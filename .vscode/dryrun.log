@@ -1,0 +1,6 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/txkj/cpp_test'
+make: Leaving directory '/home/txkj/cpp_test'
+ 
+make: *** No targets specified and no makefile found.  Stop.
+

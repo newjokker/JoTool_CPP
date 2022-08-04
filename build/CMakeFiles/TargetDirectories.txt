@@ -1,0 +1,4 @@
+/home/txkj/cpp_test/build/CMakeFiles/test.dir
+/home/txkj/cpp_test/build/CMakeFiles/saturntools.dir
+/home/txkj/cpp_test/build/CMakeFiles/edit_cache.dir
+/home/txkj/cpp_test/build/CMakeFiles/rebuild_cache.dir
