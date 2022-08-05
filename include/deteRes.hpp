@@ -6,7 +6,10 @@
 #include <string>
 #include <vector>
 #include <map>
-//#include "./tinyxml2.h"
+
+
+namespace jotools
+{
 
 struct Point
 {
@@ -45,12 +48,12 @@ class DeteObj
         bool operator==(const DeteObj other);
 };
 
-
 class DeteRes
 {
     public:
         //
         DeteRes(std::string xml_path="", std::string img_path="");
+        // ~DeteRes();
         // variable
         int height;
         int width;
@@ -93,11 +96,13 @@ class DeteRes
         void print_format();
         //
         bool operator+(const DeteRes other);
+        DeteObj& operator[](const int i);
         bool parse_xml_info(std::string xml_path);
 
     private:
 
 };
 
+}
 
 #endif

@@ -5,6 +5,9 @@
 #include <cstdlib>
 #include "../include/deteRes.hpp"
 
+namespace jotools
+{
+
 const double eps = 1e-8; // 用于判断浮点数是否相等的小数
 
 void DeteObj::do_offset(int offset_x, int offset_y){
@@ -65,4 +68,7 @@ bool DeteObj::operator==(const DeteObj other)
     if(DeteObj::y2 != other.y2){return false;}
     if(DeteObj::tag != other.tag){return false;}
     return true;
+}
+
+
 }

@@ -11,6 +11,8 @@
 #include "../include/tinyxml2.h"
 #include "../include/fileOperateUtil.hpp"
 
+namespace jotools
+{
 
 DeteRes::DeteRes(std::string xml_path, std::string img_path)
 {   
@@ -112,6 +114,10 @@ bool DeteRes::has_dete_obj(DeteObj dete_obj)
 
 bool DeteRes::operator+(const DeteRes other)
 {
+
+    // todo 这边写错了应该，非成员函数，每次要传入两个参数，这边只是传入了一个
+    // refer : https://www.runoob.com/cplusplus/cpp-overloading.html
+
     // fixme 这边返回的应该是一个新的 DeteRes 
     for(int i=0; i<other.alarms.size(); i++)
     {
@@ -120,6 +126,12 @@ bool DeteRes::operator+(const DeteRes other)
             DeteRes::add_dete_obj(other.alarms[i]);
         }
     }
+}
+
+DeteObj& DeteRes::operator[](const int i)
+{
+    // 为什么没用，不知道是什么原因
+    return DeteRes::alarms[i];
 }
 
 int DeteRes::size()
@@ -148,9 +160,8 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
         if(is_file(xml_path) == false)
         {
             std::cout << "xml path not exists : " << xml_path << std::endl;
+            throw "parse xml error, xml path not exists, " + xml_path;           
         }
-
-            std::cout << "进入 001" << std::endl;
 
         tinyxml2::XMLDocument doc;
         doc.LoadFile( xml_path.c_str());
@@ -164,9 +175,6 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
 
         tinyxml2::XMLElement* objects = root->FirstChildElement("object");
         tinyxml2::XMLElement* img_size = root->FirstChildElement("size");    
-
-
-            std::cout << "进入 002" << std::endl;
 
         if(img_size)
         {
@@ -207,11 +215,8 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
             }
         }
 
-            std::cout << "进入 003" << std::endl;
-
         // folder
         auto folder = root->FirstChildElement("folder");   
-        std::cout << "进入 00311" << std::endl;
         if(folder)
         {
             auto folder_str = folder->GetText();
@@ -250,7 +255,6 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
             std::cout << "parse xml error, lose path, " + xml_path << std::endl;
             throw "parse xml error, lose path, " + xml_path;
         }
-            std::cout << "进入 0032" << std::endl;
 
         // filename
         auto file_name = root->FirstChildElement("filename");   
@@ -272,12 +276,9 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
             throw "parse xml error, lose filename, " + xml_path;          
         }
 
-            std::cout << "进入 004" << std::endl;
-
         // object info
         if(objects)
         {
-            std::cout << "进入 obj" << std::endl;
             while(objects){
                 DeteObj* obj_info = new DeteObj();
 
@@ -409,7 +410,7 @@ int DeteRes::save_to_xml(std::string save_path)
 
     // insert attr
     // file name
-    tinyxml2::XMLElement* file_name = doc->NewElement("file_name");
+    tinyxml2::XMLElement* file_name = doc->NewElement("filename");
     tinyxml2::XMLText* file_name_text = doc->NewText(DeteRes::file_name.c_str());
     file_name->InsertEndChild(file_name_text);
     root->InsertEndChild(file_name);
@@ -554,9 +555,4 @@ int DeteRes::crop_dete_obj(std::string save_dir, bool split_by_tag, std::string 
     }
 }
 
-
-
-
-
-
-
+}
