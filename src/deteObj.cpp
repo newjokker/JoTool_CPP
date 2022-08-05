@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdlib>
 #include "../include/deteRes.hpp"
+#include "../include/pystring.h"
 
 namespace jotools
 {
@@ -54,11 +55,16 @@ std::string DeteObj::get_name_str()
 
 void DeteObj::load_from_name_str(std::string name_str)
 {
-    // todo 将字符串切分并赋值给各个值
+    std::string loc_str_pure = pystring::slice(name_str, 1, -1);
+    std::vector<std::string> obj_info = pystring::split(loc_str_pure, ",");
+    // 
+    DeteObj::x1 = std::stoi(obj_info[0]);
+    DeteObj::y1 = std::stoi(obj_info[1]);
+    DeteObj::x2 = std::stoi(obj_info[2]);
+    DeteObj::y2 = std::stoi(obj_info[3]);
+    DeteObj::conf = std::stof(obj_info[4]);
+    DeteObj::tag = obj_info[5];
 }
-
-
-//
 
 bool DeteObj::operator==(const DeteObj other)
 {

@@ -12,7 +12,7 @@
 
 using namespace jotools;
 
-int main(int argc, char ** argv)
+int main_cut_small_img(int argc, char ** argv)
 {
 
     if (argc!= 5){

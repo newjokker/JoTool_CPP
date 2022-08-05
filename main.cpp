@@ -8,56 +8,63 @@
 #include "./deteRes.hpp"
 #include <fstream>
 #include <nlohmann/json.hpp>
-#include "./include/operateDeteRes.hpp"
+// #include "./include/operateDeteRes.hpp"
+#include "./include/pystring.h"
+#include "./include/fileOperateUtil.hpp"
 
 using namespace jotools;
+using namespace std;
 
 int main(int argc, char ** argv)
 {
 
-    if (argc!= 5){
-        std::cout << "need parameter number : 4,  {xml_dir, img_dir, save_dir, is_split}, get : " << argc-1 << std::endl;
+    if (argc!= 2){
+        std::cout << "need parameter number : 1, get : " << argc-1 << std::endl;
         return -1;
     }
 
-    std::string xml_dir = argv[1];
-    std::string img_dir = argv[2];
-    std::string save_dir = argv[3];
-    std::string is_split_str = argv[4];
+    std::string crop_dir = argv[1];
 
-    bool is_split = true;
-    if((is_split_str != "true") && (is_split_str != "True") && (is_split_str != "1"))
+
+    std::map<std::string, std::vector<std::string>> xml_info_map;
+
+
+    std::vector<std::string> folder_path_list = get_all_folder_path(crop_dir);
+
+    std::cout << folder_path_list.size() << std::endl; 
+
+
+    for(int i=0; i<folder_path_list.size(); i++)
     {
-        is_split = false;
+
+        std::vector<std::string> file_path_vector = get_all_file_path(folder_path_list[i]);
+
+        std::cout << file_path_vector.size() << std::endl; 
+
+
+        std::set<std::string> suffixs;
+        suffixs.insert(".jpg");
+        suffixs.insert(".JPG");
+        suffixs.insert(".png");
+        suffixs.insert(".PNG");
+
+        std::vector<std::string> img_path_vector = filter_by_suffix(file_path_vector, suffixs);
+
+        std::cout << img_path_vector.size() << std::endl; 
+
+        for(int j=0; j<img_path_vector.size(); j++)
+        {
+            std::string file_name = get_file_name(img_path_vector[j]);
+            std::vector<std::string> loc_str_list = pystring::split(file_name, "-+-");
+            std::string loc_str = loc_str_list[loc_str_list.size()-1];
+            std::string name_str = pystring::slice(loc_str, 1, -2);
+
+            std::cout << file_name << std::endl;
+        }
+
     }
 
-    std::cout << "xml dir : " << xml_dir << std::endl;
-    std::cout << "img dir : " << img_dir << std::endl;
-    std::cout << "save dir : " << save_dir << std::endl;
-    std::cout << "is split : " << is_split << std::endl;
-
-    // DeteRes* a = new DeteRes("/home/ldq/logs/assign_logs_dir/jibei_v2_liuyue_24_model_00119373652-145c-11ed-901f-485f991ea484/xml_res/19376b3a-145c-11ed-835b-485f991ea484.xml");
-
-    // DeteRes a;
-    // 
-    // std::cout << a->operator[](0).get_name_str() << std::endl;
-
-    // a.parse_xml_info("/home/ldq/input_dir/test_data/00fa186e8d4d6660b49ddef8a35a77de.xml");
-    // a.print_for);
-
-    // count_tags("/home/disk2/res");
-    
-    clock_t start, end;
-
-    start = clock();    
-    
-	cut_small_img(xml_dir, img_dir, save_dir, is_split);
-
-    end = clock();
-
-    std::cout << "use time " << (double)(end-start)/CLOCKS_PER_SEC << std::endl;
 
 	return 1;
-	
 }
 

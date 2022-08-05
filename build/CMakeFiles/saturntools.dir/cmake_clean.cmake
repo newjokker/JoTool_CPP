@@ -9,6 +9,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/saturntools.dir/src/fileOperateUtil.cpp.o.d"
   "CMakeFiles/saturntools.dir/src/operateDeteRes.cpp.o"
   "CMakeFiles/saturntools.dir/src/operateDeteRes.cpp.o.d"
+  "CMakeFiles/saturntools.dir/src/tools/pystring.cpp.o"
+  "CMakeFiles/saturntools.dir/src/tools/pystring.cpp.o.d"
   "CMakeFiles/saturntools.dir/src/tools/tinyxml2.cpp.o"
   "CMakeFiles/saturntools.dir/src/tools/tinyxml2.cpp.o.d"
 )

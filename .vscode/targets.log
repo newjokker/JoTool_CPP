@@ -1,6 +1,4 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
-make: *** No rule to make target 'all'.  Stop.
-
 # GNU Make 4.1
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2014 Free Software Foundation, Inc.
@@ -8,7 +6,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Aug  4 17:33:34 2022
+# Make data base, printed on Fri Aug  5 17:24:41 2022
 
 # Variables
 
@@ -35,7 +33,7 @@ SHELL = /bin/sh
 # environment
 VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{}}
 # environment
-_ = /home/txkj/.vscode-server/bin/b06ae3b2d2dbfe28bca3134cc6be65935cdfea6a/node
+_ = /home/txkj/.vscode-server/bin/3b889b090b5ad5793f524b5d1d39fda662b96a2a/node
 # makefile
 MAKEFILE_LIST := 
 # 'override' directive
@@ -47,9 +45,11 @@ LESSOPEN = | /usr/bin/lesspipe %s
 # environment
 VSCODE_CWD = /home/txkj
 # environment
-SSH_CONNECTION = 192.168.4.175 13647 192.168.3.221 22
+SSH_CONNECTION = 192.168.4.175 1254 192.168.3.221 22
 # environment
-PATH = /home/txkj/.vscode-server/bin/b06ae3b2d2dbfe28bca3134cc6be65935cdfea6a/bin/remote-cli:/home/txkj/bin:/home/txkj/.local/bin:/home/txkj/anaconda3/bin:/home/txkj/anaconda3/condabin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+PATH = /home/txkj/.vscode-server/bin/3b889b090b5ad5793f524b5d1d39fda662b96a2a/bin/remote-cli:/home/txkj/bin:/home/txkj/.local/bin:/home/txkj/anaconda3/bin:/home/txkj/anaconda3/condabin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+# environment
+BOOST_LIB = /usr/local/lib
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
@@ -69,7 +69,7 @@ PWD = /home/txkj/cpp_test
 # environment
 QT_QPA_PLATFORMTHEME = appmenu-qt5
 # environment
-VSCODE_IPC_HOOK_CLI = /run/user/1000/vscode-ipc-b8b2d9cb-2233-41c4-9f7f-9dfaed4eef7c.sock
+VSCODE_IPC_HOOK_CLI = /run/user/1000/vscode-ipc-a2ba3681-1524-4a8c-bfb2-ac25c92c1a7e.sock
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -103,7 +103,9 @@ MAKECMDGOALS := all
 # environment
 SHLVL = 3
 # environment
-XDG_SESSION_ID = 606
+BOOST_ROOT = /home/ldq/del/boost_1_69_0
+# environment
+XDG_SESSION_ID = 868
 # environment
 USER = txkj
 # makefile
@@ -125,13 +127,13 @@ MAKEFLAGS = pqrR
 # environment
 MFLAGS = -pqrR
 # environment
-SSH_CLIENT = 192.168.4.175 13647 22
+SSH_CLIENT = 192.168.4.175 1254 22
 # environment
 MAIL = /var/mail/txkj
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # environment
-BROWSER = /home/txkj/.vscode-server/bin/b06ae3b2d2dbfe28bca3134cc6be65935cdfea6a/bin/helpers/browser.sh
+BROWSER = /home/txkj/.vscode-server/bin/3b889b090b5ad5793f524b5d1d39fda662b96a2a/bin/helpers/browser.sh
 # environment
 VSCODE_HANDLES_SIGPIPE = true
 # default
@@ -148,6 +150,8 @@ CONDA_PYTHON_EXE = /home/txkj/anaconda3/bin/python
 SUFFIXES := 
 # environment
 _CE_M = 
+# environment
+BOOST_INCLUDE = /usr/local/include/boost
 # default
 .INCLUDE_DIRS = /usr/include /usr/local/include /usr/include
 # default
@@ -159,7 +163,7 @@ LANG = C
 # environment
 _CE_CONDA = 
 # variable set hash-table stats:
-# Load=73/1024=7%, Rehash=0, Collisions=8/95=8%
+# Load=76/1024=7%, Rehash=0, Collisions=8/98=8%
 
 # Pattern-specific Variable Values
 
@@ -167,9 +171,9 @@ _CE_CONDA =
 
 # Directories
 
-# . (device 66306, inode 18416345): 12 files, no impossibilities.
+# . (device 66306, inode 18416345): 13 files, no impossibilities.
 
-# 12 files, no impossibilities in 1 directories.
+# 13 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -219,12 +223,14 @@ GNUmakefile:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 20 / storage = 166 B / avg = 8 B
-# current buf: size = 8162 B / used = 166 B / count = 20 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 21 / storage = 169 B / avg = 8 B
+# current buf: size = 8162 B / used = 169 B / count = 21 / avg = 8 B
 
-# strcache performance: lookups = 23 / hit rate = 13%
+# strcache performance: lookups = 24 / hit rate = 12%
 # hash-table stats:
-# Load=20/8192=0%, Rehash=0, Collisions=1/23=4%
-# Finished Make data base on Thu Aug  4 17:33:34 2022
+# Load=21/8192=0%, Rehash=0, Collisions=1/24=4%
+# Finished Make data base on Fri Aug  5 17:24:41 2022
 
  
+make: *** No rule to make target 'all'.  Stop.
+

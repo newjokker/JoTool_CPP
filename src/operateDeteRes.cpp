@@ -5,18 +5,19 @@
 #include <map>
 #include "../include/deteRes.hpp"
 #include "../include/fileOperateUtil.hpp"
+#include "../include/pystring.h"
 
 
 namespace jotools
 {
+
 
 std::map<std::string, int> count_tags(std::string floder_path)
 {
     // todo 增加标签总数统计
     // todo 增加解析的 xml 的个数
     std::map<std::string, int> count_res;
-    std::vector<std::string> file_names;
-    GetFileNames(floder_path, file_names);
+    std::vector<std::string> file_names = get_all_file_path(floder_path);
     std::set<std::string> suffixs;
     suffixs.insert(".xml");
     std::vector<std::string> file_name_xml = filter_by_suffix(file_names, suffixs);
@@ -63,8 +64,7 @@ std::map<std::string, int> count_tags(std::string floder_path)
 
 void cut_small_img(std::string img_dir, std::string xml_dir, std::string save_dir, bool split_by_tag)
 {
-    std::vector<std::string> file_path_list;
-    GetFileNames(img_dir, file_path_list);
+    std::vector<std::string> file_path_list = get_all_file_path(img_dir);
 
     std::vector<std::string> img_path_list;
     std::set<std::string> suffixs;
@@ -82,5 +82,56 @@ void cut_small_img(std::string img_dir, std::string xml_dir, std::string save_di
         }
     }
 }
+
+void get_xml_from_crop_img(std::string crop_dir, std::string region_img_dir, std::string save_xml_dir)
+{
+    // 遍历得到小文件夹
+    // 遍历每一个小文件夹下载的 jpg 和 png 图片，拿到图片名中的信息（原始文件名 + 位置信息）
+    // 根据已有的信息生成 xml 
+
+
+    // std::string crop_dir = "/home/ldq/input_dir/del_test_all/crop";
+
+    std::map<std::string, std::vector<std::string>> xml_info_map;
+
+    std::vector<std::string> folder_path_list = get_all_folder_path(crop_dir);
+
+    for(int i=0; i<folder_path_list.size(); i++)
+    {
+
+        std::vector<std::string> file_path_vector = get_all_file_path(folder_path_list[i]);
+
+        std::cout << file_path_vector.size() << std::endl; 
+
+
+        std::set<std::string> suffixs;
+        suffixs.insert(".jpg");
+        suffixs.insert(".JPG");
+        suffixs.insert(".png");
+        suffixs.insert(".PNG");
+
+        std::vector<std::string> img_path_vector = filter_by_suffix(file_path_vector, suffixs);
+
+        std::cout << img_path_vector.size() << std::endl; 
+
+        for(int j=0; j<img_path_vector.size(); j++)
+        {
+            std::string file_name = get_file_name(img_path_vector[j]);
+            std::vector<std::string> loc_str_list = pystring::split(file_name, "-+-");
+            std::string loc_str = loc_str_list[loc_str_list.size()-1];
+            std::string name_str = pystring::slice(loc_str, 1, -2);
+
+            std::cout << file_name << std::endl;
+        }
+
+    }
+
+}
+
+void test()
+{
+    
+}
+
 
 }

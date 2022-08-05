@@ -262,6 +262,30 @@ src/operateDeteRes.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/saturntools.dir/build.make CMakeFiles/saturntools.dir/src/operateDeteRes.cpp.s
 .PHONY : src/operateDeteRes.cpp.s
 
+src/tools/pystring.o: src/tools/pystring.cpp.o
+.PHONY : src/tools/pystring.o
+
+# target to build an object file
+src/tools/pystring.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/saturntools.dir/build.make CMakeFiles/saturntools.dir/src/tools/pystring.cpp.o
+.PHONY : src/tools/pystring.cpp.o
+
+src/tools/pystring.i: src/tools/pystring.cpp.i
+.PHONY : src/tools/pystring.i
+
+# target to preprocess a source file
+src/tools/pystring.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/saturntools.dir/build.make CMakeFiles/saturntools.dir/src/tools/pystring.cpp.i
+.PHONY : src/tools/pystring.cpp.i
+
+src/tools/pystring.s: src/tools/pystring.cpp.s
+.PHONY : src/tools/pystring.s
+
+# target to generate assembly for a file
+src/tools/pystring.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/saturntools.dir/build.make CMakeFiles/saturntools.dir/src/tools/pystring.cpp.s
+.PHONY : src/tools/pystring.cpp.s
+
 src/tools/tinyxml2.o: src/tools/tinyxml2.cpp.o
 .PHONY : src/tools/tinyxml2.o
 
@@ -311,6 +335,9 @@ help:
 	@echo "... src/operateDeteRes.o"
 	@echo "... src/operateDeteRes.i"
 	@echo "... src/operateDeteRes.s"
+	@echo "... src/tools/pystring.o"
+	@echo "... src/tools/pystring.i"
+	@echo "... src/tools/pystring.s"
 	@echo "... src/tools/tinyxml2.o"
 	@echo "... src/tools/tinyxml2.i"
 	@echo "... src/tools/tinyxml2.s"

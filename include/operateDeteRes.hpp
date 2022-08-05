@@ -15,5 +15,11 @@ namespace jotools
 
     void cut_small_img(std::string img_dir, std::string xml_dir, std::string save_dir, bool split_by_tag);
 
+    void get_xml_from_crop_img(std::string crop_dir, std::string region_img_dir, std::string save_xml_dir);
+
+    void test();
+
 }
+
+
 #endif

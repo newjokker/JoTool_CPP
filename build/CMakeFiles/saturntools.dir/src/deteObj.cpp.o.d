@@ -351,4 +351,5 @@ CMakeFiles/saturntools.dir/src/deteObj.cpp.o: \
  /usr/local/include/opencv2/videostab/deblurring.hpp \
  /usr/local/include/opencv2/videostab/wobble_suppression.hpp \
  /usr/local/include/opencv2/videostab/ring_buffer.hpp \
- /home/txkj/cpp_test/src/../include/deteRes.hpp
+ /home/txkj/cpp_test/src/../include/deteRes.hpp \
+ /home/txkj/cpp_test/src/../include/pystring.h
