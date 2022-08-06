@@ -3,7 +3,7 @@
 // https://github.com/imageworks/pystring/blob/master/LICENSE
 
 
-#include "../include/pystring.h"
+#include "include/pystring.h"
 
 #include <algorithm>
 #include <cctype>

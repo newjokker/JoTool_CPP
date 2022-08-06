@@ -14,8 +14,6 @@ namespace jotools
 
 std::map<std::string, int> count_tags(std::string floder_path)
 {
-    // todo 增加标签总数统计
-    // todo 增加解析的 xml 的个数
     std::map<std::string, int> count_res;
     std::vector<std::string> file_names = get_all_file_path(floder_path);
     std::set<std::string> suffixs;

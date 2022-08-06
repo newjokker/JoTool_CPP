@@ -46,25 +46,22 @@ find_package( OpenCV REQUIRED )
 FIND_PACKAGE(nlohmann_json REQUIRED)
 
 
-add_executable(test main.cpp)
-
-
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRCLIST)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/tools SRCLIST)
 
-add_library(saturntools SHARED ${SRCLIST})   
+# add_library(saturntools SHARED ${SRCLIST})   
+add_library(saturntools STATIC ${SRCLIST})   
 
+add_executable(test main.cpp)
 
 
 target_link_libraries(
     test 
     # ${TORCH_LIBRARIES}
     ${OpenCV_LIBS}
-    curlpp
-    curl
-    # tinyxml2
+    # curlpp
+    # curl
     saturntools
 	nlohmann_json::nlohmann_json
 )
@@ -80,7 +77,6 @@ MESSAGE("${TORCH_LIBRARIES}")
 
 MESSAGE("${OpenCV_LIBS}")
 
-
 MESSAGE("${PROJECT_SOURCE_DIR}")
 
 MESSAGE("${TORCH_INCLUDE_DIRS}")
@@ -88,6 +84,17 @@ MESSAGE("${TORCH_INCLUDE_DIRS}")
 MESSAGE("${OpenCV_INCLUDE_DIRS}")
 
 MESSAGE(STATUS, "------------------------------------------------------------")
+
+
+# ---------------------- 安装规则 --------------------------------
+
+# refer : https://www.hahack.com/codes/cmake/
+# install (TARGETS MathFunctions DESTINATION bin)
+
+# install (FILES MathFunctions.h DESTINATION include)
+
+
+# ---------------------- 测试规则 --------------------------------
 
 
 

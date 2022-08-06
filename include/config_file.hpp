@@ -5,6 +5,7 @@
 #include<fstream>
 #include<string>
 #include<vector>
+#include <string.h>
 #include"./xini_file.h"
 
 
