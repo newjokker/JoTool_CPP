@@ -114,7 +114,6 @@ std::vector<std::string> filter_by_suffix(std::vector<std::string> filenames, st
     return new_file_names;
 }
 
-
 FilePath parse_file_path(std::string file_path_str)
 {
     FilePath file_path;
@@ -128,4 +127,5 @@ FilePath parse_file_path(std::string file_path_str)
 void create_folder(std::string folder_path)
 {
     mkdir(folder_path.c_str(), S_IRWXU);
+    // mkdir(folder_path.c_str(), 0777);
 }

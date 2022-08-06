@@ -6,7 +6,7 @@
 #include "../include/deteRes.hpp"
 #include "../include/fileOperateUtil.hpp"
 #include "../include/pystring.h"
-
+#include "../include/operateDeteRes.hpp"
 
 namespace jotools
 {
@@ -83,26 +83,21 @@ void cut_small_img(std::string img_dir, std::string xml_dir, std::string save_di
     }
 }
 
-void get_xml_from_crop_img(std::string crop_dir, std::string region_img_dir, std::string save_xml_dir)
+void get_xml_from_crop_img(std::string crop_dir, std::string save_xml_dir)
 {
     // 遍历得到小文件夹
     // 遍历每一个小文件夹下载的 jpg 和 png 图片，拿到图片名中的信息（原始文件名 + 位置信息）
     // 根据已有的信息生成 xml 
 
 
-    // std::string crop_dir = "/home/ldq/input_dir/del_test_all/crop";
+    // get crop info 
 
     std::map<std::string, std::vector<std::string>> xml_info_map;
-
     std::vector<std::string> folder_path_list = get_all_folder_path(crop_dir);
 
     for(int i=0; i<folder_path_list.size(); i++)
     {
-
         std::vector<std::string> file_path_vector = get_all_file_path(folder_path_list[i]);
-
-        std::cout << file_path_vector.size() << std::endl; 
-
 
         std::set<std::string> suffixs;
         suffixs.insert(".jpg");
@@ -112,25 +107,41 @@ void get_xml_from_crop_img(std::string crop_dir, std::string region_img_dir, std
 
         std::vector<std::string> img_path_vector = filter_by_suffix(file_path_vector, suffixs);
 
-        std::cout << img_path_vector.size() << std::endl; 
-
         for(int j=0; j<img_path_vector.size(); j++)
         {
             std::string file_name = get_file_name(img_path_vector[j]);
             std::vector<std::string> loc_str_list = pystring::split(file_name, "-+-");
             std::string loc_str = loc_str_list[loc_str_list.size()-1];
-            std::string name_str = pystring::slice(loc_str, 1, -2);
-
-            std::cout << file_name << std::endl;
+            std::string region_name = file_name.substr(0, pystring::rfind(file_name, "-+-"));
+            xml_info_map[region_name].push_back(loc_str);
         }
-
+        // std::cout << "-----------------------" << std::endl;
     }
 
+
+    // get xml
+    auto iter = xml_info_map.begin();
+    while (iter != xml_info_map.end())
+    {
+        DeteRes* dete_res = new DeteRes();
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            DeteObj* dete_obj = new DeteObj();
+            dete_obj->load_from_name_str(iter->second[i]);
+            dete_res->add_dete_obj(*dete_obj);
+            delete dete_obj;
+            // std::cout << iter->first << " : " << iter->second.size() << std::endl;
+        }
+        std::string save_xml_path = save_xml_dir + "/" + iter->first + ".xml"; 
+        dete_res->save_to_xml(save_xml_path);
+        delete dete_res;
+        iter++;
+    }
 }
 
 void test()
 {
-    
+
 }
 
 

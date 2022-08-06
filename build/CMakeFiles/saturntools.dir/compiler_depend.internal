@@ -1457,6 +1457,9 @@ CMakeFiles/saturntools.dir/src/operateDeteRes.cpp.o
  /usr/include/x86_64-linux-gnu/sys/stat.h
  /usr/include/x86_64-linux-gnu/bits/stat.h
  /home/txkj/cpp_test/include/pystring.h
+ /home/txkj/cpp_test/include/operateDeteRes.hpp
+ /home/txkj/cpp_test/include/deteRes.hpp
+ /home/txkj/cpp_test/include/fileOperateUtil.hpp
 
 CMakeFiles/saturntools.dir/src/tools/pystring.cpp.o
  /home/txkj/cpp_test/src/tools/pystring.cpp

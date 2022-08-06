@@ -15,26 +15,20 @@
 using namespace jotools;
 using namespace std;
 
-int main(int argc, char ** argv)
+int main_crop_to_xml(int argc, char ** argv)
 {
 
-    if (argc!= 2){
-            std::cout << "need parameter number : 1 get : " << argc-1 << std::endl;
-            return -1;
+    if (argc!= 3){
+        std::cout << "need parameter number : 2, get : " << argc-1 << "{xml_dir, save_dir}, attention : 路径后面不要加斜杠" << std::endl;
+        return -1;
     }
 
-    std::string xml_dir = argv[1];
+    std::string crop_dir = argv[1];
+    std::string save_dir = argv[2];
 
-    clock_t start, end;
 
-    start = clock();    
-    
-    count_tags(xml_dir);
-
-    end = clock();
-
-    std::cout << "use time " << (double)(end-start)/CLOCKS_PER_SEC << std::endl;
+    jotools::get_xml_from_crop_img(crop_dir, save_dir);
 
 	return 1;
-	
 }
+

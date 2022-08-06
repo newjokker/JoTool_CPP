@@ -16,6 +16,12 @@ namespace jotools
 
 DeteRes::DeteRes(std::string xml_path, std::string img_path)
 {   
+    // init 
+    DeteRes::width = -1;
+    DeteRes::height = -1;
+    DeteRes::depth = -1;
+
+
     if(xml_path != "")
     {
         DeteRes::parse_xml_info(xml_path);

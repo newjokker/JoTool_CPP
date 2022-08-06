@@ -1452,7 +1452,10 @@ CMakeFiles/saturntools.dir/src/operateDeteRes.cpp.o: /home/txkj/cpp_test/src/ope
   /usr/include/x86_64-linux-gnu/bits/dirent.h \
   /usr/include/x86_64-linux-gnu/sys/stat.h \
   /usr/include/x86_64-linux-gnu/bits/stat.h \
-  /home/txkj/cpp_test/include/pystring.h
+  /home/txkj/cpp_test/include/pystring.h \
+  /home/txkj/cpp_test/include/operateDeteRes.hpp \
+  /home/txkj/cpp_test/include/deteRes.hpp \
+  /home/txkj/cpp_test/include/fileOperateUtil.hpp
 
 CMakeFiles/saturntools.dir/src/tools/pystring.cpp.o: /home/txkj/cpp_test/src/tools/pystring.cpp \
   /usr/include/stdc-predef.h \
@@ -1763,6 +1766,8 @@ CMakeFiles/saturntools.dir/src/tools/tinyxml2.cpp.o: /home/txkj/cpp_test/src/too
 /usr/include/c++/5/cstdarg:
 
 /home/txkj/cpp_test/src/tools/tinyxml2.cpp:
+
+/home/txkj/cpp_test/include/operateDeteRes.hpp:
 
 /home/txkj/cpp_test/src/operateDeteRes.cpp:
 
