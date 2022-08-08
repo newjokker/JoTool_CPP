@@ -7,7 +7,7 @@ import shutil
 
 # 运行 ldd 可执行文件地址 > reqired.txt 
 # python move_dll.py 即可将依赖的 so 保存到文件夹中
-
+# 将 so 拷贝到环境下的 /usr/lib 即可加载
 
 # ----------------------------------------------------------------------------
 require_txt_path = r"required.txt"
