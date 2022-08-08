@@ -137,10 +137,41 @@ void get_xml_from_crop_img(std::string crop_dir, std::string save_xml_dir)
     }
 }
 
-void test()
-{
+   // 查看文件分布
+    void count_files(std::string folder_path, bool recursive)
+    {
+        std::map<std::string, int> file_count_map;
+        std::vector<std::string> file_path_vector;
+        if(recursive)
+        {
+            file_path_vector = get_all_file_path_recursive(folder_path);
+        }
+        else
+        {
+            file_path_vector = get_all_file_path(folder_path);
+        }
 
-}
+        for(int i=0; i<file_path_vector.size(); i++)
+        {
 
+            std::string suffix = get_file_suffix(file_path_vector[i]);
+
+            if(file_count_map.count(suffix) == 0)
+            {
+                file_count_map[suffix] = 1;
+            }
+            else
+            {
+                file_count_map[suffix] +=1;
+            }
+        }
+
+        auto iter = file_count_map.begin();
+        while(iter != file_count_map.end())
+        {
+            std::cout << iter->first << " : " << iter->second << std::endl;
+            iter++;
+        }
+    }
 
 }

@@ -1,17 +1,17 @@
 
-
+#include <iostream>
 #include <string>
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fstream>
+// #include <io.h>
 #include <string>
-#include <iostream>
 #include <vector>
 #include <set>
 #include <string.h>
 #include <sys/stat.h>
 #include "../include/fileOperateUtil.hpp"
-
 
 
 bool is_file(std::string filename) {
@@ -32,13 +32,23 @@ std::string get_file_folder(std::string file_path)
 
 std::string get_file_suffix(std::string file_path)
 {
-    std::string file_suffix = "." + file_path.substr(file_path.find_last_of('.') + 1);
-    return file_suffix;
+    // get file_name + suffix
+    std::string file_name = get_file_name_suffix(file_path);
+    // get suffix 
+    auto point_index = file_name.find_last_of('.');
+    if (point_index == std::string::npos)
+    {
+        return "";
+    }
+    else
+    {
+        std::string file_suffix = "." + file_name.substr(point_index + 1);
+        return file_suffix;
+    }
 }
 
 std::string get_file_name_suffix(std::string file_path)
 {
-    // std::string file_suffix = "." + file_path.substr(file_path.find_last_of('.') + 1);
     std::string file_name_suffix = file_path.substr(file_path.find_last_of('/') + 1);
     return file_name_suffix;
 }
@@ -129,3 +139,66 @@ void create_folder(std::string folder_path)
     mkdir(folder_path.c_str(), S_IRWXU);
     // mkdir(folder_path.c_str(), 0777);
 }
+
+static void _GetFileNames(std::string path, std::vector<std::string>& filenames)
+{
+    DIR *pDir;
+    struct dirent* ptr;
+    if(!(pDir = opendir(path.c_str())))
+    {
+        std::cout << "Folder doesn't Exist!" << std::endl;
+        return;
+    }
+    while((ptr = readdir(pDir))!=0) {
+        if (strcmp(ptr->d_name, ".") != 0 && strcmp(ptr->d_name, "..") != 0)
+        {
+            std::string new_path = path + "/" + ptr->d_name;
+            if(is_file(new_path))
+            {
+                filenames.push_back(new_path);
+                // std::cout << new_path << std::endl;
+            }
+            else if(is_dir(new_path))
+            {
+                _GetFileNames(new_path, filenames);
+            }
+        }
+    }
+    closedir(pDir);
+}
+
+std::vector<std::string> get_all_file_path_recursive(const std::string folder_path)
+{
+    // get file path
+    std::vector<std::string> file_path_vector;
+    _GetFileNames(folder_path, file_path_vector);
+
+    // // print
+    // for(int i=0; i<file_path_vector.size(); i++)
+    // {
+    //     std::cout << file_path_vector[i] << std::endl;
+    // }
+
+    return file_path_vector;
+}
+
+std::vector<std::string> get_all_file_path_recursive(const std::string folder_path, const std::set<std::string> suffixs)
+{
+    // get file path
+    std::vector<std::string> file_path_vector;
+    _GetFileNames(folder_path, file_path_vector);
+
+    // filter by suffix
+    std::vector<std::string> file_path_suffix = filter_by_suffix(file_path_vector, suffixs);
+
+    // print
+    for(int i=0; i<file_path_suffix.size(); i++)
+    {
+        std::cout << file_path_suffix[i] << std::endl;
+    }
+
+    return file_path_suffix;
+}
+
+
+
