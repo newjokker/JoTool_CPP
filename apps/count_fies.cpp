@@ -18,33 +18,26 @@ using namespace std;
 
 
 
-int main(int argc, char ** argv)
+int main_count_files(int argc, char ** argv)
 {
 
-    // xml check
-
-    // 找到没有 xml img 对应的数据
-    // 找到 img 和 xml 中图像大小不一致的数据
-    // 找到存在 dete_obj 过小的数据
-
-
-    if (argc!= 5)
-    {
-            std::cout << "need parameter number : 4 get : " << argc-1 << "{xml_dir, img_dir, size_th, save_dir}" << std::endl;
+    if (argc!= 3){
+            std::cout << "need parameter number : 2 get : " << argc-1 << std::endl;
             return -1;
     }
 
     std::string xml_dir = argv[1];
-    std::string img_dir = argv[2];
-    int size_th = std::stoi(argv[3]);
-    std::string save_dir = argv[4];
+    std::string recursive = argv[2];
 
+    bool is_recursive = true;
+    if((recursive == "false") || (recursive == "False") || (recursive == "0"))
+    {
+        is_recursive = false;
+    }
 
     std::cout << "--------------------------------" << std::endl;
     std::cout << "xml dir   : " << xml_dir << std::endl;
-    std::cout << "img_dir   : " << img_dir << std::endl;
-    std::cout << "size_th   : " << size_th << std::endl;
-    std::cout << "save_dir   : " << save_dir << std::endl;
+    std::cout << "recursive : " << is_recursive << std::endl;
     std::cout << "--------------------------------" << std::endl;
 
 
@@ -52,7 +45,7 @@ int main(int argc, char ** argv)
 
     start = clock();    
     
-    xml_check(xml_dir, img_dir, size_th);
+    count_files(xml_dir, is_recursive);
 
     end = clock();
 

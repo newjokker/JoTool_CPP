@@ -31,6 +31,7 @@ std::string get_file_name(std::string);
 std::string get_file_name_suffix(std::string);
 
 std::vector<std::string> get_all_file_path(std::string);
+std::vector<std::string> get_all_file_path(std::string, std::set<std::string>);
 std::vector<std::string> get_all_file_path_recursive(std::string);
 std::vector<std::string> get_all_file_path_recursive(std::string, std::set<std::string>);
 std::vector<std::string> get_all_folder_path(std::string);
@@ -39,5 +40,7 @@ std::vector<std::string> filter_by_suffix(std::vector<std::string>, std::set<std
 FilePath parse_file_path(std::string);
 void create_folder(std::string);
 
+// 判断指定后缀的文件是否存在
+std::string get_file_by_suffix_set(std::string folder, std::string name, std::set<std::string>);
 
 #endif

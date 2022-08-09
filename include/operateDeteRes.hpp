@@ -23,6 +23,9 @@ namespace jotools
     // 查看文件分布
     void count_files(std::string folder_path, bool recursive=true);
 
+    // 检查 xml 和 img 是否符合规范
+    void xml_check(std::string xml_dir, std::string img_dir, int size_th);
+
 }
 
 

@@ -191,14 +191,43 @@ std::vector<std::string> get_all_file_path_recursive(const std::string folder_pa
     // filter by suffix
     std::vector<std::string> file_path_suffix = filter_by_suffix(file_path_vector, suffixs);
 
-    // print
-    for(int i=0; i<file_path_suffix.size(); i++)
-    {
-        std::cout << file_path_suffix[i] << std::endl;
-    }
+    // // print
+    // for(int i=0; i<file_path_suffix.size(); i++)
+    // {
+    //     std::cout << file_path_suffix[i] << std::endl;
+    // }
 
     return file_path_suffix;
 }
 
+std::vector<std::string> get_all_file_path(std::string folder_path, std::set<std::string> suffixs)
+{
+    // get file path
+    std::vector<std::string> file_path_vector = get_all_file_path(folder_path);
 
+    // filter by suffix
+    std::vector<std::string> file_path_suffix = filter_by_suffix(file_path_vector, suffixs);
 
+    // // print
+    // for(int i=0; i<file_path_suffix.size(); i++)
+    // {
+    //     std::cout << file_path_suffix[i] << std::endl;
+    // }
+
+    return file_path_suffix;
+}
+
+std::string get_file_by_suffix_set(std::string folder, std::string name, std::set<std::string> suffixs)
+{
+    auto iter = suffixs.begin();
+    while(iter != suffixs.end())
+    {
+        std::string file_path = folder + '/' + name + iter->data();
+        if(is_file(file_path))
+        {
+            return file_path;
+        }
+        iter ++;
+    }
+    return "";
+}

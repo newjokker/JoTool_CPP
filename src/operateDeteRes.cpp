@@ -7,6 +7,11 @@
 #include "../include/fileOperateUtil.hpp"
 #include "../include/pystring.h"
 #include "../include/operateDeteRes.hpp"
+#include <stdio.h>
+#include <sys/stat.h> 
+// #include "./parse_img_exif_info.hpp"
+#include "include/easyexif.h"
+#include "include/imageinfo.hpp"
 
 namespace jotools
 {
@@ -137,8 +142,8 @@ void get_xml_from_crop_img(std::string crop_dir, std::string save_xml_dir)
     }
 }
 
-   // 查看文件分布
-    void count_files(std::string folder_path, bool recursive)
+// 查看文件分布
+void count_files(std::string folder_path, bool recursive)
     {
         std::map<std::string, int> file_count_map;
         std::vector<std::string> file_path_vector;
@@ -173,5 +178,90 @@ void get_xml_from_crop_img(std::string crop_dir, std::string save_xml_dir)
             iter++;
         }
     }
+
+// 检查 训练的 xml 和 img 是否对应
+void xml_check(std::string xml_dir, std::string img_dir, int size_th)
+{
+
+    // suffixs
+    std::set<std::string> suffixs_xml {".xml"};
+    std::set<std::string> suffixs_img {".jpg", ".png", ".JPG", ".PNG"};
+    
+    // xml
+    std::vector<std::string> all_xml_vector = get_all_file_path(xml_dir, suffixs_xml);
+    for(int i=0; i<all_xml_vector.size(); i++)
+    {
+        std::string xml_name = get_file_name(all_xml_vector[i]);
+        std::string img_path = get_file_by_suffix_set(img_dir, xml_name, suffixs_img);
+        if(img_path == "")
+        {
+            std::cout << "extra_xml: " << all_xml_vector[i] << std::endl;
+        }
+    }
+    
+    // img
+    std::vector<std::string> all_img_vector = get_all_file_path(img_dir, suffixs_img);
+    std::vector<std::string> img_vector;
+    for(int i=0; i<all_img_vector.size(); i++)
+    {
+        std::string img_name = get_file_name(all_img_vector[i]);
+        std::string xml_path = get_file_by_suffix_set(xml_dir, img_name, suffixs_xml);
+        if(xml_path == "")
+        {
+            std::cout << "extra_img: " << all_img_vector[i] << std::endl;
+        }
+        else
+        {
+            img_vector.push_back(all_img_vector[i]);
+        }
+    }
+
+    // compare 
+    for(int i=0; i<img_vector.size(); i++)
+    {
+        std::string xml_path = xml_dir + "/" + get_file_name(img_vector[i]) + ".xml";
+        
+        DeteRes* dete_res = new DeteRes(xml_path); 
+
+        // compare height, width
+        int height, width;
+
+        FILE *file = fopen(img_vector[i].c_str(), "rb");
+        auto imageInfo = getImageInfo<IIFileReader>(file);
+        fclose(file);
+
+        height = imageInfo.getHeight();
+        width =  imageInfo.getWidth();
+
+        if(dete_res->height != height)
+        {
+            std::cout << "error_size: " << xml_path << std::endl;
+            std::cout << "error_size: " << img_vector[i] << std::endl;
+            continue;
+        }
+        
+        if(dete_res->width != width)
+        {
+            std::cout << "error_size: " << xml_path << std::endl;
+            std::cout << "error_size: " << img_vector[i] << std::endl;
+            continue;
+        }
+
+        // compare size_th
+        for(int j=0; j<dete_res->size(); j++)
+        {
+            DeteObj dete_obj = dete_res->alarms[j];
+            if((dete_obj.x2 < dete_obj.x1) || ((dete_obj.x2 - dete_obj.x1) < size_th) || (dete_obj.y2 < dete_obj.y1) || ((dete_obj.y2 - dete_obj.y1) < size_th))
+            {
+                std::cout << "error_size_th: " << xml_path << std::endl;
+                std::cout << "error_size_th: " << img_vector[i] << std::endl;
+                continue;
+            }
+        }
+
+        delete dete_res;
+    }
+}
+
 
 }
