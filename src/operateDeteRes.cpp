@@ -180,8 +180,23 @@ void count_files(std::string folder_path, bool recursive)
     }
 
 // 检查 训练的 xml 和 img 是否对应
-void xml_check(std::string xml_dir, std::string img_dir, int size_th)
+void xml_check(std::string xml_dir, std::string img_dir, int size_th, bool remove_error_path)
 {
+
+    // if folder exists
+    if(! is_dir(xml_dir))
+    {
+        std::cout << "xml dir not exist, " << xml_dir << std::endl;
+        throw "xml dir not exist";
+    }
+
+    if(! is_dir(img_dir))
+    {
+        std::cout << "img dir not exist, " << img_dir << std::endl;
+        throw "img dir not exist";
+    }
+
+    std::vector<std::string> error_file_vector;
 
     // suffixs
     std::set<std::string> suffixs_xml {".xml"};
@@ -196,6 +211,7 @@ void xml_check(std::string xml_dir, std::string img_dir, int size_th)
         if(img_path == "")
         {
             std::cout << "extra_xml: " << all_xml_vector[i] << std::endl;
+            error_file_vector.push_back(all_xml_vector[i]);
         }
     }
     
@@ -209,6 +225,7 @@ void xml_check(std::string xml_dir, std::string img_dir, int size_th)
         if(xml_path == "")
         {
             std::cout << "extra_img: " << all_img_vector[i] << std::endl;
+            error_file_vector.push_back(all_img_vector[i]);
         }
         else
         {
@@ -237,6 +254,8 @@ void xml_check(std::string xml_dir, std::string img_dir, int size_th)
         {
             std::cout << "error_size: " << xml_path << std::endl;
             std::cout << "error_size: " << img_vector[i] << std::endl;
+            error_file_vector.push_back(xml_path);
+            error_file_vector.push_back(img_vector[i]);
             continue;
         }
         
@@ -244,6 +263,8 @@ void xml_check(std::string xml_dir, std::string img_dir, int size_th)
         {
             std::cout << "error_size: " << xml_path << std::endl;
             std::cout << "error_size: " << img_vector[i] << std::endl;
+            error_file_vector.push_back(xml_path);
+            error_file_vector.push_back(img_vector[i]);
             continue;
         }
 
@@ -255,7 +276,18 @@ void xml_check(std::string xml_dir, std::string img_dir, int size_th)
             {
                 std::cout << "error_size_th: " << xml_path << std::endl;
                 std::cout << "error_size_th: " << img_vector[i] << std::endl;
+                error_file_vector.push_back(xml_path);
+                error_file_vector.push_back(img_vector[i]);
                 continue;
+            }
+        }
+
+        // delete
+        if(remove_error_path)
+        {
+            for(int i=0; i<error_file_vector.size(); i++)
+            {
+                remove_file(error_file_vector[i]);
             }
         }
 

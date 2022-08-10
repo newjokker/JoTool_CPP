@@ -231,3 +231,27 @@ std::string get_file_by_suffix_set(std::string folder, std::string name, std::se
     }
     return "";
 }
+
+// // 移动文件，可以设置是否删除源文件 (代码有 bug 先不要使用)
+// void move_file(const std::string& src, const std::string& dst, const bool keep_src)
+// {
+//     std::ifstream ifs(src, std::ios::binary);
+//     std::ofstream ofs(dst, std::ios::binary);
+//     if (!ifs.is_open()){
+//         std::cout << "open src file fail: " + src << std::endl;
+//     }
+//     ofs << ifs.rdbuf();
+//     ifs.close(); 
+//     ofs.close();
+//     if (!keep_src && 0 != remove(src.c_str()))
+//     {
+//         std::cerr << "remove src file fail: " + src << std::endl;
+//     }
+// }
+
+void remove_file(std::string file_path)
+{
+    remove(file_path.c_str());
+}
+
+

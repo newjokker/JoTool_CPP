@@ -38,7 +38,12 @@ std::vector<std::string> get_all_folder_path(std::string);
 std::vector<std::string> filter_by_suffix(std::vector<std::string>, std::set<std::string>);
 
 FilePath parse_file_path(std::string);
+
 void create_folder(std::string);
+
+void move_file(const std::string& src, const std::string& dst, const bool keep_src=false);
+
+void remove_file(std::string);
 
 // 判断指定后缀的文件是否存在
 std::string get_file_by_suffix_set(std::string folder, std::string name, std::set<std::string>);
