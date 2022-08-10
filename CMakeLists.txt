@@ -18,6 +18,8 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 #find_package( CUDA REQUIRED )
 
+# find_package()
+
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
@@ -42,9 +44,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 find_package( OpenCV REQUIRED )
 
+find_package(OpenSSL REQUIRED)
+
 FIND_PACKAGE(nlohmann_json REQUIRED)
 
-
+include_directories(${OPENSSL_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRCLIST)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/tools SRCLIST)
@@ -59,6 +63,7 @@ target_link_libraries(
     test 
     # ${TORCH_LIBRARIES}
     ${OpenCV_LIBS}
+    OpenSSL::Crypto OpenSSL::SSL
     # curlpp
     # curl
     saturntools

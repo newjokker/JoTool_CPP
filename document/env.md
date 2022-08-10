@@ -91,6 +91,11 @@
     * make install 
     * 配置 CMakeLists.txt （1）find_package(nlohmann_json REQUIRED) （2）target_link_libraries(XXX nlohmann_json::nlohmann_json) 
 
+* openssl 安装和连接
+  * apt install 安装即可
+  * 连接，refer : https://wuruofan.com/2020/05/24/cmake-static-link-openssl-curl/
+
+
 ### 环境安装的通用步骤
 
 * apt-cache search pkg_name ，去找可以安装的库的名字
