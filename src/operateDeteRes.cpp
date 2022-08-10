@@ -12,6 +12,7 @@
 // #include "./parse_img_exif_info.hpp"
 #include "include/easyexif.h"
 #include "include/imageinfo.hpp"
+#include "include/md5.hpp"
 
 namespace jotools
 {
@@ -142,7 +143,6 @@ void get_xml_from_crop_img(std::string crop_dir, std::string save_xml_dir)
     }
 }
 
-// 查看文件分布
 void count_files(std::string folder_path, bool recursive)
     {
         std::map<std::string, int> file_count_map;
@@ -179,7 +179,6 @@ void count_files(std::string folder_path, bool recursive)
         }
     }
 
-// 检查 训练的 xml 和 img 是否对应
 void xml_check(std::string xml_dir, std::string img_dir, int size_th, bool remove_error_path)
 {
 
@@ -294,6 +293,69 @@ void xml_check(std::string xml_dir, std::string img_dir, int size_th, bool remov
         delete dete_res;
     }
 }
+
+void rename_all_files_by_md5(std::string folder_path)
+{
+    std::vector<std::string> file_path_vector = get_all_file_path_recursive(folder_path);
+
+    std::string md5_str;
+    std::string new_file_path;
+    for(int i=0; i<file_path_vector.size(); i++)
+    {
+        md5_str = get_file_md5(file_path_vector[i]);
+        new_file_path = get_file_folder(file_path_vector[i]) + "/" + md5_str + get_file_suffix(file_path_vector[i]);
+        // std::cout << "md5 : " << md5_str << std::endl;
+        // std::cout << "region path : " << file_path_vector[i] << std::endl;
+        // std::cout << "rename path : " << new_file_path << std::endl;
+        rename(file_path_vector[i].c_str(), new_file_path.c_str());
+    }
+}
+
+void rename_xml_img_by_md5(std::string xml_folder, std::string img_folder)
+{
+
+    // 在使用这个代码的时候先要运行 xml_check 确保 xml 和 img 是一一对应的
+    // 找到 xml 文件夹下面的所有 xml
+    // 找到 img 文件夹中的所有 img
+
+    if(!is_dir(xml_folder))
+    {
+        std::cout << "error, xml dir not exists : " << xml_folder << std::endl;
+        throw "error, xml dir not exists : " + xml_folder;
+    }
+
+    if(!is_dir(img_folder))
+    {
+        std::cout << "error, img dir not exists : " << img_folder << std::endl;
+        throw "error, xml dir not exists : " + xml_folder;
+    }
+
+    std::set<std::string> suffix {".jpg", ".png", ".JPG", ".PNG"};
+    std::vector<std::string> img_path_vector = get_all_file_path(img_folder, suffix);
+
+    std::string each_xml_path;
+    std::string each_img_path;
+    std::string md5_str;
+    std::string new_xml_path, new_img_path;
+    for(int i=0; i<img_path_vector.size(); i++)
+    {
+        each_img_path = img_path_vector[i];
+        each_xml_path = xml_folder + "/" + get_file_name(each_img_path) + ".xml";
+        if(! is_file(each_xml_path))
+        {
+            std::cout << "error, xml_path not exists : " << each_xml_path;
+            throw "error, xml_path not exists : " + each_xml_path;
+        }
+        md5_str = get_file_md5(each_img_path);
+        new_img_path = img_folder + "/" + md5_str + get_file_suffix(each_img_path);
+        new_xml_path = xml_folder + "/" + md5_str + ".xml";
+        rename(each_img_path.c_str(), new_img_path.c_str());
+        rename(each_xml_path.c_str(), new_xml_path.c_str());
+    }
+
+
+}
+
 
 
 }

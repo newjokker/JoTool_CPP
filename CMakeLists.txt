@@ -53,8 +53,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRCLIST)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/tools SRCLIST)
 
-# add_library(saturntools SHARED ${SRCLIST})   
-add_library(saturntools STATIC ${SRCLIST})   
+add_library(saturntools SHARED ${SRCLIST})   
+# add_library(saturntools STATIC ${SRCLIST})   
 
 add_executable(test main.cpp)
 

@@ -11,10 +11,13 @@
 // hpp 和 cpp 要使用同样的命名空间
 namespace jotools
 {
+    // 统计标签个数
     std::map<std::string, int> count_tags(std::string floder_path);
 
+    // 根据大图和 xml 截取小图
     void cut_small_img(std::string img_dir, std::string xml_dir, std::string save_dir, bool split_by_tag);
 
+    // 从截图中反推出小图
     void get_xml_from_crop_img(std::string crop_dir,  std::string save_xml_dir);
 
     // 去除图片的元数据
@@ -25,6 +28,12 @@ namespace jotools
 
     // 检查 xml 和 img 是否符合规范
     void xml_check(std::string xml_dir, std::string img_dir, int size_th, bool remove_error_file=true);
+
+    // 将文件夹下面的所有文件使用 md5 进行重命名
+    void rename_all_files_by_md5(std::string folder_path);
+
+    // 将对应的 xml 和 img 重命名为 img 的 md5
+    void rename_xml_img_by_md5(std::string xml_folder, std::string img_folder);
 
 }
 
