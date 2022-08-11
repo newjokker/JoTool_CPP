@@ -11,6 +11,8 @@
 #include "./include/operateDeteRes.hpp"
 #include "./include/pystring.h"
 #include "./include/fileOperateUtil.hpp"
+// #include "include/load_img.hpp"
+#include "include/ucDatasetUtil.hpp"
 
 using namespace jotools;
 using namespace std;
@@ -26,29 +28,33 @@ using namespace std;
 int main(int argc, char ** argv)
 {
 
-    if ((argc!= 2))
+    if ((argc <= 3))
     {
-        std::cout << "need parameter number : 1 get : " << argc-1 << " {file_dir}" << std::endl;
+        std::cout << "need parameter number > 2 get : " << argc-1 << std::endl;
+        std::cout << "--------------------------------" << std::endl;
+        std::cout << "uc load json_path save_dir save_mode(111|100)" << std::endl;
+        std::cout << "ucd check" << std::endl;
+        std::cout << "ucd delete ucd_name" << std::endl;
+        std::cout << "ucd upload ucd_path {ucd_name}" << std::endl;
+        std::cout << "ucd load ucd_path" << std::endl;
         return -1;
     }
 
-    std::string file_dir = argv[1];
 
-    std::cout << "--------------------------------" << std::endl;
-    std::cout << "file dir           : " << file_dir << std::endl;
-    std::cout << "--------------------------------" << std::endl;
+    // download_file("http://192.168.3.111:11101/file/Dsn06a6.xml", "/home/ldq/del/Dsn06a6.xml");
 
-
-    clock_t start, end;
-
-    start = clock();
     
-    rename_all_files_by_md5(file_dir);
+    UCDatasetUtil* ucd = new UCDatasetUtil("192.168.3.111" , 11101);
+    ucd->json_path = "/home/ldq/del/test.json";
 
-    end = clock();
+    // ucd->save_img_xml_json("/home/ldq/del/del_now");
 
-    std::cout << "--------------------------------" << std::endl;
-    std::cout << "use time " << (double)(end-start)/CLOCKS_PER_SEC << std::endl;
+    // ucd->check_ucd();
+
+    ucd->delete_ucd("del_测试 (1)");
+
+
+    ucd->save_ucd("nihao3", "/home/ldq/del/del_now/test.json");
 
 	return 1;
 	

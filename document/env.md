@@ -95,6 +95,12 @@
   * apt install 安装即可
   * 连接，refer : https://wuruofan.com/2020/05/24/cmake-static-link-openssl-curl/
 
+* cpp-httplib 安装
+  * 访问网页
+  * 提供文件服务
+  * 下载图片 
+  * refer : https://github.com/yhirose/cpp-httplib 
+  * 下载好 git 之后 (1) mkdir build (2) cmake .. (3) make install 即可 
 
 ### 环境安装的通用步骤
 

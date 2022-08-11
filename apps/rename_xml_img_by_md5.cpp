@@ -23,7 +23,7 @@ using namespace std;
 // 解析 json 下载对应的图片
 
 
-int main(int argc, char ** argv)
+int main_xml_check(int argc, char ** argv)
 {
 
     // xml check

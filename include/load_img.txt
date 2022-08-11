@@ -1,0 +1,13 @@
+#ifndef _LOAD_IMG_HPP_
+#define _LOAD_IMG_HPP_
+
+#include <iostream>
+ 
+
+void ImageDownloader(std::string image_url, std::string save_address);
+
+void download_file(std::string image_url, std::string save_address);
+
+
+
+#endif
