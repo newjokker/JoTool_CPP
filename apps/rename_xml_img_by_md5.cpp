@@ -26,16 +26,23 @@ using namespace std;
 int main(int argc, char ** argv)
 {
 
-    if ((argc!= 2))
+    // xml check
+
+    // 直接打印结果就行了
+    // 给一个选项可以设置是否一定文件到指定的文件夹，一定文件夹不是一个好的选项
+
+    if ((argc!= 3))
     {
-        std::cout << "need parameter number : 1 get : " << argc-1 << " {file_dir}" << std::endl;
+        std::cout << "need parameter number : 2 get : " << argc-1 << " {xml_dir, img_dir}" << std::endl;
         return -1;
     }
 
-    std::string file_dir = argv[1];
+    std::string xml_dir = argv[1];
+    std::string img_dir = argv[2];
 
     std::cout << "--------------------------------" << std::endl;
-    std::cout << "file dir           : " << file_dir << std::endl;
+    std::cout << "xml dir           : " << xml_dir << std::endl;
+    std::cout << "img_dir           : " << img_dir << std::endl;
     std::cout << "--------------------------------" << std::endl;
 
 
@@ -43,7 +50,7 @@ int main(int argc, char ** argv)
 
     start = clock();
     
-    rename_all_files_by_md5(file_dir);
+    rename_xml_img_by_md5(xml_dir, img_dir);
 
     end = clock();
 
