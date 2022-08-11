@@ -17,7 +17,7 @@ class UCDatasetUtil
         std::string root_url;
         int port;
         //
-        void save_img_xml_json(std::string save_dir, bool need_img=true, bool need_xml=true, bool need_json=false);
+        void save_img_xml_json(std::string save_dir, bool need_img=true, bool need_xml=true, bool need_json=false, int need_count=-1);
         void save_ucd(std::string ucd_name, std::string save_dir);
         //
         void check_ucd();
@@ -25,7 +25,7 @@ class UCDatasetUtil
         void upload_ucd(std::string ucd_path, std::string ucd_name="");
     
     private:
-        void load_file(std::string url, std::string save_path);
+        void load_file(std::string url, std::string save_path, int index=-1);
 };
 
 

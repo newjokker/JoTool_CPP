@@ -25,10 +25,7 @@ using namespace std;
 
 // 将 post 和 host 写到配置文件中，可以进行修改，不用改之前的程序了
 
-// 当操作之后不要生成文件
-
-
-int main(int argc, char ** argv)
+int main_ucdataset(int argc, char ** argv)
 {
     if ((argc < 2))
     {
@@ -38,8 +35,8 @@ int main(int argc, char ** argv)
         std::cout << "ucd check" << std::endl;
         std::cout << "ucd delete ucd_name" << std::endl;
         std::cout << "ucd load ucd_name save_path" << std::endl;
+        // 
         std::cout << "ucd upload ucd_path {ucd_name}" << std::endl;
-        //
         std::cout << "ucd from img_dir ucd_save_path" << std::endl;
         return -1;
     }
@@ -165,24 +162,8 @@ int main(int argc, char ** argv)
     }
     else if(commond_1 == "upload")
     {
-        std::string ucd_path, assign_ucd_name;
-        if(argc == 3)
-        {
-            ucd_path = argv[2];
-            ucd->upload_ucd(ucd_path);
-        }
-        else if(argc == 4)
-        {
-            ucd_path = argv[2];
-            assign_ucd_name = argv[3];
-            ucd->upload_ucd(ucd_path, assign_ucd_name);
-        }
-        else
-        {
-            std::cout << "ucd upload json_path {assign_ucd_name}" << std::endl;
-            throw "ucd upload error";
-        }
-    }        
+        std::cout << "upload 功能还未开发好" << std::endl;
+    }
     else if(commond_1 == "from")
     {
         std::cout << "from 功能还未开发好" << std::endl;
