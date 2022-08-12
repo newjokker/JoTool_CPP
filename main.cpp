@@ -13,6 +13,11 @@
 #include "./include/fileOperateUtil.hpp"
 // #include "include/load_img.hpp"
 #include "include/ucDatasetUtil.hpp"
+#include "include/xini_file.h"
+
+#include <unistd.h>         // readlink
+#include <linux/limits.h>   // PATH_MAX
+#include <libgen.h>         // dirname
 
 using namespace jotools;
 using namespace std;
@@ -41,6 +46,7 @@ using namespace std;
 
 // 时间使用更加方便的方式进行展示
 
+// 完善路径拼接（c++多一些 // 不会造成路径错误，少一些就会报错）
 
 int main(int argc, char ** argv)
 {
@@ -58,9 +64,33 @@ int main(int argc, char ** argv)
         return -1;
     }
 
-    UCDatasetUtil* ucd = new UCDatasetUtil("192.168.3.111" , 11101);
+    std::string host = "192.168.3.111";
+    int port = 11101;
+    std::string config_path;
+    std::string current_path;
 
+    // get config.ini path
+    char result[PATH_MAX];
+    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+    const char *path;
+    if (count != -1) 
+    {
+        current_path = dirname(result);
+        config_path = current_path + "/config.ini";
+    }
+    
+    if(is_file(config_path))
+    {
+        xini_file_t xini_file(config_path);
+        host = (const std::string &)xini_file["info"]["host"];
+        port = (const int &)xini_file["info"]["port"];
+        // std::cout << host << std::endl;
+        // std::cout << port << std::endl;
+    }
+
+    UCDatasetUtil* ucd = new UCDatasetUtil(host , port);
     std::string commond_1 = argv[1];
+
 
     if(commond_1 == "check")
     {
