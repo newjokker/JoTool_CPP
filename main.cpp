@@ -23,9 +23,21 @@ using namespace std;
 
 // todo 增加将文件夹中的图片转为 ucDataset.json 的功能
 
-// 将 post 和 host 写到配置文件中，可以进行修改，不用改之前的程序了
-
 // 当操作之后不要生成文件
+
+// 创建的文件夹要最高的权限
+
+// ucd load 可以指定保存文件夹 或者保存路径
+
+// 单张图片的下载
+
+// 设置配置文件，host port
+
+// img -> ucd.json
+
+// 完善报错机制
+
+// 方便的查看 ucd 相关的信息
 
 
 int main(int argc, char ** argv)
@@ -69,6 +81,11 @@ int main(int argc, char ** argv)
         else if (argc == 4)
         {
             ucd_save_path = argv[3];
+            // 指定的是个文件夹的话直接用 ucd_name 保存在指定的文件夹中
+            if(is_dir(ucd_save_path))
+            {
+                ucd_save_path += "/" + ucd_name + ".json";
+            }
         }
         else
         {

@@ -18,6 +18,29 @@ using json = nlohmann::json;
 // CPP 写服务端 refer : https://blog.csdn.net/canlynetsky/article/details/119083255
 
 
+UCDataset::UCDataset(std::string json_path)
+{
+    UCDataset::json_path = json_path;
+}
+
+void UCDataset::print_json_info()
+{
+    std::cout << "--------------------------------" << std::endl;
+    std::cout << "dataset_name      : " << UCDataset::dataset_name << std::endl;
+    std::cout << "uc count          : " << UCDataset::uc_list.size() << std::endl;
+    std::cout << "model_name        : " << UCDataset::model_name << std::endl;
+    std::cout << "model_version     : " << UCDataset::model_version << std::endl;
+    std::cout << "add_time     : " << UCDataset::add_time << std::endl;
+    std::cout << "update_time     : " << UCDataset::update_time << std::endl;
+    std::cout << "describe     : " << UCDataset::describe << std::endl;
+    std::cout << "label_used     : " << UCDataset::model_version << std::endl;
+    for(int i=0; i<UCDataset::label_used.size(); i++)
+    {
+        std::cout << "      * " << UCDataset::label_used[i] << std::endl;
+    }
+
+    std::cout << "--------------------------------" << std::endl;
+}
 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port)
 {

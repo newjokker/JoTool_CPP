@@ -4,6 +4,30 @@
 #define _UCDATASETUTIL_HPP_
 
 #include <iostream>
+#include <vector>
+
+
+class UCDataset
+{
+    public:
+        //
+        std::vector<std::string> uc_list;
+        std::string dataset_name;
+        std::string model_name;
+        std::string model_version;
+        std::vector<std::string> label_used;
+        #
+        double add_time;
+        double update_time;
+        std::string describe;
+        std::string json_path;
+        //
+        UCDataset(std::string json_path="");
+        void parse_json_path();
+        void save_to_json(std::string save_path);
+        void print_json_info();
+        //
+};
 
 
 
