@@ -26,6 +26,21 @@
 ### 常用命令
 
 
+* ucd save json_path save_dir save_mode(111|100) {need_count}
+* 
+* ucd check
+* 
+* ucd show
+* 
+* ucd delete ucd_name
+* 
+* ucd load ucd_name save_path|save_dir 
+* 
+* ucd upload ucd_path {ucd_name}
+* 
+* ucd from img_dir ucd_save_path
+* 
+* ucd info ucd_path
 
 
 

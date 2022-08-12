@@ -238,7 +238,7 @@ void UCDatasetUtil::load_file(std::string url, std::string save_path, int index)
         else
         {
             std::cout << "load error : " << url << std::endl;
-            throw "load error : " + url;
+            // throw "load error : " + url;
         }
     }
 }
