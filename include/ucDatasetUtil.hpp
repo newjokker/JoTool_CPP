@@ -30,7 +30,6 @@ class UCDataset
 };
 
 
-
 class UCDatasetUtil
 {
     public:
@@ -47,6 +46,8 @@ class UCDatasetUtil
         void check_ucd();
         void delete_ucd(std::string ucd_name);
         void upload_ucd(std::string ucd_path, std::string ucd_name="");
+        // 将 img_dir 中的文件符合 UC 规范的组织为一个 ucd
+        void get_ucd_from_img_dir(std::string img_dir, std::string ucd_path);
     
     private:
         void load_file(std::string url, std::string save_path, int index=-1);

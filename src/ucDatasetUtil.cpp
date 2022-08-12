@@ -11,7 +11,7 @@
 #include <nlohmann/json.hpp>
 #include <httplib.h>
 #include <string>
-
+#include <set>
 
 using json = nlohmann::json;
 
@@ -21,6 +21,13 @@ using json = nlohmann::json;
 
 UCDataset::UCDataset(std::string json_path)
 {
+    UCDataset::dataset_name = "";
+    UCDataset::model_name = "";
+    UCDataset::model_version = "";
+    std::vector<std::string> label_used;
+    UCDataset::add_time = -1;
+    UCDataset::update_time = -1;
+    UCDataset::describe = "";
     UCDataset::json_path = json_path;
 }
 
@@ -71,6 +78,26 @@ void UCDataset::print_json_info()
         std::cout << "  * " << UCDataset::label_used[i] << std::endl;
     }
     std::cout << "--------------------------------" << std::endl;
+}
+
+void UCDataset::save_to_json(std::string save_path)
+{
+    nlohmann::json json_info = {
+        {"dataset_name", UCDataset::dataset_name},
+        {"model_name", UCDataset::model_name},
+        {"model_version", UCDataset::model_version},
+        {"add_time", UCDataset::add_time},
+        {"update_time", UCDataset::update_time},
+        {"describe", UCDataset::describe},
+    };
+
+    json_info["label_used"] = UCDataset::label_used;
+    json_info["uc_list"] = UCDataset::uc_list;
+
+    std::ofstream o(save_path);
+    // 不加 std::setw(4) 就不是格式化输出，都显示在一行
+    o << std::setw(4) << json_info << std::endl;
+    // o << json_info << std::endl;
 }
 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port)
@@ -206,4 +233,42 @@ void UCDatasetUtil::load_file(std::string url, std::string save_path, int index)
         out<<res->body;
         out.close();
     }
+}
+
+static bool is_uc(std::string uc)
+{
+    if(uc.size() != 7){ return false; }
+
+    // if((uc[0] != 'C') || (uc[0] != 'D') || (uc[0] != 'E') || (uc[0] != 'F')) { return false; }
+
+    if(((int)uc[0] < (int)'C') || ((int)uc[0] > int('K'))) { return false; }
+
+
+    return true;
+}
+
+void UCDatasetUtil::get_ucd_from_img_dir(std::string img_dir, std::string ucd_path)
+{
+
+    std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
+    std::vector<std::string> img_path_vector = get_all_file_path_recursive(img_dir, suffix);
+
+    UCDataset* ucd = new UCDataset();
+
+    std::string uc;
+    for(int i=0; i<img_path_vector.size(); i++)
+    {
+        uc = get_file_name(img_path_vector[i]);
+
+        if(is_uc(uc))
+        {
+            ucd->uc_list.push_back(uc);
+        }
+
+        std::cout << img_path_vector[i] << std::endl;
+    }
+
+    ucd->save_to_json(ucd_path);
+    delete ucd;
+
 }

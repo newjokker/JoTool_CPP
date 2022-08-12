@@ -211,16 +211,20 @@ int main(int argc, char ** argv)
         }
 
         std::string json_path = argv[2];
-        UCDataset * ucd = new UCDataset(json_path);
+        UCDataset * ucd_info = new UCDataset(json_path);
+        ucd_info->parse_json_info();
+        ucd_info->print_json_info();
 
-        ucd->parse_json_info();
-        ucd->print_json_info();
-
-        delete ucd;
+        delete ucd_info;
     }
     else if(commond_1 == "from")
     {
-        std::cout << "from 功能还未开发好" << std::endl;
+        if(argc == 4)
+        {
+            std::string img_path = argv[2];
+            std::string ucd_name = argv[3];
+            ucd->get_ucd_from_img_dir(img_path, ucd_name);
+        }
     }
     else
     {
