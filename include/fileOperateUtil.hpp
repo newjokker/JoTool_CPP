@@ -48,4 +48,11 @@ void remove_file(std::string);
 // 判断指定后缀的文件是否存在
 std::string get_file_by_suffix_set(std::string folder, std::string name, std::set<std::string>);
 
+
+
+
+// 获取可执行文件的目录 rerfer : https://stackoverflow.com/questions/23943239/how-to-get-path-to-current-exe-file-on-linux
+
+
 #endif
+

@@ -211,7 +211,6 @@ void UCDatasetUtil::load_file(std::string url, std::string save_path, int index)
 {
     // refer : https://blog.csdn.net/harry49/article/details/115763383
 
-
     if(is_file(save_path))
     {
         std::cout << "* file exists ignore : " << save_path << std::endl;
@@ -228,22 +227,28 @@ void UCDatasetUtil::load_file(std::string url, std::string save_path, int index)
         }
         httplib::Client cli(UCDatasetUtil::root_url);
         auto res = cli.Get(url);
-        std::ofstream out;
-        out.open(save_path, std::ios_base::binary | std::ios::out);
-        out<<res->body;
-        out.close();
+
+        if(res->status == 200)
+        {
+            std::ofstream out;
+            out.open(save_path, std::ios_base::binary | std::ios::out);
+            out<<res->body;
+            out.close();
+        }
+        else
+        {
+            std::cout << "load error : " << url << std::endl;
+            throw "load error : " + url;
+        }
     }
 }
 
 static bool is_uc(std::string uc)
 {
     if(uc.size() != 7){ return false; }
-
-    // if((uc[0] != 'C') || (uc[0] != 'D') || (uc[0] != 'E') || (uc[0] != 'F')) { return false; }
-
     if(((int)uc[0] < (int)'C') || ((int)uc[0] > int('K'))) { return false; }
-
-
+    if(((int)uc[1] < (int)'a') || ((int)uc[1] > int('z'))) { return false; }
+    if(((int)uc[2] < (int)'a') || ((int)uc[2] > int('z'))) { return false; }
     return true;
 }
 
@@ -262,12 +267,10 @@ void UCDatasetUtil::get_ucd_from_img_dir(std::string img_dir, std::string ucd_pa
 
         if(is_uc(uc))
         {
+            std::cout << img_path_vector[i] << std::endl;
             ucd->uc_list.push_back(uc);
         }
-
-        std::cout << img_path_vector[i] << std::endl;
     }
-
     ucd->save_to_json(ucd_path);
     delete ucd;
 

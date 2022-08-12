@@ -18,6 +18,7 @@
 #include <unistd.h>         // readlink
 #include <linux/limits.h>   // PATH_MAX
 #include <libgen.h>         // dirname
+#include <pwd.h>
 
 using namespace jotools;
 using namespace std;
@@ -32,65 +33,73 @@ using namespace std;
 
 // 创建的文件夹要最高的权限
 
-// ucd load 可以指定保存文件夹 或者保存路径
-
-// 单张图片的下载
-
-// 设置配置文件，host port
-
-// img -> ucd.json
-
 // 完善报错机制
 
-// 方便的查看 ucd 相关的信息
-
-// 时间使用更加方便的方式进行展示
 
 // 完善路径拼接（c++多一些 // 不会造成路径错误，少一些就会报错）
+
+
+void print_info()
+{
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "下载 图片|标注|元信息, ucd save json_path save_dir save_mode(111|100) {need_count}" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "查看所有在线数据集, ucd check" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "查看所有下载路径, ucd show" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "删除在线数据集,无法删除官方数据集 ucd delete ucd_name" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "下载在线数据集 ucd load ucd_name save_path|save_dir " << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "上传数据集到网络 ucd upload ucd_path {ucd_name}" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "本地文件生成数据集 ucd from img_dir ucd_save_path" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "查看数据集信息 ucd info ucd_path" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+}
+
 
 int main(int argc, char ** argv)
 {
     if ((argc < 2))
     {
         std::cout << "need parameter number >= 1 get : " << argc-1 << std::endl;
-        std::cout << "--------------------------------" << std::endl;
-        std::cout << "uc save json_path save_dir save_mode(111|100) {need_count}" << std::endl;
-        std::cout << "ucd check" << std::endl;
-        std::cout << "ucd delete ucd_name" << std::endl;
-        std::cout << "ucd load ucd_name save_path" << std::endl;
-        std::cout << "ucd upload ucd_path {ucd_name}" << std::endl;
-        //
-        std::cout << "ucd from img_dir ucd_save_path" << std::endl;
+        print_info();
         return -1;
     }
 
     std::string host = "192.168.3.111";
     int port = 11101;
     std::string config_path;
-    std::string current_path;
 
-    // get config.ini path
-    char result[PATH_MAX];
-    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
-    const char *path;
-    if (count != -1) 
+    // get user name
+    struct passwd* pwd;
+    uid_t userid;
+	userid = getuid();
+	pwd = getpwuid(userid);
+    std::string pw_name = pwd->pw_name;
+    // if config_path is "~/ucdconfig.ini" can't read the file, so should get the user name for ~
+    if(pw_name == "root")
     {
-        current_path = dirname(result);
-        config_path = current_path + "/config.ini";
+        config_path = "/" + pw_name + "/ucdconfig.ini";
     }
-    
+    else
+    {
+        config_path = "/home/" + pw_name + "/ucdconfig.ini";
+    }
+
+    // read config
     if(is_file(config_path))
     {
         xini_file_t xini_file(config_path);
         host = (const std::string &)xini_file["info"]["host"];
         port = (const int &)xini_file["info"]["port"];
-        // std::cout << host << std::endl;
-        // std::cout << port << std::endl;
     }
 
     UCDatasetUtil* ucd = new UCDatasetUtil(host , port);
     std::string commond_1 = argv[1];
-
 
     if(commond_1 == "check")
     {
@@ -256,15 +265,18 @@ int main(int argc, char ** argv)
             ucd->get_ucd_from_img_dir(img_path, ucd_name);
         }
     }
+    else if(commond_1 == "show")
+    {
+        // 展示所有的下载路径，为了方便单张图片的信息下载查看
+        std::cout << "load img      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/{UC}.jpg" << std::endl;
+        std::cout << "load xml      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/{UC}.xml" << std::endl;
+        std::cout << "load json     : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/{UC}.json" << std::endl;
+        std::cout << "load ucd      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/ucd/{ucd_name}.json" << std::endl;
+        std::cout << "check         : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/ucd/check" << std::endl;
+    }
     else
     {
-        std::cout << "need parameter number > 2 get : " << argc-1 << std::endl;
-        std::cout << "--------------------------------" << std::endl;
-        std::cout << "uc save json_path save_dir save_mode(111|100)" << std::endl;
-        std::cout << "ucd check" << std::endl;
-        std::cout << "ucd delete ucd_name" << std::endl;
-        std::cout << "ucd upload ucd_path {ucd_name}" << std::endl;
-        std::cout << "ucd load ucd_name save_path" << std::endl;
+        print_info();
         return -1;
     }
 

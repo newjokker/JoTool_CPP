@@ -14,12 +14,14 @@
 #include "../include/fileOperateUtil.hpp"
 
 
-bool is_file(std::string filename) {
+bool is_file(std::string filename) 
+{
     struct stat   buffer;
     return (stat (filename.c_str(), &buffer) == 0 && S_ISREG(buffer.st_mode));
 }
 
-bool is_dir(std::string filefodler) {
+bool is_dir(std::string filefodler) 
+{
     struct stat   buffer;
     return (stat (filefodler.c_str(), &buffer) == 0 && S_ISDIR(buffer.st_mode));
 }
