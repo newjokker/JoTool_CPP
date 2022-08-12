@@ -23,7 +23,7 @@ class UCDataset
         std::string json_path;
         //
         UCDataset(std::string json_path="");
-        void parse_json_path();
+        void parse_json_info();
         void save_to_json(std::string save_path);
         void print_json_info();
         //

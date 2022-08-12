@@ -7,10 +7,11 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <./include/ucDatasetUtil.hpp>
-// #include "include/load_img.hpp"
 #include "include/fileOperateUtil.hpp"
 #include <nlohmann/json.hpp>
 #include <httplib.h>
+#include <string>
+
 
 using json = nlohmann::json;
 
@@ -23,6 +24,37 @@ UCDataset::UCDataset(std::string json_path)
     UCDataset::json_path = json_path;
 }
 
+void UCDataset::parse_json_info()
+{
+    if(! is_file(UCDataset::json_path))
+    {
+        std::cout << "json path not exists : " << UCDataset::json_path << std::endl;
+        throw "json path not exists";
+    }
+    
+    std::ifstream jsfile(UCDataset::json_path);
+    json data = json::parse(jsfile); 
+
+    auto dataset_name = data["dataset_name"];
+    auto model_name = data["model_name"];
+    auto model_version = data["model_version"];
+    auto add_time = data["add_time"];
+    auto update_time = data["update_time"];
+    auto describe = data["describe"];
+    auto label_used = data["label_used"];
+    auto uc_list = data["uc_list"];
+
+    if(dataset_name != nullptr){ UCDataset::dataset_name = dataset_name; }
+    if(model_name != nullptr){ UCDataset::model_name = model_name; }
+    if(model_version != nullptr){ UCDataset::model_version = model_version; }
+    if(add_time != nullptr){ UCDataset::add_time = add_time; }
+    if(update_time != nullptr){ UCDataset::update_time = update_time; }
+    if(describe != nullptr){ UCDataset::describe = describe; }
+    if(label_used != nullptr){ UCDataset::label_used = label_used; }
+    if(uc_list != nullptr){ UCDataset::uc_list = uc_list; }
+
+}
+
 void UCDataset::print_json_info()
 {
     std::cout << "--------------------------------" << std::endl;
@@ -30,15 +62,14 @@ void UCDataset::print_json_info()
     std::cout << "uc count          : " << UCDataset::uc_list.size() << std::endl;
     std::cout << "model_name        : " << UCDataset::model_name << std::endl;
     std::cout << "model_version     : " << UCDataset::model_version << std::endl;
-    std::cout << "add_time     : " << UCDataset::add_time << std::endl;
-    std::cout << "update_time     : " << UCDataset::update_time << std::endl;
-    std::cout << "describe     : " << UCDataset::describe << std::endl;
-    std::cout << "label_used     : " << UCDataset::model_version << std::endl;
+    std::cout << "add_time          : " << UCDataset::add_time << std::endl;
+    std::cout << "update_time       : " << UCDataset::update_time << std::endl;
+    std::cout << "describe          : " << UCDataset::describe << std::endl;
+    std::cout << "label_used        : " << UCDataset::model_version << std::endl;
     for(int i=0; i<UCDataset::label_used.size(); i++)
     {
-        std::cout << "      * " << UCDataset::label_used[i] << std::endl;
+        std::cout << "  * " << UCDataset::label_used[i] << std::endl;
     }
-
     std::cout << "--------------------------------" << std::endl;
 }
 

@@ -39,6 +39,8 @@ using namespace std;
 
 // 方便的查看 ucd 相关的信息
 
+// 时间使用更加方便的方式进行展示
+
 
 int main(int argc, char ** argv)
 {
@@ -200,6 +202,22 @@ int main(int argc, char ** argv)
             throw "ucd upload error";
         }
     }        
+    else if(commond_1 == "info")
+    {
+        if(argc != 3)
+        {
+            std::cout << "ucd info json_path" << std::endl;
+            throw "ucd info error";
+        }
+
+        std::string json_path = argv[2];
+        UCDataset * ucd = new UCDataset(json_path);
+
+        ucd->parse_json_info();
+        ucd->print_json_info();
+
+        delete ucd;
+    }
     else if(commond_1 == "from")
     {
         std::cout << "from 功能还未开发好" << std::endl;
