@@ -12,6 +12,7 @@
 #include <httplib.h>
 #include <string>
 #include <set>
+#include <iterator>
 
 using json = nlohmann::json;
 
@@ -58,8 +59,10 @@ void UCDataset::parse_json_info()
     if(update_time != nullptr){ UCDataset::update_time = update_time; }
     if(describe != nullptr){ UCDataset::describe = describe; }
     if(label_used != nullptr){ UCDataset::label_used = label_used; }
-    if(uc_list != nullptr){ UCDataset::uc_list = uc_list; }
-
+    if(uc_list != nullptr){ 
+        UCDataset::uc_list = uc_list; 
+        UCDataset::unique();
+    }
 }
 
 void UCDataset::print_json_info()
@@ -98,6 +101,12 @@ void UCDataset::save_to_json(std::string save_path)
     // 不加 std::setw(4) 就不是格式化输出，都显示在一行
     o << std::setw(4) << json_info << std::endl;
     // o << json_info << std::endl;
+}
+
+void UCDataset::unique()
+{
+    std::set<std::string> uc_set(UCDataset::uc_list.begin(), UCDataset::uc_list.end());
+    UCDataset::uc_list.assign(uc_set.begin(), uc_set.end());
 }
 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port)
@@ -278,13 +287,6 @@ void UCDatasetUtil::get_ucd_from_img_dir(std::string img_dir, std::string ucd_pa
 
 void UCDatasetUtil::merge_ucds(std::string save_path, std::vector<std::string> ucd_path_vector)
 {
-    // // save path
-    // if(is_file(save_path))
-    // {
-    //     std::cout << "save path exists : " << save_path << std::endl;
-    //     throw "save path exists";
-    // }
-
     // ucd path
     for(int i=0; i<ucd_path_vector.size(); i++)
     {
@@ -331,6 +333,46 @@ void UCDatasetUtil::merge_ucds(std::string save_path, std::vector<std::string> u
     delete merge;
 }
 
+void UCDatasetUtil::ucd_diff(std::string ucd_path_1, std::string ucd_path_2)
+{
+    UCDataset* ucd1 = new UCDataset(ucd_path_1);
+    ucd1->parse_json_info();
+    UCDataset* ucd2 = new UCDataset(ucd_path_2);
+    ucd2->parse_json_info();
+    std::vector<std::string> uc_intersection;
+    // set_intersection
+    std::set<std::string> uc_set1(ucd1->uc_list.begin(), ucd1->uc_list.end());
+    std::set<std::string> uc_set2(ucd2->uc_list.begin(), ucd2->uc_list.end());
+    std::set_intersection(uc_set1.begin(), uc_set1.end(), uc_set2.begin(), uc_set2.end(), std::inserter(uc_intersection, uc_intersection.begin()));
+    // print
+    std::cout << "----------------------" << std::endl;
+    std::cout << "A  : " << ucd1->uc_list.size() - uc_intersection.size() << std::endl;
+    std::cout << "AB : " << uc_intersection.size() << std::endl;
+    std::cout << "B  : " << ucd2->uc_list.size() - uc_intersection.size() << std::endl;
+    std::cout << "----------------------" << std::endl;
+    // delete
+    delete ucd1;
+    delete ucd2;
+}
+
+void UCDatasetUtil::ucd_minus(std::string save_path, std::string ucd_path_1, std::string ucd_path_2)
+{
+    UCDataset* ucd1 = new UCDataset(ucd_path_1);
+    ucd1->parse_json_info();
+    UCDataset* ucd2 = new UCDataset(ucd_path_2);
+    ucd2->parse_json_info();
+    UCDataset* ucd3 = new UCDataset(save_path);
+    std::vector<std::string> uc_difference;
+    // set_intersection
+    std::set<std::string> uc_set1(ucd1->uc_list.begin(), ucd1->uc_list.end());
+    std::set<std::string> uc_set2(ucd2->uc_list.begin(), ucd2->uc_list.end());
+    std::set_difference(uc_set1.begin(), uc_set1.end(), uc_set2.begin(), uc_set2.end(), std::inserter(uc_difference, uc_difference.begin()));
+    // save
+    
+    // delete
+    delete ucd1;
+    delete ucd2;
+}
 
 
 

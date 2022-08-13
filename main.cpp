@@ -23,6 +23,7 @@ using namespace std;
 
 // 完善路径拼接（c++多一些 // 不会造成路径错误，少一些就会报错）
 
+// 设置将 uc_list 去重
 
 void print_info()
 {
@@ -280,14 +281,19 @@ int main(int argc, char ** argv)
         // same : 10, uc1, uc2, uc3 ... 
         // diff : 20, uc1, uc2, uc3 ...
 
-
-
+        if(argc == 4)
+        {
+            std::string ucd_path_1 = argv[2];
+            std::string ucd_path_2 = argv[3];
+            ucd->ucd_diff(ucd_path_1, ucd_path_2);
+        }
+        else
+        {
+            print_info();
+        }
     }
     else if(commond_1 == "merge")
     {
-        // 合并两个 ucd, uc_list 相加去重，used_label 相加去重
-        // 后面可以输入多个 ucd 的路径 >=2 
-
         if(argc >= 5)
         {
             std::string save_path = argv[2];
