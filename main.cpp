@@ -43,6 +43,10 @@ void print_info()
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "查看数据集信息 ucd info ucd_path" << std::endl;
     std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "查看配置信息 ucd meta" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "设置配置信息 ucd set host | port value" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
 }
 
 
@@ -270,6 +274,10 @@ int main(int argc, char ** argv)
     {
         // 查看两个 ucd 的异同
         // 显示前 20 个 uc，其他的使用省略号表示
+
+        // same : 10, uc1, uc2, uc3 ... 
+        // diff : 20, uc1, uc2, uc3 ...
+
     }
     else if(commond_1 == "merge")
     {
@@ -284,12 +292,39 @@ int main(int argc, char ** argv)
     {
         // 打印原信息，host post 等基本信息
         // 当前用户 ucdconfig.ini 的路径
+        std::cout << "-----------------------------" << std::endl;
+        std::cout << "host          : " << host << std::endl;
+        std::cout << "port          : " << port << std::endl;
+        std::cout << "config path   : " << config_path << std::endl;
+        std::cout << "-----------------------------" << std::endl;
     }
     else if(commond_1 == "set")
     {
-        // ucd set host 192.168.3.111
-        // ucd set port 11101
-        // 设置元信息 post host 等
+        if(argc == 4)
+        {
+            xini_file_t xini_write(config_path);
+            std::string option = argv[2]; 
+
+            if(option == "host")
+            {
+                std::string host = argv[3];
+                xini_write["info"]["host"] = host;
+            }
+            else if(option == "port")
+            {
+                int port = std::stoi(argv[3]);
+                xini_write["info"]["port"] = port;      
+            }
+            else
+            {
+                print_info();
+            }
+            xini_write.dump(config_path);   
+        }
+        else
+        {
+            print_info();
+        }
     }
     else
     {

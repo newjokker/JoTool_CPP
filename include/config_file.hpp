@@ -8,8 +8,9 @@
 #include <string.h>
 #include"./xini_file.h"
 
-
 using namespace std;
+
+// refer : https://gitee.com/qinwanlin/inifile
 
 
 // 分割字符串

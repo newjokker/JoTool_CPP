@@ -1,48 +1,90 @@
 
-#include <opencv2/opencv.hpp>
 #include <iostream>
-#include <set>
-#include <time.h>
-#include "./include/crow_all.h"
-#include "./include/strToImg.hpp"
-#include "./deteRes.hpp"
 #include <fstream>
+#include <set>
+#include <pwd.h>
+#include <time.h>
+#include <opencv2/opencv.hpp>
 #include <nlohmann/json.hpp>
-#include "./include/operateDeteRes.hpp"
-#include "./include/pystring.h"
-#include "./include/fileOperateUtil.hpp"
-// #include "include/load_img.hpp"
+#include "include/crow_all.h"
+#include "include/strToImg.hpp"
+#include "include/deteRes.hpp"
+#include "include/operateDeteRes.hpp"
+#include "include/pystring.h"
+#include "include/fileOperateUtil.hpp"
 #include "include/ucDatasetUtil.hpp"
+#include "include/xini_file.h"
 
 using namespace jotools;
 using namespace std;
 
 
+// nginx 负载均衡，可以在风火轮上部署，转到 111 和 209 服务器上
 
-// 提供一个图床服务，图片专门放在一个服务器中 (放在多个服务器中，分担压力)
+// 完善路径拼接（c++多一些 // 不会造成路径错误，少一些就会报错）
 
-// todo 增加将文件夹中的图片转为 ucDataset.json 的功能
 
-// 将 post 和 host 写到配置文件中，可以进行修改，不用改之前的程序了
+void print_info()
+{
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "下载 图片|标注|元信息, ucd save json_path save_dir save_mode(111|100) {need_count}" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "查看所有在线数据集, ucd check" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "查看所有下载路径, ucd show {uc}" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "删除在线数据集,无法删除官方数据集 ucd delete ucd_name" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "下载在线数据集 ucd load ucd_name save_path|save_dir " << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "上传数据集到网络 ucd upload ucd_path {ucd_name}" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "本地文件生成数据集 ucd from img_dir ucd_save_path" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "查看数据集信息 ucd info ucd_path" << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+}
 
-int main_ucdataset(int argc, char ** argv)
+
+int main_ucd(int argc, char ** argv)
 {
     if ((argc < 2))
     {
         std::cout << "need parameter number >= 1 get : " << argc-1 << std::endl;
-        std::cout << "--------------------------------" << std::endl;
-        std::cout << "uc save json_path save_dir save_mode(111|100) {need_count}" << std::endl;
-        std::cout << "ucd check" << std::endl;
-        std::cout << "ucd delete ucd_name" << std::endl;
-        std::cout << "ucd load ucd_name save_path" << std::endl;
-        // 
-        std::cout << "ucd upload ucd_path {ucd_name}" << std::endl;
-        std::cout << "ucd from img_dir ucd_save_path" << std::endl;
+        print_info();
         return -1;
     }
 
-    UCDatasetUtil* ucd = new UCDatasetUtil("192.168.3.111" , 11101);
+    std::string host = "192.168.3.111";
+    int port = 11101;
+    std::string config_path;
 
+    // get user name
+    struct passwd* pwd;
+    uid_t userid;
+	userid = getuid();
+	pwd = getpwuid(userid);
+    std::string pw_name = pwd->pw_name;
+    
+    // if config_path is "~/ucdconfig.ini" can't read the file, so should get the user name for ~
+    if(pw_name == "root")
+    {
+        config_path = "/" + pw_name + "/ucdconfig.ini";
+    }
+    else
+    {
+        config_path = "/home/" + pw_name + "/ucdconfig.ini";
+    }
+
+    // read config
+    if(is_file(config_path))
+    {
+        xini_file_t xini_file(config_path);
+        host = (const std::string &)xini_file["info"]["host"];
+        port = (const int &)xini_file["info"]["port"];
+    }
+
+    UCDatasetUtil* ucd = new UCDatasetUtil(host , port);
     std::string commond_1 = argv[1];
 
     if(commond_1 == "check")
@@ -66,6 +108,11 @@ int main_ucdataset(int argc, char ** argv)
         else if (argc == 4)
         {
             ucd_save_path = argv[3];
+            //
+            if(is_dir(ucd_save_path))
+            {
+                ucd_save_path += "/" + ucd_name + ".json";
+            }
         }
         else
         {
@@ -73,11 +120,9 @@ int main_ucdataset(int argc, char ** argv)
             throw "ucd load ucd_name {ucd_path}";
         }
         ucd->save_ucd(ucd_name, ucd_save_path);
-
     }
     else if(commond_1 == "delete")
     {
-        
         if(argc != 3)
         {
             std::cout << "ucd delete ucd_name " << std::endl;
@@ -162,21 +207,93 @@ int main_ucdataset(int argc, char ** argv)
     }
     else if(commond_1 == "upload")
     {
-        std::cout << "upload 功能还未开发好" << std::endl;
+        std::string ucd_path, assign_ucd_name;
+        if(argc == 3)
+        {
+            ucd_path = argv[2];
+            ucd->upload_ucd(ucd_path);
+        }
+        else if(argc == 4)
+        {
+            ucd_path = argv[2];
+            assign_ucd_name = argv[3];
+            ucd->upload_ucd(ucd_path, assign_ucd_name);
+        }
+        else
+        {
+            std::cout << "ucd upload json_path {assign_ucd_name}" << std::endl;
+            throw "ucd upload error";
+        }
+    }        
+    else if(commond_1 == "info")
+    {
+        if(argc != 3)
+        {
+            std::cout << "ucd info json_path" << std::endl;
+            throw "ucd info error";
+        }
+
+        std::string json_path = argv[2];
+        UCDataset * ucd_info = new UCDataset(json_path);
+        ucd_info->parse_json_info();
+        ucd_info->print_json_info();
+        delete ucd_info;
     }
     else if(commond_1 == "from")
     {
-        std::cout << "from 功能还未开发好" << std::endl;
+        if(argc == 4)
+        {
+            std::string img_path = argv[2];
+            std::string ucd_name = argv[3];
+            ucd->get_ucd_from_img_dir(img_path, ucd_name);
+        }
+    }
+    else if(commond_1 == "show")
+    {
+        std::string uc;
+        if(argc >= 3)
+        {
+            uc = argv[2];
+        }
+        else
+        {
+            uc = "{UC}";
+        }
+        // 展示所有的下载路径，为了方便单张图片的信息下载查看
+        std::cout << "load img      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/" + uc + ".jpg" << std::endl;
+        std::cout << "load xml      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/" + uc + ".xml" << std::endl;
+        std::cout << "load json     : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/" + uc + ".json" << std::endl;
+        std::cout << "load ucd      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/ucd/{ucd_name}.json" << std::endl;
+        std::cout << "check         : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/ucd/check" << std::endl;
+    }
+    else if(commond_1 == "diff")
+    {
+        // 查看两个 ucd 的异同
+        // 显示前 20 个 uc，其他的使用省略号表示
+    }
+    else if(commond_1 == "merge")
+    {
+        // 合并两个 ucd, uc_list 相加去重，used_label 相加去重
+        // 后面可以输入多个 ucd 的路径 >=2 
+    }
+    else if(commond_1 == "minus")
+    {
+        // 去除第一个 ucd 中 第二个 ucd 中包含的 uc
+    }
+    else if(commond_1 == "meta")
+    {
+        // 打印原信息，host post 等基本信息
+        // 当前用户 ucdconfig.ini 的路径
+    }
+    else if(commond_1 == "set")
+    {
+        // ucd set host 192.168.3.111
+        // ucd set port 11101
+        // 设置元信息 post host 等，更新到 ucdconfig.ini 文件中去
     }
     else
     {
-        std::cout << "need parameter number > 2 get : " << argc-1 << std::endl;
-        std::cout << "--------------------------------" << std::endl;
-        std::cout << "uc save json_path save_dir save_mode(111|100)" << std::endl;
-        std::cout << "ucd check" << std::endl;
-        std::cout << "ucd delete ucd_name" << std::endl;
-        std::cout << "ucd upload ucd_path {ucd_name}" << std::endl;
-        std::cout << "ucd load ucd_name save_path" << std::endl;
+        print_info();
         return -1;
     }
 
