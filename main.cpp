@@ -1,40 +1,25 @@
 
-#include <opencv2/opencv.hpp>
 #include <iostream>
-#include <set>
-#include <time.h>
-#include "./include/crow_all.h"
-#include "./include/strToImg.hpp"
-#include "./deteRes.hpp"
 #include <fstream>
+#include <set>
+#include <pwd.h>
+#include <time.h>
+#include <opencv2/opencv.hpp>
 #include <nlohmann/json.hpp>
-#include "./include/operateDeteRes.hpp"
-#include "./include/pystring.h"
-#include "./include/fileOperateUtil.hpp"
-// #include "include/load_img.hpp"
+#include "include/crow_all.h"
+#include "include/strToImg.hpp"
+#include "include/deteRes.hpp"
+#include "include/operateDeteRes.hpp"
+#include "include/pystring.h"
+#include "include/fileOperateUtil.hpp"
 #include "include/ucDatasetUtil.hpp"
 #include "include/xini_file.h"
-
-#include <unistd.h>         // readlink
-#include <linux/limits.h>   // PATH_MAX
-#include <libgen.h>         // dirname
-#include <pwd.h>
 
 using namespace jotools;
 using namespace std;
 
 
-
-// 提供一个图床服务，图片专门放在一个服务器中 (放在多个服务器中，分担压力)
-
-// todo 增加将文件夹中的图片转为 ucDataset.json 的功能
-
-// 当操作之后不要生成文件
-
-// 创建的文件夹要最高的权限
-
-// 完善报错机制
-
+// nginx 负载均衡，可以在风火轮上部署，转到 111 和 209 服务器上
 
 // 完善路径拼接（c++多一些 // 不会造成路径错误，少一些就会报错）
 
@@ -46,7 +31,7 @@ void print_info()
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "查看所有在线数据集, ucd check" << std::endl;
     std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "查看所有下载路径, ucd show" << std::endl;
+    std::cout << "查看所有下载路径, ucd show {uc}" << std::endl;
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "删除在线数据集,无法删除官方数据集 ucd delete ucd_name" << std::endl;
     std::cout << "-------------------------------------------------------" << std::endl;
@@ -80,6 +65,7 @@ int main(int argc, char ** argv)
 	userid = getuid();
 	pwd = getpwuid(userid);
     std::string pw_name = pwd->pw_name;
+    
     // if config_path is "~/ucdconfig.ini" can't read the file, so should get the user name for ~
     if(pw_name == "root")
     {
@@ -122,7 +108,7 @@ int main(int argc, char ** argv)
         else if (argc == 4)
         {
             ucd_save_path = argv[3];
-            // 指定的是个文件夹的话直接用 ucd_name 保存在指定的文件夹中
+            //
             if(is_dir(ucd_save_path))
             {
                 ucd_save_path += "/" + ucd_name + ".json";
@@ -134,11 +120,9 @@ int main(int argc, char ** argv)
             throw "ucd load ucd_name {ucd_path}";
         }
         ucd->save_ucd(ucd_name, ucd_save_path);
-
     }
     else if(commond_1 == "delete")
     {
-        
         if(argc != 3)
         {
             std::cout << "ucd delete ucd_name " << std::endl;
@@ -253,7 +237,6 @@ int main(int argc, char ** argv)
         UCDataset * ucd_info = new UCDataset(json_path);
         ucd_info->parse_json_info();
         ucd_info->print_json_info();
-
         delete ucd_info;
     }
     else if(commond_1 == "from")
@@ -267,10 +250,19 @@ int main(int argc, char ** argv)
     }
     else if(commond_1 == "show")
     {
+        std::string uc;
+        if(argc >= 3)
+        {
+            uc = argv[2];
+        }
+        else
+        {
+            uc = "{UC}";
+        }
         // 展示所有的下载路径，为了方便单张图片的信息下载查看
-        std::cout << "load img      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/{UC}.jpg" << std::endl;
-        std::cout << "load xml      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/{UC}.xml" << std::endl;
-        std::cout << "load json     : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/{UC}.json" << std::endl;
+        std::cout << "load img      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/" + uc + ".jpg" << std::endl;
+        std::cout << "load xml      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/" + uc + ".xml" << std::endl;
+        std::cout << "load json     : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/" + uc + ".json" << std::endl;
         std::cout << "load ucd      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/ucd/{ucd_name}.json" << std::endl;
         std::cout << "check         : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/ucd/check" << std::endl;
     }
