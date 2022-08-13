@@ -266,6 +266,31 @@ int main(int argc, char ** argv)
         std::cout << "load ucd      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/ucd/{ucd_name}.json" << std::endl;
         std::cout << "check         : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/ucd/check" << std::endl;
     }
+    else if(commond_1 == "diff")
+    {
+        // 查看两个 ucd 的异同
+        // 显示前 20 个 uc，其他的使用省略号表示
+    }
+    else if(commond_1 == "merge")
+    {
+        // 合并两个 ucd, uc_list 相加去重，used_label 相加去重
+        // 后面可以输入多个 ucd 的路径 >=2 
+    }
+    else if(commond_1 == "minus")
+    {
+        // 去除第一个 ucd 中 第二个 ucd 中包含的 uc
+    }
+    else if(commond_1 == "meta")
+    {
+        // 打印原信息，host post 等基本信息
+        // 当前用户 ucdconfig.ini 的路径
+    }
+    else if(commond_1 == "set")
+    {
+        // ucd set host 192.168.3.111
+        // ucd set port 11101
+        // 设置元信息 post host 等
+    }
     else
     {
         print_info();
