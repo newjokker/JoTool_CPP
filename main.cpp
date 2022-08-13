@@ -275,12 +275,6 @@ int main(int argc, char ** argv)
     }
     else if(commond_1 == "diff")
     {
-        // 查看两个 ucd 的异同
-        // 显示前 20 个 uc，其他的使用省略号表示
-
-        // same : 10, uc1, uc2, uc3 ... 
-        // diff : 20, uc1, uc2, uc3 ...
-
         if(argc == 4)
         {
             std::string ucd_path_1 = argv[2];
@@ -312,7 +306,17 @@ int main(int argc, char ** argv)
     }
     else if(commond_1 == "minus")
     {
-        // 去除第一个 ucd 中 第二个 ucd 中包含的 uc
+        if(argc == 5)
+        {
+            std::string ucd_save_path = argv[2];
+            std::string ucd_path_1 = argv[3];
+            std::string ucd_path_2 = argv[4];
+            ucd->ucd_minus(ucd_save_path, ucd_path_1, ucd_path_2);
+        }
+        else
+        {
+            print_info();
+        }
     }
     else if(commond_1 == "meta")
     {

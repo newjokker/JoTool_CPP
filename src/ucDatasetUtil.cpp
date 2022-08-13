@@ -361,14 +361,15 @@ void UCDatasetUtil::ucd_minus(std::string save_path, std::string ucd_path_1, std
     ucd1->parse_json_info();
     UCDataset* ucd2 = new UCDataset(ucd_path_2);
     ucd2->parse_json_info();
-    UCDataset* ucd3 = new UCDataset(save_path);
+    UCDataset* ucd_res = new UCDataset();
     std::vector<std::string> uc_difference;
     // set_intersection
     std::set<std::string> uc_set1(ucd1->uc_list.begin(), ucd1->uc_list.end());
     std::set<std::string> uc_set2(ucd2->uc_list.begin(), ucd2->uc_list.end());
     std::set_difference(uc_set1.begin(), uc_set1.end(), uc_set2.begin(), uc_set2.end(), std::inserter(uc_difference, uc_difference.begin()));
     // save
-    
+    ucd_res->uc_list = uc_difference;
+    ucd_res->save_to_json(save_path);
     // delete
     delete ucd1;
     delete ucd2;
