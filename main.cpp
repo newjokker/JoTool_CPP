@@ -47,6 +47,8 @@ void print_info()
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "设置配置信息 ucd set host | port value" << std::endl;
     std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "合并数据集 ucd merge save_path ucd_path1 ucd_path2 ..." << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
 }
 
 
@@ -278,11 +280,29 @@ int main(int argc, char ** argv)
         // same : 10, uc1, uc2, uc3 ... 
         // diff : 20, uc1, uc2, uc3 ...
 
+
+
     }
     else if(commond_1 == "merge")
     {
         // 合并两个 ucd, uc_list 相加去重，used_label 相加去重
         // 后面可以输入多个 ucd 的路径 >=2 
+
+        if(argc >= 5)
+        {
+            std::string save_path = argv[2];
+            std::vector<std::string> ucd_path_vector;
+            for(int i=0; i<argc-3; i++)
+            {
+                std::string each_ucd_path = argv[i+3];
+                ucd_path_vector.push_back(each_ucd_path);
+            }
+            ucd->merge_ucds(save_path, ucd_path_vector);
+        }
+        else
+        {
+            print_info();
+        }
     }
     else if(commond_1 == "minus")
     {

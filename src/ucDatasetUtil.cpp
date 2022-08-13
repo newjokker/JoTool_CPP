@@ -275,3 +275,62 @@ void UCDatasetUtil::get_ucd_from_img_dir(std::string img_dir, std::string ucd_pa
     delete ucd;
 
 }
+
+void UCDatasetUtil::merge_ucds(std::string save_path, std::vector<std::string> ucd_path_vector)
+{
+    // // save path
+    // if(is_file(save_path))
+    // {
+    //     std::cout << "save path exists : " << save_path << std::endl;
+    //     throw "save path exists";
+    // }
+
+    // ucd path
+    for(int i=0; i<ucd_path_vector.size(); i++)
+    {
+        if(! is_file(ucd_path_vector[i]))
+        {
+            std::cout << "ucd path not exists : " << save_path << std::endl;
+            throw "ucd path not exists";
+        }
+    }
+    // merge 
+    UCDataset* merge = new UCDataset();
+    std::set<std::string> uc_set, used_label_set;
+    for(int i=0; i<ucd_path_vector.size(); i++)
+    {
+        UCDataset* ucd = new UCDataset(ucd_path_vector[i]);
+        ucd->parse_json_info();
+        // uc
+        for(int j=0; j<ucd->uc_list.size(); j++)
+        {
+            uc_set.insert(ucd->uc_list[j]);
+        }
+        // used label
+        for(int j=0; j<ucd->label_used.size(); j++)
+        {
+            used_label_set.insert(ucd->label_used[j]);
+        }
+        delete ucd;
+    }
+    // uc list
+    std::set<std::string>::iterator iter_uc = uc_set.begin();
+    while(iter_uc != uc_set.end())
+    {
+        merge->uc_list.push_back(iter_uc->data());
+        iter_uc ++;
+    }
+    // label used
+    std::set<std::string>::iterator iter_label = used_label_set.begin();
+    while(iter_label != used_label_set.end())
+    {
+        merge->label_used.push_back(iter_label->data());
+        iter_label ++;
+    }
+    merge->save_to_json(save_path);
+    delete merge;
+}
+
+
+
+
