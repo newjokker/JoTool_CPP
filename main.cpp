@@ -28,7 +28,7 @@ using namespace std;
 void print_info()
 {
     std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "下载 图片|标注|元信息, ucd save json_path save_dir save_mode(111|100) {need_count}" << std::endl;
+    std::cout << "下载 图片|标注|元信息, ucd save json_path save_dir save_mode(image,xml,json) {need_count}" << std::endl;
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "查看所有在线数据集, ucd check" << std::endl;
     std::cout << "-------------------------------------------------------" << std::endl;
@@ -49,6 +49,10 @@ void print_info()
     std::cout << "设置配置信息 ucd set host | port value" << std::endl;
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "合并数据集 ucd merge save_path ucd_path1 ucd_path2 ..." << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "合并数据集 ucd minus save_path ucd_path1 ucd_path2 ..." << std::endl;
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "合并数据集 ucd diff ucd_path1 ucd_path2 ..." << std::endl;
     std::cout << "-------------------------------------------------------" << std::endl;
 }
 
@@ -102,8 +106,7 @@ int main(int argc, char ** argv)
     {        
         if(argc < 2)
         {
-            std::cout << "ucd load ucd_name {ucd_path}" << std::endl;
-            throw "ucd load ucd_name {ucd_path}";
+            print_info();
         }
 
         std::string ucd_name = argv[2];
@@ -123,8 +126,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            std::cout << "ucd load ucd_name {ucd_path}" << std::endl;
-            throw "ucd load ucd_name {ucd_path}";
+            print_info();
         }
         ucd->save_ucd(ucd_name, ucd_save_path);
     }
@@ -132,8 +134,7 @@ int main(int argc, char ** argv)
     {
         if(argc != 3)
         {
-            std::cout << "ucd delete ucd_name " << std::endl;
-            throw "ucd delete ucd_name";
+            print_info();
         }
         else
         {
@@ -143,11 +144,9 @@ int main(int argc, char ** argv)
     }
     else if(commond_1 == "save")
     {
-        // save img | xml | json
         if((argc != 5) && (argc != 6))
         {
-            std::cout << "uc save json_path save_path save_mode" << std::endl;
-            throw "ucd delete ucd_name";
+            print_info();
         }
         else
         {
@@ -228,16 +227,14 @@ int main(int argc, char ** argv)
         }
         else
         {
-            std::cout << "ucd upload json_path {assign_ucd_name}" << std::endl;
-            throw "ucd upload error";
+            print_info();
         }
     }        
     else if(commond_1 == "info")
     {
         if(argc != 3)
         {
-            std::cout << "ucd info json_path" << std::endl;
-            throw "ucd info error";
+            print_info();
         }
 
         std::string json_path = argv[2];

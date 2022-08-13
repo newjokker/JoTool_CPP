@@ -373,6 +373,7 @@ void UCDatasetUtil::ucd_minus(std::string save_path, std::string ucd_path_1, std
     // delete
     delete ucd1;
     delete ucd2;
+    delete ucd_res;
 }
 
 
