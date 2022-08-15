@@ -18,6 +18,11 @@ string g_Password = "root123";
 string g_Database = "Saturn_Database_beta";
 
 
+
+
+
+
+
 void printVevtorVal(vector <string> strVal)
 {
     vector<string>::iterator itr = strVal.begin();
@@ -122,7 +127,7 @@ void getTableValSql(string strSql,vector <vector <string> > &vecVals)
     MYSQL_RES *res;  
     conn = mysql_init(NULL);  
 
-    if (!mysql_real_connect(conn, g_Server.c_str(),g_User.c_str(), g_Password.c_str(), g_Database.c_str(),0, NULL, 0))
+    if (!mysql_real_connect(conn, g_Server.c_str(),g_User.c_str(), g_Password.c_str(), g_Database.c_str(),  0, NULL, 0))
     {
         std::cout << "connect error" << std::endl;
         return ;
@@ -155,11 +160,10 @@ void getTableValSql(string strSql,vector <vector <string> > &vecVals)
 }
 
 
-
 int main_sql() 
 {
 
-    vector <vector <string> > res;
+    vector < vector<string> > res;
     getTableValSql("SELECT uc FROM MD5_uc WHERE MD5 = '6a761388756dead5510c6314e154e833';", res);
 
     printTableVal(res);

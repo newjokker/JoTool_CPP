@@ -14,6 +14,7 @@
 #include "include/fileOperateUtil.hpp"
 #include "include/ucDatasetUtil.hpp"
 #include "include/xini_file.h"
+#include "include/saturn_database_sql.hpp"
 
 using namespace jotools;
 using namespace std;
@@ -93,6 +94,16 @@ void print_info(std::string command="*")
         std::cout << "-------------------------------------------------------" << std::endl;
         std::cout << "比较数据集 ucd diff ucd_path1 ucd_path2 ..." << std::endl;
     }
+    if(command=="rename_img" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "重命名数据集 ucd rename_img img_dir ..." << std::endl;
+    }
+    if(command=="rename_img_xml" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "重命名数据集 ucd rename_img_xml img_dir xml_dir ..." << std::endl;
+    }
     std::cout << "-------------------------------------------------------" << std::endl;
     throw "error";
 }
@@ -140,9 +151,6 @@ int main(int argc, char ** argv)
     if(is_file(config_path))
     {
         xini_file_t xini_file(config_path);
-
-        // todo 当指定的标签不存在的时候，需要报错，表示配置文件错误
-
         host = (const std::string &)xini_file["server"]["host"];
         port = (const int &)xini_file["server"]["port"];
         sql_host = (const std::string &)xini_file["sql"]["host"];
@@ -399,7 +407,7 @@ int main(int argc, char ** argv)
             std::cout << "sql_host      : " << sql_host << std::endl;
             std::cout << "sql_port      : " << sql_port << std::endl;
             std::cout << "sql_user      : " << sql_user << std::endl;
-            std::cout << "sql_pwd       : " << sql_user << std::endl;
+            std::cout << "sql_pwd       : " << sql_pwd << std::endl;
             std::cout << "sql_db        : " << sql_db << std::endl;
             std::cout << "-----------------------------" << std::endl;
         }
@@ -461,12 +469,51 @@ int main(int argc, char ** argv)
             print_info("set");
         }
     }
-    else if(commond_1 == "rename")
+    else if(commond_1 == "rename_img")
     {
-        // 对文件夹中的所有图片进行重命名
-        // 有一张图片不符合规范就直接报错，让数据先进行入库分配对应的 uc
+        if(argc == 3)
+        {
+            std::string img_dir = argv[2];
+            if(is_dir(img_dir))
+            {
+                SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
+                sd_sql->rename_img_dir(img_dir);
+                delete sd_sql;
+            }
+            else
+            {
+                std::cout << "image dir not exists : " << img_dir << std::endl;
+                print_info("rename_img");
+            }
+        }
+        else
+        {
+            print_info("rename_img");
+        }
     }
-
+    else if(commond_1 == "rename_img_xml")
+    {
+        if(argc == 4)
+        {
+            std::string img_dir = argv[2];
+            std::string xml_dir = argv[3];
+            if(is_dir(img_dir) && is_dir(xml_dir))
+            {
+                SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
+                sd_sql->rename_img_xml_dir(img_dir, xml_dir);
+                delete sd_sql;
+            }
+            else
+            {
+                std::cout << "image dir or xml dir not exists : " << img_dir << std::endl;
+                print_info("rename_img_xml");
+            }
+        }
+        else
+        {
+            print_info("rename_img_xml");
+        }
+    }
     else
     {
         print_info("*");

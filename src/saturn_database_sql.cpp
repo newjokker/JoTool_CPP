@@ -1,0 +1,160 @@
+
+#include <string>
+#include <iostream>
+#include <vector>
+#include <map>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <mysql/mysql.h>
+#include <stdlib.h>
+#include "include/saturn_database_sql.hpp"
+#include "include/md5.hpp"
+#include "include/fileOperateUtil.hpp"
+
+
+SaturnDatabaseSQL::SaturnDatabaseSQL(std::string host, int port, std::string user, std::string pwd, std::string db)
+{
+    SaturnDatabaseSQL::host = host;
+    SaturnDatabaseSQL::port = port;
+    SaturnDatabaseSQL::user = user;
+    SaturnDatabaseSQL::pwd = pwd;
+    SaturnDatabaseSQL::db = db;
+}
+
+void SaturnDatabaseSQL::rename_img_dir(std::string img_dir, int buffer_img_size)
+{
+
+    // fixme 本身是 uc 名字的就不要操作了，直接拷贝或者复制就行
+
+    // todo 是不是直接重命名原始文件，不需要保存到另外一个文件夹上了？
+
+    std::set<std::string> suffixs {".jpg", ".JPG", ".png", ".PNG"};
+    std::vector<std::string> img_path_vector = get_all_file_path_recursive(img_dir, suffixs);
+    std::vector<std::string> md5_vector;
+    std::string md5_str;
+    // 
+    for(int i=0; i<img_path_vector.size(); i++)
+    {
+        md5_str = get_file_md5(img_path_vector[i]);
+        md5_vector.push_back(md5_str);
+        std::cout << i << "get md5 : " << img_path_vector[i] << std::endl;
+    }
+
+    std::map<std::string, std::string> md5_uc_map = SaturnDatabaseSQL::get_md5_uc_map_from_md5_vector(md5_vector);
+
+    auto iter = md5_uc_map.begin();
+    while(iter != md5_uc_map.end())
+    {
+        std::cout << iter->first << " : " << iter->second << std::endl;
+        iter ++;
+    }
+}
+
+void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_dir, int buffer_img_size)
+{
+
+}
+
+std::map<std::string, std::string> SaturnDatabaseSQL::get_md5_uc_map_from_md5_vector(std::vector<std::string> md5_vector)
+{
+    MYSQL *conn;
+    MYSQL_RES *res;  
+    conn = mysql_init(NULL);  
+    std::map<std::string, std::string> md5_uc_map;
+
+    // connect
+    if (!mysql_real_connect(conn, SaturnDatabaseSQL::host.c_str(), SaturnDatabaseSQL::user.c_str(), SaturnDatabaseSQL::pwd.c_str(), SaturnDatabaseSQL::db.c_str(),0, NULL, 0))
+    {
+        std::cout << "saturndatabase sql connect error" << std::endl;
+        SaturnDatabaseSQL::print_sql_info();
+        throw "saturndatabase sql connect error";
+    }     
+    // search
+    std::string serarch_str;
+    for(int i=0; i<md5_vector.size(); i++)
+    {
+        serarch_str = "SELECT uc FROM MD5_uc WHERE MD5 = '" + md5_vector[i] + "';";
+        mysql_query(conn, serarch_str.c_str());       
+        res = mysql_store_result(conn);      
+        if(!res)                                
+        {
+            std::cout << "saturndatabase sql query error" << std::endl;
+            throw "saturndatabase sql query error";
+        }
+        int rows = mysql_num_rows(res);               
+        int cols = mysql_num_fields(res);  
+
+        // 结果只有一行数据
+        if(rows > 0)
+        {
+            MYSQL_ROW row = mysql_fetch_row(res); 
+            std::string uc = row[0];
+            md5_uc_map[md5_vector[i]] = uc;
+        }
+        else
+        {
+            std::cout << "can't find uc by md5 : " << md5_vector[i] << std::endl;
+        }
+        mysql_free_result(res); 
+    }
+    mysql_close(conn);  
+    return md5_uc_map;
+}
+
+std::map<std::string, std::string> SaturnDatabaseSQL::get_uc_md5_map_from_uc_vector(std::vector<std::string> uc_vector)
+{
+    MYSQL *conn;
+    MYSQL_RES *res;  
+    conn = mysql_init(NULL);  
+    std::map<std::string, std::string> uc_md5_map;
+
+    // connect
+    if (!mysql_real_connect(conn, SaturnDatabaseSQL::host.c_str(), SaturnDatabaseSQL::user.c_str(), SaturnDatabaseSQL::pwd.c_str(), SaturnDatabaseSQL::db.c_str(),0, NULL, 0))
+    {
+        std::cout << "saturndatabase sql connect error" << std::endl;
+        SaturnDatabaseSQL::print_sql_info();
+        throw "saturndatabase sql connect error";
+    }     
+    // search
+    std::string serarch_str;
+    for(int i=0; i<uc_vector.size(); i++)
+    {
+        serarch_str = "SELECT uc FROM MD5_uc WHERE UC = '" + uc_vector[i] + "';";
+        mysql_query(conn, serarch_str.c_str());       
+        res = mysql_store_result(conn);      
+        if(!res)                                
+        {
+            std::cout << "saturndatabase sql query error" << std::endl;
+            throw "saturndatabase sql query error";
+        }
+        int rows = mysql_num_rows(res);               
+        int cols = mysql_num_fields(res);  
+
+        // 结果只有一行数据
+        if(rows > 0)
+        {
+            MYSQL_ROW row = mysql_fetch_row(res); 
+            std::string md5 = row[0];
+            std::cout << md5 << std::endl;
+            uc_md5_map[uc_vector[i]] = md5;
+        }
+        else
+        {
+            std::cout << "can't find md5 by uc : " << uc_vector[i] << std::endl;
+        }
+        mysql_free_result(res); 
+    }
+    mysql_close(conn);  
+    return uc_md5_map;
+}
+
+void SaturnDatabaseSQL::print_sql_info()
+{
+        std::cout << "sql_host      : " << SaturnDatabaseSQL::host << std::endl;
+        std::cout << "sql_port      : " << SaturnDatabaseSQL::port << std::endl;
+        std::cout << "sql_user      : " << SaturnDatabaseSQL::user << std::endl;
+        std::cout << "sql_pwd       : " << SaturnDatabaseSQL::pwd << std::endl;
+        std::cout << "sql_db        : " << SaturnDatabaseSQL::db << std::endl;
+}
+
