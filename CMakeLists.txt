@@ -11,7 +11,13 @@ INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}
      "/usr/include"
 	"/usr/del/example-app/tools/"
+    "/usr/include/mysql"
 )
+
+# link_directories("/usr/lib/x86_64-linux-gnu")
+
+
+set(MYSQL_LIBS mysqlclient pthread z m rt atomic ssl crypto dl)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
@@ -44,6 +50,8 @@ find_package( OpenCV REQUIRED )
 
 find_package(OpenSSL REQUIRED)
 
+# find_package(MYSQL REQUIRED)
+
 FIND_PACKAGE(nlohmann_json REQUIRED)
 
 include_directories(${OPENSSL_INCLUDE_DIRS})
@@ -66,6 +74,7 @@ target_link_libraries(
     # curl
     saturntools_v1.0
 	nlohmann_json::nlohmann_json
+    ${MYSQL_LIBS}
 )
     
 

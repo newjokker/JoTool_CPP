@@ -75,7 +75,7 @@ void UCDataset::print_json_info()
     std::cout << "add_time          : " << UCDataset::add_time << std::endl;
     std::cout << "update_time       : " << UCDataset::update_time << std::endl;
     std::cout << "describe          : " << UCDataset::describe << std::endl;
-    std::cout << "label_used        : " << UCDataset::model_version << std::endl;
+    std::cout << "label_used        : " << UCDataset::label_used.size() <<std::endl;
     for(int i=0; i<UCDataset::label_used.size(); i++)
     {
         std::cout << "  * " << UCDataset::label_used[i] << std::endl;

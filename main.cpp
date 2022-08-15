@@ -53,7 +53,7 @@ void print_info(std::string command="*")
         std::cout << "-------------------------------------------------------" << std::endl;
         std::cout << "下载在线数据集 ucd load ucd_name save_path|save_dir " << std::endl;
     }
-    if(command=="uoload" || command=="*")
+    if(command=="upload" || command=="*")
     {
         std::cout << "-------------------------------------------------------" << std::endl;
         std::cout << "上传数据集到网络 ucd upload ucd_path {ucd_name}" << std::endl;
@@ -107,9 +107,17 @@ int main(int argc, char ** argv)
         return -1;
     }
 
+    // server
     std::string host = "192.168.3.111";
     int port = 11101;
     std::string config_path;
+    
+    // sql info 
+    int sql_port = 3306;
+    std::string sql_host = "192.168.3.101";
+    std::string sql_user = "root";
+    std::string sql_pwd = "root123";
+    std::string sql_db = "Saturn_Database_beta";
 
     // get user name
     struct passwd* pwd;
@@ -132,8 +140,16 @@ int main(int argc, char ** argv)
     if(is_file(config_path))
     {
         xini_file_t xini_file(config_path);
-        host = (const std::string &)xini_file["info"]["host"];
-        port = (const int &)xini_file["info"]["port"];
+
+        // todo 当指定的标签不存在的时候，需要报错，表示配置文件错误
+
+        host = (const std::string &)xini_file["server"]["host"];
+        port = (const int &)xini_file["server"]["port"];
+        sql_host = (const std::string &)xini_file["sql"]["host"];
+        sql_port = (const int &)xini_file["sql"]["port"];
+        sql_user = (const std::string &)xini_file["sql"]["user"];
+        sql_pwd = (const std::string &)xini_file["sql"]["pwd"];
+        sql_db = (const std::string &)xini_file["sql"]["db"];
     }
 
     UCDatasetUtil* ucd = new UCDatasetUtil(host , port);
@@ -375,9 +391,16 @@ int main(int argc, char ** argv)
         if(argc == 2)
         {
             std::cout << "-----------------------------" << std::endl;
+            std::cout << "[server]" << std::endl;
             std::cout << "host          : " << host << std::endl;
             std::cout << "port          : " << port << std::endl;
             std::cout << "config path   : " << config_path << std::endl;
+            std::cout << "[sql]" << std::endl;
+            std::cout << "sql_host      : " << sql_host << std::endl;
+            std::cout << "sql_port      : " << sql_port << std::endl;
+            std::cout << "sql_user      : " << sql_user << std::endl;
+            std::cout << "sql_pwd       : " << sql_user << std::endl;
+            std::cout << "sql_db        : " << sql_db << std::endl;
             std::cout << "-----------------------------" << std::endl;
         }
         else
@@ -395,12 +418,37 @@ int main(int argc, char ** argv)
             if(option == "host")
             {
                 std::string host = argv[3];
-                xini_write["info"]["host"] = host;
+                xini_write["server"]["host"] = host;
             }
             else if(option == "port")
             {
                 int port = std::stoi(argv[3]);
-                xini_write["info"]["port"] = port;      
+                xini_write["server"]["port"] = port;      
+            }
+            else if(option == "sql_host")
+            {
+                std::string host = argv[3];
+                xini_write["sql"]["host"] = host;
+            }
+            else if(option == "sql_port")
+            {
+                int port = std::stoi(argv[3]);
+                xini_write["sql"]["port"] = port;   
+            }
+            else if(option == "sql_user")
+            {
+                std::string user = argv[3];
+                xini_write["sql"]["user"] = user;
+            }
+            else if(option == "sql_pwd")
+            {
+                std::string pwd = argv[3];
+                xini_write["sql"]["pwd"] = pwd;
+            }
+            else if(option == "sql_db")
+            {
+                std::string db = argv[3];
+                xini_write["sql"]["db"] = db;
             }
             else
             {
@@ -413,6 +461,12 @@ int main(int argc, char ** argv)
             print_info("set");
         }
     }
+    else if(commond_1 == "rename")
+    {
+        // 对文件夹中的所有图片进行重命名
+        // 有一张图片不符合规范就直接报错，让数据先进行入库分配对应的 uc
+    }
+
     else
     {
         print_info("*");
