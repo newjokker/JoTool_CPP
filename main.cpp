@@ -23,37 +23,78 @@ using namespace std;
 
 // 完善路径拼接（c++多一些 // 不会造成路径错误，少一些就会报错）
 
-// 设置将 uc_list 去重
 
-void print_info()
+
+void print_info(std::string command="*")
 {
+
+    if(command=="save" || command =="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "下载 图片|标注|元信息, ucd save json_path save_dir save_mode(image,xml,json) {need_count}" << std::endl;
+    }
+    if(command=="check" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "查看所有在线数据集, ucd check" << std::endl;
+    }
+    if(command=="show" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "查看所有下载路径, ucd show {uc}" << std::endl;
+    }
+    if(command=="delete" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "删除在线数据集,无法删除官方数据集 ucd delete ucd_name" << std::endl;
+    }
+    if(command=="load" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "下载在线数据集 ucd load ucd_name save_path|save_dir " << std::endl;
+    }
+    if(command=="uoload" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "上传数据集到网络 ucd upload ucd_path {ucd_name}" << std::endl;
+    }
+    if(command=="from" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "本地文件生成数据集 ucd from img_dir ucd_save_path" << std::endl;
+    }
+    if(command=="info" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "查看数据集信息 ucd info ucd_path" << std::endl;
+    }
+    if(command=="meta" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "查看配置信息 ucd meta" << std::endl;
+    }
+    if(command=="set" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "设置配置信息 ucd set host | port value" << std::endl;
+    }
+    if(command=="merge" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "合并数据集 ucd merge save_path ucd_path1 ucd_path2 ..." << std::endl;
+    }
+    if(command=="minus" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "减操作数据集 ucd minus save_path ucd_path1 ucd_path2 ..." << std::endl;
+    }
+    if(command=="diff" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "比较数据集 ucd diff ucd_path1 ucd_path2 ..." << std::endl;
+    }
     std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "下载 图片|标注|元信息, ucd save json_path save_dir save_mode(image,xml,json) {need_count}" << std::endl;
-    std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "查看所有在线数据集, ucd check" << std::endl;
-    std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "查看所有下载路径, ucd show {uc}" << std::endl;
-    std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "删除在线数据集,无法删除官方数据集 ucd delete ucd_name" << std::endl;
-    std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "下载在线数据集 ucd load ucd_name save_path|save_dir " << std::endl;
-    std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "上传数据集到网络 ucd upload ucd_path {ucd_name}" << std::endl;
-    std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "本地文件生成数据集 ucd from img_dir ucd_save_path" << std::endl;
-    std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "查看数据集信息 ucd info ucd_path" << std::endl;
-    std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "查看配置信息 ucd meta" << std::endl;
-    std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "设置配置信息 ucd set host | port value" << std::endl;
-    std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "合并数据集 ucd merge save_path ucd_path1 ucd_path2 ..." << std::endl;
-    std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "合并数据集 ucd minus save_path ucd_path1 ucd_path2 ..." << std::endl;
-    std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "合并数据集 ucd diff ucd_path1 ucd_path2 ..." << std::endl;
-    std::cout << "-------------------------------------------------------" << std::endl;
+    throw "error";
 }
 
 
@@ -62,7 +103,7 @@ int main(int argc, char ** argv)
     if ((argc < 2))
     {
         std::cout << "need parameter number >= 1 get : " << argc-1 << std::endl;
-        print_info();
+        print_info("*");
         return -1;
     }
 
@@ -100,15 +141,21 @@ int main(int argc, char ** argv)
 
     if(commond_1 == "check")
     {
-        ucd->check_ucd();
+        if(argc == 2)
+        {
+            ucd->check_ucd();
+        }
+        else
+        {
+            print_info("check");
+        }
     }
     else if(commond_1 == "load")
     {        
         if(argc < 2)
         {
-            print_info();
+            print_info("load");
         }
-
         std::string ucd_name = argv[2];
         std::string ucd_save_path;
         if(argc == 3)
@@ -126,7 +173,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info();
+            print_info("load");
         }
         ucd->save_ucd(ucd_name, ucd_save_path);
     }
@@ -134,7 +181,7 @@ int main(int argc, char ** argv)
     {
         if(argc != 3)
         {
-            print_info();
+            print_info("delete");
         }
         else
         {
@@ -146,7 +193,7 @@ int main(int argc, char ** argv)
     {
         if((argc != 5) && (argc != 6))
         {
-            print_info();
+            print_info("save");
         }
         else
         {
@@ -165,7 +212,7 @@ int main(int argc, char ** argv)
             {
                 std::cout << "json_path not exists : " << json_path << std::endl;
                 throw "json_path not exists";
-             }
+            }
             // save_path
            if(! is_dir(save_dir))
             {
@@ -227,14 +274,14 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info();
+            print_info("upload");
         }
     }        
     else if(commond_1 == "info")
     {
         if(argc != 3)
         {
-            print_info();
+            print_info("info");
         }
 
         std::string json_path = argv[2];
@@ -251,19 +298,27 @@ int main(int argc, char ** argv)
             std::string ucd_name = argv[3];
             ucd->get_ucd_from_img_dir(img_path, ucd_name);
         }
+        else
+        {
+            print_info("from");
+        }
     }
     else if(commond_1 == "show")
     {
         std::string uc;
-        if(argc >= 3)
+        if(argc = 3)
         {
             uc = argv[2];
         }
-        else
+        else if(argc == 2)
         {
             uc = "{UC}";
         }
-        // 展示所有的下载路径，为了方便单张图片的信息下载查看
+        else
+        {
+            print_info("show");
+        }
+        // 展示所有的下载路径，为了方便单张图片的信息下载查看，可以使用 curl 下载单个 uc 对应的信息
         std::cout << "load img      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/" + uc + ".jpg" << std::endl;
         std::cout << "load xml      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/" + uc + ".xml" << std::endl;
         std::cout << "load json     : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/" + uc + ".json" << std::endl;
@@ -280,7 +335,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info();
+            print_info("diff");
         }
     }
     else if(commond_1 == "merge")
@@ -298,7 +353,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info();
+            print_info("merge");
         }
     }
     else if(commond_1 == "minus")
@@ -312,18 +367,23 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info();
+            print_info("minus");
         }
     }
     else if(commond_1 == "meta")
     {
-        // 打印原信息，host post 等基本信息
-        // 当前用户 ucdconfig.ini 的路径
-        std::cout << "-----------------------------" << std::endl;
-        std::cout << "host          : " << host << std::endl;
-        std::cout << "port          : " << port << std::endl;
-        std::cout << "config path   : " << config_path << std::endl;
-        std::cout << "-----------------------------" << std::endl;
+        if(argc == 2)
+        {
+            std::cout << "-----------------------------" << std::endl;
+            std::cout << "host          : " << host << std::endl;
+            std::cout << "port          : " << port << std::endl;
+            std::cout << "config path   : " << config_path << std::endl;
+            std::cout << "-----------------------------" << std::endl;
+        }
+        else
+        {
+            print_info("meta");
+        }
     }
     else if(commond_1 == "set")
     {
@@ -344,23 +404,22 @@ int main(int argc, char ** argv)
             }
             else
             {
-                print_info();
+                print_info("set");
             }
             xini_write.dump(config_path);   
         }
         else
         {
-            print_info();
+            print_info("set");
         }
     }
     else
     {
-        print_info();
+        print_info("*");
         return -1;
     }
 
     delete ucd;
 
 	return 1;
-	
 }
