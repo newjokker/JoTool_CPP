@@ -9,8 +9,8 @@ SET(CMAKE_CXX_FLAGS "-std=c++11 -O3")
 # 指定头文件搜索路径
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}
-     "/usr/include"
-	"/usr/del/example-app/tools/"
+    "/usr/include"
+	"/home/ldq/Apps_jokker/so_dir"
     "/usr/include/mysql"
 )
 
@@ -59,7 +59,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRCLIST)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/tools SRCLIST)
 
-add_library(saturntools_v1.0 SHARED ${SRCLIST})   
+add_library(saturntools_v1.1 SHARED ${SRCLIST})   
 # add_library(saturntools STATIC ${SRCLIST})   
 
 add_executable(test main.cpp)
@@ -72,7 +72,7 @@ target_link_libraries(
     OpenSSL::Crypto OpenSSL::SSL
     # curlpp
     # curl
-    saturntools_v1.0
+    saturntools_v1.1
 	nlohmann_json::nlohmann_json
     ${MYSQL_LIBS}
 )

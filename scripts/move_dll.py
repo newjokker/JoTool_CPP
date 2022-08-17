@@ -14,7 +14,7 @@ require_txt_path = r"required.txt"
 save_dir = r"./so_dir"
 # ----------------------------------------------------------------------------
 
-os.makedirs(save_dir)
+os.makedirs(save_dir, exist_ok=True)
 
 with open(require_txt_path, 'r') as txt_path:
 

@@ -25,28 +25,41 @@ SaturnDatabaseSQL::SaturnDatabaseSQL(std::string host, int port, std::string use
 void SaturnDatabaseSQL::rename_img_dir(std::string img_dir, int buffer_img_size)
 {
 
-    // fixme 本身是 uc 名字的就不要操作了，直接拷贝或者复制就行
-
-    // todo 是不是直接重命名原始文件，不需要保存到另外一个文件夹上了？
+    // fixme 本身是 uc 名字的就不要操作了，直接拷贝或者复制就行，有 uc 格式的看在不在数据库就完事了
 
     std::set<std::string> suffixs {".jpg", ".JPG", ".png", ".PNG"};
     std::vector<std::string> img_path_vector = get_all_file_path_recursive(img_dir, suffixs);
     std::vector<std::string> md5_vector;
     std::string md5_str;
+    std::map<std::string, std::string> md5_img_path_map;
+
     // 
     for(int i=0; i<img_path_vector.size(); i++)
     {
         md5_str = get_file_md5(img_path_vector[i]);
         md5_vector.push_back(md5_str);
-        std::cout << i << "get md5 : " << img_path_vector[i] << std::endl;
+        std::cout << i << ", " << "get md5 : " << img_path_vector[i] << ", " << md5_str << std::endl;
+        md5_img_path_map[md5_str] = img_path_vector[i];
     }
 
+    // get uc by md5
     std::map<std::string, std::string> md5_uc_map = SaturnDatabaseSQL::get_md5_uc_map_from_md5_vector(md5_vector);
 
+    // rename
+    std::string img_path;
+    std::string img_folder;
+    std::string img_suffix;
+    std::string new_img_path;
     auto iter = md5_uc_map.begin();
     while(iter != md5_uc_map.end())
     {
-        std::cout << iter->first << " : " << iter->second << std::endl;
+        img_path = md5_img_path_map[iter->first];
+        img_folder = get_file_folder(img_path);
+        img_suffix = get_file_suffix(img_path);
+        new_img_path = img_folder + "/" + iter->second + img_suffix;
+        // rename 
+        rename(img_path.c_str(), new_img_path.c_str());
+        // std::cout << img_path << " : " << new_img_path << std::endl;
         iter ++;
     }
 }
@@ -54,6 +67,53 @@ void SaturnDatabaseSQL::rename_img_dir(std::string img_dir, int buffer_img_size)
 void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_dir, int buffer_img_size)
 {
 
+    // fixme 本身是 uc 名字的就不要操作了，直接拷贝或者复制就行，有 uc 格式的看在不在数据库就完事了
+
+    std::set<std::string> suffixs {".jpg", ".JPG", ".png", ".PNG"};
+    std::vector<std::string> img_path_vector = get_all_file_path(img_dir, suffixs);
+    std::vector<std::string> md5_vector;
+    std::string md5_str;
+    std::map<std::string, std::string> md5_img_path_map;
+    std::string img_path, xml_path, img_name, img_suffix;
+    std::string new_img_path, new_xml_path;
+    // 
+    for(int i=0; i<img_path_vector.size(); i++)
+    {
+        // todo 如果存在对应的 xml path
+        img_name = get_file_name(img_path_vector[i]);
+        xml_path = xml_dir + "/" + img_name + ".xml";
+        if(is_file(xml_path))
+        {
+            md5_str = get_file_md5(img_path_vector[i]);
+            md5_vector.push_back(md5_str);
+            std::cout << i << ", " << "get md5 : " << img_path_vector[i] << ", " << md5_str << std::endl;
+            md5_img_path_map[md5_str] = img_path_vector[i];
+        }
+        else
+        {
+            std::cout << "can't find xml_path : " << xml_path << std::endl;
+        }
+    }
+
+    // get uc by md5
+    std::map<std::string, std::string> md5_uc_map = SaturnDatabaseSQL::get_md5_uc_map_from_md5_vector(md5_vector);
+
+    // rename
+    auto iter = md5_uc_map.begin();
+    while(iter != md5_uc_map.end())
+    {
+        img_path = md5_img_path_map[iter->first];
+        img_name = get_file_name(img_path);
+        xml_path = xml_dir + "/" + img_name + ".xml";
+        img_suffix = get_file_suffix(img_path);
+        new_img_path = img_dir + "/" + iter->second + img_suffix;
+        new_xml_path = xml_dir + "/" + iter->second + ".xml";
+        // rename 
+        rename(img_path.c_str(), new_img_path.c_str());
+        rename(xml_path.c_str(), new_xml_path.c_str());
+        // std::cout << img_path << " : " << new_img_path << std::endl;
+        iter ++;
+    }
 }
 
 std::map<std::string, std::string> SaturnDatabaseSQL::get_md5_uc_map_from_md5_vector(std::vector<std::string> md5_vector)
@@ -71,6 +131,7 @@ std::map<std::string, std::string> SaturnDatabaseSQL::get_md5_uc_map_from_md5_ve
         throw "saturndatabase sql connect error";
     }     
     // search
+    int no_uc_index = 0;
     std::string serarch_str;
     for(int i=0; i<md5_vector.size(); i++)
     {
@@ -94,7 +155,8 @@ std::map<std::string, std::string> SaturnDatabaseSQL::get_md5_uc_map_from_md5_ve
         }
         else
         {
-            std::cout << "can't find uc by md5 : " << md5_vector[i] << std::endl;
+            no_uc_index += 1;
+            std::cout << no_uc_index << ", " << "can't find uc by md5 : " << md5_vector[i] << std::endl;
         }
         mysql_free_result(res); 
     }
