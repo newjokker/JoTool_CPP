@@ -16,6 +16,8 @@ class UCDataset
         std::string model_name;
         std::string model_version;
         std::vector<std::string> label_used;
+        // {uc: [uc, x1, y1, x2, y2, conf, tag]}
+        std::map<std::string, std::vector<std::vector<std::string> > > xml_info; 
         double add_time;
         double update_time;
         std::string describe;
@@ -23,7 +25,7 @@ class UCDataset
         //
         UCDataset(std::string json_path="");
         // 解析 json 数据
-        void parse_json_info();
+        void parse_json_info(bool parse_xml_info=false);
         // 保存为 json
         void save_to_json(std::string save_path);
         // 打印 json 数据
@@ -46,6 +48,8 @@ class UCDatasetUtil
         void save_img_xml_json(std::string save_dir, bool need_img=true, bool need_xml=true, bool need_json=false, int need_count=-1);
         // 下载库中的 ucd
         void save_ucd(std::string ucd_name, std::string save_dir);
+        // 从 json 中解析 xml
+        void save_xml(std::string save_path, int get_count=-1);
         // 查看库中的 ucd
         void check_ucd();
         // 删除库中的 ucd
@@ -54,6 +58,8 @@ class UCDatasetUtil
         void upload_ucd(std::string ucd_path, std::string ucd_name="");
         // 将 img_dir 中的文件符合 UC 规范的组织为一个 ucd
         void get_ucd_from_img_dir(std::string img_dir, std::string ucd_path);
+        // 将 img 和 xml 信息 保存在 ucd 中
+        void get_ucd_from_img_xml_dir(std::string img_dir, std::string xml_dir, std::string ucd_path);
         // 将多个 ucd 进行合并
         void merge_ucds(std::string save_path, std::vector<std::string> ucd_path_vector);
         // 查看两个 ucd 之间的差异

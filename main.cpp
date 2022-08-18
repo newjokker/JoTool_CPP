@@ -24,6 +24,21 @@ using namespace std;
 
 // 完善路径拼接（c++多一些 // 不会造成路径错误，少一些就会报错）
 
+// 完成 C++ 版本的 文件 服务，再部署到 docker 上面，这样在哪个服务器上都能方便进行启动
+
+// 生成  path_list 方便 v2 版本的测试，一个 txt 里面写满了 读取的 path
+
+// jo_post 实现 v0 ~ v4 的测试
+// 
+
+// 将更多的内容服务化，写一个轻量化的服务，这样最大化利用缓存的数据，可以搞成 docker 服务
+
+// 将 xml 信息整合到 ucd 中，实现最轻量化的 xml 数据（只支持 正框的数据） ucd from_img, ucd_from_img_xml(保存 xml 信息)
+
+// 整合了 xml 信息之后，连平时的测试结果都可以进行存储，这样方便后期的获取对比
+
+// 获取数据是按照顺序还是随机获取需要修改配置文件 ucdconfig.ini， 
+
 
 void print_info(std::string command="*")
 {
@@ -313,7 +328,7 @@ int main(int argc, char ** argv)
         ucd_info->print_json_info();
         delete ucd_info;
     }
-    else if(commond_1 == "from")
+    else if(commond_1 == "from" || commond_1 == "from_img")
     {
         if(argc == 4)
         {
@@ -324,6 +339,87 @@ int main(int argc, char ** argv)
         else
         {
             print_info("from");
+        }
+    }
+    else if(commond_1 == "from_img_xml")
+    {
+        // 保存 xml 信息到 ucd 中去
+        if(argc == 5)
+        {
+            std::string img_dir = argv[2];
+            std::string xml_dir = argv[3];
+            std::string ucd_name = argv[4];
+            ucd->get_ucd_from_img_xml_dir(img_dir, xml_dir, ucd_name);
+        }
+        else
+        {
+            print_info("from_img_xml");
+        }
+    }
+    else if(commond_1 == "parse")
+    {
+        // ucd 中解压出 xml 信息，同时可以解析出 img 信息
+        // 跟 save 差不多的接口
+
+        if((argc == 5) || (argc == 6))
+        {
+            std::string json_path = argv[2];
+            std::string save_dir = argv[3];
+            std::string save_mode = argv[4];
+            // need assign number of data
+            int need_count = -1;
+            if(argc == 6)
+            {
+                need_count = std::stoi(argv[5]);
+            }
+
+            // json_path
+            if(! is_file(json_path))
+            {
+                std::cout << "json_path not exists : " << json_path << std::endl;
+                throw "json_path not exists";
+            }
+            // save_path
+           if(! is_dir(save_dir))
+            {
+                std::cout << "save_dir not exists : " << save_dir << std::endl;
+                throw "save_dir not exists";
+             }
+            // save_mode
+            if(save_mode.size() != 2)
+            {
+                std::cout << "save_mode illeagal, need save_mode such as 11 | 10  " << save_dir << std::endl;
+                throw "save_mode illeagal";
+            }
+            bool need_img, need_xml, need_json;
+            
+            if(save_mode[0] == '0')
+            {
+                need_img = false;
+            }
+            else
+            {
+                need_img = true;
+            }
+
+            if(save_mode[1] == '0')
+            {
+                need_xml = false;
+            }
+            else
+            {
+                need_xml = true;
+            }
+            
+            // load
+            ucd->json_path = json_path;
+            ucd->save_img_xml_json(save_dir, need_img, false, false, need_count);
+            // parse xml from ucd 
+            ucd->save_xml(save_dir, need_count);
+        }
+        else
+        {
+            print_info("parse");
         }
     }
     else if(commond_1 == "show")
@@ -408,6 +504,8 @@ int main(int argc, char ** argv)
             std::cout << "sql_user      : " << sql_user << std::endl;
             std::cout << "sql_pwd       : " << sql_pwd << std::endl;
             std::cout << "sql_db        : " << sql_db << std::endl;
+            std::cout << "-----------------------------" << std::endl;
+            std::cout << "app versio 1.1" << std::endl;
             std::cout << "-----------------------------" << std::endl;
         }
         else

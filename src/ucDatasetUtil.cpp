@@ -6,13 +6,14 @@
 #include <time.h>
 #include <fstream>
 #include <nlohmann/json.hpp>
-#include <./include/ucDatasetUtil.hpp>
-#include "include/fileOperateUtil.hpp"
 #include <nlohmann/json.hpp>
 #include <httplib.h>
 #include <string>
 #include <set>
 #include <iterator>
+#include "include/fileOperateUtil.hpp"
+#include "include/ucDatasetUtil.hpp"
+#include "include/deteRes.hpp"
 
 using json = nlohmann::json;
 
@@ -32,7 +33,7 @@ UCDataset::UCDataset(std::string json_path)
     UCDataset::json_path = json_path;
 }
 
-void UCDataset::parse_json_info()
+void UCDataset::parse_json_info(bool parse_xml_info)
 {
     if(! is_file(UCDataset::json_path))
     {
@@ -59,9 +60,21 @@ void UCDataset::parse_json_info()
     if(update_time != nullptr){ UCDataset::update_time = update_time; }
     if(describe != nullptr){ UCDataset::describe = describe; }
     if(label_used != nullptr){ UCDataset::label_used = label_used; }
-    if(uc_list != nullptr){ 
+    if(uc_list != nullptr)
+    { 
         UCDataset::uc_list = uc_list; 
         UCDataset::unique();
+    }
+    
+    // parse xml_info
+    if(parse_xml_info)
+    {
+        auto xml_info = data["xml_info"];
+        if(xml_info != nullptr)
+        {
+            // 读取存储的 xml info， 存放到 字典中，{uc: [uc, x1, y1, x2, y2, conf, tag]}
+            UCDataset::xml_info = xml_info;
+        }
     }
 }
 
@@ -92,10 +105,15 @@ void UCDataset::save_to_json(std::string save_path)
         {"add_time", UCDataset::add_time},
         {"update_time", UCDataset::update_time},
         {"describe", UCDataset::describe},
+        {"label_used", UCDataset::label_used},
+        {"uc_list", UCDataset::uc_list},
+        {"xml_info", {}}
     };
 
-    json_info["label_used"] = UCDataset::label_used;
-    json_info["uc_list"] = UCDataset::uc_list;
+    // xml info
+    nlohmann::json xml_data;
+    xml_data =  UCDataset::xml_info;
+    json_info["xml_info"] = xml_data;
 
     std::ofstream o(save_path);
     // 不加 std::setw(4) 就不是格式化输出，都显示在一行
@@ -108,6 +126,7 @@ void UCDataset::unique()
     std::set<std::string> uc_set(UCDataset::uc_list.begin(), UCDataset::uc_list.end());
     UCDataset::uc_list.assign(uc_set.begin(), uc_set.end());
 }
+
 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port)
 {
@@ -136,18 +155,22 @@ void UCDatasetUtil::save_img_xml_json(std::string save_dir, bool need_img, bool 
     if(need_json){create_folder(save_json_dir);}
 
     //
-	std::ifstream jsfile(UCDatasetUtil::json_path);
-    json data = json::parse(jsfile); 
+	// std::ifstream jsfile(UCDatasetUtil::json_path);
+    // json data = json::parse(jsfile); 
+
+    UCDataset* ucd = new UCDataset(UCDatasetUtil::json_path);
+    ucd->parse_json_info();
 
     std::string each_uc;
     std::string img_url, xml_url, json_url;
     std::string save_img_path, save_xml_path, save_json_path;
 
-    for(int i=0; i<data["uc_list"].size(); i++)
+    // for(int i=0; i<data["uc_list"].size(); i++)
+    for(int i=0; i<ucd->uc_list.size(); i++)
     {
             if((need_count == -1) || (i < need_count))
             {
-            each_uc = data["uc_list"][i];
+            each_uc = ucd->uc_list[i];
             //
             img_url = "/file/" + each_uc + ".jpg";
             xml_url = "/file/" + each_uc + ".xml";
@@ -162,6 +185,7 @@ void UCDatasetUtil::save_img_xml_json(std::string save_dir, bool need_img, bool 
             if(need_json){ UCDatasetUtil::load_file(json_url, save_json_path, i); }
         }
     }
+    delete ucd;
 }
 
 void UCDatasetUtil::check_ucd()
@@ -263,7 +287,6 @@ static bool is_uc(std::string uc)
 
 void UCDatasetUtil::get_ucd_from_img_dir(std::string img_dir, std::string ucd_path)
 {
-
     std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
     std::vector<std::string> img_path_vector = get_all_file_path_recursive(img_dir, suffix);
 
@@ -282,7 +305,45 @@ void UCDatasetUtil::get_ucd_from_img_dir(std::string img_dir, std::string ucd_pa
     }
     ucd->save_to_json(ucd_path);
     delete ucd;
+}
 
+void UCDatasetUtil::get_ucd_from_img_xml_dir(std::string img_dir, std::string xml_dir, std::string ucd_path)
+{
+    std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
+    std::vector<std::string> img_path_vector = get_all_file_path_recursive(img_dir, suffix);
+
+    UCDataset* ucd = new UCDataset();
+    std::string uc, xml_path;
+
+    for(int i=0; i<img_path_vector.size(); i++)
+    {
+        uc = get_file_name(img_path_vector[i]);
+        xml_path = xml_dir + "/" + uc + ".xml";
+        if(is_uc(uc) && is_file(xml_path))
+        {
+            // std::cout << img_path_vector[i] << std::endl;
+            ucd->uc_list.push_back(uc);
+            // read xml info
+            jotools::DeteRes* dete_res = new jotools::DeteRes(xml_path);
+            std::vector< std::vector<std::string> > xml_info; 
+            for(int j=0; j<dete_res->size(); j++)
+            {
+                std::vector<std::string> each_xml_info;
+                each_xml_info.push_back(std::to_string(dete_res->alarms[j].x1));        
+                each_xml_info.push_back(std::to_string(dete_res->alarms[j].y1));        
+                each_xml_info.push_back(std::to_string(dete_res->alarms[j].x2));        
+                each_xml_info.push_back(std::to_string(dete_res->alarms[j].y2));        
+                each_xml_info.push_back(std::to_string(dete_res->alarms[j].conf));        
+                each_xml_info.push_back(dete_res->alarms[j].tag);
+                xml_info.push_back(each_xml_info); 
+                // std::cout << uc << std::endl;       
+            }
+            ucd->xml_info[uc] = xml_info;
+            delete dete_res;
+        }
+    }
+    ucd->save_to_json(ucd_path);
+    delete ucd;
 }
 
 void UCDatasetUtil::merge_ucds(std::string save_path, std::vector<std::string> ucd_path_vector)
@@ -376,5 +437,51 @@ void UCDatasetUtil::ucd_minus(std::string save_path, std::string ucd_path_1, std
     delete ucd_res;
 }
 
+void UCDatasetUtil::save_xml(std::string save_dir, int get_count)
+{
+    // to 创建一个 xml 路径 xml_from_ucd
+    
+    std::string save_xml_dir = save_dir + "/" + "xml_from_ucd";
 
+    if(! is_dir(save_xml_dir))
+    {
+        create_folder(save_xml_dir);
+    }
 
+    //
+    UCDataset* ucd = new UCDataset(UCDatasetUtil::json_path);
+    ucd->parse_json_info(true);
+
+    std::string save_xml_path, uc;
+    std::string tag;
+    int x1, x2, y1, y2;
+    float conf;
+
+    for(int i=0; i<ucd->uc_list.size(); i++)
+    {
+        if(get_count == 0)
+        { 
+            break; 
+        }
+        get_count-- ;
+
+        uc = ucd->uc_list[i];
+        save_xml_path = save_xml_dir + "/" + uc + ".xml";
+        //
+        jotools::DeteRes* dete_res = new jotools::DeteRes();
+        std::vector< std::vector< std::string > > xml_info = ucd->xml_info[uc];
+        for(int i=0; i<xml_info.size(); i++)
+        {
+            x1 = std::stoi(xml_info[i][0]);
+            y1 = std::stoi(xml_info[i][1]);
+            x2 = std::stoi(xml_info[i][2]);
+            y2 = std::stoi(xml_info[i][3]);
+            conf = std::stof(xml_info[i][4]);
+            tag = xml_info[i][5];
+            dete_res->add_dete_obj(x1, y1, x2, y2, conf, tag);
+        }
+        dete_res->save_to_xml(save_xml_path);
+        delete dete_res;
+    }
+    delete ucd;
+}
