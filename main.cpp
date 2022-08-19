@@ -47,6 +47,8 @@ using namespace std;
 
 // 积极发挥服务化的各项功能，比如提交合并的数据
 
+// xml 读取的时候
+
 
 void print_info(std::string command="*")
 {
@@ -141,15 +143,20 @@ void print_info(std::string command="*")
         std::cout << "-------------------------------------------------------" << std::endl;
         std::cout << "统计xml 标签 ucd count_tags xml_dir" << std::endl;
     }
-    if(command=="cut_small_img" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "统计xml 标签 ucd cut_small_img img_dir xml_dir save_dir is_split(true|1|True|false|0|False)" << std::endl;
-    }
     if(command=="count_files" || command=="*")
     {
         std::cout << "-------------------------------------------------------" << std::endl;
         std::cout << "统计文件夹中各后缀的文件数 ucd count_files file_dir recursive(true|1|True|false|0|False)" << std::endl;
+    }
+    if(command=="cut_small_img" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "统计xml 标签 ucd cut_small_img img_dir xml_dir save_dir is_split(true|1|True|false|0|False)" << std::endl;   
+    }
+    if(command=="crop_to_xml" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "截图生成xml ucd crop_to_xml crop_dir, save_dir" << std::endl;
     }
     std::cout << "-------------------------------------------------------" << std::endl;
     // throw "error";
@@ -719,6 +726,20 @@ int main(int argc, char ** argv)
         else
         {
             print_info("cut_small_img");
+            return -1;
+        }
+    }
+    else if(command_1=="crop_to_xml")
+    {
+        if (argc== 4)
+        {
+            std::string crop_dir = argv[2];
+            std::string save_dir = argv[3];
+            jotools::get_xml_from_crop_img(crop_dir, save_dir);
+        }
+        else
+        {
+            print_info("crop_to_xml");
             return -1;
         }
     }
