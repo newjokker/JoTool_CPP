@@ -43,8 +43,6 @@ using namespace std;
 
 // merge 之类的信息都需要支持 合并 xml 信息
 
-// 将基础的操作也合并到 ucd 中去
-
 // 积极发挥服务化的各项功能，比如提交合并的数据
 
 // xml 读取的时候
@@ -93,7 +91,7 @@ void print_info(std::string command="*")
         std::cout << "-------------------------------------------------------" << std::endl;
         std::cout << "本地文件生成数据集 ucd from img_dir ucd_save_path" << std::endl;
     }
-    if(command=="from" || command=="from_img_xml" || command=="*")
+    if(command=="from_img_xml" || command=="*")
     {
         std::cout << "-------------------------------------------------------" << std::endl;
         std::cout << "本地文件生成数据集 ucd from_img_xml img_dir xml_dir ucd_save_path" << std::endl;
@@ -128,6 +126,7 @@ void print_info(std::string command="*")
         std::cout << "-------------------------------------------------------" << std::endl;
         std::cout << "比较数据集 ucd diff ucd_path1 ucd_path2" << std::endl;
     }
+    // 不属于 ucd 后期进行删除
     if(command=="rename_img" || command=="*")
     {
         std::cout << "-------------------------------------------------------" << std::endl;
@@ -158,8 +157,17 @@ void print_info(std::string command="*")
         std::cout << "-------------------------------------------------------" << std::endl;
         std::cout << "截图生成xml ucd crop_to_xml crop_dir, save_dir" << std::endl;
     }
+    if(command=="check_xml" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "检查xml是否符合标准 ucd check_xml xml_dir img_dir size_th remove_error(true|1|True|false|0|False)" << std::endl;
+    }
+    if(command=="format_xml" || command=="*")
+    {
+        std::cout << "-------------------------------------------------------" << std::endl;
+        std::cout << "将 xml 进行标准化 ucd format_xml xml_dir {img_dir}" << std::endl;
+    }
     std::cout << "-------------------------------------------------------" << std::endl;
-    // throw "error";
 }
 
 
@@ -676,7 +684,7 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
-    else if(command_1=="count_tags")
+    else if(command_1 == "count_tags")
     {
         if (argc== 3)
         {
@@ -689,7 +697,7 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
-    else if(command_1=="count_files")
+    else if(command_1 == "count_files")
     {
         if (argc== 4)
         {
@@ -708,7 +716,7 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
-    else if(command_1=="cut_small_img")
+    else if(command_1 == "cut_small_img")
     {
         if (argc== 6){
             // get parameter
@@ -729,7 +737,7 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
-    else if(command_1=="crop_to_xml")
+    else if(command_1 == "crop_to_xml")
     {
         if (argc== 4)
         {
@@ -742,6 +750,33 @@ int main(int argc, char ** argv)
             print_info("crop_to_xml");
             return -1;
         }
+    }
+    else if(command_1 == "check_xml")
+    {
+        if ((argc == 6))
+        {
+            std::string xml_dir = argv[2];
+            std::string img_dir = argv[3];
+            int size_th = std::stoi(argv[4]);
+            std::string remove_error_path = argv[5];
+            
+            bool remove_error = true;
+            if((remove_error_path != "true") && (remove_error_path != "True") && (remove_error_path != "1"))
+            {
+                remove_error = false;
+            }
+            xml_check(xml_dir, img_dir, size_th, remove_error);
+        }
+        else
+        {
+            print_info("check_xml");
+            return -1;
+        }
+    }
+    else if(command_1 == "format_xml")
+    {
+        // 传入 img 的话就规范 height, width
+        // 格式化没有 prob 字段，读取 xml报错 的问题
     }
     else
     {
