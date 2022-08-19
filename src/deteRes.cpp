@@ -308,8 +308,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
                 }
                 else
                 {
-                    std::cout << "parse xml error, lose prob, " + xml_path << std::endl;
-                    throw "parse xml error, lose prob" + xml_path;
+                    obj_info->conf = -1;
                 }
 
                 // bndbox
