@@ -69,15 +69,25 @@ std::map<std::string, int> count_tags(std::string floder_path)
 void cut_small_img(std::string img_dir, std::string xml_dir, std::string save_dir, bool split_by_tag)
 {
     std::vector<std::string> file_path_list = get_all_file_path(img_dir);
-
     std::vector<std::string> img_path_list;
-    std::set<std::string> suffixs;
-    suffixs.insert(".jpg");
+    std::set<std::string> suffixs {".jpg", ".JPG", ".png", ".PNG"};
     img_path_list = filter_by_suffix(file_path_list, suffixs);
+
+    for(int i=0; i<file_path_list.size(); i++)
+    {
+        std::cout << file_path_list[i] << std::endl;
+    }
+
+    std::cout << "here" << std::endl;
+    std::cout << file_path_list.size() << std::endl;
+    std::cout << img_path_list.size() << std::endl;
 
     for(int i=0; i<img_path_list.size();i++)
     {
         std::string each_xml_path = xml_dir + "/" + get_file_name(img_path_list[i]) + ".xml";
+        
+        std::cout << each_xml_path << std::endl;
+        
         if (is_file(each_xml_path))
         {
             std::cout << i << " : " << each_xml_path << " , " << img_path_list[i] << std::endl;
