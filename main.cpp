@@ -579,7 +579,7 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
-    else if(command_1=="--version" || command_1=="-V")
+    else if(command_1 == "--version" || command_1 == "-V")
     {
         std::cout << "uc_dataset : " << app_version << std::endl;
         return -1;
@@ -711,10 +711,25 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "count_tags")
     {
-        if (argc== 3)
+        if(argc== 3)
         {
             std::string xml_dir = argv[2];
-            count_tags(xml_dir);
+            if(ucd_util->is_ucd_path(xml_dir))
+            {
+                // 从 ucd 进行统计
+                ucd_util->count_ucd_tags(xml_dir);
+            }
+            else if(is_dir(xml_dir))
+            {
+                // 从 xml 进行统计
+                count_tags(xml_dir);
+            }
+            else
+            {
+                std::cout << "ucd_path not exists or xml dir not exists : " << xml_dir << std::endl;
+                print_info("count_tags");
+                return -1;
+            }
         }
         else
         {

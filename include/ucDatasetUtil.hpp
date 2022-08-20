@@ -55,6 +55,8 @@ class UCDatasetUtil
         void save_xml(std::string save_path, int get_count=-1);
         // 查看库中的 ucd
         void check_ucd();
+        // 是不是 ucd path （1）是不是合法文件 （2）是否为 .json 结尾的文件
+        bool is_ucd_path(std::string ucd_path);
         // 删除库中的 ucd
         void delete_ucd(std::string ucd_name);
         // 上传 ucd
@@ -69,6 +71,8 @@ class UCDatasetUtil
         void ucd_diff(std::string ucd_path_1, std::string ucd_path_2);
         // 去除在 ucd1 中 ucd2 中也存在的 uc
         void ucd_minus(std::string save_path, std::string ucd_path_1, std::string ucd_path_2);
+        // 统计标签的个数
+        void count_ucd_tags(std::string ucd_path);
     private:
         // 下载云上的数据
         void load_file(std::string url, std::string save_path, int index=-1);

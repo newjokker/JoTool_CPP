@@ -72,7 +72,7 @@ void UCDataset::parse_json_info(bool parse_xml_info)
         auto xml_info = data["xml_info"];
         if(xml_info != nullptr)
         {
-            // 读取存储的 xml info， 存放到 字典中，{uc: [uc, x1, y1, x2, y2, conf, tag]}
+            // 读取存储的 xml info， 存放到 字典中，{uc: [x1, y1, x2, y2, conf, tag]}
             UCDataset::xml_info = xml_info;
         }
     }
@@ -496,3 +496,65 @@ void UCDatasetUtil::save_xml(std::string save_dir, int get_count)
     }
     delete ucd;
 }
+
+bool UCDatasetUtil::is_ucd_path(std::string ucd_path)
+{
+    if((! is_file(ucd_path)) || (ucd_path.substr(ucd_path.size()-5, ucd_path.size()) != ".json"))
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+void UCDatasetUtil::count_ucd_tags(std::string ucd_path)
+{
+    if(! UCDatasetUtil::is_ucd_path(ucd_path))
+    {
+        std::cout << "ucd path not exists : " << ucd_path << std::endl;
+    }
+
+    std::map< std::string, int > count_map;
+    int uc_count = 0;
+    int dete_obj_count=0; 
+    UCDataset* ucd = new UCDataset(ucd_path);
+    ucd->parse_json_info(true);
+
+    std::string each_tag;
+    auto iter = ucd->xml_info.begin();
+    while(iter != ucd->xml_info.end())
+    {
+        uc_count += 1;
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            // x1, y1, x2, y2, conf, tag
+            dete_obj_count += 1;
+            each_tag = iter->second[i][5];
+            if(count_map.count(each_tag) == 0)
+            {
+                count_map[each_tag] = 1;
+            }
+            else
+            {
+                count_map[each_tag] += 1;
+            }
+        }
+        iter++;
+    }
+    // print statistics res
+    auto iter_count = count_map.begin();
+    std::cout << "-------------------------------" << std::endl;
+    while(iter_count != count_map.end())
+    {
+        std::cout << iter_count->first << " : " << iter_count->second << std::endl;
+        iter_count ++;
+    }
+    std::cout << "number of uc  : " << uc_count << std::endl;
+    std::cout << "number of tag : " << dete_obj_count << std::endl;
+    std::cout << "-------------------------------" << std::endl;
+}
+
+
+
