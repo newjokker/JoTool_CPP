@@ -233,14 +233,14 @@ int main(int argc, char ** argv)
         cache_dir = (const std::string &)xini_file["cache"]["dir"];
     }
 
-    UCDatasetUtil* ucd = new UCDatasetUtil(host , port, cache_dir);
+    UCDatasetUtil* ucd_util = new UCDatasetUtil(host , port, cache_dir);
     std::string command_1 = argv[1];
 
     if(command_1 == "check")
     {
         if(argc == 2)
         {
-            ucd->check_ucd();
+            ucd_util->check_ucd();
         }
         else
         {
@@ -275,7 +275,7 @@ int main(int argc, char ** argv)
             print_info("load");
             return -1;
         }
-        ucd->save_ucd(ucd_name, ucd_save_path);
+        ucd_util->save_ucd(ucd_name, ucd_save_path);
     }
     else if(command_1 == "delete")
     {
@@ -287,7 +287,7 @@ int main(int argc, char ** argv)
         else
         {
             std::string std_name = argv[2];
-            ucd->delete_ucd(std_name);
+            ucd_util->delete_ucd(std_name);
         }
     }
     else if(command_1 == "save")
@@ -347,8 +347,8 @@ int main(int argc, char ** argv)
                 need_xml = true;
             }
             // load
-            ucd->json_path = json_path;
-            ucd->save_img_xml_json(save_dir, need_img, need_xml, need_count);
+            ucd_util->json_path = json_path;
+            ucd_util->save_img_xml_json(save_dir, need_img, need_xml, need_count);
         }
     }
     else if(command_1 == "upload")
@@ -357,13 +357,13 @@ int main(int argc, char ** argv)
         if(argc == 3)
         {
             ucd_path = argv[2];
-            ucd->upload_ucd(ucd_path);
+            ucd_util->upload_ucd(ucd_path);
         }
         else if(argc == 4)
         {
             ucd_path = argv[2];
             assign_ucd_name = argv[3];
-            ucd->upload_ucd(ucd_path, assign_ucd_name);
+            ucd_util->upload_ucd(ucd_path, assign_ucd_name);
         }
         else
         {
@@ -391,7 +391,7 @@ int main(int argc, char ** argv)
         {
             std::string img_path = argv[2];
             std::string ucd_name = argv[3];
-            ucd->get_ucd_from_img_dir(img_path, ucd_name);
+            ucd_util->get_ucd_from_img_dir(img_path, ucd_name);
         }
         else
         {
@@ -407,7 +407,7 @@ int main(int argc, char ** argv)
             std::string img_dir = argv[2];
             std::string xml_dir = argv[3];
             std::string ucd_name = argv[4];
-            ucd->get_ucd_from_img_xml_dir(img_dir, xml_dir, ucd_name);
+            ucd_util->get_ucd_from_img_xml_dir(img_dir, xml_dir, ucd_name);
         }
         else
         {
@@ -469,10 +469,10 @@ int main(int argc, char ** argv)
             }
             
             // load
-            ucd->json_path = json_path;
-            ucd->save_img_xml_json(save_dir, need_img, false, need_count);
+            ucd_util->json_path = json_path;
+            ucd_util->save_img_xml_json(save_dir, need_img, false, need_count);
             // parse xml from ucd 
-            ucd->save_xml(save_dir, need_count);
+            ucd_util->save_xml(save_dir, need_count);
         }
         else
         {
@@ -497,11 +497,11 @@ int main(int argc, char ** argv)
             return -1;
         }
         // 展示所有的下载路径，为了方便单张图片的信息下载查看，可以使用 curl 下载单个 uc 对应的信息
-        std::cout << "load img      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/" + uc + ".jpg" << std::endl;
-        std::cout << "load xml      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/" + uc + ".xml" << std::endl;
-        std::cout << "load json     : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/file/" + uc + ".json" << std::endl;
-        std::cout << "load ucd      : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/ucd/{ucd_name}.json" << std::endl;
-        std::cout << "check         : http://" + ucd->host + ":" + std::to_string(ucd->port) + "/ucd/check" << std::endl;
+        std::cout << "load img      : http://" + ucd_util->host + ":" + std::to_string(ucd_util->port) + "/file/" + uc + ".jpg" << std::endl;
+        std::cout << "load xml      : http://" + ucd_util->host + ":" + std::to_string(ucd_util->port) + "/file/" + uc + ".xml" << std::endl;
+        std::cout << "load json     : http://" + ucd_util->host + ":" + std::to_string(ucd_util->port) + "/file/" + uc + ".json" << std::endl;
+        std::cout << "load ucd      : http://" + ucd_util->host + ":" + std::to_string(ucd_util->port) + "/ucd/{ucd_name}.json" << std::endl;
+        std::cout << "check         : http://" + ucd_util->host + ":" + std::to_string(ucd_util->port) + "/ucd/check" << std::endl;
     }
     else if(command_1 == "diff")
     {
@@ -509,7 +509,7 @@ int main(int argc, char ** argv)
         {
             std::string ucd_path_1 = argv[2];
             std::string ucd_path_2 = argv[3];
-            ucd->ucd_diff(ucd_path_1, ucd_path_2);
+            ucd_util->ucd_diff(ucd_path_1, ucd_path_2);
         }
         else
         {
@@ -528,7 +528,7 @@ int main(int argc, char ** argv)
                 std::string each_ucd_path = argv[i+3];
                 ucd_path_vector.push_back(each_ucd_path);
             }
-            ucd->merge_ucds(save_path, ucd_path_vector);
+            ucd_util->merge_ucds(save_path, ucd_path_vector);
         }
         else
         {
@@ -543,7 +543,7 @@ int main(int argc, char ** argv)
             std::string ucd_save_path = argv[2];
             std::string ucd_path_1 = argv[3];
             std::string ucd_path_2 = argv[4];
-            ucd->ucd_minus(ucd_save_path, ucd_path_1, ucd_path_2);
+            ucd_util->ucd_minus(ucd_save_path, ucd_path_1, ucd_path_2);
         }
         else
         {
@@ -819,6 +819,65 @@ int main(int argc, char ** argv)
         // 缓存信息的获取（有多少张缓存，指定的 json 有多少在缓存中，缓存率百分之多少）
         // 缓存的清空
         // 缓存信息的设置，最大缓存量。等
+
+        if(! is_dir(ucd_util->cache_img_dir))
+        {
+            std::cout << "cache dir is not exists" << std::endl;
+            return -1;
+        }
+
+        int all_cache_img_count, exist_cache_img_count;
+        std::string cache_info, json_path;
+        if((argc == 3) || (argc == 4))
+        {
+            cache_info = argv[2];
+            if(cache_info == "info")
+            {
+                if(argc == 4)
+                {
+                    json_path = argv[3];
+                    if((! is_file(json_path)) || (json_path.substr(json_path.size()-5, json_path.size()) != ".json"))
+                    {
+                        std::cout << "ucd path not exists : " << json_path << std::endl;
+                        print_info("cache");
+                        return -1;
+                    }
+
+                    UCDataset* ucd = new UCDataset(json_path);
+                    ucd->parse_json_info();
+                    std::string each_img_path;
+                    float exist_ratio;
+                    std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
+
+                    for(int i=0; i<ucd->uc_list.size(); i++)
+                    {
+                        each_img_path = get_file_by_suffix_set(ucd_util->cache_img_dir, ucd->uc_list[i], suffix);
+                        if(each_img_path != "")
+                        {
+                            exist_cache_img_count++;
+                        }
+                    }
+                    exist_ratio = (float)exist_cache_img_count / (float)ucd->uc_list.size();
+                    std::cout << "----------------------------------" << std::endl;
+                    std::cout << "all img count         : " << ucd->uc_list.size() << std::endl;
+                    std::cout << "exist cache img count : " << exist_cache_img_count << std::endl;
+                    std::cout << "exist ratio           : " << exist_ratio * 100 << " %" << std::endl;
+                    std::cout << "----------------------------------" << std::endl;
+                    delete ucd;
+                }
+                else
+                {
+                    // 没有参数，查看基础情况
+                    std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
+                    std::vector<std::string> img_path_vector;
+                    img_path_vector = get_all_file_path(ucd_util->cache_img_dir, suffix);
+                    all_cache_img_count = img_path_vector.size();
+                    std::cout << "----------------------------------" << std::endl;
+                    std::cout << "all cache img count   : " << all_cache_img_count << std::endl;
+                    std::cout << "----------------------------------" << std::endl;
+                }
+            }
+        }
     }
     else if(command_1 == "acc")
     {
@@ -841,7 +900,7 @@ int main(int argc, char ** argv)
         return -1;
     }
 
-    delete ucd;
+    delete ucd_util;
     end_time = clock();
     std::cout << "---------------" << std::endl;
     std::cout << "use time " << (double)(end_time-start_time)/CLOCKS_PER_SEC << " s" << std::endl;
