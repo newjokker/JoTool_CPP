@@ -38,14 +38,17 @@ class UCDataset
 class UCDatasetUtil
 {
     public:
-        //
-        UCDatasetUtil(std::string host, int port);
+        // 缓存文件夹，多个人多个项目使用的时候可以直接缓存图片
+        std::string cache_dir;
+        std::string cache_img_dir;
         std::string json_path;
         std::string host;
         std::string root_url;
         int port;
+        // 
+        UCDatasetUtil(std::string host, int port, std::string cache_dir="");
         // 下载 ucd 中对应的数据
-        void save_img_xml_json(std::string save_dir, bool need_img=true, bool need_xml=true, bool need_json=false, int need_count=-1);
+        void save_img_xml_json(std::string save_dir, bool need_img=true, bool need_xml=true, int need_count=-1);
         // 下载库中的 ucd
         void save_ucd(std::string ucd_name, std::string save_dir);
         // 从 json 中解析 xml

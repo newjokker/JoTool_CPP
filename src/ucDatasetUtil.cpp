@@ -128,31 +128,45 @@ void UCDataset::unique()
 }
 
 
-UCDatasetUtil::UCDatasetUtil(std::string host, int port)
+UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
 {
     UCDatasetUtil::host = host;
     UCDatasetUtil::port = port;
     UCDatasetUtil::root_url = "http://" + UCDatasetUtil::host + ":" + std::to_string(UCDatasetUtil::port);
+    UCDatasetUtil::cache_dir = cache_dir;
+    if(is_dir(cache_dir))
+    {
+        UCDatasetUtil::cache_img_dir = UCDatasetUtil::cache_dir + "/" + "img_cache";
+        if(! is_dir(UCDatasetUtil::cache_img_dir))
+        {
+            create_folder(UCDatasetUtil::cache_img_dir);
+        }
+    }
 }
 
-void UCDatasetUtil::save_img_xml_json(std::string save_dir, bool need_img, bool need_xml, bool need_json, int need_count)
+void UCDatasetUtil::save_img_xml_json(std::string save_dir, bool need_img, bool need_xml, int need_count)
 {
-
     if(! is_dir(save_dir))
     {
         std::cout << "save dir not exists : " << save_dir << std::endl;
         throw "save dir not exists";
     }
-
     // 
-    std::string save_img_dir = save_dir + "/" + "img";
+    std::string save_img_dir;
+    if(is_dir(UCDatasetUtil::cache_img_dir))
+    {
+        save_img_dir = cache_img_dir;
+    }
+    else
+    {
+        save_img_dir = save_dir + "/" + "img";
+    }
     std::string save_xml_dir = save_dir + "/" + "xml";
     std::string save_json_dir = save_dir + "/" + "json";
 
     // 
     if(need_img){create_folder(save_img_dir);}
     if(need_xml){create_folder(save_xml_dir);}
-    if(need_json){create_folder(save_json_dir);}
 
     //
 	// std::ifstream jsfile(UCDatasetUtil::json_path);
@@ -174,15 +188,12 @@ void UCDatasetUtil::save_img_xml_json(std::string save_dir, bool need_img, bool 
             //
             img_url = "/file/" + each_uc + ".jpg";
             xml_url = "/file/" + each_uc + ".xml";
-            json_url = "/file/" + each_uc + ".json";
             //
             save_img_path = save_img_dir + "/" + each_uc + ".jpg";
             save_xml_path = save_xml_dir + "/" + each_uc + ".xml";
-            save_json_path = save_json_dir + "/" + each_uc + ".json";
             
             if(need_img){ UCDatasetUtil::load_file(img_url, save_img_path, i); }
             if(need_xml){ UCDatasetUtil::load_file(xml_url, save_xml_path, i); }
-            if(need_json){ UCDatasetUtil::load_file(json_url, save_json_path, i); }
         }
     }
     delete ucd;

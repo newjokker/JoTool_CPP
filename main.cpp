@@ -233,7 +233,7 @@ int main(int argc, char ** argv)
         cache_dir = (const std::string &)xini_file["cache"]["dir"];
     }
 
-    UCDatasetUtil* ucd = new UCDatasetUtil(host , port);
+    UCDatasetUtil* ucd = new UCDatasetUtil(host , port, cache_dir);
     std::string command_1 = argv[1];
 
     if(command_1 == "check")
@@ -322,9 +322,9 @@ int main(int argc, char ** argv)
                 throw "save_dir not exists";
              }
             // save_mode
-            if(save_mode.size() != 3)
+            if(save_mode.size() != 2)
             {
-                std::cout << "save_mode illeagal, need save_mode such as 111 | 101  " << save_dir << std::endl;
+                std::cout << "save_mode illeagal, need save_mode such as 11 | 10  " << save_dir << std::endl;
                 throw "save_mode illeagal";
             }
             bool need_img, need_xml, need_json;
@@ -346,18 +346,9 @@ int main(int argc, char ** argv)
             {
                 need_xml = true;
             }
-            
-            if(save_mode[2] == '0')
-            {
-                need_json = false;
-            }
-            else
-            {
-                need_json = true;
-            }
             // load
             ucd->json_path = json_path;
-            ucd->save_img_xml_json(save_dir, need_img, need_xml, need_json, need_count);
+            ucd->save_img_xml_json(save_dir, need_img, need_xml, need_count);
         }
     }
     else if(command_1 == "upload")
@@ -427,8 +418,6 @@ int main(int argc, char ** argv)
     else if(command_1 == "parse")
     {
         // ucd 中解压出 xml 信息，同时可以解析出 img 信息
-        // 跟 save 差不多的接口
-
         if((argc == 5) || (argc == 6))
         {
             std::string json_path = argv[2];
@@ -481,7 +470,7 @@ int main(int argc, char ** argv)
             
             // load
             ucd->json_path = json_path;
-            ucd->save_img_xml_json(save_dir, need_img, false, false, need_count);
+            ucd->save_img_xml_json(save_dir, need_img, false, need_count);
             // parse xml from ucd 
             ucd->save_xml(save_dir, need_count);
         }
@@ -578,7 +567,7 @@ int main(int argc, char ** argv)
             std::cout << "sql_pwd       : " << sql_pwd << std::endl;
             std::cout << "sql_db        : " << sql_db << std::endl;
             std::cout << "[cache]" << std::endl;
-            std::cout << "cache_dir    : " << cache_dir << std::endl;
+            std::cout << "cache_dir     : " << cache_dir << std::endl;
             std::cout << "[version]" << std::endl;
             std::cout << "uc_dataset    : " << app_version << std::endl;
             std::cout << "-----------------------------" << std::endl;
@@ -641,7 +630,7 @@ int main(int argc, char ** argv)
             {
                 std::string cache_dir_new = argv[3];
                 // 
-                if(!is_dir(cache_dir))
+                if(!is_dir(cache_dir_new))
                 {
                     std::cout << "cache dir not exist" << std::endl;
                     throw "cache dir not exist";
@@ -649,7 +638,7 @@ int main(int argc, char ** argv)
                 else
                 {
                     // 创建对应的文件夹
-                    std::string img_cache_dir = cache_dir + "/" + "img_cache";
+                    std::string img_cache_dir = cache_dir_new + "/" + "img_cache";
                     if(! is_dir(img_cache_dir))
                     {
                         create_folder(img_cache_dir);
