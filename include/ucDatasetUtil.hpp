@@ -21,9 +21,8 @@ class UCDataset
         double add_time;
         double update_time;
         std::string describe;
-        std::string json_path;
         //
-        UCDataset(std::string json_path="");
+        UCDataset(std::string json_path);
         // 解析 json 数据
         void parse_json_info(bool parse_xml_info=false);
         // 保存为 json
@@ -32,6 +31,10 @@ class UCDataset
         void print_json_info();
         // uc list 去重
         void unique();
+        // 统计标签个数
+        std::map<std::string, int> count_tags();
+    private:
+        std::string json_path;
 };
 
 

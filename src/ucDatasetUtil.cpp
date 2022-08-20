@@ -80,18 +80,49 @@ void UCDataset::parse_json_info(bool parse_xml_info)
 
 void UCDataset::print_json_info()
 {
-    std::cout << "--------------------------------" << std::endl;
-    std::cout << "dataset_name      : " << UCDataset::dataset_name << std::endl;
-    std::cout << "uc count          : " << UCDataset::uc_list.size() << std::endl;
-    std::cout << "model_name        : " << UCDataset::model_name << std::endl;
-    std::cout << "model_version     : " << UCDataset::model_version << std::endl;
-    std::cout << "add_time          : " << UCDataset::add_time << std::endl;
-    std::cout << "update_time       : " << UCDataset::update_time << std::endl;
-    std::cout << "describe          : " << UCDataset::describe << std::endl;
-    std::cout << "label_used        : " << UCDataset::label_used.size() <<std::endl;
-    for(int i=0; i<UCDataset::label_used.size(); i++)
+    // print statistics res
+    if(is_file(UCDataset::json_path))
     {
-        std::cout << "  * " << UCDataset::label_used[i] << std::endl;
+        UCDataset::parse_json_info();
+        // json 属性
+        std::cout << "--------------------------------" << std::endl;
+        std::cout << "dataset_name      : " << UCDataset::dataset_name << std::endl;
+        std::cout << "uc count          : " << UCDataset::uc_list.size() << std::endl;
+        std::cout << "model_name        : " << UCDataset::model_name << std::endl;
+        std::cout << "model_version     : " << UCDataset::model_version << std::endl;
+        std::cout << "add_time          : " << UCDataset::add_time << std::endl;
+        std::cout << "update_time       : " << UCDataset::update_time << std::endl;
+        std::cout << "describe          : " << UCDataset::describe << std::endl;
+        std::cout << "label_used        : " << UCDataset::label_used.size() <<std::endl;
+        //
+        if(UCDataset::label_used.size() > 0)
+        {
+            std::cout << "  ";
+            for(int i=0; i<UCDataset::label_used.size(); i++)
+            {
+                std::cout << UCDataset::label_used[i] << ",";
+            }
+            std::cout << std::endl;
+        }
+        // (2) statistics tags
+        // std::cout << "--------------------------------" << std::endl;
+        // int uc_count = 0;
+        // int dete_obj_count=0; 
+        // std::map< std::string, int > count_map = UCDataset::count_tags();
+        // auto iter_count = count_map.begin();
+        // while(iter_count != count_map.end())
+        // {
+        //     uc_count += 1;
+        //     dete_obj_count += iter_count->second;
+        //     std::cout << iter_count->first << " : " << iter_count->second << std::endl;
+        //     iter_count ++;
+        // }
+        // std::cout << "number of tag  : " << uc_count << std::endl;
+        // std::cout << "number of obj : " << dete_obj_count << std::endl;
+    }
+    else
+    {
+        std::cout << "ucd_path not exists : " << UCDataset::json_path;
     }
     std::cout << "--------------------------------" << std::endl;
 }
@@ -127,6 +158,41 @@ void UCDataset::unique()
     UCDataset::uc_list.assign(uc_set.begin(), uc_set.end());
 }
 
+std::map<std::string, int> UCDataset::count_tags()
+{
+    if(! is_file(UCDataset::json_path))
+    {
+        std::cout << "json path not exists : " << UCDataset::json_path << std::endl;
+        throw "json path not exists";
+    }
+    // count_tags
+    std::map< std::string, int > count_map;
+    UCDataset::parse_json_info(true);
+    std::string each_tag;
+    auto iter = UCDataset::xml_info.begin();
+    while(iter != UCDataset::xml_info.end())
+    {
+        // uc_count += 1;
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            // x1, y1, x2, y2, conf, tag
+            // dete_obj_count += 1;
+            each_tag = iter->second[i][5];
+            if(count_map.count(each_tag) == 0)
+            {
+                count_map[each_tag] = 1;
+            }
+            else
+            {
+                count_map[each_tag] += 1;
+            }
+        }
+        iter++;
+    }
+    return count_map;
+}
+
+//
 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
 {
@@ -301,7 +367,7 @@ void UCDatasetUtil::get_ucd_from_img_dir(std::string img_dir, std::string ucd_pa
     std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
     std::vector<std::string> img_path_vector = get_all_file_path_recursive(img_dir, suffix);
 
-    UCDataset* ucd = new UCDataset();
+    UCDataset* ucd = new UCDataset(ucd_path);
 
     std::string uc;
     for(int i=0; i<img_path_vector.size(); i++)
@@ -323,7 +389,7 @@ void UCDatasetUtil::get_ucd_from_img_xml_dir(std::string img_dir, std::string xm
     std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
     std::vector<std::string> img_path_vector = get_all_file_path_recursive(img_dir, suffix);
 
-    UCDataset* ucd = new UCDataset();
+    UCDataset* ucd = new UCDataset(ucd_path);
     std::string uc, xml_path;
 
     for(int i=0; i<img_path_vector.size(); i++)
@@ -369,7 +435,7 @@ void UCDatasetUtil::merge_ucds(std::string save_path, std::vector<std::string> u
         }
     }
     // merge 
-    UCDataset* merge = new UCDataset();
+    UCDataset* merge = new UCDataset(save_path);
     std::set<std::string> uc_set, used_label_set;
     for(int i=0; i<ucd_path_vector.size(); i++)
     {
@@ -433,7 +499,7 @@ void UCDatasetUtil::ucd_minus(std::string save_path, std::string ucd_path_1, std
     ucd1->parse_json_info();
     UCDataset* ucd2 = new UCDataset(ucd_path_2);
     ucd2->parse_json_info();
-    UCDataset* ucd_res = new UCDataset();
+    UCDataset* ucd_res = new UCDataset(save_path);
     std::vector<std::string> uc_difference;
     // set_intersection
     std::set<std::string> uc_set1(ucd1->uc_list.begin(), ucd1->uc_list.end());
@@ -516,43 +582,24 @@ void UCDatasetUtil::count_ucd_tags(std::string ucd_path)
         std::cout << "ucd path not exists : " << ucd_path << std::endl;
     }
 
-    std::map< std::string, int > count_map;
     int uc_count = 0;
     int dete_obj_count=0; 
     UCDataset* ucd = new UCDataset(ucd_path);
-    ucd->parse_json_info(true);
+    // count_tags 函数中会自动 解析一遍 json 
+    std::map< std::string, int > count_map = ucd->count_tags();
 
-    std::string each_tag;
-    auto iter = ucd->xml_info.begin();
-    while(iter != ucd->xml_info.end())
-    {
-        uc_count += 1;
-        for(int i=0; i<iter->second.size(); i++)
-        {
-            // x1, y1, x2, y2, conf, tag
-            dete_obj_count += 1;
-            each_tag = iter->second[i][5];
-            if(count_map.count(each_tag) == 0)
-            {
-                count_map[each_tag] = 1;
-            }
-            else
-            {
-                count_map[each_tag] += 1;
-            }
-        }
-        iter++;
-    }
     // print statistics res
     auto iter_count = count_map.begin();
     std::cout << "-------------------------------" << std::endl;
     while(iter_count != count_map.end())
     {
+        uc_count += 1;
+        dete_obj_count += iter_count->second;
         std::cout << iter_count->first << " : " << iter_count->second << std::endl;
         iter_count ++;
     }
-    std::cout << "number of uc  : " << uc_count << std::endl;
-    std::cout << "number of tag : " << dete_obj_count << std::endl;
+    std::cout << "number of tag  : " << uc_count << std::endl;
+    std::cout << "number of obj : " << dete_obj_count << std::endl;
     std::cout << "-------------------------------" << std::endl;
 }
 

@@ -45,7 +45,9 @@ using namespace std;
 
 // 积极发挥服务化的各项功能，比如提交合并的数据
 
-// xml 读取的时候
+// todo json 读取大文件太慢，能不能只读取需要的部分，比如打印 info 信息，不需要后面的 xml_info 信息，是否可以不读取到内存里，不行的话就直接自己写一个解析 json 的代码，用做快速解析
+
+// 一个专门的测试文件，针对每一个函数写一个对应的测试函数，就像在 guihub 上看到别人写的那样
 
 
 void print_info(std::string command="*")
@@ -378,10 +380,8 @@ int main(int argc, char ** argv)
             print_info("info");
             return -1;
         }
-
         std::string json_path = argv[2];
         UCDataset * ucd_info = new UCDataset(json_path);
-        ucd_info->parse_json_info();
         ucd_info->print_json_info();
         delete ucd_info;
     }
@@ -716,12 +716,12 @@ int main(int argc, char ** argv)
             std::string xml_dir = argv[2];
             if(ucd_util->is_ucd_path(xml_dir))
             {
-                // 从 ucd 进行统计
+                // statistice from ucd_path
                 ucd_util->count_ucd_tags(xml_dir);
             }
             else if(is_dir(xml_dir))
             {
-                // 从 xml 进行统计
+                // statistice from xml_dir
                 count_tags(xml_dir);
             }
             else
@@ -908,6 +908,11 @@ int main(int argc, char ** argv)
     {
         // 屏幕闪烁一些标准的 gif 图
         // 比如 你真棒，我很忙，你走开，别烦我
+    }
+    else if(command_1 == "attr")
+    {
+        // 修改 ucd 文件的属性信息，因为对于比较大的 ucd 打开自己去修改非常麻烦
+        // ucd attr dataset_name test_name
     }
     else
     {
