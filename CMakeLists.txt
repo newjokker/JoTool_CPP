@@ -33,7 +33,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
 # 动态库文件目录
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
 # 可执行文件目录
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../build)
 
 
 #set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH} "~/libtorch/libtorch")
@@ -62,11 +63,11 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/tools SRCLIST)
 add_library(saturntools_v1.1 SHARED ${SRCLIST})   
 # add_library(saturntools STATIC ${SRCLIST})   
 
-add_executable(test main.cpp)
+add_executable(ucd main.cpp)
 
 
 target_link_libraries(
-    test 
+    ucd 
     # ${TORCH_LIBRARIES}
     ${OpenCV_LIBS}
     OpenSSL::Crypto OpenSSL::SSL
@@ -78,7 +79,7 @@ target_link_libraries(
 )
     
 
-set_property(TARGET test PROPERTY CXX_STANDARD 14)
+set_property(TARGET ucd PROPERTY CXX_STANDARD 14)
 
 
 

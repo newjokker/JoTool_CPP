@@ -195,6 +195,12 @@ int main(int argc, char ** argv)
     std::string sql_user = "root";
     std::string sql_pwd = "root123";
     std::string sql_db = "Saturn_Database_beta";
+    
+    // version
+    std::string app_version = "v1.1";
+
+    // cache dir
+    std::string cache_dir;
 
     // get user name
     struct passwd* pwd;
@@ -224,6 +230,7 @@ int main(int argc, char ** argv)
         sql_user = (const std::string &)xini_file["sql"]["user"];
         sql_pwd = (const std::string &)xini_file["sql"]["pwd"];
         sql_db = (const std::string &)xini_file["sql"]["db"];
+        cache_dir = (const std::string &)xini_file["cache"]["dir"];
     }
 
     UCDatasetUtil* ucd = new UCDatasetUtil(host , port);
@@ -387,7 +394,7 @@ int main(int argc, char ** argv)
         ucd_info->print_json_info();
         delete ucd_info;
     }
-    else if(command_1 == "from" || command_1 == "from_img")
+    else if(command_1 == "from_img")
     {
         if(argc == 4)
         {
@@ -570,15 +577,23 @@ int main(int argc, char ** argv)
             std::cout << "sql_user      : " << sql_user << std::endl;
             std::cout << "sql_pwd       : " << sql_pwd << std::endl;
             std::cout << "sql_db        : " << sql_db << std::endl;
+            std::cout << "[cache]" << std::endl;
+            std::cout << "cache_dir    : " << cache_dir << std::endl;
+            std::cout << "[version]" << std::endl;
+            std::cout << "uc_dataset    : " << app_version << std::endl;
             std::cout << "-----------------------------" << std::endl;
-            std::cout << "app versio 1.1" << std::endl;
-            std::cout << "-----------------------------" << std::endl;
+            return -1;
         }
         else
         {
             print_info("meta");
             return -1;
         }
+    }
+    else if(command_1=="--version" || command_1=="-V")
+    {
+        std::cout << "uc_dataset : " << app_version << std::endl;
+        return -1;
     }
     else if(command_1 == "set")
     {
@@ -589,38 +604,58 @@ int main(int argc, char ** argv)
 
             if(option == "host")
             {
-                std::string host = argv[3];
-                xini_write["server"]["host"] = host;
+                std::string host_new = argv[3];
+                xini_write["server"]["host"] = host_new;
             }
             else if(option == "port")
             {
-                int port = std::stoi(argv[3]);
-                xini_write["server"]["port"] = port;      
+                int port_new = std::stoi(argv[3]);
+                xini_write["server"]["port"] = port_new;      
             }
             else if(option == "sql_host")
             {
-                std::string host = argv[3];
-                xini_write["sql"]["host"] = host;
+                std::string sql_host_new = argv[3];
+                xini_write["sql"]["host"] = sql_host_new;
             }
             else if(option == "sql_port")
             {
-                int port = std::stoi(argv[3]);
-                xini_write["sql"]["port"] = port;   
+                int sql_port_new = std::stoi(argv[3]);
+                xini_write["sql"]["port"] = sql_port_new;   
             }
             else if(option == "sql_user")
             {
-                std::string user = argv[3];
-                xini_write["sql"]["user"] = user;
+                std::string sql_user_new = argv[3];
+                xini_write["sql"]["user"] = sql_user_new;
             }
             else if(option == "sql_pwd")
             {
-                std::string pwd = argv[3];
-                xini_write["sql"]["pwd"] = pwd;
+                std::string sql_pwd_new = argv[3];
+                xini_write["sql"]["pwd"] = sql_pwd_new;
             }
             else if(option == "sql_db")
             {
-                std::string db = argv[3];
-                xini_write["sql"]["db"] = db;
+                std::string sql_db_name_new = argv[3];
+                xini_write["sql"]["db"] = sql_db_name_new;
+            }
+            else if(option == "cache_dir")
+            {
+                std::string cache_dir_new = argv[3];
+                // 
+                if(!is_dir(cache_dir))
+                {
+                    std::cout << "cache dir not exist" << std::endl;
+                    throw "cache dir not exist";
+                }
+                else
+                {
+                    // 创建对应的文件夹
+                    std::string img_cache_dir = cache_dir + "/" + "img_cache";
+                    if(! is_dir(img_cache_dir))
+                    {
+                        create_folder(img_cache_dir);
+                    }
+                }
+                xini_write["cache"]["dir"] = cache_dir_new;
             }
             else
             {
@@ -628,6 +663,7 @@ int main(int argc, char ** argv)
                 return -1;
             }
             xini_write.dump(config_path);   
+            return -1;
         }
         else
         {
@@ -777,6 +813,38 @@ int main(int argc, char ** argv)
     {
         // 传入 img 的话就规范 height, width
         // 格式化没有 prob 字段，读取 xml报错 的问题
+    }
+    else if(command_1 == "say")
+    {
+        //大屏幕打印
+    }
+    else if(command_1 == "filter")
+    {
+        // 对 ucd 进行过滤
+        // used_label
+        // conf
+        // assign label list split by ,
+    }
+    else if(command_1 == "cache")
+    {
+        // 缓存信息的获取（有多少张缓存，指定的 json 有多少在缓存中，缓存率百分之多少）
+        // 缓存的清空
+        // 缓存信息的设置，最大缓存量。等
+    }
+    else if(command_1 == "acc")
+    {
+        // 对比两个 ucd 的对比结果，
+        // 可以设置是否保存标准的画图
+        // 直接画出 0.1 ~ 0.9 的统计数据
+    }
+    else if(command_1 == "to")
+    {
+        // 转为 yolo 的训练格式，vit 的训练格式 faster rcnn csra 的训练格式
+    }
+    else if(command_1 == "gif")
+    {
+        // 屏幕闪烁一些标准的 gif 图
+        // 比如 你真棒，我很忙，你走开，别烦我
     }
     else
     {
