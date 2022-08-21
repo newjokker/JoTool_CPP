@@ -41,163 +41,24 @@ using namespace std;
 
 // 一个专门的测试文件，针对每一个函数写一个对应的测试函数，就像在 guihub 上看到别人写的那样
 
-// 完善使用函数的查询
-    //（0）不一次性将所有的帮助全部打印出来，分成多段打印
-    //（0.1）加上模糊匹配
-    //（1）功能分块
-    //（2）每一个提示分为合理的几部分
-    //（3）为提示写一个方便整理的类 关键字 | 中文提示 | 参数使用 | demo | 常见的错误，需要仔细检查的部分
-    //（4）自动给提示进行编号，可以使用编号代替 command，获取提示
-    //（5）提示可以有不同的格式，可以选择输出的顺序，
-
 // 使用 set 代替 vector 存放 dete_obj 
 
 // 发布功能，快速部署到所有机器上
 
-void print_info(std::string command="*")
-{
-
-    if(command=="save" || command =="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "下载 图片|标注|元信息, ucd save json_path save_dir save_mode(image,xml,json) {need_count}" << std::endl;
-    }
-    if(command=="parse" || command =="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "下载 图片 可以选择从 json 解析出 xml, ucd parse json_path save_dir save_mode(image,xml_from_json) {need_count}" << std::endl;
-    }
-    if(command=="check" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "查看所有在线数据集, ucd check" << std::endl;
-    }
-    if(command=="show" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "查看所有下载路径, ucd show {uc}" << std::endl;
-    }
-    if(command=="delete" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "删除在线数据集,无法删除官方数据集 ucd delete ucd_name" << std::endl;
-    }
-    if(command=="load" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "下载在线数据集 ucd load ucd_name save_path|save_dir " << std::endl;
-    }
-    if(command=="upload" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "上传数据集到网络 ucd upload ucd_path {ucd_name}" << std::endl;
-    }
-    if(command=="from" || command=="from_img" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "本地文件生成数据集 ucd from img_dir ucd_save_path" << std::endl;
-    }
-    if(command=="from_img_xml" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "本地文件生成数据集 ucd from_img_xml img_dir xml_dir ucd_save_path" << std::endl;
-    }
-    if(command=="info" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "查看数据集信息 ucd info ucd_path" << std::endl;
-    }
-    if(command=="meta" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "查看配置信息 ucd meta" << std::endl;
-    }
-    if(command=="set" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "设置配置信息 ucd set host | port value" << std::endl;
-    }
-    if(command=="merge" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "合并数据集 ucd merge save_path ucd_path1 ucd_path2 ..." << std::endl;
-    }
-    if(command=="minus" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "减操作数据集 ucd minus save_path ucd_path1 ucd_path2" << std::endl;
-    }
-    if(command=="diff" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "比较数据集 ucd diff ucd_path1 ucd_path2" << std::endl;
-    }
-    // 不属于 ucd 后期进行删除
-    if(command=="rename_img" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "重命名数据集 ucd rename_img img_dir" << std::endl;
-    }
-    if(command=="rename_img_xml" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "重命名数据集 ucd rename_img_xml img_dir xml_dir" << std::endl;
-    }
-    if(command=="count_tags" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "统计xml 标签 ucd count_tags xml_dir" << std::endl;
-    }
-    if(command=="count_files" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "统计文件夹中各后缀的文件数 ucd count_files file_dir recursive(true|1|True|false|0|False)" << std::endl;
-    }
-    if(command=="cut_small_img" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "统计xml 标签 ucd cut_small_img img_dir xml_dir save_dir is_split(true|1|True|false|0|False)" << std::endl;   
-    }
-    if(command=="crop_to_xml" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "截图生成xml ucd crop_to_xml crop_dir, save_dir" << std::endl;
-    }
-    if(command=="check_xml" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "检查xml是否符合标准 ucd check_xml xml_dir img_dir size_th remove_error(true|1|True|false|0|False)" << std::endl;
-    }
-    if(command=="format_xml" || command=="*")
-    {
-        std::cout << "-------------------------------------------------------" << std::endl;
-        std::cout << "将 xml 进行标准化 ucd format_xml xml_dir {img_dir}" << std::endl;
-    }
-    std::cout << "-------------------------------------------------------" << std::endl;
-}
-
 
 int main(int argc, char ** argv)
 {
+
+    // param
+    UcdParamOpt *ucd_param_opt = new UcdParamOpt();
+    ucd_param_opt->load_param_info();
+
     if ((argc < 2))
     {
         std::cout << "need parameter number >= 1 get : " << argc-1 << std::endl;
-        print_info("*");
+        ucd_param_opt->print_all_fun();
         return -1;
     }
-
-
-    // param
-
-    std::string command = argv[1];
-    ParamInfo *param_info = new ParamInfo("cut_small_img");
-
-    bool is_similar = param_info->is_similar(command);
-
-    std::cout << "is similar : " << is_similar << std::endl;
-
-    return -1;
-
 
     // time
     clock_t start_time, end_time;
@@ -263,7 +124,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("check");
+            ucd_param_opt->print_command_info("check");
             return -1;
         }
     }
@@ -271,7 +132,7 @@ int main(int argc, char ** argv)
     {        
         if(argc < 2)
         {
-            print_info("load");
+            ucd_param_opt->print_command_info("load");
             return -1;
         }
         std::string ucd_name = argv[2];
@@ -291,7 +152,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("load");
+            ucd_param_opt->print_command_info("load");
             return -1;
         }
         ucd_util->save_ucd(ucd_name, ucd_save_path);
@@ -300,7 +161,7 @@ int main(int argc, char ** argv)
     {
         if(argc != 3)
         {
-            print_info("delete");
+            ucd_param_opt->print_command_info("delete");
             return -1;
         }
         else
@@ -313,7 +174,7 @@ int main(int argc, char ** argv)
     {
         if((argc != 5) && (argc != 6))
         {
-            print_info("save");
+            ucd_param_opt->print_command_info("save");
             return -1;
         }
         else
@@ -386,7 +247,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("upload");
+            ucd_param_opt->print_command_info("upload");
             return -1;
         }
     }        
@@ -394,7 +255,7 @@ int main(int argc, char ** argv)
     {
         if(argc != 3)
         {
-            print_info("info");
+            ucd_param_opt->print_command_info("info");
             return -1;
         }
         std::string json_path = argv[2];
@@ -412,7 +273,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("from");
+            ucd_param_opt->print_command_info("from");
             return -1;
         }
     }
@@ -428,7 +289,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("from_img_xml");
+            ucd_param_opt->print_command_info("from_img_xml");
             return -1;
         }
     }
@@ -493,7 +354,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("parse");
+            ucd_param_opt->print_command_info("parse");
             return -1;
         }
     }
@@ -510,7 +371,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("show");
+            ucd_param_opt->print_command_info("show");
             return -1;
         }
         // 展示所有的下载路径，为了方便单张图片的信息下载查看，可以使用 curl 下载单个 uc 对应的信息
@@ -530,7 +391,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("diff");
+            ucd_param_opt->print_command_info("diff");
             return -1;
         }
     }
@@ -549,7 +410,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("merge");
+            ucd_param_opt->print_command_info("merge");
             return -1;
         }
     }
@@ -564,7 +425,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("minus");
+            ucd_param_opt->print_command_info("minus");
             return -1;
         }
     }
@@ -592,7 +453,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("meta");
+            ucd_param_opt->print_command_info("meta");
             return -1;
         }
     }
@@ -665,7 +526,7 @@ int main(int argc, char ** argv)
             }
             else
             {
-                print_info("set");
+                ucd_param_opt->print_command_info("set");
                 return -1;
             }
             xini_write.dump(config_path);   
@@ -673,7 +534,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("set");
+            ucd_param_opt->print_command_info("set");
             return -1;
         }
     }
@@ -691,13 +552,13 @@ int main(int argc, char ** argv)
             else
             {
                 std::cout << "image dir not exists : " << img_dir << std::endl;
-                print_info("rename_img");
+                ucd_param_opt->print_command_info("rename_img");
                 return -1;
             }
         }
         else
         {
-            print_info("rename_img");
+            ucd_param_opt->print_command_info("rename_img");
             return -1;
         }
     }
@@ -716,13 +577,13 @@ int main(int argc, char ** argv)
             else
             {
                 std::cout << "image dir or xml dir not exists : " << img_dir << std::endl;
-                print_info("rename_img_xml");
+                ucd_param_opt->print_command_info("rename_img_xml");
                 return -1;
             }
         }
         else
         {
-            print_info("rename_img_xml");
+            ucd_param_opt->print_command_info("rename_img_xml");
             return -1;
         }
     }
@@ -744,13 +605,13 @@ int main(int argc, char ** argv)
             else
             {
                 std::cout << "ucd_path not exists or xml dir not exists : " << xml_dir << std::endl;
-                print_info("count_tags");
+                ucd_param_opt->print_command_info("count_tags");
                 return -1;
             }
         }
         else
         {
-            print_info("count_tags");
+            ucd_param_opt->print_command_info("count_tags");
             return -1;
         }
     }
@@ -769,7 +630,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("count_files");
+            ucd_param_opt->print_command_info("count_files");
             return -1;
         }
     }
@@ -790,7 +651,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("cut_small_img");
+            ucd_param_opt->print_command_info("cut_small_img");
             return -1;
         }
     }
@@ -804,7 +665,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("crop_to_xml");
+            ucd_param_opt->print_command_info("crop_to_xml");
             return -1;
         }
     }
@@ -826,7 +687,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            print_info("check_xml");
+            ucd_param_opt->print_command_info("check_xml");
             return -1;
         }
     }
@@ -871,7 +732,7 @@ int main(int argc, char ** argv)
                     if((! is_file(json_path)) || (json_path.substr(json_path.size()-5, json_path.size()) != ".json"))
                     {
                         std::cout << "ucd path not exists : " << json_path << std::endl;
-                        print_info("cache");
+                        ucd_param_opt->print_command_info("cache");
                         return -1;
                     }
 
@@ -931,13 +792,23 @@ int main(int argc, char ** argv)
         // 修改 ucd 文件的属性信息，因为对于比较大的 ucd 打开自己去修改非常麻烦
         // ucd attr dataset_name test_name
     }
+    else if(command_1 == "help")
+    {
+        // 输出指定 command 详细的参考
+    }
+    else if(ucd_param_opt->has_simliar_command(command_1))
+    {
+        ucd_param_opt->print_similar_command_info(command_1);
+        return -1;
+    }
     else
     {
-        print_info("*");
+        ucd_param_opt->print_all_fun();
         return -1;
     }
 
     delete ucd_util;
+    delete ucd_param_opt;
     end_time = clock();
     std::cout << "---------------" << std::endl;
     std::cout << "use time " << (double)(end_time-start_time)/CLOCKS_PER_SEC << " s" << std::endl;
