@@ -9,6 +9,8 @@ import shutil
 # python move_dll.py 即可将依赖的 so 保存到文件夹中
 # 将 so 拷贝到环境下的 /usr/lib 即可加载
 
+# todo 没必要分两步来做，直接 os.system("ldd ucd > require.txt") 生成需要的文件即可，一步直接得到所有的依赖文件
+
 # ----------------------------------------------------------------------------
 require_txt_path = r"required.txt"
 save_dir = r"./so_dir"

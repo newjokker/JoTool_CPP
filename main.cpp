@@ -15,6 +15,7 @@
 #include "include/ucDatasetUtil.hpp"
 #include "include/xini_file.h"
 #include "include/saturn_database_sql.hpp"
+#include "include/paramInfo.hpp"
 
 using namespace jotools;
 using namespace std;
@@ -26,22 +27,13 @@ using namespace std;
 
 // 完成 C++ 版本的 文件 服务，再部署到 docker 上面，这样在哪个服务器上都能方便进行启动
 
-// 生成  path_list 方便 v2 版本的测试，一个 txt 里面写满了 读取的 path
-
-// jo_post 实现 v0 ~ v4 的测试
-// 
-
-// 将更多的内容服务化，写一个轻量化的服务，这样最大化利用缓存的数据，可以搞成 docker 服务
-
-// 将 xml 信息整合到 ucd 中，实现最轻量化的 xml 数据（只支持 正框的数据） ucd from_img, ucd_from_img_xml(保存 xml 信息)
-
 // 整合了 xml 信息之后，连平时的测试结果都可以进行存储，这样方便后期的获取对比
 
 // 获取数据是按照顺序还是随机获取需要修改配置文件 ucdconfig.ini， 
 
 // 完善报错信息，对于 upload 失败等进行提示
 
-// merge 之类的信息都需要支持 合并 xml 信息
+// merge 支持 xml 合并（如何快速去重是个难以解决的问题，修改保存的结构，vector 改为 set）
 
 // 积极发挥服务化的各项功能，比如提交合并的数据
 
@@ -49,6 +41,18 @@ using namespace std;
 
 // 一个专门的测试文件，针对每一个函数写一个对应的测试函数，就像在 guihub 上看到别人写的那样
 
+// 完善使用函数的查询
+    //（0）不一次性将所有的帮助全部打印出来，分成多段打印
+    //（0.1）加上模糊匹配
+    //（1）功能分块
+    //（2）每一个提示分为合理的几部分
+    //（3）为提示写一个方便整理的类 关键字 | 中文提示 | 参数使用 | demo | 常见的错误，需要仔细检查的部分
+    //（4）自动给提示进行编号，可以使用编号代替 command，获取提示
+    //（5）提示可以有不同的格式，可以选择输出的顺序，
+
+// 使用 set 代替 vector 存放 dete_obj 
+
+// 发布功能，快速部署到所有机器上
 
 void print_info(std::string command="*")
 {
@@ -181,6 +185,19 @@ int main(int argc, char ** argv)
         print_info("*");
         return -1;
     }
+
+
+    // param
+
+    std::string command = argv[1];
+    ParamInfo *param_info = new ParamInfo("cut_small_img");
+
+    bool is_similar = param_info->is_similar(command);
+
+    std::cout << "is similar : " << is_similar << std::endl;
+
+    return -1;
+
 
     // time
     clock_t start_time, end_time;
