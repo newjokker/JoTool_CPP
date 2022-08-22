@@ -429,9 +429,12 @@ void UcdParamOpt::load_param_info()
     // filter
     ParamInfo * param_filter = new ParamInfo("filter");
     param_filter->group = "-";
-    param_filter->grammar = "";
-    param_filter->english_explain = "";
-    param_filter->chinese_explain = "";   
+    param_filter->grammar = "ucd filter ucd_path save_path {filter_labes}";
+    param_filter->english_explain = "filter ucd by labels";
+    param_filter->chinese_explain = "对 ucd 进行过滤，可以指定过滤的标签，如果不指定，按照 ucd 中的 used_label 中的内容进行过滤";
+    param_filter->demo = {
+        "ucd filter test.json save_json",
+        "ucd filter test.json save_json fzc_broken,Fnormal"};   
     UcdParamOpt::add_param(param_filter);
 
     // cache_info

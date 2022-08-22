@@ -16,6 +16,7 @@
 #include "include/xini_file.h"
 #include "include/saturn_database_sql.hpp"
 #include "include/paramInfo.hpp"
+#include "include/chinese.hpp"
 
 using namespace jotools;
 using namespace std;
@@ -699,6 +700,9 @@ int main(int argc, char ** argv)
     else if(command_1 == "say")
     {
         //大屏幕打印
+        // word();
+        test_word("好");
+
     }
     else if(command_1 == "filter")
     {
@@ -895,7 +899,7 @@ int main(int argc, char ** argv)
     }
 
     delete ucd_util;
-    delete ucd_param_opt;
+    delete ucd_param_opt;                         
     end_time = clock();
     std::cout << "---------------" << std::endl;
     std::cout << "use time " << (double)(end_time-start_time)/CLOCKS_PER_SEC << " s" << std::endl;
