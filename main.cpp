@@ -707,12 +707,8 @@ int main(int argc, char ** argv)
         // conf
         // assign label list split by ,
     }
-    else if(command_1 == "cache")
+    else if(command_1 == "cache_info")
     {
-        // 缓存信息的获取（有多少张缓存，指定的 json 有多少在缓存中，缓存率百分之多少）
-        // 缓存的清空
-        // 缓存信息的设置，最大缓存量。等
-
         if(! is_dir(ucd_util->cache_img_dir))
         {
             std::cout << "cache dir is not exists" << std::endl;
@@ -721,55 +717,103 @@ int main(int argc, char ** argv)
 
         int all_cache_img_count, exist_cache_img_count;
         std::string cache_info, json_path;
-        if((argc == 3) || (argc == 4))
+        if((argc == 2) || (argc == 3))
         {
-            cache_info = argv[2];
-            if(cache_info == "info")
+            if(argc == 3)
             {
-                if(argc == 4)
+                json_path = argv[2];
+                if((! is_file(json_path)) || (json_path.substr(json_path.size()-5, json_path.size()) != ".json"))
                 {
-                    json_path = argv[3];
-                    if((! is_file(json_path)) || (json_path.substr(json_path.size()-5, json_path.size()) != ".json"))
-                    {
-                        std::cout << "ucd path not exists : " << json_path << std::endl;
-                        ucd_param_opt->print_command_info("cache");
-                        return -1;
-                    }
+                    std::cout << "ucd path not exists : " << json_path << std::endl;
+                    ucd_param_opt->print_command_info("cache");
+                    return -1;
+                }
 
-                    UCDataset* ucd = new UCDataset(json_path);
-                    ucd->parse_json_info();
-                    std::string each_img_path;
-                    float exist_ratio;
-                    std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
-
-                    for(int i=0; i<ucd->uc_list.size(); i++)
+                UCDataset* ucd = new UCDataset(json_path);
+                ucd->parse_json_info();
+                std::string each_img_path;
+                float exist_ratio;
+                std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
+                // 
+                for(int i=0; i<ucd->uc_list.size(); i++)
+                {
+                    each_img_path = get_file_by_suffix_set(ucd_util->cache_img_dir, ucd->uc_list[i], suffix);
+                    if(each_img_path != "")
                     {
-                        each_img_path = get_file_by_suffix_set(ucd_util->cache_img_dir, ucd->uc_list[i], suffix);
-                        if(each_img_path != "")
-                        {
-                            exist_cache_img_count++;
-                        }
+                        exist_cache_img_count++;
                     }
-                    exist_ratio = (float)exist_cache_img_count / (float)ucd->uc_list.size();
-                    std::cout << "----------------------------------" << std::endl;
-                    std::cout << "all img count         : " << ucd->uc_list.size() << std::endl;
-                    std::cout << "exist cache img count : " << exist_cache_img_count << std::endl;
-                    std::cout << "exist ratio           : " << exist_ratio * 100 << " %" << std::endl;
-                    std::cout << "----------------------------------" << std::endl;
-                    delete ucd;
+                }
+                exist_ratio = (float)exist_cache_img_count / (float)ucd->uc_list.size();
+                std::cout << "----------------------------------" << std::endl;
+                std::cout << "all img count         : " << ucd->uc_list.size() << std::endl;
+                std::cout << "exist cache img count : " << exist_cache_img_count << std::endl;
+                std::cout << "exist ratio           : " << exist_ratio * 100 << " %" << std::endl;
+                std::cout << "----------------------------------" << std::endl;
+                delete ucd;
+            }
+            else
+            {
+                // 没有参数，查看基础情况
+                std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
+                std::vector<std::string> img_path_vector;
+                img_path_vector = get_all_file_path(ucd_util->cache_img_dir, suffix);
+                all_cache_img_count = img_path_vector.size();
+                std::cout << "----------------------------------" << std::endl;
+                std::cout << "all cache img count   : " << all_cache_img_count << std::endl;
+                std::cout << "----------------------------------" << std::endl;
+            }
+        }
+        else
+        {
+            ucd_param_opt->print_command_info("cache_info");
+        }
+    }
+    else if(command_1 == "cache_clear")
+    {
+        // 清空所有的缓存信息，指定 ucd 的话可以只清空这个 ucd 对应的信息
+        // 清空缓存信息的时候需要再次进行确认
+        if(! is_dir(ucd_util->cache_img_dir))
+        {
+            std::cout << "cache dir is not exists" << std::endl;
+            return -1;
+        }
+
+        if((argc == 2) || (argc == 3))
+        {
+            if(argc == 3)
+            {
+                std::string ucd_path = argv[2];
+                if(! ucd_util->is_ucd_path(ucd_path))
+                {
+                    std::cout << "ucd path not exists : " << ucd_path << std::endl;
+                    throw "ucd path not exists";
                 }
                 else
                 {
-                    // 没有参数，查看基础情况
-                    std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
-                    std::vector<std::string> img_path_vector;
-                    img_path_vector = get_all_file_path(ucd_util->cache_img_dir, suffix);
-                    all_cache_img_count = img_path_vector.size();
-                    std::cout << "----------------------------------" << std::endl;
-                    std::cout << "all cache img count   : " << all_cache_img_count << std::endl;
-                    std::cout << "----------------------------------" << std::endl;
+                    // 确认是否删除
+                    char confirm;
+                    std::cin >> confirm;
+                    if(confirm == 'y')
+                    {
+                        // 遍历删除所有的缓存图片
+                        // for(int i=0; )
+                        // todo 在 UCDatasetUtil 中新增删除缓存的函数，并调用
+                    }
+                    else
+                    {
+                        std::cout << "clear canceled" << std::endl;
+                        return -1;
+                    }
                 }
             }
+            else
+            {
+
+            }
+        }
+        else
+        {
+            ucd_param_opt->print_command_info("cache_clear");
         }
     }
     else if(command_1 == "acc")

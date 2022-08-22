@@ -64,7 +64,7 @@ bool ParamInfo::is_similar(std::string other_command)
 
     // std::cout << "diff index : " << diff_index << std::endl;
 
-    if(diff_index < 0.5)
+    if(diff_index < 0.6)
     {
         return true;
     }
@@ -434,13 +434,21 @@ void UcdParamOpt::load_param_info()
     param_filter->chinese_explain = "";   
     UcdParamOpt::add_param(param_filter);
 
-    // cache
-    ParamInfo * param_cache = new ParamInfo("cache");
-    param_cache->group = "-";
-    param_cache->grammar = "";
-    param_cache->english_explain = "";
-    param_cache->chinese_explain = "";   
-    UcdParamOpt::add_param(param_cache);
+    // cache_info
+    ParamInfo * param_cache_info = new ParamInfo("cache_info");
+    param_cache_info->group = "cache";
+    param_cache_info->grammar = "ucd cache_info {ucd_path}";
+    param_cache_info->english_explain = "viewing cache info";
+    param_cache_info->chinese_explain = "查看当前服务器的缓存信息";   
+    UcdParamOpt::add_param(param_cache_info);
+    
+    // cache_clear
+    ParamInfo * param_cache_clear = new ParamInfo("cache_clear");
+    param_cache_clear->group = "cache";
+    param_cache_clear->grammar = "ucd cache_clear {ucd_path}";
+    param_cache_clear->english_explain = "clear cache";
+    param_cache_clear->chinese_explain = "清空缓存信息";   
+    UcdParamOpt::add_param(param_cache_clear);
 
     // to
     ParamInfo * param_to = new ParamInfo("to");
