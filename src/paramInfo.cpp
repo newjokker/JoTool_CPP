@@ -60,11 +60,11 @@ bool ParamInfo::is_similar(std::string other_command)
 
     // 字符串的相似程度就是计算字符串的最小编辑代价
     int mec = min_edit_cost(ParamInfo::command, other_command, 1, 1, 1);
-    float diff_index = (float)mec / (float)(ParamInfo::command.size() + other_command.size());
+    float diff_index = (float)mec / (float)ParamInfo::command.size();
 
     // std::cout << "diff index : " << diff_index << std::endl;
 
-    if(diff_index < 0.25)
+    if(diff_index < 0.5)
     {
         return true;
     }
@@ -477,9 +477,9 @@ void UcdParamOpt::load_param_info()
     // help
     ParamInfo * param_help = new ParamInfo("help");
     param_help->group = "-";
-    param_help->grammar = "";
-    param_help->english_explain = "";
-    param_help->chinese_explain = "";   
+    param_help->grammar = "ucd help command";
+    param_help->english_explain = "print command info";
+    param_help->chinese_explain = "打印指定 command 对应的信息";   
     UcdParamOpt::add_param(param_help);
 
 

@@ -273,7 +273,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            ucd_param_opt->print_command_info("from");
+            ucd_param_opt->print_command_info("from_img");
             return -1;
         }
     }
@@ -795,6 +795,29 @@ int main(int argc, char ** argv)
     else if(command_1 == "help")
     {
         // 输出指定 command 详细的参考
+        if (argc == 3)
+        {
+            //
+            std::string command = argv[2];
+
+            if(ucd_param_opt->has_command(command))
+            {
+                ucd_param_opt->print_command_info(command);
+            }
+            else
+            {
+                if(ucd_param_opt->has_simliar_command(command_1))
+                {
+                    ucd_param_opt->print_similar_command_info(command);
+                }
+            }
+            return -1;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info("help");
+            return -1;
+        }
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {
