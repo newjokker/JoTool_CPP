@@ -770,8 +770,6 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "cache_clear")
     {
-        // 清空所有的缓存信息，指定 ucd 的话可以只清空这个 ucd 对应的信息
-        // 清空缓存信息的时候需要再次进行确认
         if(! is_dir(ucd_util->cache_img_dir))
         {
             std::cout << "cache dir is not exists" << std::endl;
@@ -780,6 +778,17 @@ int main(int argc, char ** argv)
 
         if((argc == 2) || (argc == 3))
         {
+            // 确认是否删除
+            char confirm;
+            std::cout << "Would clear cache:" << std::endl;
+            std::cout << "Proceed (y/n)? ";
+            std::cin >> confirm;
+            if(confirm != 'y')
+            {
+                std::cout << "clear canceled" << std::endl;
+                return -1;
+            }
+            // 删除 ucd 包含的所有图片
             if(argc == 3)
             {
                 std::string ucd_path = argv[2];
@@ -790,25 +799,13 @@ int main(int argc, char ** argv)
                 }
                 else
                 {
-                    // 确认是否删除
-                    char confirm;
-                    std::cin >> confirm;
-                    if(confirm == 'y')
-                    {
-                        // 遍历删除所有的缓存图片
-                        // for(int i=0; )
-                        // todo 在 UCDatasetUtil 中新增删除缓存的函数，并调用
-                    }
-                    else
-                    {
-                        std::cout << "clear canceled" << std::endl;
-                        return -1;
-                    }
+                    ucd_util->cache_clear(ucd_path);
                 }
             }
+            // 删除所有的文件
             else
             {
-
+                ucd_util->cache_clear();
             }
         }
         else

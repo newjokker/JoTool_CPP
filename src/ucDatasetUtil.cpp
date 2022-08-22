@@ -647,5 +647,47 @@ void UCDatasetUtil::count_ucd_tags(std::string ucd_path)
     std::cout << "-------------------------------" << std::endl;
 }
 
+void UCDatasetUtil::cache_clear()
+{
+
+    if(! is_dir(UCDatasetUtil::cache_img_dir))
+    {
+        std::cout << "ucd path not exists" << std::endl;
+    }
+
+    // 清空全部缓存
+    std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
+    std::vector<std::string> all_img_path_vector = get_all_file_path(UCDatasetUtil::cache_img_dir, suffix);
+    for(int i=0; i<all_img_path_vector.size(); i++)
+    {
+        remove(all_img_path_vector[i].c_str());
+        std::cout << i << " , remove : " << all_img_path_vector[i] << std::endl;
+    }
+}
+
+void UCDatasetUtil::cache_clear(std::string ucd_path)
+{
+    if(! is_dir(UCDatasetUtil::cache_img_dir))
+    {
+        std::cout << "ucd path not exists" << std::endl;
+    }
+
+    // 清空全部缓存
+    std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
+    UCDataset* ucd = new UCDataset(ucd_path);
+    ucd->parse_json_info();
+
+    for(int i=0; i<ucd->uc_list.size(); i++)
+    {
+        std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, ucd->uc_list[i], suffix);
+
+        if(is_file(img_path))
+        {
+            remove(img_path.c_str());
+            std::cout << i << " , remove : " << img_path << std::endl;
+        }
+    }
+    delete ucd;
+}
 
 

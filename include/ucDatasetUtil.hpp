@@ -78,6 +78,10 @@ class UCDatasetUtil
         void ucd_minus(std::string save_path, std::string ucd_path_1, std::string ucd_path_2);
         // 统计标签的个数
         void count_ucd_tags(std::string ucd_path);
+        // 清空缓存
+        void cache_clear();
+        void cache_clear(std::string ucd_path);
+        
     private:
         // 下载云上的数据
         void load_file(std::string url, std::string save_path, int index=-1);
