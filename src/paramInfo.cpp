@@ -293,7 +293,7 @@ void UcdParamOpt::load_param_info()
     // from_img
     ParamInfo * param_from_img = new ParamInfo("from_img");
     param_from_img->group = "ucd_opt";
-    param_from_img->grammar = "ucd from img_dir ucd_save_path";
+    param_from_img->grammar = "ucd from_img img_dir ucd_save_path";
     param_from_img->english_explain = "get ucd from loacal data(img)";
     param_from_img->chinese_explain = "本地文件生成数据集";   
     UcdParamOpt::add_param(param_from_img);
@@ -301,7 +301,7 @@ void UcdParamOpt::load_param_info()
     // from_img_xml
     ParamInfo * param_from_img_xml = new ParamInfo("from_img_xml");
     param_from_img_xml->group = "ucd_opt";
-    param_from_img_xml->grammar = "ucd from img_dir ucd_save_path";
+    param_from_img_xml->grammar = "ucd from_img_xml img_dir ucd_save_path";
     param_from_img_xml->english_explain = "get ucd from loacal data(img, xml)";
     param_from_img_xml->chinese_explain = "本地文件生成 ucd, ucd中包含 dete_obj 信息";   
     UcdParamOpt::add_param(param_from_img_xml);
@@ -469,9 +469,9 @@ void UcdParamOpt::load_param_info()
     // attr
     ParamInfo * param_attr = new ParamInfo("attr");
     param_attr->group = "-";
-    param_attr->grammar = "";
-    param_attr->english_explain = "";
-    param_attr->chinese_explain = "";   
+    param_attr->grammar = "ucd attr ucd_path attr_name attr_value";
+    param_attr->english_explain = "change attr in ucd";
+    param_attr->chinese_explain = "修改ucd中使用 ucd info 能看到的属性";   
     UcdParamOpt::add_param(param_attr);
 
     // help
@@ -481,8 +481,6 @@ void UcdParamOpt::load_param_info()
     param_help->english_explain = "print command info";
     param_help->chinese_explain = "打印指定 command 对应的信息";   
     UcdParamOpt::add_param(param_help);
-
-
 }
 
 

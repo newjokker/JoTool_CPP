@@ -44,7 +44,7 @@ class UcdParamOpt
 
         // 根据 command 获取参数实例
         ParamInfo get_param(std::string command);
-        // 加载参数
+        // 加载所有注册的参数
         void load_param_info();
         // 添加参数实例
         void add_param(ParamInfo *param_info);

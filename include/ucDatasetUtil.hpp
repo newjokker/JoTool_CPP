@@ -33,6 +33,8 @@ class UCDataset
         void unique();
         // 统计标签个数
         std::map<std::string, int> count_tags();
+        // 修改属性
+        void change_attar(std::string attr_name, std::string attr_value);
     private:
         std::string json_path;
 };

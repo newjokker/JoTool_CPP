@@ -791,6 +791,29 @@ int main(int argc, char ** argv)
     {
         // 修改 ucd 文件的属性信息，因为对于比较大的 ucd 打开自己去修改非常麻烦
         // ucd attr dataset_name test_name
+
+        if(argc == 5)
+        {
+            std::string ucd_path = argv[2];
+            if(ucd_util->is_ucd_path(ucd_path))
+            {
+                std::string attr_name = argv[3];
+                std::string attr_value = argv[4];
+                UCDataset * ucd = new UCDataset(ucd_path);
+                ucd->change_attar(attr_name, attr_value);
+                delete ucd;
+            }
+            else
+            {
+                std::cout << "ucd path not exists : " << ucd_path << std::endl;
+                throw "ucd path not exists";
+            }
+        }
+        else
+        {
+            ucd_param_opt->print_command_info("attr");
+            return -1;
+        }
     }
     else if(command_1 == "help")
     {

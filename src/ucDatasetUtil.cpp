@@ -14,6 +14,7 @@
 #include "include/fileOperateUtil.hpp"
 #include "include/ucDatasetUtil.hpp"
 #include "include/deteRes.hpp"
+#include "include/pystring.h"
 
 using json = nlohmann::json;
 
@@ -87,7 +88,7 @@ void UCDataset::print_json_info()
         // json 属性
         std::cout << "--------------------------------" << std::endl;
         std::cout << "dataset_name      : " << UCDataset::dataset_name << std::endl;
-        std::cout << "uc count          : " << UCDataset::uc_list.size() << std::endl;
+        std::cout << "uc_count          : " << UCDataset::uc_list.size() << std::endl;
         std::cout << "model_name        : " << UCDataset::model_name << std::endl;
         std::cout << "model_version     : " << UCDataset::model_version << std::endl;
         std::cout << "add_time          : " << UCDataset::add_time << std::endl;
@@ -100,7 +101,11 @@ void UCDataset::print_json_info()
             std::cout << "  ";
             for(int i=0; i<UCDataset::label_used.size(); i++)
             {
-                std::cout << UCDataset::label_used[i] << ",";
+                std::cout << UCDataset::label_used[i];
+                if(i != UCDataset::label_used.size()-1)
+                {
+                    std::cout << ",";
+                }
             }
             std::cout << std::endl;
         }
@@ -190,6 +195,45 @@ std::map<std::string, int> UCDataset::count_tags()
         iter++;
     }
     return count_map;
+}
+
+void UCDataset::change_attar(std::string attr_name, std::string attr_value)
+{
+    UCDataset::parse_json_info(true);
+    if(attr_name == "dataset_name")
+    {
+        UCDataset::dataset_name = attr_value;
+    }
+    else if(attr_name == "model_name")
+    {
+        UCDataset::model_name = attr_value;
+    }
+    else if(attr_name == "model_version")
+    {
+        UCDataset::model_version = attr_value;
+    }
+    else if(attr_name == "describe")
+    {
+        UCDataset::describe = attr_value;
+    }
+    else if(attr_name == "label_used")
+    {
+        // 将输入的 label_used 字符串根据 ',' 进行分割，获得 vector
+        std::vector<std::string> label_vector = pystring::split(attr_value, ",");
+        std::vector<std::string> label_used;
+        for(int i=0; i<label_vector.size(); i++)
+        {
+            std::string label = pystring::strip(label_vector[i]);
+            label_used.push_back(label);
+        }
+        UCDataset::label_used = label_used;
+    }
+    else
+    {
+        std::cout << "attr_name " << attr_name << "not in (dataset_name, model_name, model_version, describe, label_used)" << std::endl;
+        throw "attr_name " + attr_name + " not in (dataset_name, model_name, model_version, describe, label_used)";
+    }
+    UCDataset::save_to_json(UCDataset::json_path);
 }
 
 //
