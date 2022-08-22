@@ -699,10 +699,33 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "say")
     {
-        //大屏幕打印
-        // word();
-        test_word("好");
-
+        if((argc == 3) || (argc == 4) || (argc == 5))
+        {
+            std::string words = argv[2];
+            int height, width;
+            if(argc == 3)
+            {
+                height = 30;
+                width = 30;
+            }
+            else if(argc == 4)
+            {
+                height = std::stoi(argv[3]);
+                width = std::stoi(argv[3]);
+            }
+            else
+            {
+                height = std::stoi(argv[3]);
+                width = std::stoi(argv[3]);
+            }
+            ucd_util->print_words(words, height, width);
+            // test_word(words, height, width);
+            // hehe();
+        }
+        else
+        {
+            ucd_param_opt->print_command_info("say");
+        }
     }
     else if(command_1 == "filter")
     {

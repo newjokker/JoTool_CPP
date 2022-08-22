@@ -1,69 +1,83 @@
 #include <iostream>
-#include <fstream>
-#include <memory>
 #include <opencv2/opencv.hpp>
+#include "include/utf8.h"
 
 
-std::unique_ptr<char[]> unicode_to_utf8(uint16_t unicode) {
-  const int k_buffer_length = 3;
-  auto buffer = std::make_unique<char[]>(k_buffer_length);
-  buffer[0] = 0xE0 | (unicode >> 12);
-  buffer[1] = 0x80 | ((unicode >> 6) & 0x3F);
-  buffer[2] = 0x80 | (unicode & 0x3F);
-  return buffer;
-}
-
-void word() {
-  const auto k_chinese_encoding_begin = 0x4E00;
-  const auto k_chinese_encoding_end = 0x9FFF;
-  const auto k_output_filename = "test_01.txt";
-
-  std::ofstream out(k_output_filename, std::ios::out | std::ios::binary);
-  for (int i = k_chinese_encoding_begin; i <= k_chinese_encoding_end; i++) {
-    uint16_t unicode = i;
-    auto buffer = unicode_to_utf8(unicode);
-    out.write(buffer.get(), 3);
-    out.write("\n", 1);
-  }
-
-  out.close();
-}
-
-void test_word(std::string name) 
+ 
+int test_word(std::string name, int width=50, int height=50)
 {
-
-    std::string save_dir = "/home/disk3/word";
-    std::string word_path = save_dir + "/" + name + ".png";
-    // read word
-    cv::Mat word_mat = cv::imread(word_path);
+    // refer : https://www.codeleading.com/article/25882730552/
+    string strChar;
+    std::vector<std::string> words;
+    for(int i = 0; name[i] != '\0'; )
+    {
+        char chr = name[i];
+        if((chr & 0x80) == 0)
+        {
+            strChar = name.substr(i,1);
+            words.push_back(strChar);
+            ++i;
+        }
+        else if((chr & 0xF8) == 0xF8)
+        {
+            strChar = name.substr(i, 5);
+            words.push_back(strChar);
+            i+=5;
+        }
+        else if((chr & 0xF0) == 0xF0)
+        {
+            strChar = name.substr(i, 4);
+            words.push_back(strChar);
+            i+=4;
+        }
+        else if((chr & 0xE0) == 0xE0)
+        {
+            strChar = name.substr(i, 3);
+            words.push_back(strChar);
+            i+=3;
+        }
+        else if((chr & 0xC0) == 0xC0)
+        {
+            strChar = name.substr(i, 2);
+            words.push_back(strChar);
+            i+=2;
+        }
+    }
     // 
+    std::string save_dir = "/home/disk3/word";
+    std::vector<cv::Mat> word_mat_vector;
 
-    int height = word_mat.rows;
-    int width = word_mat.cols;
+    for(int i=0; i<words.size(); i++)
+    {
+        std::string word_path = save_dir + "/" + words[i] + ".png";
+        std::cout << word_path << std::endl;
+        cv::Mat word_mat = cv::imread(word_path);
+        cv::Mat word_resize;
+        cv::resize(word_mat, word_resize, cv::Size(height, width));
+        word_mat_vector.push_back(word_resize);
+    }
+
+    // print
     for(int i=0; i<height; i++)
     {
-        for(int j=0; j<width; j++)
+        for(int m=0; m<word_mat_vector.size(); m++)
         {
-            int index = (i * width + j)*3;
-            int pix_value = (int)word_mat.data[index];
-            if(pix_value > 254)
+            for(int j=0; j<width; j++)
             {
-                std::cout << "  ";
-            }
-            else
-            {
-                std::cout << "**";
+                int index = (i * width + j)*3;
+                int pix_value = (int)word_mat_vector[m].data[index];
+                if(pix_value > 254)
+                {
+                    std::cout << "  ";
+                }
+                else
+                {
+                    std::cout << "**";
+                }
             }
         }
         std::cout << std::endl;
     }
-
-
-    std::cout << word_mat.size() << std::endl;
-
-
-//     std::ofstream out(word_path, std::ios::out | std::ios::binary);
-//     out.write(name.c_str(), 3);
-//     out.write("\n", 1);
-//   out.close();
 }
+
+

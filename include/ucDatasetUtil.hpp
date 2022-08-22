@@ -81,6 +81,8 @@ class UCDatasetUtil
         // 清空缓存
         void cache_clear();
         void cache_clear(std::string ucd_path);
+        // 打印文字
+        void print_words(std::string name, int width=50, int height=50);
         
     private:
         // 下载云上的数据

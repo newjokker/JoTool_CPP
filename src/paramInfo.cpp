@@ -420,10 +420,10 @@ void UcdParamOpt::load_param_info()
 
     // say
     ParamInfo * param_say = new ParamInfo("say");
-    param_say->group = "-";
-    param_say->grammar = "";
-    param_say->english_explain = "";
-    param_say->chinese_explain = "";   
+    param_say->group = "fun";
+    param_say->grammar = "ucd say words {height} {width}";
+    param_say->english_explain = "say something with big character";
+    param_say->chinese_explain = "将汉字放大说点什么";   
     UcdParamOpt::add_param(param_say);
 
     // filter
