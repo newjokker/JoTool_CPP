@@ -83,6 +83,8 @@ class UCDatasetUtil
         void cache_clear(std::string ucd_path);
         // 打印文字
         void print_words(std::string name, int width=50, int height=50);
+        // 裁切小图
+        void cut_small_img(std::string img_dir, std::string xml_dir, std::string save_dir, bool is_split);
         
     private:
         // 下载云上的数据

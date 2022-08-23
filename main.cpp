@@ -45,6 +45,9 @@ using namespace std;
 
 // 发布功能，快速部署到所有机器上
 
+// ucd_opt 中的 xml_info 和 dete_res 灵活地转化
+
+// 考虑是否有缓存文件夹，是否有缓存文件，逻辑太复杂了，需要默认检查缓存文件夹，不存在就直接报错
 
 int main(int argc, char ** argv)
 {
@@ -636,7 +639,8 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "cut_small_img")
     {
-        if (argc== 6){
+        if (argc == 6)
+        {
             // get parameter
             std::string xml_dir = argv[2];
             std::string img_dir = argv[3];
@@ -647,7 +651,8 @@ int main(int argc, char ** argv)
             {
                 is_split = false;
             }
-            cut_small_img(xml_dir, img_dir, save_dir, is_split);
+            // cut_small_img(xml_dir, img_dir, save_dir, is_split);
+            ucd_util->cut_small_img(img_dir, xml_dir, save_dir, is_split);
         }
         else
         {
