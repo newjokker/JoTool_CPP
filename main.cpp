@@ -49,6 +49,9 @@ using namespace std;
 
 // 考虑是否有缓存文件夹，是否有缓存文件，逻辑太复杂了，需要默认检查缓存文件夹，不存在就直接报错
 
+// 在一个专门的目录中测试 存储 dete_info 信息使用 set 结构，防止插入对象不断重复
+
+
 int main(int argc, char ** argv)
 {
 
@@ -103,7 +106,7 @@ int main(int argc, char ** argv)
     }
 
     // read config
-    if(is_file(config_path))
+    if(! is_file(config_path))
     {
         xini_file_t xini_file(config_path);
         host = (const std::string &)xini_file["server"]["host"];

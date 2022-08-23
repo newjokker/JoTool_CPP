@@ -60,7 +60,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRCLIST)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/tools SRCLIST)
 
-add_library(saturntools_v1.1 SHARED ${SRCLIST})   
+add_library(saturntools_v1.2 SHARED ${SRCLIST})   
 # add_library(saturntools STATIC ${SRCLIST})   
 
 add_executable(ucd main.cpp)
@@ -73,7 +73,7 @@ target_link_libraries(
     OpenSSL::Crypto OpenSSL::SSL
     # curlpp
     # curl
-    saturntools_v1.1
+    saturntools_v1.2
 	nlohmann_json::nlohmann_json
     ${MYSQL_LIBS}
 )
