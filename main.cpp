@@ -115,6 +115,14 @@ int main(int argc, char ** argv)
         sql_db = (const std::string &)xini_file["sql"]["db"];
         cache_dir = (const std::string &)xini_file["cache"]["dir"];
     }
+    
+    // 必须要有缓存文件夹，否则报错，因为逻辑太麻烦了
+    if(is_dir(cache_dir))
+    {
+        std::cout << "cache_dir not exists, edit ucdconfig.ini cache/cache_dir : " << std::endl;
+        std::cout << "edit ucdconfig.ini with ucd set " << std::endl;
+        throw "cache_dir not exists!";
+    }
 
     UCDatasetUtil* ucd_util = new UCDatasetUtil(host , port, cache_dir);
     std::string command_1 = argv[1];
