@@ -744,10 +744,18 @@ void UCDatasetUtil::print_words(std::string name, int width, int height)
     {
         std::string word_path = save_dir + "/" + words[i] + ".png";
         std::cout << word_path << std::endl;
-        cv::Mat word_mat = cv::imread(word_path);
-        cv::Mat word_resize;
-        cv::resize(word_mat, word_resize, cv::Size(height, width));
-        word_mat_vector.push_back(word_resize);
+        if(is_file(word_path))
+        {
+            cv::Mat word_mat = cv::imread(word_path);
+            cv::Mat word_resize;
+            cv::resize(word_mat, word_resize, cv::Size(width, height));
+            word_mat_vector.push_back(word_resize);
+        }
+        else
+        {
+            std::cout << "* 未找到字符 : " << words[i] << "，目前仅支持中文"<< std::endl;
+            throw "未找到字符 : " + words[i] ;
+        }
     }
 
     // print

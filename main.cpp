@@ -16,7 +16,6 @@
 #include "include/xini_file.h"
 #include "include/saturn_database_sql.hpp"
 #include "include/paramInfo.hpp"
-#include "include/chinese.hpp"
 
 using namespace jotools;
 using namespace std;
@@ -716,11 +715,10 @@ int main(int argc, char ** argv)
             else
             {
                 height = std::stoi(argv[3]);
-                width = std::stoi(argv[3]);
+                width = std::stoi(argv[4]);
             }
             ucd_util->print_words(words, height, width);
-            // test_word(words, height, width);
-            // hehe();
+            return -1;
         }
         else
         {
@@ -733,6 +731,8 @@ int main(int argc, char ** argv)
         // used_label
         // conf
         // assign label list split by ,
+        // filter by uc 是否为 uc 名字对数据进行划分，是否为 uc 直接与数据库上核对
+        // 
     }
     else if(command_1 == "cache_info")
     {
@@ -846,7 +846,7 @@ int main(int argc, char ** argv)
         // 可以设置是否保存标准的画图
         // 直接画出 0.1 ~ 0.9 的统计数据
     }
-    else if(command_1 == "to")
+    else if(command_1 == "to_yolo")
     {
         // 转为 yolo 的训练格式，vit 的训练格式 faster rcnn csra 的训练格式
     }
