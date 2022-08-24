@@ -5,7 +5,7 @@
 
 #include <iostream>
 #include <vector>
-
+#include "include/lablelmeObj.hpp"
 
 class UCDataset
 {
@@ -24,9 +24,9 @@ class UCDataset
         //
         UCDataset(std::string json_path);
         // 解析 json 数据
-        void parse_json_info(bool parse_xml_info=false);
+        void parse_ucd(bool parse_xml_info=false);
         // 保存为 json
-        void save_to_json(std::string save_path);
+        void save_to_ucd(std::string save_path);
         // 打印 json 数据
         void print_json_info();
         // uc list 去重

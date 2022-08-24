@@ -6,7 +6,6 @@
 #include <time.h>
 #include <fstream>
 #include <nlohmann/json.hpp>
-#include <nlohmann/json.hpp>
 #include <httplib.h>
 #include <string>
 #include <set>
@@ -36,7 +35,7 @@ UCDataset::UCDataset(std::string json_path)
     UCDataset::json_path = json_path;
 }
 
-void UCDataset::parse_json_info(bool parse_xml_info)
+void UCDataset::parse_ucd(bool parse_xml_info)
 {
     if(! is_file(UCDataset::json_path))
     {
@@ -86,7 +85,7 @@ void UCDataset::print_json_info()
     // print statistics res
     if(is_file(UCDataset::json_path))
     {
-        UCDataset::parse_json_info();
+        UCDataset::parse_ucd();
         // json 属性
         std::cout << "--------------------------------" << std::endl;
         std::cout << "dataset_name      : " << UCDataset::dataset_name << std::endl;
@@ -134,7 +133,7 @@ void UCDataset::print_json_info()
     std::cout << "--------------------------------" << std::endl;
 }
 
-void UCDataset::save_to_json(std::string save_path)
+void UCDataset::save_to_ucd(std::string save_path)
 {
     nlohmann::json json_info = {
         {"dataset_name", UCDataset::dataset_name},
@@ -174,7 +173,7 @@ std::map<std::string, int> UCDataset::count_tags()
     }
     // count_tags
     std::map< std::string, int > count_map;
-    UCDataset::parse_json_info(true);
+    UCDataset::parse_ucd(true);
     std::string each_tag;
     auto iter = UCDataset::xml_info.begin();
     while(iter != UCDataset::xml_info.end())
@@ -201,7 +200,7 @@ std::map<std::string, int> UCDataset::count_tags()
 
 void UCDataset::change_attar(std::string attr_name, std::string attr_value)
 {
-    UCDataset::parse_json_info(true);
+    UCDataset::parse_ucd(true);
     if(attr_name == "dataset_name")
     {
         UCDataset::dataset_name = attr_value;
@@ -235,7 +234,7 @@ void UCDataset::change_attar(std::string attr_name, std::string attr_value)
         std::cout << "attr_name " << attr_name << "not in (dataset_name, model_name, model_version, describe, label_used)" << std::endl;
         throw "attr_name " + attr_name + " not in (dataset_name, model_name, model_version, describe, label_used)";
     }
-    UCDataset::save_to_json(UCDataset::json_path);
+    UCDataset::save_to_ucd(UCDataset::json_path);
 }
 
 std::vector<std::string> UCDataset::uc_slice(int start, int end)
@@ -301,7 +300,7 @@ void UCDatasetUtil::save_img_xml_json(std::string save_dir, bool need_img, bool 
     // json data = json::parse(jsfile); 
 
     UCDataset* ucd = new UCDataset(UCDatasetUtil::json_path);
-    ucd->parse_json_info();
+    ucd->parse_ucd();
 
     std::string each_uc;
     std::string img_url, xml_url, json_url;
@@ -489,7 +488,7 @@ void UCDatasetUtil::get_ucd_from_img_dir(std::string img_dir, std::string ucd_pa
             ucd->uc_list.push_back(uc);
         }
     }
-    ucd->save_to_json(ucd_path);
+    ucd->save_to_ucd(ucd_path);
     delete ucd;
 }
 
@@ -528,7 +527,7 @@ void UCDatasetUtil::get_ucd_from_img_xml_dir(std::string img_dir, std::string xm
             delete dete_res;
         }
     }
-    ucd->save_to_json(ucd_path);
+    ucd->save_to_ucd(ucd_path);
     delete ucd;
 }
 
@@ -549,7 +548,7 @@ void UCDatasetUtil::merge_ucds(std::string save_path, std::vector<std::string> u
     for(int i=0; i<ucd_path_vector.size(); i++)
     {
         UCDataset* ucd = new UCDataset(ucd_path_vector[i]);
-        ucd->parse_json_info();
+        ucd->parse_ucd();
         // uc
         for(int j=0; j<ucd->uc_list.size(); j++)
         {
@@ -576,16 +575,16 @@ void UCDatasetUtil::merge_ucds(std::string save_path, std::vector<std::string> u
         merge->label_used.push_back(iter_label->data());
         iter_label ++;
     }
-    merge->save_to_json(save_path);
+    merge->save_to_ucd(save_path);
     delete merge;
 }
 
 void UCDatasetUtil::ucd_diff(std::string ucd_path_1, std::string ucd_path_2)
 {
     UCDataset* ucd1 = new UCDataset(ucd_path_1);
-    ucd1->parse_json_info();
+    ucd1->parse_ucd();
     UCDataset* ucd2 = new UCDataset(ucd_path_2);
-    ucd2->parse_json_info();
+    ucd2->parse_ucd();
     std::vector<std::string> uc_intersection;
     // set_intersection
     std::set<std::string> uc_set1(ucd1->uc_list.begin(), ucd1->uc_list.end());
@@ -605,9 +604,9 @@ void UCDatasetUtil::ucd_diff(std::string ucd_path_1, std::string ucd_path_2)
 void UCDatasetUtil::ucd_minus(std::string save_path, std::string ucd_path_1, std::string ucd_path_2)
 {
     UCDataset* ucd1 = new UCDataset(ucd_path_1);
-    ucd1->parse_json_info();
+    ucd1->parse_ucd();
     UCDataset* ucd2 = new UCDataset(ucd_path_2);
-    ucd2->parse_json_info();
+    ucd2->parse_ucd();
     UCDataset* ucd_res = new UCDataset(save_path);
     std::vector<std::string> uc_difference;
     // set_intersection
@@ -616,7 +615,7 @@ void UCDatasetUtil::ucd_minus(std::string save_path, std::string ucd_path_1, std
     std::set_difference(uc_set1.begin(), uc_set1.end(), uc_set2.begin(), uc_set2.end(), std::inserter(uc_difference, uc_difference.begin()));
     // save
     ucd_res->uc_list = uc_difference;
-    ucd_res->save_to_json(save_path);
+    ucd_res->save_to_ucd(save_path);
     // delete
     delete ucd1;
     delete ucd2;
@@ -634,7 +633,7 @@ void UCDatasetUtil::save_to_xml(std::string save_dir, std::vector<std::string> u
 
     //
     UCDataset* ucd = new UCDataset(UCDatasetUtil::json_path);
-    ucd->parse_json_info(true);
+    ucd->parse_ucd(true);
 
     std::string save_xml_path, uc;
     std::string tag;
@@ -733,7 +732,7 @@ void UCDatasetUtil::cache_clear(std::string ucd_path)
     // 清空全部缓存
     std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
     UCDataset* ucd = new UCDataset(ucd_path);
-    ucd->parse_json_info();
+    ucd->parse_ucd();
 
     for(int i=0; i<ucd->uc_list.size(); i++)
     {
@@ -853,7 +852,7 @@ void UCDatasetUtil::cut_small_img(std::string img_dir, std::string xml_dir, std:
     if(UCDatasetUtil::is_ucd_path(xml_dir))
     {
         ucd = new UCDataset(xml_dir);
-        ucd->parse_json_info(true);
+        ucd->parse_ucd(true);
         if(ucd->xml_info.size() == 0)
         {
             std::cout << "no dete_obj in ucd_path : " << xml_dir << std::endl;

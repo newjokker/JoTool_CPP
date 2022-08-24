@@ -17,6 +17,13 @@
 #include "include/saturn_database_sql.hpp"
 #include "include/paramInfo.hpp"
 #include "include/printCpp.hpp"
+#include "include/lablelmeObj.hpp"
+
+
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
+
 
 using namespace jotools;
 using namespace std;
@@ -270,7 +277,7 @@ int main(int argc, char ** argv)
 
             // load
             UCDataset* ucd = new UCDataset(json_path);
-            ucd->parse_json_info();
+            ucd->parse_ucd();
             // ucd_util->json_path = json_path;
 
             // need assign number of data
@@ -344,7 +351,7 @@ int main(int argc, char ** argv)
 
             // load
             UCDataset* ucd = new UCDataset(json_path);
-            ucd->parse_json_info();
+            ucd->parse_ucd();
             // ucd_util->json_path = json_path;
             std::vector<std::string> uc_vector = ucd->uc_list;
             // 
@@ -420,6 +427,48 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
+    else if(command_1 == "from_img_json")
+    {
+        // 将 img 和 对应的 labelme 格式的 json 导入为 ucd 
+
+
+        struct obj
+        {
+            std::string label;
+            std::vector< std::vector<float> > points;
+            int group_id;
+            std::string shape_type;
+            std::vector<std::string> flags;
+        };
+
+
+        std::ifstream jsfile("/home/ldq/del/test.json");
+        json data = json::parse(jsfile); 
+
+        auto shapes = data["shapes"];
+
+        if(shapes != nullptr)
+        { 
+
+            obj a;
+
+            std::cout << shapes.size() << std::endl;
+
+            a.points = shapes[0]["points"];
+
+            std::cout << "parse points ok" << std::endl;
+            std::cout << a.points[0][0] << std::endl;
+            std::cout << a.points[0][1] << std::endl;
+
+            // a = shapes[0];
+
+            std::cout << shapes[0]["label"] << std::endl;
+        }
+
+
+
+
+    }
     else if(command_1 == "parse_xml")
     {
         // ucd 中解压出 xml 信息，同时可以解析出 img 信息
@@ -437,7 +486,7 @@ int main(int argc, char ** argv)
 
             // 输入要解析的 ucd_path 和 需要的 uc 
             UCDataset* ucd = new UCDataset(json_path);
-            ucd->parse_json_info();
+            ucd->parse_ucd();
             ucd_util->json_path = json_path;
             ucd_util->save_to_xml(save_dir, ucd->uc_list);
         }
@@ -858,12 +907,11 @@ int main(int argc, char ** argv)
                 if((! is_file(json_path)) || (json_path.substr(json_path.size()-5, json_path.size()) != ".json"))
                 {
                     std::cout << "ucd path not exists : " << json_path << std::endl;
-                    ucd_param_opt->print_command_info("cache");
                     return -1;
                 }
 
                 UCDataset* ucd = new UCDataset(json_path);
-                ucd->parse_json_info();
+                ucd->parse_ucd();
                 std::string each_img_path;
                 float exist_ratio;
                 std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
@@ -949,6 +997,7 @@ int main(int argc, char ** argv)
     else if(command_1 == "acc")
     {
         // 对比两个 ucd 的对比结果，
+        // ucd 作为标准结果，只允许 ucd 之间进行对比
         // 可以设置是否保存标准的画图
         // 直接画出 0.1 ~ 0.9 的统计数据
     }
