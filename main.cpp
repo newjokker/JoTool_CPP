@@ -211,7 +211,6 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "save")
     {
-
         // save 保存到本地
         if((argc == 5) || (argc == 6))
         {
@@ -242,10 +241,7 @@ int main(int argc, char ** argv)
             bool need_img, need_xml;
             std::string save_img_dir = save_dir + "/" + "img";
             std::string save_xml_dir = save_dir + "/" + "xml";
-            
-
-            std::cout << save_mode << std::endl;
-
+        
             if(save_mode[0] == '0')
             {
                 need_img = false;
@@ -275,7 +271,7 @@ int main(int argc, char ** argv)
             // load
             UCDataset* ucd = new UCDataset(json_path);
             ucd->parse_json_info();
-            ucd_util->json_path = json_path;
+            // ucd_util->json_path = json_path;
 
             // need assign number of data
             int need_count = -1;
@@ -289,9 +285,9 @@ int main(int argc, char ** argv)
             {
                 uc_vector = ucd->uc_list;
             }
-            
-            ucd_util->load_img(save_img_dir, uc_vector);
-            ucd_util->load_xml(save_xml_dir, uc_vector);
+
+            if(need_img){ucd_util->load_img(save_img_dir, uc_vector);}
+            if(need_xml){ucd_util->load_xml(save_xml_dir, uc_vector);}
             delete ucd;
         }
         else
@@ -303,7 +299,64 @@ int main(int argc, char ** argv)
     else if(command_1 == "save_cache")
     {
         // 保存到缓存中，xml 和 img 都有对应的缓存
-        // xml 缓存因为会不断更新，提供 update xml 缓存的功能
+
+        if(argc == 4)
+        {
+            std::string json_path = argv[2];
+            std::string save_mode = argv[3];
+            
+            // json_path
+            if(! is_file(json_path))
+            {
+                std::cout << "json_path not exists : " << json_path << std::endl;
+                throw "json_path not exists";
+            }
+
+            // save_mode
+            if(save_mode.size() != 2)
+            {
+                std::cout << "save_mode illeagal, need save_mode such as 11 | 10  " << std::endl;
+                throw "save_mode illeagal";
+            }
+
+            // load 
+            bool need_img, need_xml;
+            // std::string save_img_dir = ucd_util->cache_img_dir;
+            // std::string save_xml_dir = 
+        
+            if(save_mode[0] == '0')
+            {
+                need_img = false;
+            }
+            else
+            {
+                need_img = true;
+            }
+
+            if(save_mode[1] == '0')
+            {
+                need_xml = false;
+            }
+            else
+            {
+                need_xml = true;
+            }
+
+            // load
+            UCDataset* ucd = new UCDataset(json_path);
+            ucd->parse_json_info();
+            // ucd_util->json_path = json_path;
+            std::vector<std::string> uc_vector = ucd->uc_list;
+            // 
+            if(need_img){ucd_util->load_img(ucd_util->cache_img_dir, uc_vector);}
+            if(need_xml){ucd_util->load_xml(ucd_util->cache_xml_dir, uc_vector);}
+            delete ucd;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info("save_cache");
+        }
+
     }
     else if(command_1 == "upload")
     {
@@ -507,6 +560,8 @@ int main(int argc, char ** argv)
     {
         if(argc == 2)
         {
+            std::cout << "-----------------------------" << std::endl;
+            std::cout << std::setw(15) << "ucd " << app_version << std::endl;
             std::cout << "-----------------------------" << std::endl;
             std::cout << "[server]" << std::endl;
             std::cout << "host          : " << host << std::endl;

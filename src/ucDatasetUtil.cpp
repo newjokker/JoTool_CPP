@@ -259,9 +259,14 @@ UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
     if(is_dir(cache_dir))
     {
         UCDatasetUtil::cache_img_dir = UCDatasetUtil::cache_dir + "/" + "img_cache";
+        UCDatasetUtil::cache_xml_dir = UCDatasetUtil::cache_dir + "/" + "xml_cache";
         if(! is_dir(UCDatasetUtil::cache_img_dir))
         {
             create_folder(UCDatasetUtil::cache_img_dir);
+        }
+        if(! is_dir(UCDatasetUtil::cache_xml_dir))
+        {
+            create_folder(UCDatasetUtil::cache_xml_dir);
         }
     }
 }

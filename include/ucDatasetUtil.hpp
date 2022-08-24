@@ -48,6 +48,7 @@ class UCDatasetUtil
         // 缓存文件夹，多个人多个项目使用的时候可以直接缓存图片
         std::string cache_dir;
         std::string cache_img_dir;
+        std::string cache_xml_dir;
         std::string json_path;
         std::string host;
         std::string root_url;

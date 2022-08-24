@@ -274,6 +274,14 @@ void UcdParamOpt::load_param_info()
     param_parse->chinese_explain = "下载 图片 可以选择从 json 解析出 xml";   
     UcdParamOpt::add_param(param_parse);
     
+    // update_xml
+    ParamInfo * param_update_xml = new ParamInfo("update_xml");
+    param_update_xml->group = "sync";
+    param_update_xml->grammar = "ucd update_xml {ucd_path}";
+    param_update_xml->english_explain = "update cache xml";
+    param_update_xml->chinese_explain = "更新本地缓存中的 xml, 可以全部更新，或者指定更新某 ucd 中包含的 uc 的本地 xml 缓存";   
+    UcdParamOpt::add_param(param_update_xml);
+    
     // show
     ParamInfo * param_show = new ParamInfo("show");
     param_show->group = "info";
