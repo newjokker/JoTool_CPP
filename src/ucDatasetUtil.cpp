@@ -623,15 +623,13 @@ void UCDatasetUtil::ucd_minus(std::string save_path, std::string ucd_path_1, std
     delete ucd_res;
 }
 
-void UCDatasetUtil::save_to_xml(std::string save_dir, int get_count)
-{
-    // to 创建一个 xml 路径 xml_from_ucd
-    
-    std::string save_xml_dir = save_dir + "/" + "xml_from_ucd";
+void UCDatasetUtil::save_to_xml(std::string save_dir, std::vector<std::string> uc_vector)
+{    
 
-    if(! is_dir(save_xml_dir))
+    if(! is_dir(save_dir))
     {
-        create_folder(save_xml_dir);
+        std::cout << "save dir not exists : " << save_dir << std::endl;
+        throw "save dir not exists";
     }
 
     //
@@ -643,16 +641,10 @@ void UCDatasetUtil::save_to_xml(std::string save_dir, int get_count)
     int x1, x2, y1, y2;
     float conf;
 
-    for(int i=0; i<ucd->uc_list.size(); i++)
+    for(int i=0; i<uc_vector.size(); i++)
     {
-        if(get_count == 0)
-        { 
-            break; 
-        }
-        get_count-- ;
-
-        uc = ucd->uc_list[i];
-        save_xml_path = save_xml_dir + "/" + uc + ".xml";
+        uc = uc_vector[i];
+        save_xml_path = save_dir + "/" + uc + ".xml";
         //
         jotools::DeteRes* dete_res = new jotools::DeteRes();
         std::vector< std::vector< std::string > > xml_info = ucd->xml_info[uc];
@@ -669,6 +661,7 @@ void UCDatasetUtil::save_to_xml(std::string save_dir, int get_count)
         dete_res->save_to_xml(save_xml_path);
         delete dete_res;
     }
+    std::cout << "parse " << uc_vector.size() << " uc" << std::endl;
     delete ucd;
 }
 

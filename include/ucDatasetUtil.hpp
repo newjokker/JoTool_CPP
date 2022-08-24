@@ -61,7 +61,7 @@ class UCDatasetUtil
         void load_xml(std::string save_dir, std::vector<std::string> uc_list);
         void load_ucd(std::string ucd_name, std::string save_dir);
         // 从 json 中解析 xml 并保存
-        void save_to_xml(std::string save_path, int get_count=-1);
+        void save_to_xml(std::string save_path, std::vector<std::string>);
         // 查看库中的 ucd
         void search_ucd();
         // 是不是 ucd path （1）是不是合法文件 （2）是否为 .json 结尾的文件

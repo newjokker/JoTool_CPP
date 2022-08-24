@@ -420,68 +420,30 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
-    else if(command_1 == "parse")
+    else if(command_1 == "parse_xml")
     {
         // ucd 中解压出 xml 信息，同时可以解析出 img 信息
-        if((argc == 5) || (argc == 6))
+        if(argc == 4)
         {
             std::string json_path = argv[2];
             std::string save_dir = argv[3];
-            std::string save_mode = argv[4];
-            // need assign number of data
-            int need_count = -1;
-            if(argc == 6)
-            {
-                need_count = std::stoi(argv[5]);
-            }
+            std::vector<std::string> uc_vector;
 
-            // json_path
             if(! is_file(json_path))
             {
-                std::cout << "json_path not exists : " << json_path << std::endl;
-                throw "json_path not exists";
-            }
-            // save_path
-           if(! is_dir(save_dir))
-            {
-                std::cout << "save_dir not exists : " << save_dir << std::endl;
-                throw "save_dir not exists";
-             }
-            // save_mode
-            if(save_mode.size() != 2)
-            {
-                std::cout << "save_mode illeagal, need save_mode such as 11 | 10  " << save_dir << std::endl;
-                throw "save_mode illeagal";
-            }
-            bool need_img, need_xml, need_json;
-            
-            if(save_mode[0] == '0')
-            {
-                need_img = false;
-            }
-            else
-            {
-                need_img = true;
+                std::cout << "ucd_path not exists : " << json_path << std::endl;
+                throw "ucd_path not exists";
             }
 
-            if(save_mode[1] == '0')
-            {
-                need_xml = false;
-            }
-            else
-            {
-                need_xml = true;
-            }
-            
-            // load
+            // 输入要解析的 ucd_path 和 需要的 uc 
+            UCDataset* ucd = new UCDataset(json_path);
+            ucd->parse_json_info();
             ucd_util->json_path = json_path;
-            ucd_util->save_img_xml_json(save_dir, need_img, false, need_count);
-            // parse xml from ucd 
-            ucd_util->save_to_xml(save_dir, need_count);
+            ucd_util->save_to_xml(save_dir, ucd->uc_list);
         }
         else
         {
-            ucd_param_opt->print_command_info("parse");
+            ucd_param_opt->print_command_info("parse_xml");
             return -1;
         }
     }

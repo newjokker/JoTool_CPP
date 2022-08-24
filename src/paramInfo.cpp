@@ -266,13 +266,13 @@ void UcdParamOpt::load_param_info()
     param_save_cache->chinese_explain = "从服务器下载 图片|标注 保存到 ucd 缓存文件夹";   
     UcdParamOpt::add_param(param_save_cache);
     
-    // parse
-    ParamInfo * param_parse = new ParamInfo("parse");
-    param_parse->group = "sync";
-    param_parse->grammar = "ucd parse json_path save_dir save_mode(image,xml_from_json) {need_count}";
-    param_parse->english_explain = "parse xml from json";
-    param_parse->chinese_explain = "下载 图片 可以选择从 json 解析出 xml";   
-    UcdParamOpt::add_param(param_parse);
+    // parse_xml
+    ParamInfo * param_parse_xml = new ParamInfo("parse_xml");
+    param_parse_xml->group = "sync";
+    param_parse_xml->grammar = "ucd parse_xml json_path save_dir";
+    param_parse_xml->english_explain = "parse xml from json";
+    param_parse_xml->chinese_explain = "从 json 中解析出 xml";   
+    UcdParamOpt::add_param(param_parse_xml);
     
     // update_xml
     ParamInfo * param_update_xml = new ParamInfo("update_xml");
