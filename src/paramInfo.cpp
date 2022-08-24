@@ -242,13 +242,29 @@ void UcdParamOpt::load_param_info()
     param_check->chinese_explain = "查看服务器中所有 ucd 信息，包括官方 ucd 和 自定义 ucd";
     UcdParamOpt::add_param(param_check);
     
+    // search
+    ParamInfo * param_search = new ParamInfo("search");
+    param_search->group = "sync";
+    param_search->grammar = "ucd search keyword";
+    param_search->english_explain = "get all ucd official|customer from server by keyword";
+    param_search->chinese_explain = "根据关键字查看服务器中所有 ucd 信息，包括官方 ucd 和 自定义 ucd";
+    UcdParamOpt::add_param(param_search);
+    
     // save
     ParamInfo * param_save = new ParamInfo("save");
     param_save->group = "sync";
-    param_save->grammar = "ucd save json_path save_dir save_mode(image,xml,json) {need_count}";
+    param_save->grammar = "ucd save ucd_path save_dir save_mode(image,xml) {need_count}";
     param_save->english_explain = "load img|xml from server";
-    param_save->chinese_explain = "从服务器下载 图片|标注";   
+    param_save->chinese_explain = "从服务器下载 图片|标注 保存到指定文件夹";   
     UcdParamOpt::add_param(param_save);
+    
+    // save_cache
+    ParamInfo * param_save_cache = new ParamInfo("save_cache");
+    param_save_cache->group = "sync";
+    param_save_cache->grammar = "ucd save_cache ucd_path save_mode(image,xml)";
+    param_save_cache->english_explain = "load img|xml from server";
+    param_save_cache->chinese_explain = "从服务器下载 图片|标注 保存到 ucd 缓存文件夹";   
+    UcdParamOpt::add_param(param_save_cache);
     
     // parse
     ParamInfo * param_parse = new ParamInfo("parse");
@@ -317,9 +333,9 @@ void UcdParamOpt::load_param_info()
     // meta
     ParamInfo * param_meta = new ParamInfo("meta");
     param_meta->group = "info";
-    param_meta->grammar = "ucd meta";
+    param_meta->grammar = "ucd meta {attr_name}";
     param_meta->english_explain = "show config info";
-    param_meta->chinese_explain = "查看配置信息";   
+    param_meta->chinese_explain = "查看配置信息, 可以指定配置的名字";   
     UcdParamOpt::add_param(param_meta);
     
     // set

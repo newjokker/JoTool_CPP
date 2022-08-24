@@ -31,6 +31,8 @@ class UCDataset
         void print_json_info();
         // uc list 去重
         void unique();
+        // 对 uc 进行切片
+        std::vector<std::string> uc_slice(int start, int end);
         // 统计标签个数
         std::map<std::string, int> count_tags();
         // 修改属性
@@ -52,14 +54,15 @@ class UCDatasetUtil
         int port;
         // 
         UCDatasetUtil(std::string host, int port, std::string cache_dir="");
-        // 下载 ucd 中对应的数据
+        // 从服务器下载对应的数据
         void save_img_xml_json(std::string save_dir, bool need_img=true, bool need_xml=true, int need_count=-1);
-        // 下载库中的 ucd
-        void save_ucd(std::string ucd_name, std::string save_dir);
-        // 从 json 中解析 xml
-        void save_xml(std::string save_path, int get_count=-1);
+        void load_img(std::string save_dir, std::vector<std::string> uc_list);
+        void load_xml(std::string save_dir, std::vector<std::string> uc_list);
+        void load_ucd(std::string ucd_name, std::string save_dir);
+        // 从 json 中解析 xml 并保存
+        void save_to_xml(std::string save_path, int get_count=-1);
         // 查看库中的 ucd
-        void check_ucd();
+        void search_ucd();
         // 是不是 ucd path （1）是不是合法文件 （2）是否为 .json 结尾的文件
         bool is_ucd_path(std::string ucd_path);
         // 删除库中的 ucd

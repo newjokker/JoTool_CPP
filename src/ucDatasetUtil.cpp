@@ -238,6 +238,16 @@ void UCDataset::change_attar(std::string attr_name, std::string attr_value)
     UCDataset::save_to_json(UCDataset::json_path);
 }
 
+std::vector<std::string> UCDataset::uc_slice(int start, int end)
+{
+    std::vector<std::string> slice;
+    for(int i=start; i<end; i++)
+    {
+        slice.push_back(UCDataset::uc_list[i]);
+    }
+    return slice;
+}
+
 //
 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
@@ -256,6 +266,7 @@ UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
     }
 }
 
+// load 
 void UCDatasetUtil::save_img_xml_json(std::string save_dir, bool need_img, bool need_xml, int need_count)
 {
     if(! is_dir(save_dir))
@@ -311,58 +322,6 @@ void UCDatasetUtil::save_img_xml_json(std::string save_dir, bool need_img, bool 
     delete ucd;
 }
 
-void UCDatasetUtil::check_ucd()
-{
-    std::string check_url = "http://" + UCDatasetUtil::host + ":" + std::to_string(UCDatasetUtil::port);
-    httplib::Client cli(check_url);
-    auto res = cli.Get("/ucd/check");
-    
-    json data = json::parse(res->body);
-    // customer
-    for(int i=0; i<data["official"].size(); i++)
-    {
-        std::cout << "official : " << data["official"][i] << std::endl;
-    }
-    // official
-    for(int i=0; i<data["customer"].size(); i++)
-    {
-        std::cout << "customer : " << data["customer"][i] << std::endl;
-    }
-}
-
-void UCDatasetUtil::delete_ucd(std::string std_name)
-{
-    httplib::Client cli(UCDatasetUtil::root_url);
-    auto res = cli.Delete("/ucd/delete/" + std_name + ".json");
-}
-
-void UCDatasetUtil::save_ucd(std::string ucd_name, std::string save_path)
-{
-    UCDatasetUtil::load_file("/ucd/" + ucd_name, save_path);
-}
-
-void UCDatasetUtil::upload_ucd(std::string ucd_path, std::string assign_ucd_name)
-{
-    // refer : https://stackoverflow.com/questions/64480176/uploading-file-using-cpp-httplib
-    std::ifstream t_lf_img(ucd_path);
-    std::stringstream buffer_lf_img;
-    buffer_lf_img << t_lf_img.rdbuf();
-    std::string ucd_name = get_file_name(ucd_path);
-    std::string ucd_name_suffix = get_file_name_suffix(ucd_path);
-
-    httplib::Client cliSendFiles(UCDatasetUtil::root_url);
-    if(assign_ucd_name != "")
-    {
-        httplib::MultipartFormDataItems items = {{"json_file", buffer_lf_img.str(), ucd_name_suffix, "application/octet-stream"},{"ucd_name", assign_ucd_name}};
-        auto resSendFiles = cliSendFiles.Post("/ucd/upload", items);
-    }
-    else
-    {
-        httplib::MultipartFormDataItems items = {{"json_file", buffer_lf_img.str(), ucd_name_suffix, "application/octet-stream"},{"ucd_name", ucd_name}};
-        auto resSendFiles = cliSendFiles.Post("/ucd/upload", items);
-    }
-}
-
 void UCDatasetUtil::load_file(std::string url, std::string save_path, int index)
 {
     // refer : https://blog.csdn.net/harry49/article/details/115763383
@@ -394,8 +353,107 @@ void UCDatasetUtil::load_file(std::string url, std::string save_path, int index)
         else
         {
             std::cout << "load error : " << url << std::endl;
-            // throw "load error : " + url;
         }
+    }
+}
+
+void UCDatasetUtil::load_img(std::string save_dir, std::vector<std::string> uc_list)
+{
+    if(! is_dir(save_dir))
+    {
+        std::cout << "save dir not exists : " << save_dir << std::endl;
+        throw "save dir not exists";
+    }
+
+    for(int i=0; i<uc_list.size(); i++)
+    {
+        std::string img_url = "/file/" + uc_list[i] + ".jpg";
+        std::string save_img_path = save_dir + "/" + uc_list[i] + ".jpg";  
+        if(! is_file(save_img_path))
+        {
+            UCDatasetUtil::load_file(img_url, save_img_path, i); 
+        }
+        else
+        {
+            std::cout << i << ", file exists : " << save_img_path << std::endl;
+        }
+    }
+}
+
+void UCDatasetUtil::load_xml(std::string save_dir, std::vector<std::string> uc_list)
+{
+    if(! is_dir(save_dir))
+    {
+        std::cout << "save dir not exists : " << save_dir << std::endl;
+        throw "save dir not exists";
+    }
+
+    for(int i=0; i<uc_list.size(); i++)
+    {
+        std::string xml_url = "/file/" + uc_list[i] + ".xml";
+        std::string save_xml_path = save_dir + "/" + uc_list[i] + ".xml";  
+        if(! is_file(save_xml_path))
+        {
+            UCDatasetUtil::load_file(xml_url, save_xml_path, i); 
+        }
+        else
+        {
+            std::cout << i <<  ", file exists : " << save_xml_path << std::endl;
+        }
+    }
+}
+
+void UCDatasetUtil::load_ucd(std::string ucd_name, std::string save_path)
+{
+    UCDatasetUtil::load_file("/ucd/" + ucd_name, save_path);
+}
+
+
+// 
+void UCDatasetUtil::search_ucd()
+{
+    std::string check_url = "http://" + UCDatasetUtil::host + ":" + std::to_string(UCDatasetUtil::port);
+    httplib::Client cli(check_url);
+    auto res = cli.Get("/ucd/check");
+    
+    json data = json::parse(res->body);
+    // customer
+    for(int i=0; i<data["official"].size(); i++)
+    {
+        std::cout << "official : " << data["official"][i] << std::endl;
+    }
+    // official
+    for(int i=0; i<data["customer"].size(); i++)
+    {
+        std::cout << "customer : " << data["customer"][i] << std::endl;
+    }
+}
+
+void UCDatasetUtil::delete_ucd(std::string std_name)
+{
+    httplib::Client cli(UCDatasetUtil::root_url);
+    auto res = cli.Delete("/ucd/delete/" + std_name + ".json");
+}
+
+void UCDatasetUtil::upload_ucd(std::string ucd_path, std::string assign_ucd_name)
+{
+    // refer : https://stackoverflow.com/questions/64480176/uploading-file-using-cpp-httplib
+    std::ifstream t_lf_img(ucd_path);
+    std::stringstream buffer_lf_img;
+    buffer_lf_img << t_lf_img.rdbuf();
+    std::string ucd_name = get_file_name(ucd_path);
+    std::string ucd_name_suffix = get_file_name_suffix(ucd_path);
+
+    httplib::Client cliSendFiles(UCDatasetUtil::root_url);
+    if(assign_ucd_name != "")
+    {
+        httplib::MultipartFormDataItems items = {{"json_file", buffer_lf_img.str(), ucd_name_suffix, "application/octet-stream"},{"ucd_name", assign_ucd_name}};
+        auto resSendFiles = cliSendFiles.Post("/ucd/upload", items);
+    }
+    else
+    {
+        httplib::MultipartFormDataItems items = {{"json_file", buffer_lf_img.str(), ucd_name_suffix, "application/octet-stream"},{"ucd_name", ucd_name}};
+        auto resSendFiles = cliSendFiles.Post("/ucd/upload", items);
     }
 }
 
@@ -560,7 +618,7 @@ void UCDatasetUtil::ucd_minus(std::string save_path, std::string ucd_path_1, std
     delete ucd_res;
 }
 
-void UCDatasetUtil::save_xml(std::string save_dir, int get_count)
+void UCDatasetUtil::save_to_xml(std::string save_dir, int get_count)
 {
     // to 创建一个 xml 路径 xml_from_ucd
     

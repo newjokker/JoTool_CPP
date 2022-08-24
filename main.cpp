@@ -16,6 +16,7 @@
 #include "include/xini_file.h"
 #include "include/saturn_database_sql.hpp"
 #include "include/paramInfo.hpp"
+#include "include/printCpp.hpp"
 
 using namespace jotools;
 using namespace std;
@@ -51,6 +52,18 @@ using namespace std;
 
 // 在一个专门的目录中测试 存储 dete_info 信息使用 set 结构，防止插入对象不断重复
 
+// 下载某一些图片报错，可能是没有按照各个后缀依次寻找图片
+
+// 先不提供除了 ucd 之外的 xml_dir img_dir 的操作
+
+// 快速测试代码的稳定性，重要的是同步功能，（保留下载到本地的选项）
+
+// 交互设计之类的全部抄 git 的
+
+// 下载时候 0 不下载 1 下载到缓存文件夹 other 下载到本地 
+
+// 参数的有效性检查都是在函数里面去做，在外面不需要去做
+
 
 int main(int argc, char ** argv)
 {
@@ -83,7 +96,7 @@ int main(int argc, char ** argv)
     std::string sql_db = "Saturn_Database_beta";
     
     // version
-    std::string app_version = "v1.1";
+    std::string app_version = "v1.2";
 
     // cache dir
     std::string cache_dir;
@@ -106,7 +119,7 @@ int main(int argc, char ** argv)
     }
 
     // read config
-    if(! is_file(config_path))
+    if(is_file(config_path))
     {
         xini_file_t xini_file(config_path);
         host = (const std::string &)xini_file["server"]["host"];
@@ -120,7 +133,7 @@ int main(int argc, char ** argv)
     }
     
     // 必须要有缓存文件夹，否则报错，因为逻辑太麻烦了
-    if(is_dir(cache_dir))
+    if(! is_dir(cache_dir))
     {
         std::cout << "cache_dir not exists, edit ucdconfig.ini cache/cache_dir : " << std::endl;
         std::cout << "edit ucdconfig.ini with ucd set " << std::endl;
@@ -134,7 +147,19 @@ int main(int argc, char ** argv)
     {
         if(argc == 2)
         {
-            ucd_util->check_ucd();
+            ucd_util->search_ucd();
+        }
+        else
+        {
+            ucd_param_opt->print_command_info("check");
+            return -1;
+        }
+    }
+    else if(command_1 == "search")
+    {
+        if(argc == 2)
+        {
+            ucd_util->search_ucd();
         }
         else
         {
@@ -169,7 +194,7 @@ int main(int argc, char ** argv)
             ucd_param_opt->print_command_info("load");
             return -1;
         }
-        ucd_util->save_ucd(ucd_name, ucd_save_path);
+        ucd_util->load_ucd(ucd_name, ucd_save_path);
     }
     else if(command_1 == "delete")
     {
@@ -186,23 +211,14 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "save")
     {
-        if((argc != 5) && (argc != 6))
-        {
-            ucd_param_opt->print_command_info("save");
-            return -1;
-        }
-        else
+
+        // save 保存到本地
+        if((argc == 5) || (argc == 6))
         {
             std::string json_path = argv[2];
             std::string save_dir = argv[3];
             std::string save_mode = argv[4];
-            // need assign number of data
-            int need_count = -1;
-            if(argc == 6)
-            {
-                need_count = std::stoi(argv[5]);
-            }
-
+            
             // json_path
             if(! is_file(json_path))
             {
@@ -221,8 +237,15 @@ int main(int argc, char ** argv)
                 std::cout << "save_mode illeagal, need save_mode such as 11 | 10  " << save_dir << std::endl;
                 throw "save_mode illeagal";
             }
-            bool need_img, need_xml, need_json;
+
+            // load 
+            bool need_img, need_xml;
+            std::string save_img_dir = save_dir + "/" + "img";
+            std::string save_xml_dir = save_dir + "/" + "xml";
             
+
+            std::cout << save_mode << std::endl;
+
             if(save_mode[0] == '0')
             {
                 need_img = false;
@@ -230,6 +253,10 @@ int main(int argc, char ** argv)
             else
             {
                 need_img = true;
+                if(! is_dir(save_img_dir))
+                {
+                    create_folder(save_img_dir);
+                }
             }
 
             if(save_mode[1] == '0')
@@ -239,11 +266,44 @@ int main(int argc, char ** argv)
             else
             {
                 need_xml = true;
+                if(! is_dir(save_xml_dir))
+                {
+                    create_folder(save_xml_dir);
+                }
             }
+
             // load
+            UCDataset* ucd = new UCDataset(json_path);
+            ucd->parse_json_info();
             ucd_util->json_path = json_path;
-            ucd_util->save_img_xml_json(save_dir, need_img, need_xml, need_count);
+
+            // need assign number of data
+            int need_count = -1;
+            std::vector<std::string> uc_vector;
+            if(argc == 6)
+            {
+                need_count = std::stoi(argv[5]);
+                uc_vector = ucd->uc_slice(0, need_count);
+            }
+            else
+            {
+                uc_vector = ucd->uc_list;
+            }
+            
+            ucd_util->load_img(save_img_dir, uc_vector);
+            ucd_util->load_xml(save_xml_dir, uc_vector);
+            delete ucd;
         }
+        else
+        {
+            ucd_param_opt->print_command_info("save");
+            return -1;
+        }
+    }
+    else if(command_1 == "save_cache")
+    {
+        // 保存到缓存中，xml 和 img 都有对应的缓存
+        // xml 缓存因为会不断更新，提供 update xml 缓存的功能
     }
     else if(command_1 == "upload")
     {
@@ -364,7 +424,7 @@ int main(int argc, char ** argv)
             ucd_util->json_path = json_path;
             ucd_util->save_img_xml_json(save_dir, need_img, false, need_count);
             // parse xml from ucd 
-            ucd_util->save_xml(save_dir, need_count);
+            ucd_util->save_to_xml(save_dir, need_count);
         }
         else
         {
@@ -451,7 +511,7 @@ int main(int argc, char ** argv)
             std::cout << "[server]" << std::endl;
             std::cout << "host          : " << host << std::endl;
             std::cout << "port          : " << port << std::endl;
-            std::cout << "config path   : " << config_path << std::endl;
+            std::cout << "config_path   : " << config_path << std::endl;
             std::cout << "[sql]" << std::endl;
             std::cout << "sql_host      : " << sql_host << std::endl;
             std::cout << "sql_port      : " << sql_port << std::endl;
@@ -460,12 +520,25 @@ int main(int argc, char ** argv)
             std::cout << "sql_db        : " << sql_db << std::endl;
             std::cout << "[cache]" << std::endl;
             std::cout << "cache_dir     : " << cache_dir << std::endl;
-            std::cout << "[version]" << std::endl;
-            std::cout << "uc_dataset    : " << app_version << std::endl;
             std::cout << "-----------------------------" << std::endl;
             return -1;
         }
-        else
+        else if(argc == 3)
+        {
+            std::string attr_name = argv[2];
+            if(attr_name == "host") {std::cout << host << std::endl ;}
+            else if(attr_name == "port") {std::cout << port << std::endl ;}
+            else if(attr_name == "config_path") {std::cout << config_path << std::endl ;}
+            else if(attr_name == "sql_host") {std::cout << sql_host << std::endl ;}
+            else if(attr_name == "sql_port") {std::cout << sql_port << std::endl ;}
+            else if(attr_name == "sql_user") {std::cout << sql_user << std::endl ;}
+            else if(attr_name == "sql_pwd") {std::cout << sql_pwd << std::endl ;}
+            else if(attr_name == "sql_db") {std::cout << sql_db << std::endl ;}
+            else if(attr_name == "cache_dir") {std::cout << cache_dir << std::endl ;}
+            else{std::cout << "no attr name : " << attr_name << std::endl; }
+            return -1;
+        }
+        else 
         {
             ucd_param_opt->print_command_info("meta");
             return -1;
