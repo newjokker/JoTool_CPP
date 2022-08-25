@@ -22,7 +22,7 @@
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
-
+#include "include/lablelmeObj.hpp"
 
 
 using namespace jotools;
@@ -394,7 +394,7 @@ int main(int argc, char ** argv)
         }
         std::string json_path = argv[2];
         UCDataset * ucd_info = new UCDataset(json_path);
-        ucd_info->print_json_info();
+        ucd_info->print_ucd_info();
         delete ucd_info;
     }
     else if(command_1 == "from_img")
@@ -431,42 +431,15 @@ int main(int argc, char ** argv)
     {
         // 将 img 和 对应的 labelme 格式的 json 导入为 ucd 
 
+        UCDataset* ucd = new UCDataset(""); 
 
-        struct obj
-        {
-            std::string label;
-            std::vector< std::vector<float> > points;
-            int group_id;
-            std::string shape_type;
-            std::vector<std::string> flags;
-        };
+        std::string uc = "fack_uc";
 
+        ucd->add_labelme_json_info(uc, "/home/ldq/del/test.json");
 
-        std::ifstream jsfile("/home/ldq/del/test.json");
-        json data = json::parse(jsfile); 
+        ucd->add_saturndatabase_json_info(uc, "/home/ldq/del/Czi00nb.json");
 
-        auto shapes = data["shapes"];
-
-        if(shapes != nullptr)
-        { 
-
-            obj a;
-
-            std::cout << shapes.size() << std::endl;
-
-            a.points = shapes[0]["points"];
-
-            std::cout << "parse points ok" << std::endl;
-            std::cout << a.points[0][0] << std::endl;
-            std::cout << a.points[0][1] << std::endl;
-
-            // a = shapes[0];
-
-            std::cout << shapes[0]["label"] << std::endl;
-        }
-
-
-
+        ucd->print_assign_uc_info(uc);
 
     }
     else if(command_1 == "parse_xml")

@@ -18,17 +18,22 @@ class UCDataset
         std::vector<std::string> label_used;
         // {uc: [uc, x1, y1, x2, y2, conf, tag]}
         std::map<std::string, std::vector<std::vector<std::string> > > xml_info; 
+        // labelme 中的对象 {uc: [PointObj, CricleObj, retangleObj ...]}
+        std::map<std::string, std::vector<LabelmeObj*> > object_info;
         double add_time;
         double update_time;
         std::string describe;
         //
-        UCDataset(std::string json_path);
-        // 解析 json 数据
+        UCDataset(std::string ucd_path="");
+        ~UCDataset();
+        // 解析 ucd 数据
         void parse_ucd(bool parse_xml_info=false);
-        // 保存为 json
+        // 保存为 ucd
         void save_to_ucd(std::string save_path);
         // 打印 json 数据
-        void print_json_info();
+        void print_ucd_info();
+        // 打印指定 uc 对应的信息
+        void print_assign_uc_info(std::string uc);
         // uc list 去重
         void unique();
         // 对 uc 进行切片
@@ -37,6 +42,15 @@ class UCDataset
         std::map<std::string, int> count_tags();
         // 修改属性
         void change_attar(std::string attr_name, std::string attr_value);
+
+        // 增量解析 xml 数据到 ucd 中
+        void add_voc_xml_info(std::string uc, std::string voc_xml_path);
+        // 增量解析 labelme 的 json 数据
+        void add_labelme_json_info(std::string uc, std::string labelme_json_path);
+        // 增量解析 saturndatabase 的 json 数据
+        void add_saturndatabase_json_info(std::string uc, std::string labelme_json_path);
+
+
     private:
         std::string json_path;
 };

@@ -16,6 +16,8 @@
 #include "include/pystring.h"
 #include "include/deteRes.hpp"
 
+#include "include/lablelmeObj.hpp"
+
 using json = nlohmann::json;
 using namespace jotools;
 
@@ -33,6 +35,18 @@ UCDataset::UCDataset(std::string json_path)
     UCDataset::update_time = -1;
     UCDataset::describe = "";
     UCDataset::json_path = json_path;
+}
+
+UCDataset::~UCDataset()
+{
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        for(int i=0; i<UCDataset::object_info.size(); i++)
+        {
+            delete iter->second[i];
+        }
+    }
 }
 
 void UCDataset::parse_ucd(bool parse_xml_info)
@@ -80,7 +94,7 @@ void UCDataset::parse_ucd(bool parse_xml_info)
     }
 }
 
-void UCDataset::print_json_info()
+void UCDataset::print_ucd_info()
 {
     // print statistics res
     if(is_file(UCDataset::json_path))
@@ -131,6 +145,16 @@ void UCDataset::print_json_info()
         std::cout << "ucd_path not exists : " << UCDataset::json_path;
     }
     std::cout << "--------------------------------" << std::endl;
+}
+
+void UCDataset::print_assign_uc_info(std::string uc)
+{
+    std::vector<LabelmeObj*> objects = UCDataset::object_info[uc];
+    std::cout << "[" << uc << "]" << std::endl;
+    for(int i=0; i<objects.size(); i++)
+    {
+        std::cout << objects[i]->shape_type << ", " << objects[i]->label << ", " << objects[i]->points.size() << std::endl;
+    }
 }
 
 void UCDataset::save_to_ucd(std::string save_path)
@@ -245,6 +269,95 @@ std::vector<std::string> UCDataset::uc_slice(int start, int end)
         slice.push_back(UCDataset::uc_list[i]);
     }
     return slice;
+}
+
+void UCDataset::add_voc_xml_info(std::string uc, std::string voc_xml_path)
+{
+    // 增量解析 voc 标准的 xml 数据
+}
+
+void UCDataset::add_labelme_json_info(std::string uc, std::string labelme_json_path)
+{
+    // 增量解析 labelme 标准的 json 数据
+
+    std::ifstream jsfile(labelme_json_path);
+    json data = json::parse(jsfile); 
+
+        auto shapes = data["shapes"];
+        LabelmeObjFactory obj_factory;
+        // std::vector<LabelmeObj*> objects;
+
+        if(shapes == nullptr)
+        { 
+            std::cout << "json obj is empty" << std::endl;
+        }
+
+        for(int i=0; i<shapes.size(); i++)
+        {
+            std::string shape_type = shapes[i]["shape_type"];
+            LabelmeObj* obj = obj_factory.CreateObj(shape_type);
+            obj->points = shapes[i]["points"];
+            obj->label = shapes[i]["label"];
+
+            // 遍历查看是否已有这个对象
+            bool add_obj = true;
+            for(int j=0; j<UCDataset::object_info[uc].size(); j++)
+            {
+                if(UCDataset::object_info[uc][j]->equal_to(obj))
+                {
+                    std::cout << "find repeated" << std::endl;
+                    add_obj = false;
+                }
+            }
+
+            if(add_obj)
+            {
+                std::cout << "add obj : " << obj->label << std::endl;
+                UCDataset::object_info[uc].push_back(obj);
+            }
+        }
+}
+
+void UCDataset::add_saturndatabase_json_info(std::string uc, std::string labelme_json_path)
+{
+    // 增量解析 labelme 标准的 json 数据
+
+    std::ifstream jsfile(labelme_json_path);
+    json data = json::parse(jsfile); 
+
+        auto shapes = data["objects"];
+        LabelmeObjFactory obj_factory;
+        // std::vector<LabelmeObj*> objects;
+
+        if(shapes == nullptr)
+        { 
+            std::cout << "json obj is empty" << std::endl;
+        }
+
+        for(int i=0; i<shapes.size(); i++)
+        {
+            std::string shape_type = shapes[i]["shape_type"];
+            LabelmeObj* obj = obj_factory.CreateObj(shape_type);
+            obj->points = shapes[i]["points"];
+            obj->label = shapes[i]["label"];
+
+            // 遍历查看是否已有这个对象
+            bool add_obj = true;
+            for(int j=0; j<UCDataset::object_info[uc].size(); j++)
+            {
+                if(UCDataset::object_info[uc][j]->equal_to(obj))
+                {
+                    std::cout << "find repeated" << std::endl;
+                    add_obj = false;
+                }
+            }
+
+            if(add_obj)
+            {
+                std::cout << "add obj : " << obj->label << std::endl;
+                UCDataset::object_info[uc].push_back(obj);
+            }
+        }
 }
 
 //

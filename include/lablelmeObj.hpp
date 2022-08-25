@@ -7,69 +7,78 @@
 #include <set>
 
 
-struct point
-{
-    // 点
-    float x;
-    float y;
-};
-
 class LabelmeObj
 {    
-    // labelme 中各种标注类型的基类
     public:
         std::string label;
-        std::vector<point> points;
-        std::string shape_type;
-        // 不知道干什么用的，先抄 labelme 的结构
-        int group_id;
+        std::vector< std::vector<double> > points;
+        std::string shape_type = "None";
         std::set<std::string> flags;
-
+        int group_id;
         // 打印 obj 信息
-        void print_info();
+        virtual void print_info() = 0;
+        // 判断指针指向的对象是否相等
+        virtual bool equal_to(LabelmeObj *obj) = 0;
+
 };
+
+
 
 class PointObj : public LabelmeObj
 {
-    // 点
     public:
-        std::string shape_type = "point";
+        PointObj();
+        void print_info();
+        bool equal_to(LabelmeObj *obj);
 };
 
 class LineObj : public LabelmeObj
 {
-    // 线（两个点）
     public:
-        std::string shape_type = "line";
+        LineObj();
+        void print_info();
+        bool equal_to(LabelmeObj *obj);
 };
 
 class LineStripObj : public LabelmeObj
 {
-    // 线（多个点）
     public:
-        std::string shape_type = "linestrip";
+        LineStripObj();
+        void print_info();
+        bool equal_to(LabelmeObj *obj);
 };
 
 class CircleObj : public LabelmeObj
 {
-    // 圆
     public:
-        std::string shape_type = "circle";
+        CircleObj();
+        void print_info();
+        bool equal_to(LabelmeObj *obj);
 };
 
 class RectangleObj : public LabelmeObj
 {
-    // 矩形
     public:
-        std::string shape_type = "rectangle";
+        RectangleObj();
+        void print_info();
+        bool equal_to(LabelmeObj *obj);
 };
 
 class PolygonObj : public LabelmeObj
 {
-    // 多边形 - 旋转矩形属于多边形
     public:
-        std::string shape_type = "polygon";
+        PolygonObj();
+        void print_info();
+        bool equal_to(LabelmeObj *obj);
 };
+
+class LabelmeObjFactory
+{
+    public:
+        LabelmeObj *CreateObj(std::string shape_type);
+
+};
+
 
 
 
