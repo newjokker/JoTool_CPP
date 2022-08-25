@@ -71,6 +71,8 @@ using namespace std;
 
 // 参数的有效性检查都是在函数里面去做，在外面不需要去做
 
+// 解释一下斜框矩形为什么不被包括在 labelme 中，因为不是标准结构，labelme 一直使用的点对结构信息进行存储
+
 
 int main(int argc, char ** argv)
 {
@@ -435,11 +437,16 @@ int main(int argc, char ** argv)
 
         std::string uc = "fack_uc";
 
-        ucd->add_labelme_json_info(uc, "/home/ldq/del/test.json");
+        ucd->add_labelme_json_info("fake_1", "/home/ldq/del/test.json");
+        ucd->add_labelme_json_info("fake_2", "/home/ldq/del/test.json");
+        ucd->add_saturndatabase_json_info("fake_3", "/home/ldq/del/Czi00nb.json");
+        ucd->add_voc_xml_info("fake_4", "/home/ldq/del/Dsm07dn.xml");
+        ucd->add_voc_xml_info("fake_5", "/home/ldq/del/Dsm07dn.xml");
+        // ucd->print_assign_uc_info(uc);
 
-        ucd->add_saturndatabase_json_info(uc, "/home/ldq/del/Czi00nb.json");
 
-        ucd->print_assign_uc_info(uc);
+        ucd->save_to_ucd("/home/ldq/del/del_ucd.json");
+
 
     }
     else if(command_1 == "parse_xml")

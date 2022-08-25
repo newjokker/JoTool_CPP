@@ -36,6 +36,8 @@ class UCDataset
         void print_assign_uc_info(std::string uc);
         // uc list 去重
         void unique();
+        // 指定 uc 中是否存在某个对象
+        bool has_obj(std::string uc, LabelmeObj *obj);
         // 对 uc 进行切片
         std::vector<std::string> uc_slice(int start, int end);
         // 统计标签个数

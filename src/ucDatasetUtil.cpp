@@ -159,6 +159,7 @@ void UCDataset::print_assign_uc_info(std::string uc)
 
 void UCDataset::save_to_ucd(std::string save_path)
 {
+
     nlohmann::json json_info = {
         {"dataset_name", UCDataset::dataset_name},
         {"model_name", UCDataset::model_name},
@@ -168,19 +169,32 @@ void UCDataset::save_to_ucd(std::string save_path)
         {"describe", UCDataset::describe},
         {"label_used", UCDataset::label_used},
         {"uc_list", UCDataset::uc_list},
-        {"xml_info", {}}
+        {"shapes", {}}
     };
 
-    // xml info
-    nlohmann::json xml_data;
-    xml_data =  UCDataset::xml_info;
-    json_info["xml_info"] = xml_data;
+    std::map<std::string, std::vector<nlohmann::json> > shapes_info;
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        UCDataset::print_assign_uc_info(iter->first);
+        std::vector<LabelmeObj*> obj_vector = iter->second; 
 
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            nlohmann::json each_obj;
+            each_obj["shape_type"] = obj_vector[i]->shape_type;
+            each_obj["label"] = obj_vector[i]->label;
+            each_obj["points"] = obj_vector[i]->points;
+            shapes_info[iter->first].push_back(each_obj);
+        }
+        iter++;
+    }    
+    
+    json_info["shapes"] = shapes_info;
     std::ofstream o(save_path);
-    // 不加 std::setw(4) 就不是格式化输出，都显示在一行
     o << std::setw(4) << json_info << std::endl;
-    // o << json_info << std::endl;
 }
+
 
 void UCDataset::unique()
 {
@@ -271,9 +285,38 @@ std::vector<std::string> UCDataset::uc_slice(int start, int end)
     return slice;
 }
 
+bool UCDataset::has_obj(std::string uc, LabelmeObj *obj)
+{
+    for(int j=0; j<UCDataset::object_info[uc].size(); j++)
+    {
+        if(UCDataset::object_info[uc][j]->equal_to(obj))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void UCDataset::add_voc_xml_info(std::string uc, std::string voc_xml_path)
 {
     // 增量解析 voc 标准的 xml 数据
+
+    DeteRes* dete_res = new DeteRes(voc_xml_path);
+    for(int i; i<dete_res->alarms.size(); i++)
+    {
+        DeteObj dete_obj = dete_res->alarms[i];
+        RectangleObj* obj = new RectangleObj();
+        obj->label = dete_obj.tag;
+        obj->points = {{(double)dete_obj.x1, (double)dete_obj.y1}, {(double)dete_obj.x2, (double)dete_obj.y2}};
+        if(! UCDataset::has_obj(uc, obj))
+        {
+            UCDataset::object_info[uc].push_back(obj);
+        }
+        else
+        {
+            std::cout << "repeated obj : " << uc << ", " << obj->label << std::endl; 
+        }
+    }
 }
 
 void UCDataset::add_labelme_json_info(std::string uc, std::string labelme_json_path)
@@ -300,20 +343,13 @@ void UCDataset::add_labelme_json_info(std::string uc, std::string labelme_json_p
             obj->label = shapes[i]["label"];
 
             // 遍历查看是否已有这个对象
-            bool add_obj = true;
-            for(int j=0; j<UCDataset::object_info[uc].size(); j++)
+            if(! UCDataset::has_obj(uc, obj))
             {
-                if(UCDataset::object_info[uc][j]->equal_to(obj))
-                {
-                    std::cout << "find repeated" << std::endl;
-                    add_obj = false;
-                }
-            }
-
-            if(add_obj)
-            {
-                std::cout << "add obj : " << obj->label << std::endl;
                 UCDataset::object_info[uc].push_back(obj);
+            }
+            else
+            {
+                std::cout << "repeated obj : " << uc << ", " << obj->label << std::endl;
             }
         }
 }
@@ -342,20 +378,13 @@ void UCDataset::add_saturndatabase_json_info(std::string uc, std::string labelme
             obj->label = shapes[i]["label"];
 
             // 遍历查看是否已有这个对象
-            bool add_obj = true;
-            for(int j=0; j<UCDataset::object_info[uc].size(); j++)
+            if(! UCDataset::has_obj(uc, obj))
             {
-                if(UCDataset::object_info[uc][j]->equal_to(obj))
-                {
-                    std::cout << "find repeated" << std::endl;
-                    add_obj = false;
-                }
-            }
-
-            if(add_obj)
-            {
-                std::cout << "add obj : " << obj->label << std::endl;
                 UCDataset::object_info[uc].push_back(obj);
+            }
+            else
+            {
+                std::cout << "repeated obj : " << uc << ", " << obj->label << std::endl;
             }
         }
 }
