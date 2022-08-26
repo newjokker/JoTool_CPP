@@ -15,7 +15,7 @@
 #include "include/deteRes.hpp"
 #include "include/pystring.h"
 #include "include/deteRes.hpp"
-
+#include "include/strToImg.hpp"
 #include "include/lablelmeObj.hpp"
 
 using json = nlohmann::json;
@@ -440,12 +440,62 @@ void UCDataset::save_to_voc_xml(std::string save_dir)
     }
 }
 
-void UCDataset::save_to_labelme_json(std::string save_dir)
+void UCDataset::save_to_labelme_json(std::string save_dir, std::string img_dir)
 {
-    //
+    int index = 0;
+    cv::Mat img_mat;
+    std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        nlohmann::json json_info = 
+        {
+            {"version", "4.4.0"},
+            {"flags", {}},
+            {"imagePath", ""},
+            {"imageData", ""},
+            {"imageHeight", -1},
+            {"imageWidth", -1},
+            {"shapes", {}}
+        };
+
+        std::string uc = iter->first;
+        std::string each_img_path = get_file_by_suffix_set(img_dir, uc, suffix);
+        std::string save_json_path = save_dir + "/" + uc + ".json";
+
+        if(! is_file(each_img_path))
+        {
+            std::cout << "img_path not exists : " << each_img_path << std::endl;
+            continue;
+        }
+        else
+        {
+            img_mat = cv::imread(each_img_path); 
+            json_info["imageHeight"] = img_mat.rows;
+            json_info["imageWidth"] = img_mat.cols;
+        }
+
+        std::map<std::string, nlohmann::json> obj_info;
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            LabelmeObj* obj = iter->second[i];
+            obj_info["shape_type"] = obj->shape_type;
+            obj_info["label"] = obj->label;
+            obj_info["points"] = obj->points;
+            json_info["shapes"].push_back(obj_info);
+        }
+
+        std::string img_suffix = get_file_suffix(each_img_path);
+        std::string base64_str = Mat2Base64(img_mat, img_suffix.substr(1, img_suffix.size()));
+        json_info["imageData"] = base64_str;
+
+        std::cout << index << ", save json : " << uc << std::endl;
+        std::ofstream o(save_json_path);
+        o << std::setw(4) << json_info << std::endl;
+        index += 1;
+        iter++;
+    }
 }
-
-
 
 //
 

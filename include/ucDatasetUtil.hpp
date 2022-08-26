@@ -68,7 +68,7 @@ class UCDataset
         void save_to_voc_xml(std::string save_path);
         
         // 保存为 labelme 的 json 形式（所有对象都保存，斜框矩阵是都进行保存）
-        void save_to_labelme_json(std::string save_path);
+        void save_to_labelme_json(std::string save_path, std::string img_dir);
 
     private:
         std::string json_path;

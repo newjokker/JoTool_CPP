@@ -271,8 +271,16 @@ void UcdParamOpt::load_param_info()
     param_parse_xml->group = "sync";
     param_parse_xml->grammar = "ucd parse_xml json_path save_dir";
     param_parse_xml->english_explain = "parse xml from json";
-    param_parse_xml->chinese_explain = "从 json 中解析出 xml";   
+    param_parse_xml->chinese_explain = "从 ucd 中解析出 xml";   
     UcdParamOpt::add_param(param_parse_xml);
+    
+    // parse_json
+    ParamInfo * param_parse_json = new ParamInfo("parse_json");
+    param_parse_json->group = "sync";
+    param_parse_json->grammar = "ucd parse_xml json_path save_dir";
+    param_parse_json->english_explain = "parse labelme_json from ucd";
+    param_parse_json->chinese_explain = "从 ucd 中解析出 labelme_json";   
+    UcdParamOpt::add_param(param_parse_json);
     
     // update_xml
     ParamInfo * param_update_xml = new ParamInfo("update_xml");
@@ -335,7 +343,7 @@ void UcdParamOpt::load_param_info()
     param_from_json->group = "sync";
     param_from_json->grammar = "ucd from_json json_dir ucd_save_path";
     param_from_json->english_explain = "get ucd from loacal data(img, json)";
-    param_from_json->chinese_explain = "本地 labelme json 文件生成 ucd, ucd中包含 dete_obj 信息";   
+    param_from_json->chinese_explain = "本地 labelme_json 文件生成 ucd, ucd中包含 dete_obj 信息";   
     UcdParamOpt::add_param(param_from_json);
     
     // info

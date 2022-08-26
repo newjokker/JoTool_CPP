@@ -395,13 +395,16 @@ int main(int argc, char ** argv)
     {
         if(argc != 3)
         {
+            std::string ucd_path = argv[2];
+            UCDataset * ucd_info = new UCDataset(ucd_path);
+            ucd_info->print_ucd_info();
+            delete ucd_info;
+        }
+        else
+        {
             ucd_param_opt->print_command_info("info");
             return -1;
         }
-        std::string json_path = argv[2];
-        UCDataset * ucd_info = new UCDataset(json_path);
-        ucd_info->print_ucd_info();
-        delete ucd_info;
     }
     else if(command_1 == "from_img")
     {
@@ -449,17 +452,16 @@ int main(int argc, char ** argv)
     {
         if(argc == 4)
         {
-            std::string json_path = argv[2];
+            std::string ucd_path = argv[2];
             std::string save_dir = argv[3];
-            std::vector<std::string> uc_vector;
 
-            if(! is_file(json_path))
+            if(! is_file(ucd_path))
             {
-                std::cout << "ucd_path not exists : " << json_path << std::endl;
+                std::cout << "ucd_path not exists : " << ucd_path << std::endl;
                 throw "ucd_path not exists";
             }
 
-            UCDataset* ucd = new UCDataset(json_path);
+            UCDataset* ucd = new UCDataset(ucd_path);
             ucd->parse_ucd(true);
             ucd->save_to_voc_xml(save_dir);
         }
@@ -472,6 +474,27 @@ int main(int argc, char ** argv)
     else if(command_1 == "parse_json")
     {
         // 从 ucd 中解析出 labelme json 格式的数据
+
+        if(argc == 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_dir = argv[3];
+
+            if(! is_file(ucd_path))
+            {
+                std::cout << "ucd_path not exists : " << ucd_path << std::endl;
+                throw "ucd_path not exists";
+            }
+
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd_util->load_img(ucd_util->cache_img_dir, ucd->uc_list);
+            ucd->save_to_labelme_json(save_dir, ucd_util->cache_img_dir);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info("parse_json");
+        }
     }
     else if(command_1 == "show")
     {
@@ -498,6 +521,7 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "diff")
     {
+        // todo 只是 uc 的差异，是否可以表示 tag 的差异 
         if(argc == 4)
         {
             std::string ucd_path_1 = argv[2];
