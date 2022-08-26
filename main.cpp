@@ -57,17 +57,11 @@ using namespace std;
 
 // 考虑是否有缓存文件夹，是否有缓存文件，逻辑太复杂了，需要默认检查缓存文件夹，不存在就直接报错
 
-// 在一个专门的目录中测试 存储 dete_info 信息使用 set 结构，防止插入对象不断重复
-
 // 下载某一些图片报错，可能是没有按照各个后缀依次寻找图片
-
-// 先不提供除了 ucd 之外的 xml_dir img_dir 的操作
 
 // 快速测试代码的稳定性，重要的是同步功能，（保留下载到本地的选项）
 
 // 交互设计之类的全部抄 git 的
-
-// 下载时候 0 不下载 1 下载到缓存文件夹 other 下载到本地 
 
 // 参数的有效性检查都是在函数里面去做，在外面不需要去做
 
@@ -76,6 +70,9 @@ using namespace std;
 // 斜框先不进行处理，先去掉
 
 // 没有地方存储置信度的，这个要注意一点
+
+// 忘记 xml，img，json 只记得 ucd 即可
+
 
 
 int main(int argc, char ** argv)
@@ -224,6 +221,9 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "save")
     {
+
+        // todo 如果本地有对应的缓存，直接把缓存拷贝到文件夹，没有的话再去下载
+
         // save 保存到本地
         if((argc == 5) || (argc == 6))
         {
@@ -473,8 +473,7 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "parse_json")
     {
-        // 从 ucd 中解析出 labelme json 格式的数据
-
+        // todo 在 ucd_util 中实现一下，是一个图像一个图像进行保存，不要
         if(argc == 4)
         {
             std::string ucd_path = argv[2];
@@ -536,6 +535,10 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "merge")
     {
+
+        // ucdataset 增加 merge 函数，用于两两合并
+        // 合并 uc 和 obj
+
         if(argc >= 5)
         {
             std::string save_path = argv[2];

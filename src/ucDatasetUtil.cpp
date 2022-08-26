@@ -785,6 +785,10 @@ void UCDatasetUtil::get_ucd_from_json_dir(std::string json_dir, std::string ucd_
 
 void UCDatasetUtil::merge_ucds(std::string save_path, std::vector<std::string> ucd_path_vector)
 {
+
+    // todo object_info 也需要进行合并
+
+
     // ucd path
     for(int i=0; i<ucd_path_vector.size(); i++)
     {
