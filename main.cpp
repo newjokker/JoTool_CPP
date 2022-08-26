@@ -419,60 +419,31 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "from_xml")
     {
-        // 保存 xml 信息到 ucd 中去
         if(argc == 5)
         {
-            std::string img_dir = argv[2];
-            std::string xml_dir = argv[3];
-            std::string ucd_path = argv[4];
+            std::string xml_dir = argv[2];
+            std::string ucd_path = argv[3];
             ucd_util->get_ucd_from_xml_dir(xml_dir, ucd_path);
         }
         else
         {
-            ucd_param_opt->print_command_info("from_img_xml");
+            ucd_param_opt->print_command_info("from_xml");
             return -1;
         }
     }
     else if(command_1 == "from_json")
     {
-
-        if(argc == 5)
+        if(argc == 4)
         {
-            std::string img_dir = argv[2];
-            std::string xml_dir = argv[3];
-            std::string ucd_path = argv[4];
-            // ucd_util->get_ucd_from_img_xml_dir(img_dir, xml_dir, ucd_path);
+            std::string xml_dir = argv[2];
+            std::string ucd_path = argv[3];
+            ucd_util->get_ucd_from_json_dir(xml_dir, ucd_path);
         }
         else
         {
-            ucd_param_opt->print_command_info("from_img_json");
+            ucd_param_opt->print_command_info("from_json");
             return -1;       
         }
-
-        // 将 img 和 对应的 labelme 格式的 json 导入为 ucd 
-
-        // json 必须以 uc 格式进行命名
-
-        UCDataset* ucd = new UCDataset("/home/ldq/del/del_ucd.json"); 
-
-        // std::string uc = "fack_uc";
-        // ucd->add_labelme_json_info("fake_1", "/home/ldq/del/test.json");
-        // ucd->add_labelme_json_info("fake_2", "/home/ldq/del/test.json");
-        // ucd->add_saturndatabase_json_info("fake_3", "/home/ldq/del/Czi00nb.json");
-        // ucd->add_voc_xml_info("fake_4", "/home/ldq/del/Dsm07dn.xml");
-        // ucd->add_voc_xml_info("fake_5", "/home/ldq/del/Dsm07dn.xml");
-        // ucd->print_assign_uc_info(uc);
-        // ucd->save_to_ucd("/home/ldq/del/del_ucd.json");
-
-        // ucd->json_path = "/home/ldq/del/test.json";
-        ucd->parse_ucd(true);
-        // ucd->print_assign_uc_info("fake_1");
-        // ucd->print_assign_uc_info("fake_4");
-
-        ucd->print_ucd_info();
-
-
-
     }
     else if(command_1 == "parse_xml")
     {
@@ -730,22 +701,29 @@ int main(int argc, char ** argv)
         {
             std::string img_dir = argv[2];
             std::string xml_dir = argv[3];
-            if(is_dir(img_dir) && is_dir(xml_dir))
-            {
-                SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
-                sd_sql->rename_img_xml_dir(img_dir, xml_dir);
-                delete sd_sql;
-            }
-            else
-            {
-                std::cout << "image dir or xml dir not exists : " << img_dir << std::endl;
-                ucd_param_opt->print_command_info("rename_img_xml");
-                return -1;
-            }
+            SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
+            sd_sql->rename_img_xml_dir(img_dir, xml_dir);
+            delete sd_sql;
         }
         else
         {
             ucd_param_opt->print_command_info("rename_img_xml");
+            return -1;
+        }
+    }
+    else if(command_1 == "rename_img_json")
+    {
+        if(argc == 4)
+        {
+            std::string img_dir = argv[2];
+            std::string json_dir = argv[3];
+            SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
+            sd_sql->rename_img_json_dir(img_dir, json_dir);
+            delete sd_sql;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info("rename_img_json");
             return -1;
         }
     }

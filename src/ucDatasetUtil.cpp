@@ -37,17 +37,17 @@ UCDataset::UCDataset(std::string json_path)
     UCDataset::json_path = json_path;
 }
 
-UCDataset::~UCDataset()
-{
-    auto iter = UCDataset::object_info.begin();
-    while(iter != UCDataset::object_info.end())
-    {
-        for(int i=0; i<UCDataset::object_info.size(); i++)
-        {
-            delete iter->second[i];
-        }
-    }
-}
+// UCDataset::~UCDataset()
+// {
+//     auto iter = UCDataset::object_info.begin();
+//     while(iter != UCDataset::object_info.end())
+//     {
+//         for(int i=0; i<UCDataset::object_info.size(); i++)
+//         {
+//             delete iter->second[i];
+//         }
+//     }
+// }
 
 void UCDataset::parse_ucd(bool parse_shape_info)
 {
@@ -177,7 +177,6 @@ void UCDataset::print_assign_uc_info(std::string uc)
 
 void UCDataset::save_to_ucd(std::string save_path)
 {
-
     nlohmann::json json_info = {
         {"dataset_name", UCDataset::dataset_name},
         {"model_name", UCDataset::model_name},
@@ -194,7 +193,6 @@ void UCDataset::save_to_ucd(std::string save_path)
     auto iter = UCDataset::object_info.begin();
     while(iter != UCDataset::object_info.end())
     {
-        UCDataset::print_assign_uc_info(iter->first);
         std::vector<LabelmeObj*> obj_vector = iter->second; 
 
         for(int i=0; i<iter->second.size(); i++)
@@ -333,41 +331,42 @@ void UCDataset::add_voc_xml_info(std::string uc, std::string voc_xml_path)
             std::cout << "repeated obj : " << uc << ", " << obj->label << std::endl; 
         }
     }
+    
+    UCDataset::uc_list.push_back(uc);
 }
 
 void UCDataset::add_labelme_json_info(std::string uc, std::string labelme_json_path)
 {
-    // 增量解析 labelme 标准的 json 数据
-
     std::ifstream jsfile(labelme_json_path);
     json data = json::parse(jsfile); 
 
-        auto shapes = data["shapes"];
-        LabelmeObjFactory obj_factory;
-        // std::vector<LabelmeObj*> objects;
+    auto shapes = data["shapes"];
+    LabelmeObjFactory obj_factory;
 
-        if(shapes == nullptr)
-        { 
-            std::cout << "json obj is empty" << std::endl;
-        }
+    if(shapes == nullptr)
+    { 
+        std::cout << "json obj is empty" << std::endl;
+    }
 
-        for(int i=0; i<shapes.size(); i++)
+    for(int i=0; i<shapes.size(); i++)
+    {
+        std::string shape_type = shapes[i]["shape_type"];
+        LabelmeObj* obj = obj_factory.CreateObj(shape_type);
+        obj->points = shapes[i]["points"];
+        obj->label = shapes[i]["label"];
+
+        // 遍历查看是否已有这个对象
+        if(! UCDataset::has_obj(uc, obj))
         {
-            std::string shape_type = shapes[i]["shape_type"];
-            LabelmeObj* obj = obj_factory.CreateObj(shape_type);
-            obj->points = shapes[i]["points"];
-            obj->label = shapes[i]["label"];
-
-            // 遍历查看是否已有这个对象
-            if(! UCDataset::has_obj(uc, obj))
-            {
-                UCDataset::object_info[uc].push_back(obj);
-            }
-            else
-            {
-                std::cout << "repeated obj : " << uc << ", " << obj->label << std::endl;
-            }
+            UCDataset::object_info[uc].push_back(obj);
         }
+        else
+        {
+            std::cout << "repeated obj : " << uc << ", " << obj->label << std::endl;
+        }
+    }
+
+    UCDataset::uc_list.push_back(uc);
 }
 
 void UCDataset::add_saturndatabase_json_info(std::string uc, std::string labelme_json_path)
@@ -662,6 +661,7 @@ void UCDatasetUtil::get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_pa
         uc = get_file_name(xml_path_vector[i]);
         if(is_uc(uc))
         {
+            std::cout << i << ", add labelme json : " << xml_path_vector[i] << std::endl;
             ucd->add_voc_xml_info(uc, xml_path_vector[i]);
         }
     }
@@ -682,6 +682,7 @@ void UCDatasetUtil::get_ucd_from_json_dir(std::string json_dir, std::string ucd_
         uc = get_file_name(json_path_vector[i]);
         if(is_uc(uc))
         {
+            std::cout << i << ", add labelme json : " << json_path_vector[i] << std::endl;
             ucd->add_labelme_json_info(uc, json_path_vector[i]);
         }
     }

@@ -7,7 +7,6 @@
 #include <vector>
 #include <map>
 
-
 using namespace std;
 
 
@@ -30,6 +29,9 @@ class SaturnDatabaseSQL
 
         // rename image xml
         void rename_img_xml_dir(std::string img_dir, std::string xml_dir, int buffer_img_size=100);
+        
+        // rename image json
+        void rename_img_json_dir(std::string img_dir, std::string json_dir, int buffer_img_size=100);
 
         // 根据 md5 获取 uc
         std::map<std::string, std::string> get_md5_uc_map_from_md5_vector(std::vector<std::string> md5_vector);
