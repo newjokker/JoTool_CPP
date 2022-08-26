@@ -175,49 +175,13 @@ void UCDataset::print_assign_uc_info(std::string uc)
     }
 }
 
-void UCDataset::save_to_ucd(std::string save_path)
-{
-    nlohmann::json json_info = {
-        {"dataset_name", UCDataset::dataset_name},
-        {"model_name", UCDataset::model_name},
-        {"model_version", UCDataset::model_version},
-        {"add_time", UCDataset::add_time},
-        {"update_time", UCDataset::update_time},
-        {"describe", UCDataset::describe},
-        {"label_used", UCDataset::label_used},
-        {"uc_list", UCDataset::uc_list},
-        {"shapes", {}}
-    };
-
-    std::map<std::string, std::vector<nlohmann::json> > shapes_info;
-    auto iter = UCDataset::object_info.begin();
-    while(iter != UCDataset::object_info.end())
-    {
-        std::vector<LabelmeObj*> obj_vector = iter->second; 
-
-        for(int i=0; i<iter->second.size(); i++)
-        {
-            nlohmann::json each_obj;
-            each_obj["shape_type"] = obj_vector[i]->shape_type;
-            each_obj["label"] = obj_vector[i]->label;
-            each_obj["points"] = obj_vector[i]->points;
-            shapes_info[iter->first].push_back(each_obj);
-        }
-        iter++;
-    }    
-    
-    json_info["shapes"] = shapes_info;
-    std::ofstream o(save_path);
-    o << std::setw(4) << json_info << std::endl;
-}
-
 void UCDataset::unique()
 {
     std::set<std::string> uc_set(UCDataset::uc_list.begin(), UCDataset::uc_list.end());
     UCDataset::uc_list.assign(uc_set.begin(), uc_set.end());
 }
 
-std::map<std::string, int> UCDataset::count_tags()
+std::map<std::string, std::map<std::string, int> > UCDataset::count_tags()
 {
     // 
     if(! is_file(UCDataset::json_path))
@@ -226,23 +190,24 @@ std::map<std::string, int> UCDataset::count_tags()
         throw "json path not exists";
     }
     // count_tags
-    std::map< std::string, int > count_map;
+    std::map<std::string, std::map<std::string, int> > count_map;
     UCDataset::parse_ucd(true);
+
     std::string each_tag;
     auto iter = UCDataset::object_info.begin();
     while(iter != UCDataset::object_info.end())
     {
-        // uc_count += 1;
         for(int i=0; i<iter->second.size(); i++)
         {
-            each_tag = iter->second[i]->label;
-            if(count_map.count(each_tag) == 0)
+            std::string each_tag = iter->second[i]->label;
+            std::string each_shape_type = iter->second[i]->shape_type;
+            if(count_map[each_shape_type].count(each_tag) == 0)
             {
-                count_map[each_tag] = 1;
+                count_map[each_shape_type][each_tag] = 1;
             }
             else
             {
-                count_map[each_tag] += 1;
+                count_map[each_shape_type][each_tag] += 1;
             }
         }
         iter++;
@@ -403,6 +368,84 @@ void UCDataset::add_saturndatabase_json_info(std::string uc, std::string labelme
             }
         }
 }
+
+void UCDataset::save_to_ucd(std::string save_path)
+{
+    nlohmann::json json_info = {
+        {"dataset_name", UCDataset::dataset_name},
+        {"model_name", UCDataset::model_name},
+        {"model_version", UCDataset::model_version},
+        {"add_time", UCDataset::add_time},
+        {"update_time", UCDataset::update_time},
+        {"describe", UCDataset::describe},
+        {"label_used", UCDataset::label_used},
+        {"uc_list", UCDataset::uc_list},
+        {"shapes", {}}
+    };
+
+    std::map<std::string, std::vector<nlohmann::json> > shapes_info;
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        std::vector<LabelmeObj*> obj_vector = iter->second; 
+
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            nlohmann::json each_obj;
+            each_obj["shape_type"] = obj_vector[i]->shape_type;
+            each_obj["label"] = obj_vector[i]->label;
+            each_obj["points"] = obj_vector[i]->points;
+            shapes_info[iter->first].push_back(each_obj);
+        }
+        iter++;
+    }    
+    
+    json_info["shapes"] = shapes_info;
+    std::ofstream o(save_path);
+    o << std::setw(4) << json_info << std::endl;
+}
+
+void UCDataset::save_to_voc_xml(std::string save_dir)
+{
+    if(! is_dir(save_dir))
+    {
+        std::cout << "save dir not exists : " << save_dir << std::endl;
+        throw "save dir not exists";
+    }
+    int index =0;
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        std::string uc = iter->first;
+        std::string each_xml_path = save_dir + "/" + uc + ".xml"; 
+        DeteRes* dete_res = new DeteRes();
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            LabelmeObj* obj = iter->second[i];
+            if(obj->shape_type == "rectangle")
+            {
+                int x1 = obj->points[0][0];
+                int y1 = obj->points[0][1];
+                int x2 = obj->points[1][0];
+                int y2 = obj->points[1][1];
+                std::string tag = obj->label;
+                dete_res->add_dete_obj(x1, y1, x2, y2, -1, tag);
+            }
+        }
+        dete_res->save_to_xml(each_xml_path);
+        delete dete_res;
+        std::cout << index << ", save to : " << each_xml_path << std::endl;
+        index += 1;
+        iter++;
+    }
+}
+
+void UCDataset::save_to_labelme_json(std::string save_dir)
+{
+    //
+}
+
+
 
 //
 
@@ -781,48 +824,6 @@ void UCDatasetUtil::ucd_minus(std::string save_path, std::string ucd_path_1, std
     delete ucd_res;
 }
 
-void UCDatasetUtil::save_to_xml(std::string save_dir, std::vector<std::string> uc_vector)
-{    
-
-    if(! is_dir(save_dir))
-    {
-        std::cout << "save dir not exists : " << save_dir << std::endl;
-        throw "save dir not exists";
-    }
-
-    //
-    UCDataset* ucd = new UCDataset(UCDatasetUtil::json_path);
-    ucd->parse_ucd(true);
-
-    std::string save_xml_path, uc;
-    std::string tag;
-    int x1, x2, y1, y2;
-    float conf;
-
-    for(int i=0; i<uc_vector.size(); i++)
-    {
-        uc = uc_vector[i];
-        save_xml_path = save_dir + "/" + uc + ".xml";
-        //
-        jotools::DeteRes* dete_res = new jotools::DeteRes();
-        std::vector< std::vector< std::string > > xml_info = ucd->xml_info[uc];
-        for(int i=0; i<xml_info.size(); i++)
-        {
-            x1 = std::stoi(xml_info[i][0]);
-            y1 = std::stoi(xml_info[i][1]);
-            x2 = std::stoi(xml_info[i][2]);
-            y2 = std::stoi(xml_info[i][3]);
-            conf = std::stof(xml_info[i][4]);
-            tag = xml_info[i][5];
-            dete_res->add_dete_obj(x1, y1, x2, y2, conf, tag);
-        }
-        dete_res->save_to_xml(save_xml_path);
-        delete dete_res;
-    }
-    std::cout << "parse " << uc_vector.size() << " uc" << std::endl;
-    delete ucd;
-}
-
 bool UCDatasetUtil::is_ucd_path(std::string ucd_path)
 {
     if((! is_file(ucd_path)) || (ucd_path.substr(ucd_path.size()-5, ucd_path.size()) != ".json"))
@@ -842,26 +843,31 @@ void UCDatasetUtil::count_ucd_tags(std::string ucd_path)
         std::cout << "ucd path not exists : " << ucd_path << std::endl;
     }
 
-    int uc_count = 0;
+    int tag_count = 0;
     int dete_obj_count=0; 
     UCDataset* ucd = new UCDataset(ucd_path);
     // count_tags 函数中会自动 解析一遍 json 
-    std::map< std::string, int > count_map = ucd->count_tags();
+    std::map<std::string, std::map<std::string, int> > count_map = ucd->count_tags();
 
     // print statistics res
     auto iter_count = count_map.begin();
-    std::cout << "--------------------------" << std::endl;
+    std::cout << "---------------------------------------------" << std::endl;
     while(iter_count != count_map.end())
     {
-        uc_count += 1;
-        dete_obj_count += iter_count->second;
-        std::cout << std::setw(15) << std::left << iter_count->first  << " : " << iter_count->second << std::endl;
+        auto iter = iter_count->second.begin();
+        while(iter != iter_count->second.end())
+        {
+            dete_obj_count += iter->second;
+            std::cout << std::setw(15) << std::left << "[" + iter_count->first + "]" << std::setw(15) << std::left << iter->first  << " : " << iter->second << std::endl;
+            tag_count += 1;
+            iter++;
+        }
         iter_count ++;
     }
-    std::cout << "-------------------" << std::endl;
-    std::cout << "number of tag : " << uc_count << std::endl;
+    std::cout << "---------------------------" << std::endl;
+    std::cout << "number of tag : " << tag_count << std::endl;
     std::cout << "number of obj : " << dete_obj_count << std::endl;
-    std::cout << "--------------------------" << std::endl;
+    std::cout << "---------------------------------------------" << std::endl;
 }
 
 void UCDatasetUtil::cache_clear()

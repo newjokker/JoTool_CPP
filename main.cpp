@@ -75,7 +75,7 @@ using namespace std;
 
 // 斜框先不进行处理，先去掉
 
-// rename 名字已经是 uc 就不进行处理了
+// 没有地方存储置信度的，这个要注意一点
 
 
 int main(int argc, char ** argv)
@@ -419,7 +419,7 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "from_xml")
     {
-        if(argc == 5)
+        if(argc == 4)
         {
             std::string xml_dir = argv[2];
             std::string ucd_path = argv[3];
@@ -447,7 +447,6 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "parse_xml")
     {
-        // ucd 中解压出 xml 信息，同时可以解析出 img 信息
         if(argc == 4)
         {
             std::string json_path = argv[2];
@@ -460,11 +459,9 @@ int main(int argc, char ** argv)
                 throw "ucd_path not exists";
             }
 
-            // 输入要解析的 ucd_path 和 需要的 uc 
             UCDataset* ucd = new UCDataset(json_path);
-            ucd->parse_ucd();
-            ucd_util->json_path = json_path;
-            ucd_util->save_to_xml(save_dir, ucd->uc_list);
+            ucd->parse_ucd(true);
+            ucd->save_to_voc_xml(save_dir);
         }
         else
         {
@@ -734,12 +731,10 @@ int main(int argc, char ** argv)
             std::string xml_dir = argv[2];
             if(ucd_util->is_ucd_path(xml_dir))
             {
-                // statistice from ucd_path
                 ucd_util->count_ucd_tags(xml_dir);
             }
             else if(is_dir(xml_dir))
             {
-                // statistice from xml_dir
                 count_tags(xml_dir);
             }
             else

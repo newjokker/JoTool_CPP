@@ -47,7 +47,7 @@ class UCDataset
         std::vector<std::string> uc_slice(int start, int end);
         
         // 统计标签个数
-        std::map<std::string, int> count_tags();
+        std::map<std::string, std::map<std::string, int> > count_tags();
         
         // 修改属性
         void change_attar(std::string attr_name, std::string attr_value);
