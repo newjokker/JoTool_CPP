@@ -322,13 +322,21 @@ void UcdParamOpt::load_param_info()
     param_from_img->chinese_explain = "本地文件生成数据集";   
     UcdParamOpt::add_param(param_from_img);
     
-    // from_img_xml
-    ParamInfo * param_from_img_xml = new ParamInfo("from_img_xml");
-    param_from_img_xml->group = "sync";
-    param_from_img_xml->grammar = "ucd from_img_xml img_dir ucd_save_path";
-    param_from_img_xml->english_explain = "get ucd from loacal data(img, xml)";
-    param_from_img_xml->chinese_explain = "本地文件生成 ucd, ucd中包含 dete_obj 信息";   
-    UcdParamOpt::add_param(param_from_img_xml);
+    // from_xml
+    ParamInfo * param_from_xml = new ParamInfo("from_xml");
+    param_from_xml->group = "sync";
+    param_from_xml->grammar = "ucd from_xml xml_dir ucd_save_path";
+    param_from_xml->english_explain = "get ucd from loacal data(img, xml)";
+    param_from_xml->chinese_explain = "本地 voc_xml 文件生成 ucd, ucd中包含 dete_obj 信息";   
+    UcdParamOpt::add_param(param_from_xml);
+    
+    // from_json
+    ParamInfo * param_from_json = new ParamInfo("from_json");
+    param_from_json->group = "sync";
+    param_from_json->grammar = "ucd from_json json_dir ucd_save_path";
+    param_from_json->english_explain = "get ucd from loacal data(img, json)";
+    param_from_json->chinese_explain = "本地 labelme json 文件生成 ucd, ucd中包含 dete_obj 信息";   
+    UcdParamOpt::add_param(param_from_json);
     
     // info
     ParamInfo * param_info = new ParamInfo("info");
@@ -393,6 +401,14 @@ void UcdParamOpt::load_param_info()
     param_rename_img_xml->english_explain = "rename img xml by uc";
     param_rename_img_xml->chinese_explain = "重命名数据集";   
     UcdParamOpt::add_param(param_rename_img_xml);
+    
+    // rename_img_json
+    ParamInfo * param_rename_img_json = new ParamInfo("rename_img_json");
+    param_rename_img_json->group = "opt";
+    param_rename_img_json->grammar = "ucd rename_img_json img_dir xml_dir";
+    param_rename_img_json->english_explain = "rename img json by uc";
+    param_rename_img_json->chinese_explain = "重命名 lableme json 数据集";   
+    UcdParamOpt::add_param(param_rename_img_json);
     
     // count_tags
     ParamInfo * param_count_tags = new ParamInfo("count_tags");

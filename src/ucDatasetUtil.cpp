@@ -49,14 +49,16 @@ UCDataset::~UCDataset()
     }
 }
 
-void UCDataset::parse_ucd(bool parse_xml_info)
+void UCDataset::parse_ucd(bool parse_shape_info)
 {
     if(! is_file(UCDataset::json_path))
     {
         std::cout << "json path not exists : " << UCDataset::json_path << std::endl;
         throw "json path not exists";
     }
-    
+
+    // todo 原始数据的清空
+
     std::ifstream jsfile(UCDataset::json_path);
     json data = json::parse(jsfile); 
 
@@ -82,14 +84,30 @@ void UCDataset::parse_ucd(bool parse_xml_info)
         UCDataset::unique();
     }
     
-    // parse xml_info
-    if(parse_xml_info)
+    // parse shape_info
+    if(parse_shape_info)
     {
-        auto xml_info = data["xml_info"];
-        if(xml_info != nullptr)
+        auto shapes_info = data["shapes"];
+        LabelmeObjFactory obj_factory;
+
+        if(shapes_info != nullptr)
         {
-            // 读取存储的 xml info， 存放到 字典中，{uc: [x1, y1, x2, y2, conf, tag]}
-            UCDataset::xml_info = xml_info;
+            auto iter = shapes_info.begin();
+            while(iter != shapes_info.end())
+            {
+                std::string uc = iter.key();
+                for(int i=0; i<iter.value().size(); i++)
+                {
+                    std::string shape_type = iter.value()[i]["shape_type"];
+                    std::string label = iter.value()[i]["label"];
+                    std::vector< std::vector<double> > points = iter.value()[i]["points"];
+                    LabelmeObj* obj = obj_factory.CreateObj(shape_type);
+                    obj->label = label;
+                    obj->points = points;
+                    UCDataset::object_info[uc].push_back(obj);
+                }
+                iter++;
+            }
         }
     }
 }
@@ -195,7 +213,6 @@ void UCDataset::save_to_ucd(std::string save_path)
     o << std::setw(4) << json_info << std::endl;
 }
 
-
 void UCDataset::unique()
 {
     std::set<std::string> uc_set(UCDataset::uc_list.begin(), UCDataset::uc_list.end());
@@ -204,6 +221,7 @@ void UCDataset::unique()
 
 std::map<std::string, int> UCDataset::count_tags()
 {
+    // 
     if(! is_file(UCDataset::json_path))
     {
         std::cout << "json path not exists : " << UCDataset::json_path << std::endl;
@@ -213,15 +231,13 @@ std::map<std::string, int> UCDataset::count_tags()
     std::map< std::string, int > count_map;
     UCDataset::parse_ucd(true);
     std::string each_tag;
-    auto iter = UCDataset::xml_info.begin();
-    while(iter != UCDataset::xml_info.end())
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
     {
         // uc_count += 1;
         for(int i=0; i<iter->second.size(); i++)
         {
-            // x1, y1, x2, y2, conf, tag
-            // dete_obj_count += 1;
-            each_tag = iter->second[i][5];
+            each_tag = iter->second[i]->label;
             if(count_map.count(each_tag) == 0)
             {
                 count_map[each_tag] = 1;
@@ -634,39 +650,39 @@ void UCDatasetUtil::get_ucd_from_img_dir(std::string img_dir, std::string ucd_pa
     delete ucd;
 }
 
-void UCDatasetUtil::get_ucd_from_img_xml_dir(std::string img_dir, std::string xml_dir, std::string ucd_path)
+void UCDatasetUtil::get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_path)
 {
-    std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
-    std::vector<std::string> img_path_vector = get_all_file_path_recursive(img_dir, suffix);
+    std::set<std::string> suffix {".xml"};
+    std::vector<std::string> xml_path_vector = get_all_file_path_recursive(xml_dir, suffix);
+    UCDataset* ucd = new UCDataset(ucd_path);
+    std::string uc;
+
+    for(int i=0; i<xml_path_vector.size(); i++)
+    {
+        uc = get_file_name(xml_path_vector[i]);
+        if(is_uc(uc))
+        {
+            ucd->add_voc_xml_info(uc, xml_path_vector[i]);
+        }
+    }
+    ucd->save_to_ucd(ucd_path);
+    delete ucd;
+}
+
+void UCDatasetUtil::get_ucd_from_json_dir(std::string json_dir, std::string ucd_path)
+{
+    std::set<std::string> suffix {".json"};
+    std::vector<std::string> json_path_vector = get_all_file_path_recursive(json_dir, suffix);
 
     UCDataset* ucd = new UCDataset(ucd_path);
-    std::string uc, xml_path;
+    std::string uc, json_path;
 
-    for(int i=0; i<img_path_vector.size(); i++)
+    for(int i=0; i<json_path_vector.size(); i++)
     {
-        uc = get_file_name(img_path_vector[i]);
-        xml_path = xml_dir + "/" + uc + ".xml";
-        if(is_uc(uc) && is_file(xml_path))
+        uc = get_file_name(json_path_vector[i]);
+        if(is_uc(uc))
         {
-            // std::cout << img_path_vector[i] << std::endl;
-            ucd->uc_list.push_back(uc);
-            // read xml info
-            jotools::DeteRes* dete_res = new jotools::DeteRes(xml_path);
-            std::vector< std::vector<std::string> > xml_info; 
-            for(int j=0; j<dete_res->size(); j++)
-            {
-                std::vector<std::string> each_xml_info;
-                each_xml_info.push_back(std::to_string(dete_res->alarms[j].x1));        
-                each_xml_info.push_back(std::to_string(dete_res->alarms[j].y1));        
-                each_xml_info.push_back(std::to_string(dete_res->alarms[j].x2));        
-                each_xml_info.push_back(std::to_string(dete_res->alarms[j].y2));        
-                each_xml_info.push_back(std::to_string(dete_res->alarms[j].conf));        
-                each_xml_info.push_back(dete_res->alarms[j].tag);
-                xml_info.push_back(each_xml_info); 
-                // std::cout << uc << std::endl;       
-            }
-            ucd->xml_info[uc] = xml_info;
-            delete dete_res;
+            ucd->add_labelme_json_info(uc, json_path_vector[i]);
         }
     }
     ucd->save_to_ucd(ucd_path);
@@ -833,17 +849,18 @@ void UCDatasetUtil::count_ucd_tags(std::string ucd_path)
 
     // print statistics res
     auto iter_count = count_map.begin();
-    std::cout << "-------------------------------" << std::endl;
+    std::cout << "--------------------------" << std::endl;
     while(iter_count != count_map.end())
     {
         uc_count += 1;
         dete_obj_count += iter_count->second;
-        std::cout << iter_count->first << " : " << iter_count->second << std::endl;
+        std::cout << std::setw(15) << std::left << iter_count->first  << " : " << iter_count->second << std::endl;
         iter_count ++;
     }
-    std::cout << "number of tag  : " << uc_count << std::endl;
+    std::cout << "-------------------" << std::endl;
+    std::cout << "number of tag : " << uc_count << std::endl;
     std::cout << "number of obj : " << dete_obj_count << std::endl;
-    std::cout << "-------------------------------" << std::endl;
+    std::cout << "--------------------------" << std::endl;
 }
 
 void UCDatasetUtil::cache_clear()

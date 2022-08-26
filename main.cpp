@@ -73,6 +73,10 @@ using namespace std;
 
 // 解释一下斜框矩形为什么不被包括在 labelme 中，因为不是标准结构，labelme 一直使用的点对结构信息进行存储
 
+// 斜框先不进行处理，先去掉
+
+// rename 名字已经是 uc 就不进行处理了
+
 
 int main(int argc, char ** argv)
 {
@@ -413,15 +417,15 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
-    else if(command_1 == "from_img_xml")
+    else if(command_1 == "from_xml")
     {
         // 保存 xml 信息到 ucd 中去
         if(argc == 5)
         {
             std::string img_dir = argv[2];
             std::string xml_dir = argv[3];
-            std::string ucd_name = argv[4];
-            ucd_util->get_ucd_from_img_xml_dir(img_dir, xml_dir, ucd_name);
+            std::string ucd_path = argv[4];
+            ucd_util->get_ucd_from_xml_dir(xml_dir, ucd_path);
         }
         else
         {
@@ -429,23 +433,44 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
-    else if(command_1 == "from_img_json")
+    else if(command_1 == "from_json")
     {
+
+        if(argc == 5)
+        {
+            std::string img_dir = argv[2];
+            std::string xml_dir = argv[3];
+            std::string ucd_path = argv[4];
+            // ucd_util->get_ucd_from_img_xml_dir(img_dir, xml_dir, ucd_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info("from_img_json");
+            return -1;       
+        }
+
         // 将 img 和 对应的 labelme 格式的 json 导入为 ucd 
 
-        UCDataset* ucd = new UCDataset(""); 
+        // json 必须以 uc 格式进行命名
 
-        std::string uc = "fack_uc";
+        UCDataset* ucd = new UCDataset("/home/ldq/del/del_ucd.json"); 
 
-        ucd->add_labelme_json_info("fake_1", "/home/ldq/del/test.json");
-        ucd->add_labelme_json_info("fake_2", "/home/ldq/del/test.json");
-        ucd->add_saturndatabase_json_info("fake_3", "/home/ldq/del/Czi00nb.json");
-        ucd->add_voc_xml_info("fake_4", "/home/ldq/del/Dsm07dn.xml");
-        ucd->add_voc_xml_info("fake_5", "/home/ldq/del/Dsm07dn.xml");
+        // std::string uc = "fack_uc";
+        // ucd->add_labelme_json_info("fake_1", "/home/ldq/del/test.json");
+        // ucd->add_labelme_json_info("fake_2", "/home/ldq/del/test.json");
+        // ucd->add_saturndatabase_json_info("fake_3", "/home/ldq/del/Czi00nb.json");
+        // ucd->add_voc_xml_info("fake_4", "/home/ldq/del/Dsm07dn.xml");
+        // ucd->add_voc_xml_info("fake_5", "/home/ldq/del/Dsm07dn.xml");
         // ucd->print_assign_uc_info(uc);
+        // ucd->save_to_ucd("/home/ldq/del/del_ucd.json");
 
+        // ucd->json_path = "/home/ldq/del/test.json";
+        ucd->parse_ucd(true);
+        // ucd->print_assign_uc_info("fake_1");
+        // ucd->print_assign_uc_info("fake_4");
 
-        ucd->save_to_ucd("/home/ldq/del/del_ucd.json");
+        ucd->print_ucd_info();
+
 
 
     }
@@ -475,6 +500,10 @@ int main(int argc, char ** argv)
             ucd_param_opt->print_command_info("parse_xml");
             return -1;
         }
+    }
+    else if(command_1 == "parse_json")
+    {
+        // 从 ucd 中解析出 labelme json 格式的数据
     }
     else if(command_1 == "show")
     {

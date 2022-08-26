@@ -28,8 +28,6 @@ class UCDataset
         ~UCDataset();
         // 解析 ucd 数据
         void parse_ucd(bool parse_xml_info=false);
-        // 保存为 ucd
-        void save_to_ucd(std::string save_path);
         // 打印 json 数据
         void print_ucd_info();
         // 打印指定 uc 对应的信息
@@ -52,6 +50,12 @@ class UCDataset
         // 增量解析 saturndatabase 的 json 数据
         void add_saturndatabase_json_info(std::string uc, std::string labelme_json_path);
 
+        // 保存为 ucd（斜框矩形如何进行保存）
+        void save_to_ucd(std::string save_path);
+        // 保存为 voc 的xml 形式（只保存正框，或者其他类型的外接矩形代表的正框）
+        void save_to_voc_xml(std::string save_path);
+        // 保存为 labelme 的 json 形式（所有对象都保存，斜框矩阵是都进行保存）
+        void save_to_labelme_json(std::string save_path);
 
     private:
         std::string json_path;
@@ -88,8 +92,10 @@ class UCDatasetUtil
         void upload_ucd(std::string ucd_path, std::string ucd_name="");
         // 将 img_dir 中的文件符合 UC 规范的组织为一个 ucd
         void get_ucd_from_img_dir(std::string img_dir, std::string ucd_path);
-        // 将 img 和 xml 信息 保存在 ucd 中
-        void get_ucd_from_img_xml_dir(std::string img_dir, std::string xml_dir, std::string ucd_path);
+        // 将 xml 信息 保存在 ucd 中
+        void get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_path);
+        // 将 labelme json 信息保存到 ucd 中
+        void get_ucd_from_json_dir(std::string json_dir, std::string ucd_path);
         // 将多个 ucd 进行合并
         void merge_ucds(std::string save_path, std::vector<std::string> ucd_path_vector);
         // 查看两个 ucd 之间的差异
