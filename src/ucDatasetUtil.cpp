@@ -17,6 +17,8 @@
 #include "include/deteRes.hpp"
 #include "include/strToImg.hpp"
 #include "include/lablelmeObj.hpp"
+#include "include/easyexif.h"
+#include "include/imageinfo.hpp"
 
 using json = nlohmann::json;
 using namespace jotools;
@@ -142,21 +144,6 @@ void UCDataset::print_ucd_info()
             }
             std::cout << std::endl;
         }
-        // (2) statistics tags
-        // std::cout << "--------------------------------" << std::endl;
-        // int uc_count = 0;
-        // int dete_obj_count=0; 
-        // std::map< std::string, int > count_map = UCDataset::count_tags();
-        // auto iter_count = count_map.begin();
-        // while(iter_count != count_map.end())
-        // {
-        //     uc_count += 1;
-        //     dete_obj_count += iter_count->second;
-        //     std::cout << iter_count->first << " : " << iter_count->second << std::endl;
-        //     iter_count ++;
-        // }
-        // std::cout << "number of tag  : " << uc_count << std::endl;
-        // std::cout << "number of obj : " << dete_obj_count << std::endl;
     }
     else
     {
@@ -405,96 +392,95 @@ void UCDataset::save_to_ucd(std::string save_path)
     o << std::setw(4) << json_info << std::endl;
 }
 
-void UCDataset::save_to_voc_xml(std::string save_dir)
+void UCDataset::save_to_voc_xml_with_assign_uc(std::string save_path, std::string img_path, std::string uc)
 {
-    if(! is_dir(save_dir))
+    int height, width, depth;
+    if(! is_file(img_path))
     {
-        std::cout << "save dir not exists : " << save_dir << std::endl;
-        throw "save dir not exists";
+        std::cout << "img_path not exists : " << img_path << std::endl;
+        height = -1;
+        width = -1;
+        depth = -1;
     }
-    int index =0;
-    auto iter = UCDataset::object_info.begin();
-    while(iter != UCDataset::object_info.end())
+    else
     {
-        std::string uc = iter->first;
-        std::string each_xml_path = save_dir + "/" + uc + ".xml"; 
-        DeteRes* dete_res = new DeteRes();
-        for(int i=0; i<iter->second.size(); i++)
+        FILE *file = fopen(img_path.c_str(), "rb");
+        auto imageInfo = getImageInfo<IIFileReader>(file);
+        fclose(file);
+        height = imageInfo.getHeight();
+        width =  imageInfo.getWidth();
+        depth = 3;
+    }
+
+    DeteRes* dete_res = new DeteRes();
+
+    for(int i=0; i<UCDataset::object_info[uc].size(); i++)
+    {
+        LabelmeObj* obj = UCDataset::object_info[uc][i];
+        if(obj->shape_type == "rectangle")
         {
-            LabelmeObj* obj = iter->second[i];
-            if(obj->shape_type == "rectangle")
-            {
-                int x1 = obj->points[0][0];
-                int y1 = obj->points[0][1];
-                int x2 = obj->points[1][0];
-                int y2 = obj->points[1][1];
-                std::string tag = obj->label;
-                dete_res->add_dete_obj(x1, y1, x2, y2, -1, tag);
-            }
+            int x1 = obj->points[0][0];
+            int y1 = obj->points[0][1];
+            int x2 = obj->points[1][0];
+            int y2 = obj->points[1][1];
+            std::string tag = obj->label;
+            dete_res->add_dete_obj(x1, y1, x2, y2, -1, tag);
         }
-        dete_res->save_to_xml(each_xml_path);
-        delete dete_res;
-        std::cout << index << ", save to : " << each_xml_path << std::endl;
-        index += 1;
-        iter++;
     }
+
+    dete_res->width = width;
+    dete_res->height = height;
+    dete_res->depth = depth;
+    dete_res->img_path = img_path;
+    dete_res->save_to_xml(save_path);
+    delete dete_res;
 }
 
-void UCDataset::save_to_labelme_json(std::string save_dir, std::string img_dir)
+void UCDataset::save_to_labelme_json_with_assign_uc(std::string save_json_path, std::string img_path, std::string uc)
 {
-    int index = 0;
+    // 
     cv::Mat img_mat;
     std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
-    auto iter = UCDataset::object_info.begin();
-    while(iter != UCDataset::object_info.end())
+
+    nlohmann::json json_info = 
     {
-        nlohmann::json json_info = 
-        {
-            {"version", "4.4.0"},
-            {"flags", {}},
-            {"imagePath", ""},
-            {"imageData", ""},
-            {"imageHeight", -1},
-            {"imageWidth", -1},
-            {"shapes", {}}
-        };
+        {"version", "4.4.0"},
+        {"flags", {}},
+        {"imagePath", ""},
+        {"imageData", ""},
+        {"imageHeight", -1},
+        {"imageWidth", -1},
+        {"shapes", {}}
+    };
 
-        std::string uc = iter->first;
-        std::string each_img_path = get_file_by_suffix_set(img_dir, uc, suffix);
-        std::string save_json_path = save_dir + "/" + uc + ".json";
-
-        if(! is_file(each_img_path))
-        {
-            std::cout << "img_path not exists : " << each_img_path << std::endl;
-            continue;
-        }
-        else
-        {
-            img_mat = cv::imread(each_img_path); 
-            json_info["imageHeight"] = img_mat.rows;
-            json_info["imageWidth"] = img_mat.cols;
-        }
-
-        std::map<std::string, nlohmann::json> obj_info;
-        for(int i=0; i<iter->second.size(); i++)
-        {
-            LabelmeObj* obj = iter->second[i];
-            obj_info["shape_type"] = obj->shape_type;
-            obj_info["label"] = obj->label;
-            obj_info["points"] = obj->points;
-            json_info["shapes"].push_back(obj_info);
-        }
-
-        std::string img_suffix = get_file_suffix(each_img_path);
-        std::string base64_str = Mat2Base64(img_mat, img_suffix.substr(1, img_suffix.size()));
-        json_info["imageData"] = base64_str;
-
-        std::cout << index << ", save json : " << uc << std::endl;
-        std::ofstream o(save_json_path);
-        o << std::setw(4) << json_info << std::endl;
-        index += 1;
-        iter++;
+    if(! is_file(img_path))
+    {
+        std::cout << "img_path not exists : " << img_path << std::endl;
+        throw "img_path not exists";
     }
+    else
+    {
+        img_mat = cv::imread(img_path); 
+        json_info["imageHeight"] = img_mat.rows;
+        json_info["imageWidth"] = img_mat.cols;
+    }
+
+    std::map<std::string, nlohmann::json> obj_info;
+    for(int i=0; i<UCDataset::object_info[uc].size(); i++)
+    {
+        LabelmeObj* obj = UCDataset::object_info[uc][i];
+        obj_info["shape_type"] = obj->shape_type;
+        obj_info["label"] = obj->label;
+        obj_info["points"] = obj->points;
+        json_info["shapes"].push_back(obj_info);
+        delete obj;
+    }
+
+    std::string img_suffix = get_file_suffix(img_path);
+    std::string base64_str = Mat2Base64(img_mat, img_suffix.substr(1, img_suffix.size()));
+    json_info["imageData"] = base64_str;
+    std::ofstream o(save_json_path);
+    o << std::setw(4) << json_info << std::endl;
 }
 
 //
@@ -919,9 +905,11 @@ void UCDatasetUtil::count_ucd_tags(std::string ucd_path)
         iter_count ++;
     }
     std::cout << "---------------------------" << std::endl;
+    std::cout << "number of uc  : " << ucd->uc_list.size() << std::endl;
     std::cout << "number of tag : " << tag_count << std::endl;
     std::cout << "number of obj : " << dete_obj_count << std::endl;
     std::cout << "---------------------------------------------" << std::endl;
+    delete ucd;
 }
 
 void UCDatasetUtil::cache_clear()
@@ -1194,4 +1182,98 @@ void UCDatasetUtil::cut_small_img(std::string img_dir, std::string xml_dir, std:
     }
     delete ucd;
 }
+
+void UCDatasetUtil::parse_labelme_json(std::string img_dir, std::string save_dir, std::string ucd_path)
+{
+    if(! is_dir(img_dir))
+    {
+        std::cout << "img_dir not exists : " << img_dir << std::endl;
+        throw "img_dir not exists";
+    }
+
+    if(! is_dir(save_dir))
+    {
+        std::cout << "save_dir not exists : " << save_dir << std::endl;
+        throw "save_dir not exists";
+    }
+
+    if(! is_file(ucd_path))
+    {
+        std::cout << "ucd_path not exists : " << ucd_path << std::endl;
+        throw "ucd_path not exists";
+    }
+
+    std::set<std::string> img_suffix {".jpg", ".JPG", ".png", ".PNG"};
+    UCDataset *ucd = new UCDataset(ucd_path);
+    ucd->parse_ucd(true);
+    int index = 0;
+    auto iter = ucd->object_info.begin();
+    while(iter != ucd->object_info.end())
+    {
+        std::string uc = iter->first;
+        UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, {uc});
+        std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
+        
+        if(is_file(img_path))
+        {
+            std::string json_path = save_dir + "/" + uc + ".json";
+            ucd->save_to_labelme_json_with_assign_uc(json_path, img_path, uc);
+            std::cout << index << ", parse json : " << uc << std::endl;
+        }
+        else
+        {
+            std::cout << "load img failed : " << img_path << std::endl;
+        }
+        index += 1;
+        iter ++;
+    }
+}
+
+void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std::string ucd_path)
+{
+    if(! is_dir(img_dir))
+    {
+        std::cout << "img_dir not exists : " << img_dir << std::endl;
+        throw "img_dir not exists";
+    }
+
+    if(! is_dir(save_dir))
+    {
+        std::cout << "save_dir not exists : " << save_dir << std::endl;
+        throw "save_dir not exists";
+    }
+
+    if(! is_file(ucd_path))
+    {
+        std::cout << "ucd_path not exists : " << ucd_path << std::endl;
+        throw "ucd_path not exists";
+    }
+
+    std::set<std::string> img_suffix {".jpg", ".JPG", ".png", ".PNG"};
+    UCDataset *ucd = new UCDataset(ucd_path);
+    ucd->parse_ucd(true);
+    int index = 0;
+    auto iter = ucd->object_info.begin();
+    while(iter != ucd->object_info.end())
+    {
+        std::string uc = iter->first;
+        UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, {uc});
+        std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
+        
+        if(is_file(img_path))
+        {
+            std::string xml_path = save_dir + "/" + uc + ".xml";
+            ucd->save_to_voc_xml_with_assign_uc(xml_path, img_path, uc);
+            std::cout << index << ", parse xml : " << uc << std::endl;
+        }
+        else
+        {
+            std::cout << "load img failed : " << img_path << std::endl;
+        }
+        index += 1;
+        iter ++;
+    }
+}
+
+
 

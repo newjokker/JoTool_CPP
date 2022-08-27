@@ -60,8 +60,8 @@ std::map<std::string, int> count_tags(std::string floder_path)
         iter++;
     }
     // extra info
-    std::cout << "number of xml : " << file_name_xml.size() << std::endl;
-    std::cout << "number of tag : " << tags_numb << std::endl;
+    std::cout << "number of xml has obj : " << file_name_xml.size() << std::endl;
+    std::cout << "number of tag         : " << tags_numb << std::endl;
     std::cout << "-------------------------------" << std::endl;
     return count_res;
 }

@@ -73,6 +73,11 @@ using namespace std;
 
 // 忘记 xml，img，json 只记得 ucd 即可
 
+// 调整所有操作的粒度，以 uc 和 batch_uc 为单位，
+
+// 查看是不是一个文件夹中的数据都是 uc 命名 
+
+// 不是 uc 名字的文件处理 移动等
 
 
 int main(int argc, char ** argv)
@@ -393,7 +398,7 @@ int main(int argc, char ** argv)
     }        
     else if(command_1 == "info")
     {
-        if(argc != 3)
+        if(argc == 3)
         {
             std::string ucd_path = argv[2];
             UCDataset * ucd_info = new UCDataset(ucd_path);
@@ -460,10 +465,7 @@ int main(int argc, char ** argv)
                 std::cout << "ucd_path not exists : " << ucd_path << std::endl;
                 throw "ucd_path not exists";
             }
-
-            UCDataset* ucd = new UCDataset(ucd_path);
-            ucd->parse_ucd(true);
-            ucd->save_to_voc_xml(save_dir);
+            ucd_util->parse_voc_xml(ucd_util->cache_img_dir, save_dir, ucd_path);
         }
         else
         {
@@ -484,11 +486,7 @@ int main(int argc, char ** argv)
                 std::cout << "ucd_path not exists : " << ucd_path << std::endl;
                 throw "ucd_path not exists";
             }
-
-            UCDataset* ucd = new UCDataset(ucd_path);
-            ucd->parse_ucd(true);
-            ucd_util->load_img(ucd_util->cache_img_dir, ucd->uc_list);
-            ucd->save_to_labelme_json(save_dir, ucd_util->cache_img_dir);
+            ucd_util->parse_labelme_json(ucd_util->cache_img_dir, save_dir, ucd_path);
         }
         else
         {

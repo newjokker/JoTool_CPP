@@ -64,11 +64,12 @@ class UCDataset
         // 保存为 ucd（斜框矩形如何进行保存）
         void save_to_ucd(std::string save_path);
         
-        // 保存为 voc 的xml 形式（只保存正框，或者其他类型的外接矩形代表的正框）
-        void save_to_voc_xml(std::string save_path);
+        // 保存一个 xml 文件
+        void save_to_voc_xml_with_assign_uc(std::string save_path, std::string img_path, std::string assign_uc);
+
+        // 保存一个 json 文件
+        void save_to_labelme_json_with_assign_uc(std::string save_path, std::string img_path, std::string assign_uc);
         
-        // 保存为 labelme 的 json 形式（所有对象都保存，斜框矩阵是都进行保存）
-        void save_to_labelme_json(std::string save_path, std::string img_dir);
 
     private:
         std::string json_path;
@@ -106,6 +107,12 @@ class UCDatasetUtil
         void load_xml(std::string save_dir, std::vector<std::string> uc_list);
         void load_ucd(std::string ucd_name, std::string save_dir);
         
+        // 从 ucd 中解析指定的 uc 的 labelme json 文件
+        void parse_labelme_json(std::string img_dir, std::string save_dir, std::string ucd_path);
+
+        // 从 ucd 中解析出指定 uc 的 voc_xml 文件 （img_dir 用于读取图片的长宽，要是不存在的话那么就设置为 -1）
+        void parse_voc_xml(std::string img_dir, std::string save_dir, std::string ucd_path);
+
         // 从 json 中解析 xml 并保存
         void save_to_xml(std::string save_path, std::vector<std::string>);
         
