@@ -1063,10 +1063,29 @@ int main(int argc, char ** argv)
         ucd_param_opt->print_similar_command_info(command_1);
         return -1;
     }
-    else if(command_1 == "uc_check")
+    else if(command_1 == "test")
     {
         // 查看是不是所有的文件都是 uc 格式命名的，去数据库中进行对比
         // 对于不符合 uc 规范的文件可以进行路径提取，或者文件移动到指定文件夹
+
+        std::string uc = argv[2];
+
+        SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
+
+        std::vector<std::string> uc_vector {uc};
+        std::map<std::string, bool> is_uc_map = sd_sql->check_uc_by_mysql(uc_vector);
+
+        if(is_uc_map[uc])
+        {
+            std::cout << uc <<  " is uc " << std::endl;
+        }
+        else
+        {
+            std::cout << uc << " is not uc " << std::endl; 
+        }
+        
+        delete sd_sql;
+
     }
     else
     {

@@ -41,6 +41,8 @@ class SaturnDatabaseSQL
 
         // 检查 sql 配置信息
         void print_sql_info();
+
+        std::map<std::string, bool> check_uc_by_mysql(std::vector<std::string> uc_vector);
 };
 
 
