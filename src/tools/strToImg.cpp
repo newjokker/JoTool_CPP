@@ -102,7 +102,9 @@ std::string Mat2Base64(const cv::Mat &img, std::string imgType)
 	std::string img_data;
 	std::vector<uchar> vecImg;
 	std::vector<int> vecCompression_params;
-	vecCompression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+	// CV_IMWRITE_JPEG_QUALITY
+	// cv::IMWRITE_JPEG_QUALITY
+	vecCompression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
 	vecCompression_params.push_back(90);
 	imgType = "." + imgType;
 	cv::imencode(imgType, img, vecImg, vecCompression_params);
@@ -116,7 +118,9 @@ cv::Mat Base2Mat(std::string &base64_data)
 	std::string s_mat;
 	s_mat = base64Decode(base64_data.data(), base64_data.size());
 	std::vector<char> base64_img(s_mat.begin(), s_mat.end());
-	img = cv::imdecode(base64_img, CV_LOAD_IMAGE_COLOR);
+	// cv::IMREAD_COLOR
+	// CV_LOAD_IMAGE_COLOR
+	img = cv::imdecode(base64_img, cv::IMREAD_COLOR);
 	return img;
 }
 

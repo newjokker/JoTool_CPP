@@ -26,6 +26,7 @@
     * make install，安装
 
 * 安装 opencv 环境
+  * ubuntu 22.04  refer : https://linuxtus.com/uninstall-install-opencv-ubuntu-22-04/
   * refer : https://docs.opencv.org/4.x/d7/d9f/tutorial_linux_install.html 
   * 去官网下载 opencv-3.4.6 refer : https://opencv.org/releases/page/3/
   * 安装依赖环境
@@ -101,6 +102,11 @@
   * 下载图片 
   * refer : https://github.com/yhirose/cpp-httplib 
   * 下载好 git 之后 (1) mkdir build (2) cmake .. (3) make install 即可 
+
+* mysql
+  * refer : https://stackoverflow.com/questions/14604228/mysql-h-file-cant-be-found
+  * apt install libmysqlclient-dev
+
 
 ### 环境安装的通用步骤
 
