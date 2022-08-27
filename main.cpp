@@ -147,7 +147,6 @@ int main(int argc, char ** argv)
         cache_dir = (const std::string &)xini_file["cache"]["dir"];
     }
     
-    // 必须要有缓存文件夹，否则报错，因为逻辑太麻烦了
     if(! is_dir(cache_dir))
     {
         std::cout << "cache_dir not exists, edit ucdconfig.ini cache/cache_dir : " << std::endl;
@@ -226,36 +225,30 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "save")
     {
-
-        // todo 如果本地有对应的缓存，直接把缓存拷贝到文件夹，没有的话再去下载
-
-        // save 保存到本地
         if((argc == 5) || (argc == 6))
         {
-            std::string json_path = argv[2];
+            std::string ucd_path = argv[2];
             std::string save_dir = argv[3];
             std::string save_mode = argv[4];
             
-            // json_path
-            if(! is_file(json_path))
+            if(! is_file(ucd_path))
             {
-                std::cout << "json_path not exists : " << json_path << std::endl;
+                std::cout << "json_path not exists : " << ucd_path << std::endl;
                 throw "json_path not exists";
             }
-            // save_path
+
            if(! is_dir(save_dir))
             {
                 std::cout << "save_dir not exists : " << save_dir << std::endl;
                 throw "save_dir not exists";
              }
-            // save_mode
+
             if(save_mode.size() != 2)
             {
                 std::cout << "save_mode illeagal, need save_mode such as 11 | 10  " << save_dir << std::endl;
                 throw "save_mode illeagal";
             }
 
-            // load 
             bool need_img, need_xml;
             std::string save_img_dir = save_dir + "/" + "img";
             std::string save_xml_dir = save_dir + "/" + "xml";
@@ -286,12 +279,9 @@ int main(int argc, char ** argv)
                 }
             }
 
-            // load
-            UCDataset* ucd = new UCDataset(json_path);
+            UCDataset* ucd = new UCDataset(ucd_path);
             ucd->parse_ucd();
-            // ucd_util->json_path = json_path;
 
-            // need assign number of data
             int need_count = -1;
             std::vector<std::string> uc_vector;
             if(argc == 6)
@@ -831,7 +821,7 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
-    else if(command_1 == "check_xml")
+    else if(command_1 == "xml_check")
     {
         if ((argc == 6))
         {
@@ -849,7 +839,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            ucd_param_opt->print_command_info("check_xml");
+            ucd_param_opt->print_command_info("xml_check");
             return -1;
         }
     }
@@ -1076,6 +1066,11 @@ int main(int argc, char ** argv)
     {
         ucd_param_opt->print_similar_command_info(command_1);
         return -1;
+    }
+    else if(command_1 == "uc_check")
+    {
+        // 查看是不是所有的文件都是 uc 格式命名的，去数据库中进行对比
+        // 对于不符合 uc 规范的文件可以进行路径提取，或者文件移动到指定文件夹
     }
     else
     {

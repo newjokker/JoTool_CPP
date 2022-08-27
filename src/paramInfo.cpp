@@ -450,13 +450,13 @@ void UcdParamOpt::load_param_info()
     param_crop_to_xml->chinese_explain = "截图生成xml";   
     UcdParamOpt::add_param(param_crop_to_xml);
 
-    // check_xml
-    ParamInfo * param_check_xml = new ParamInfo("check_xml");
-    param_check_xml->group = "opt";
-    param_check_xml->grammar = "ucd check_xml xml_dir img_dir size_th remove_error(true|1|True|false|0|False)";
-    param_check_xml->english_explain = "check if xml is format";
-    param_check_xml->chinese_explain = "检查xml是否符合标准";   
-    UcdParamOpt::add_param(param_check_xml);
+    // xml_check
+    ParamInfo * param_xml_check = new ParamInfo("xml_check");
+    param_xml_check->group = "check";
+    param_xml_check->grammar = "ucd xml_check xml_dir img_dir size_th remove_error(true|1|True|false|0|False)";
+    param_xml_check->english_explain = "check if xml is format";
+    param_xml_check->chinese_explain = "检查xml是否符合标准";   
+    UcdParamOpt::add_param(param_xml_check);
 
     // format_xml
     ParamInfo * param_format_xml = new ParamInfo("format_xml");
@@ -556,6 +556,14 @@ void UcdParamOpt::load_param_info()
     param_help->english_explain = "print command info";
     param_help->chinese_explain = "打印指定 command 对应的信息";   
     UcdParamOpt::add_param(param_help);
+
+    // uc_check
+    ParamInfo * param_uc_check = new ParamInfo("uc_check");
+    param_uc_check->group = "check";
+    param_uc_check->grammar = "ucd uc_check file_dir";
+    param_uc_check->english_explain = "check if all file'name is uc";
+    param_uc_check->chinese_explain = "查看是否所有文件以 UC 格式进行命名的";   
+    UcdParamOpt::add_param(param_uc_check);
 }
 
 

@@ -605,13 +605,25 @@ void UCDatasetUtil::load_img(std::string save_dir, std::vector<std::string> uc_l
         throw "save dir not exists";
     }
 
+    std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
+
     for(int i=0; i<uc_list.size(); i++)
     {
         std::string img_url = "/file/" + uc_list[i] + ".jpg";
         std::string save_img_path = save_dir + "/" + uc_list[i] + ".jpg";  
+                
         if(! is_file(save_img_path))
         {
-            UCDatasetUtil::load_file(img_url, save_img_path, i); 
+            std::string img_cache_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc_list[i], suffix);
+            if(is_file(img_cache_path))
+            {
+                copy_file(img_cache_path, save_img_path);
+                std::cout << i << " " << "* copy " << img_cache_path << std::endl;
+            }
+            else
+            {
+                UCDatasetUtil::load_file(img_url, save_img_path, i); 
+            }
         }
         else
         {

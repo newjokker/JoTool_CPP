@@ -39,16 +39,20 @@ std::vector<std::string> filter_by_suffix(std::vector<std::string>, std::set<std
 
 FilePath parse_file_path(std::string);
 
+// 创建文件夹
 void create_folder(std::string);
 
+// 拷贝文件
+void copy_file(std::string src, std::string des);
+
+// 移动文件
 void move_file(const std::string& src, const std::string& dst, const bool keep_src=false);
 
+// 删除文件
 void remove_file(std::string);
 
 // 判断指定后缀的文件是否存在
 std::string get_file_by_suffix_set(std::string folder, std::string name, std::set<std::string>);
-
-
 
 
 // 获取可执行文件的目录 rerfer : https://stackoverflow.com/questions/23943239/how-to-get-path-to-current-exe-file-on-linux

@@ -6,11 +6,15 @@
 #include <stdlib.h>
 #include <fstream>
 // #include <io.h>
-#include <string>
 #include <vector>
 #include <set>
 #include <string.h>
 #include <sys/stat.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include "../include/fileOperateUtil.hpp"
 
 
@@ -256,4 +260,18 @@ void remove_file(std::string file_path)
     remove(file_path.c_str());
 }
 
-
+void copy_file(std::string src, std::string des)
+{
+    int len;
+    char buff[1024];
+	FILE *in,*out; 
+	in = fopen(src.c_str(), "r+");
+	out = fopen(des.c_str(), "w+");
+ 
+	while(len = fread(buff, 1, sizeof(buff), in))
+	{
+		fwrite(buff, 1, len, out);
+	}
+    fclose(in);
+    fclose(out);
+}
