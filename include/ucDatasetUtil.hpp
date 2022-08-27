@@ -10,20 +10,34 @@
 class UCDataset
 {
     public:
-        //
+        // uc 列表
         std::vector<std::string> uc_list;
+        
+        // 数据集名字
         std::string dataset_name;
+        
+        // 模型名字
         std::string model_name;
+        
+        // 模型版本
         std::string model_version;
+        
+        // 使用的标签
         std::vector<std::string> label_used;
-        // {uc: [uc, x1, y1, x2, y2, conf, tag]}
-        std::map<std::string, std::vector<std::vector<std::string> > > xml_info; 
+
         // labelme 中的对象 {uc: [PointObj, CricleObj, retangleObj ...]}
         std::map<std::string, std::vector<LabelmeObj*> > object_info;
+
+        // ucd 新建的时间
         double add_time;
+        
+        // ucd 更新的时间
         double update_time;
+
+        // ucd 的描述
         std::string describe;
-        //
+        
+        // 构造函数
         UCDataset(std::string ucd_path="");
         
         // ~UCDataset();

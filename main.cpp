@@ -49,13 +49,7 @@ using namespace std;
 
 // 一个专门的测试文件，针对每一个函数写一个对应的测试函数，就像在 guihub 上看到别人写的那样
 
-// 使用 set 代替 vector 存放 dete_obj 
-
 // 发布功能，快速部署到所有机器上
-
-// ucd_opt 中的 xml_info 和 dete_res 灵活地转化
-
-// 考虑是否有缓存文件夹，是否有缓存文件，逻辑太复杂了，需要默认检查缓存文件夹，不存在就直接报错
 
 // 下载某一些图片报错，可能是没有按照各个后缀依次寻找图片
 
@@ -78,6 +72,8 @@ using namespace std;
 // 查看是不是一个文件夹中的数据都是 uc 命名 
 
 // 不是 uc 名字的文件处理 移动等
+
+// todo merge 合并时候连带着 object_info 一起合并
 
 
 int main(int argc, char ** argv)

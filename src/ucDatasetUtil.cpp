@@ -506,7 +506,6 @@ UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
     }
 }
 
-// load 
 void UCDatasetUtil::save_img_xml_json(std::string save_dir, bool need_img, bool need_xml, int need_count)
 {
     if(! is_dir(save_dir))
@@ -1060,139 +1059,139 @@ void UCDatasetUtil::print_words(std::string name, int width, int height)
 
 void UCDatasetUtil::cut_small_img(std::string img_dir, std::string xml_dir, std::string save_dir, bool is_split)
 {
-    // 
-    if(! is_dir(save_dir))
-    {
-        std::cout << "save dir not exists : " << save_dir << std::endl;
-        throw "save dir not exists";
-    }
+    // // 
+    // if(! is_dir(save_dir))
+    // {
+    //     std::cout << "save dir not exists : " << save_dir << std::endl;
+    //     throw "save dir not exists";
+    // }
 
-    UCDataset* ucd; 
-    // 
-    if(UCDatasetUtil::is_ucd_path(xml_dir))
-    {
-        ucd = new UCDataset(xml_dir);
-        ucd->parse_ucd(true);
-        if(ucd->xml_info.size() == 0)
-        {
-            std::cout << "no dete_obj in ucd_path : " << xml_dir << std::endl;
-            throw "no dete_obj in ucd_path";
-        }
-    }
-    else if(is_dir(xml_dir))
-    {
-        // 非 ucd 先转为 ucd 结构
-        ucd = new UCDataset("");
-        std::set<std::string> suffix {".xml"};
-        std::vector<std::string> xml_path_vector = get_all_file_path(xml_dir, suffix);
-        for(int i=0; i<xml_path_vector.size(); i++)
-        {
-            std::string uc = get_file_name(xml_path_vector[i]);
-            if(is_uc(uc))
-            {
-                ucd->uc_list.push_back(uc);
-                DeteRes* dete_res = new DeteRes(xml_path_vector[i]);
-                std::vector< std::vector<std::string> > each_xml_info;
-                for(int j=0; j<dete_res->alarms.size(); j++)
-                {
-                    std::vector<std::string> dete_obj_info;
-                    dete_obj_info.push_back(std::to_string(dete_res->alarms[j].x1));        
-                    dete_obj_info.push_back(std::to_string(dete_res->alarms[j].y1));        
-                    dete_obj_info.push_back(std::to_string(dete_res->alarms[j].x2));        
-                    dete_obj_info.push_back(std::to_string(dete_res->alarms[j].y2));        
-                    dete_obj_info.push_back(std::to_string(dete_res->alarms[j].conf));        
-                    dete_obj_info.push_back(dete_res->alarms[j].tag);
-                    each_xml_info.push_back(dete_obj_info);
-                }
-                ucd->xml_info[uc] = each_xml_info;
-                delete dete_res;
-            }
-        }
-    }
-    else
-    {
-        std::cout << "xml_dir need xml_dir or ucd_path : " << xml_dir << std::endl;
-        throw "xml_dir need xml_dir or ucd_path";
-    }
+    // UCDataset* ucd; 
+    // // 
+    // if(UCDatasetUtil::is_ucd_path(xml_dir))
+    // {
+    //     ucd = new UCDataset(xml_dir);
+    //     ucd->parse_ucd(true);
+    //     if(ucd->xml_info.size() == 0)
+    //     {
+    //         std::cout << "no dete_obj in ucd_path : " << xml_dir << std::endl;
+    //         throw "no dete_obj in ucd_path";
+    //     }
+    // }
+    // else if(is_dir(xml_dir))
+    // {
+    //     // 非 ucd 先转为 ucd 结构
+    //     ucd = new UCDataset("");
+    //     std::set<std::string> suffix {".xml"};
+    //     std::vector<std::string> xml_path_vector = get_all_file_path(xml_dir, suffix);
+    //     for(int i=0; i<xml_path_vector.size(); i++)
+    //     {
+    //         std::string uc = get_file_name(xml_path_vector[i]);
+    //         if(is_uc(uc))
+    //         {
+    //             ucd->uc_list.push_back(uc);
+    //             DeteRes* dete_res = new DeteRes(xml_path_vector[i]);
+    //             std::vector< std::vector<std::string> > each_xml_info;
+    //             for(int j=0; j<dete_res->alarms.size(); j++)
+    //             {
+    //                 std::vector<std::string> dete_obj_info;
+    //                 dete_obj_info.push_back(std::to_string(dete_res->alarms[j].x1));        
+    //                 dete_obj_info.push_back(std::to_string(dete_res->alarms[j].y1));        
+    //                 dete_obj_info.push_back(std::to_string(dete_res->alarms[j].x2));        
+    //                 dete_obj_info.push_back(std::to_string(dete_res->alarms[j].y2));        
+    //                 dete_obj_info.push_back(std::to_string(dete_res->alarms[j].conf));        
+    //                 dete_obj_info.push_back(dete_res->alarms[j].tag);
+    //                 each_xml_info.push_back(dete_obj_info);
+    //             }
+    //             ucd->xml_info[uc] = each_xml_info;
+    //             delete dete_res;
+    //         }
+    //     }
+    // }
+    // else
+    // {
+    //     std::cout << "xml_dir need xml_dir or ucd_path : " << xml_dir << std::endl;
+    //     throw "xml_dir need xml_dir or ucd_path";
+    // }
 
-    //
-    if(UCDatasetUtil::is_ucd_path(img_dir) && (! is_dir(UCDatasetUtil::cache_img_dir)))
-    {
-        std::cout << "if img_dir is ucd_path, need set cache_dir in ucconfig : " << img_dir << std::endl;
-        throw "if img_dir is ucd_path, need set cache_dir in ucconfig";
-    }
-    else if(UCDatasetUtil::is_ucd_path(img_dir) || is_dir(img_dir))
-    {
-        // 图像如果是 ucd 先下载在进行处理
-        std::set<std::string> img_suffix {".jpg", ".JPG", ".png", ".PNG"};
-        for(int i=0; i<ucd->uc_list.size(); i++)
-        {
-            std::string uc = ucd->uc_list[i];
-            // 查看是否有对应的 dete_obj 如果没有跳过
-            if(ucd->xml_info[uc].size() == 0)
-            {
-                continue;
-            }
+    // //
+    // if(UCDatasetUtil::is_ucd_path(img_dir) && (! is_dir(UCDatasetUtil::cache_img_dir)))
+    // {
+    //     std::cout << "if img_dir is ucd_path, need set cache_dir in ucconfig : " << img_dir << std::endl;
+    //     throw "if img_dir is ucd_path, need set cache_dir in ucconfig";
+    // }
+    // else if(UCDatasetUtil::is_ucd_path(img_dir) || is_dir(img_dir))
+    // {
+    //     // 图像如果是 ucd 先下载在进行处理
+    //     std::set<std::string> img_suffix {".jpg", ".JPG", ".png", ".PNG"};
+    //     for(int i=0; i<ucd->uc_list.size(); i++)
+    //     {
+    //         std::string uc = ucd->uc_list[i];
+    //         // 查看是否有对应的 dete_obj 如果没有跳过
+    //         if(ucd->xml_info[uc].size() == 0)
+    //         {
+    //             continue;
+    //         }
 
-            std::string img_path;
-            if(UCDatasetUtil::is_ucd_path(img_dir))
-            {
-                // 文件不存在就先下载文件 
-                img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, ucd->uc_list[i], img_suffix);
-                if(! is_file(img_path))
-                {
-                    std::string img_url = "/file/" + ucd->uc_list[i] + ".jpg";
-                    std::string save_img_path = UCDatasetUtil::cache_img_dir + "/" + ucd->uc_list[i] + ".jpg";
-                    UCDatasetUtil::load_file(img_url, save_img_path, -1);
-                    //
-                    if(is_file(save_img_path))
-                    {
-                        img_path = save_img_path;
-                    }
-                    else
-                    {
-                        std::cout << "load uc img failed : " << ucd->uc_list[i] << std::endl;
-                        continue;
-                    }
-                }
-            }
-            else
-            {
-                // 找到对应的图片，找不到就跳过
-                img_path = get_file_by_suffix_set(img_dir, uc, img_suffix);
-                if(! is_file(img_path))
-                {
-                    continue;
-                }
-            }
+    //         std::string img_path;
+    //         if(UCDatasetUtil::is_ucd_path(img_dir))
+    //         {
+    //             // 文件不存在就先下载文件 
+    //             img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, ucd->uc_list[i], img_suffix);
+    //             if(! is_file(img_path))
+    //             {
+    //                 std::string img_url = "/file/" + ucd->uc_list[i] + ".jpg";
+    //                 std::string save_img_path = UCDatasetUtil::cache_img_dir + "/" + ucd->uc_list[i] + ".jpg";
+    //                 UCDatasetUtil::load_file(img_url, save_img_path, -1);
+    //                 //
+    //                 if(is_file(save_img_path))
+    //                 {
+    //                     img_path = save_img_path;
+    //                 }
+    //                 else
+    //                 {
+    //                     std::cout << "load uc img failed : " << ucd->uc_list[i] << std::endl;
+    //                     continue;
+    //                 }
+    //             }
+    //         }
+    //         else
+    //         {
+    //             // 找到对应的图片，找不到就跳过
+    //             img_path = get_file_by_suffix_set(img_dir, uc, img_suffix);
+    //             if(! is_file(img_path))
+    //             {
+    //                 continue;
+    //             }
+    //         }
 
-            // 图片下载完毕，等待裁切
-            DeteRes* dete_res = new DeteRes();
-            dete_res->img_path = img_path;
-            for(int j=0; j<ucd->xml_info[uc].size(); j++)
-            {
-                // x1, y1, x2, y2, conf, tag
-                std::vector<std::string> dete_obj_info = ucd->xml_info[uc][j];
-                DeteObj* dete_obj = new DeteObj();
-                dete_obj->x1 = std::stoi(dete_obj_info[0]);
-                dete_obj->y1 = std::stoi(dete_obj_info[1]);
-                dete_obj->x2 = std::stoi(dete_obj_info[2]);
-                dete_obj->y2 = std::stoi(dete_obj_info[3]);
-                dete_obj->conf = std::stof(dete_obj_info[4]);
-                dete_obj->tag = dete_obj_info[5];
-                dete_res->add_dete_obj(*dete_obj);
-            }
-            std::cout << i << ", cut uc : " << uc << std::endl;
-            dete_res->parse_img_info(img_path);
-            dete_res->crop_dete_obj(save_dir, is_split);
-        }
-    }
-    else
-    {
-        std::cout << "img_dir is not exists : " << img_dir << std::endl;
-        throw "img_dir is not exists";
-    }
-    delete ucd;
+    //         // 图片下载完毕，等待裁切
+    //         DeteRes* dete_res = new DeteRes();
+    //         dete_res->img_path = img_path;
+    //         for(int j=0; j<ucd->xml_info[uc].size(); j++)
+    //         {
+    //             // x1, y1, x2, y2, conf, tag
+    //             std::vector<std::string> dete_obj_info = ucd->xml_info[uc][j];
+    //             DeteObj* dete_obj = new DeteObj();
+    //             dete_obj->x1 = std::stoi(dete_obj_info[0]);
+    //             dete_obj->y1 = std::stoi(dete_obj_info[1]);
+    //             dete_obj->x2 = std::stoi(dete_obj_info[2]);
+    //             dete_obj->y2 = std::stoi(dete_obj_info[3]);
+    //             dete_obj->conf = std::stof(dete_obj_info[4]);
+    //             dete_obj->tag = dete_obj_info[5];
+    //             dete_res->add_dete_obj(*dete_obj);
+    //         }
+    //         std::cout << i << ", cut uc : " << uc << std::endl;
+    //         dete_res->parse_img_info(img_path);
+    //         dete_res->crop_dete_obj(save_dir, is_split);
+    //     }
+    // }
+    // else
+    // {
+    //     std::cout << "img_dir is not exists : " << img_dir << std::endl;
+    //     throw "img_dir is not exists";
+    // }
+    // delete ucd;
 }
 
 void UCDatasetUtil::parse_labelme_json(std::string img_dir, std::string save_dir, std::string ucd_path)

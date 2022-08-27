@@ -37,6 +37,7 @@ std::vector<std::string> get_all_file_path_recursive(std::string, std::set<std::
 std::vector<std::string> get_all_folder_path(std::string);
 std::vector<std::string> filter_by_suffix(std::vector<std::string>, std::set<std::string>);
 
+// 解析文件路径，返回 FilePath 结构体，可以方便拿到文件路径的各个信息
 FilePath parse_file_path(std::string);
 
 // 创建文件夹
