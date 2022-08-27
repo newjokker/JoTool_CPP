@@ -21,6 +21,54 @@ static bool is_uc(std::string uc)
     return true;
 }
 
+
+std::map<std::string, bool> SaturnDatabaseSQL::is_uc_check_by_mysql(std::vector<std::string> uc_vector)
+{
+    MYSQL *conn;
+    MYSQL_RES *res;  
+    conn = mysql_init(NULL);  
+    std::map<std::string, bool> is_uc_map;
+
+    // connect
+    if (!mysql_real_connect(conn, SaturnDatabaseSQL::host.c_str(), SaturnDatabaseSQL::user.c_str(), SaturnDatabaseSQL::pwd.c_str(), SaturnDatabaseSQL::db.c_str(),0, NULL, 0))
+    {
+        std::cout << "saturndatabase sql connect error" << std::endl;
+        SaturnDatabaseSQL::print_sql_info();
+        throw "saturndatabase sql connect error";
+    }     
+    
+    // search
+    for(int i=0; i<uc_vector.size(); i++)
+    {
+        std::string uc = uc_vector[i];
+        std::string serarch_str = "SELECT MD5 FROM MD5_UC WHERE UC = '" + uc + "';";
+        mysql_query(conn, serarch_str.c_str());       
+        res = mysql_store_result(conn);      
+        if(!res)                                
+        {
+            std::cout << "saturndatabase sql query error" << std::endl;
+            throw "saturndatabase sql query error";
+        }
+        int rows = mysql_num_rows(res);               
+        int cols = mysql_num_fields(res);  
+
+        if(rows > 0)
+        {
+            is_uc_map[uc] = true;
+        }
+        else
+        {
+            is_uc_map[uc] = false;
+        }
+    }
+
+    mysql_free_result(res); 
+    mysql_close(conn);  
+    return is_uc_map;
+}
+
+
+
 SaturnDatabaseSQL::SaturnDatabaseSQL(std::string host, int port, std::string user, std::string pwd, std::string db)
 {
     SaturnDatabaseSQL::host = host;

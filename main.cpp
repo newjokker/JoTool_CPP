@@ -1072,6 +1072,25 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
+    else if(command_1 == "test")
+    {
+        std::string uc = argv[2];
+        SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
+        std::vector<std::string> uc_vector {uc};
+        std::map<std::string, bool> is_uc_map = sd_sql->is_uc_check_by_mysql(uc_vector);
+        
+        if(is_uc_map[uc])
+        {
+            std::cout << uc <<  " is uc " << std::endl;
+        }
+        else
+        {
+            std::cout << uc << " is not uc " << std::endl; 
+        }
+        
+        delete sd_sql;
+
+    }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {
         ucd_param_opt->print_similar_command_info(command_1);
