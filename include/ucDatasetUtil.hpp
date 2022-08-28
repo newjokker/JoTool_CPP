@@ -172,6 +172,9 @@ class UCDatasetUtil
         
         // 裁切小图
         void cut_small_img(std::string img_dir, std::string xml_dir, std::string save_dir, bool is_split);
+
+        // uc_check
+        void uc_check(std::vector<std::string> file_vector);
         
     private:
         

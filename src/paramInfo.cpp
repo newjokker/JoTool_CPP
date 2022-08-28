@@ -564,6 +564,24 @@ void UcdParamOpt::load_param_info()
     param_uc_check->english_explain = "check if all file'name is uc";
     param_uc_check->chinese_explain = "查看是否所有文件以 UC 格式进行命名的";   
     UcdParamOpt::add_param(param_uc_check);
+
+    // god blass me
+    ParamInfo * param_god_bless = new ParamInfo("god_bless");
+    param_god_bless->group = "fun";
+    param_god_bless->grammar = "ucd god_bless {name}";
+    param_god_bless->english_explain = "god bless";
+    param_god_bless->chinese_explain = "";   
+    UcdParamOpt::add_param(param_god_bless);
+
+    // buddha blass me
+    ParamInfo * param_buddha_bless = new ParamInfo("buddha_bless");
+    param_buddha_bless->group = "fun";
+    param_buddha_bless->grammar = "ucd buddha_bless {name}";
+    param_buddha_bless->english_explain = "buddha bless";
+    param_buddha_bless->chinese_explain = "";   
+    UcdParamOpt::add_param(param_buddha_bless);
+
+
 }
 
 

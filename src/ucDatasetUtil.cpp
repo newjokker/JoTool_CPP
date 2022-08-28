@@ -582,6 +582,12 @@ void UCDatasetUtil::load_file(std::string url, std::string save_path, int index)
         httplib::Client cli(UCDatasetUtil::root_url);
         auto res = cli.Get(url);
 
+        if(res == nullptr)
+        {
+            std::cout << "connect error : " << url << std::endl;
+            return;
+        }
+
         if(res->status == 200)
         {
             std::ofstream out;
@@ -1287,4 +1293,16 @@ void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std
 }
 
 
+// void UCDatasetUtil::uc_check(std::vector<std::string> file_vector)
+// {
 
+//     std::vector<std::string> file_vector = get_all_file_path(file_dir);
+
+//     SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
+
+//     std::vector<std::string> uc_vector {uc};
+//     std::map<std::string, bool> is_uc_map = sd_sql->check_uc_by_mysql(uc_vector);
+
+
+
+// }

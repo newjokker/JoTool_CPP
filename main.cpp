@@ -4,9 +4,9 @@
 #include <set>
 #include <pwd.h>
 #include <time.h>
+#include <unistd.h>
 #include <opencv2/opencv.hpp>
 #include <nlohmann/json.hpp>
-#include "include/crow_all.h"
 #include "include/strToImg.hpp"
 #include "include/deteRes.hpp"
 #include "include/operateDeteRes.hpp"
@@ -19,14 +19,13 @@
 #include "include/printCpp.hpp"
 #include "include/lablelmeObj.hpp"
 
-
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 #include "include/lablelmeObj.hpp"
 
-
 using namespace jotools;
 using namespace std;
+
 
 
 // nginx 负载均衡，可以在风火轮上部署，转到 111 和 209 服务器上
@@ -34,8 +33,6 @@ using namespace std;
 // 完善路径拼接（c++多一些 // 不会造成路径错误，少一些就会报错）
 
 // 完成 C++ 版本的 文件 服务，再部署到 docker 上面，这样在哪个服务器上都能方便进行启动
-
-// 整合了 xml 信息之后，连平时的测试结果都可以进行存储，这样方便后期的获取对比
 
 // 获取数据是按照顺序还是随机获取需要修改配置文件 ucdconfig.ini， 
 
@@ -75,6 +72,11 @@ using namespace std;
 
 // todo merge 合并时候连带着 object_info 一起合并
 
+// app for install 
+
+// uc_check 
+
+// ucd say support english
 
 int main(int argc, char ** argv)
 {
@@ -890,7 +892,8 @@ int main(int argc, char ** argv)
             return -1;
         }
 
-        int all_cache_img_count, exist_cache_img_count;
+        int all_cache_img_count = 0;
+        int exist_cache_img_count = 0;
         std::string cache_info, json_path;
         if((argc == 2) || (argc == 3))
         {
@@ -1058,34 +1061,67 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
-    else if(ucd_param_opt->has_simliar_command(command_1))
-    {
-        ucd_param_opt->print_similar_command_info(command_1);
-        return -1;
-    }
-    else if(command_1 == "test")
+    else if(command_1 == "uc_check")
     {
         // 查看是不是所有的文件都是 uc 格式命名的，去数据库中进行对比
         // 对于不符合 uc 规范的文件可以进行路径提取，或者文件移动到指定文件夹
 
-        std::string uc = argv[2];
-
-        SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
-
-        std::vector<std::string> uc_vector {uc};
-        std::map<std::string, bool> is_uc_map = sd_sql->check_uc_by_mysql(uc_vector);
-
-        if(is_uc_map[uc])
+        if(argc == 3)
         {
-            std::cout << uc <<  " is uc " << std::endl;
+            std::string file_dir = argv[2];
+
+            if(! is_dir(file_dir))
+            {
+                std::cout << "file_dir not exists : " << file_dir << std::endl;
+                return -1;
+            }
+
+            std::vector<string> uc_vector;
+            std::set<std::string> file_suffix {".jpg", ".JPG", ".png", ".PNG", ".json", ".xml"}; 
+            std::vector<std::string> file_vector = get_all_file_path(file_dir, file_suffix);
+        
+            for(int i=0; i<file_vector.size(); i++)
+            {
+                std::string uc = get_file_name(file_vector[i]);
+                uc_vector.push_back(uc);
+            }
+
+            SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
+            std::map<std::string, bool> is_uc_map = sd_sql->check_uc_by_mysql(uc_vector);
+
+            int is_uc = 0;
+            int not_uc = 0;
+            auto iter = is_uc_map.begin();
+            while(iter != is_uc_map.end())
+            {
+                if(iter->second)
+                {
+                    is_uc += 1;
+                }
+                else
+                {
+                    not_uc += 1;
+                }
+                iter ++;
+            }
+
+            std::cout << "------------------------" << std::endl;
+            std::cout << "is  uc count : " << is_uc << std::endl;
+            std::cout << "not uc count : " << not_uc << std::endl;
+            std::cout << "check name format for (.jpg, .JPG, .png, .PNG. .xml, .json) : " << std::endl;
+            std::cout << "------------------------" << std::endl;
+            delete sd_sql;
         }
         else
         {
-            std::cout << uc << " is not uc " << std::endl; 
-        }
-        
-        delete sd_sql;
-
+            ucd_param_opt->print_command_info("uc_check");
+            return -1;
+        }        
+    }
+    else if(ucd_param_opt->has_simliar_command(command_1))
+    {
+        ucd_param_opt->print_similar_command_info(command_1);
+        return -1;
     }
     else
     {

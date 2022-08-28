@@ -59,9 +59,9 @@ std::map<std::string, bool> SaturnDatabaseSQL::check_uc_by_mysql(std::vector<std
         {
             is_uc_map[uc] = false;
         }
+        mysql_free_result(res); 
     }
 
-    mysql_free_result(res); 
     mysql_close(conn);  
     return is_uc_map;
 }
