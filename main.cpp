@@ -68,15 +68,12 @@ using namespace std;
 
 // 查看是不是一个文件夹中的数据都是 uc 命名 
 
-// 不是 uc 名字的文件处理 移动等
-
 // todo merge 合并时候连带着 object_info 一起合并
 
 // app for install 
 
-// uc_check 
-
 // ucd say support english
+
 
 int main(int argc, char ** argv)
 {
@@ -144,16 +141,29 @@ int main(int argc, char ** argv)
         sql_db = (const std::string &)xini_file["sql"]["db"];
         cache_dir = (const std::string &)xini_file["cache"]["dir"];
     }
-    
-    if(! is_dir(cache_dir))
+    else
     {
-        std::cout << "cache_dir not exists, edit ucdconfig.ini cache/cache_dir : " << std::endl;
-        std::cout << "edit ucdconfig.ini with ucd set " << std::endl;
-        throw "cache_dir not exists!";
+        xini_file_t xini_write(config_path);
+        xini_write["server"]["host"] = host;
+        xini_write["server"]["port"] = port;
+        xini_write["sql"]["host"] = sql_host;
+        xini_write["sql"]["port"] = sql_host;
+        xini_write["sql"]["user"] = sql_user;
+        xini_write["sql"]["pwd"] = sql_pwd;
+        xini_write["sql"]["db"] = sql_db;
+        xini_write.dump(config_path);   
     }
-
+    
     UCDatasetUtil* ucd_util = new UCDatasetUtil(host , port, cache_dir);
     std::string command_1 = argv[1];
+
+    if((! is_dir(cache_dir)) && (command_1 != "set"))
+    {
+        std::cout << "cache_dir not exists, edit ucdconfig.ini cache/cache_dir : " << std::endl;
+        std::cout << "ucdconfig path : " << config_path << std::endl;
+        std::cout << "set cache_dir with 'ucd set cache_dir {cache_dir}' " << std::endl;
+        throw "cache_dir not exists!";
+    }
 
     if(command_1 == "check")
     {
@@ -389,9 +399,9 @@ int main(int argc, char ** argv)
         if(argc == 3)
         {
             std::string ucd_path = argv[2];
-            UCDataset * ucd_info = new UCDataset(ucd_path);
-            ucd_info->print_ucd_info();
-            delete ucd_info;
+            UCDataset * ucd = new UCDataset(ucd_path);
+            ucd->print_ucd_info();
+            delete ucd;
         }
         else
         {
@@ -1117,6 +1127,83 @@ int main(int argc, char ** argv)
             ucd_param_opt->print_command_info("uc_check");
             return -1;
         }        
+    }
+    else if((command_1 == "move_uc") || (command_1 == "move_not_uc"))
+    {
+
+        // the same name not different suffix 
+        
+        bool is_uc;
+        if(command_1 == "move_uc")
+        {
+            is_uc = true;
+        }
+        else
+        {
+            is_uc = false;
+        }
+
+        if(argc == 4)
+        {
+            std::string file_dir = argv[2];
+            std::string save_dir = argv[3];
+
+            if(! is_dir(file_dir))
+            {
+                std::cout << "file_dir not exists : " << file_dir << std::endl;
+                return -1;
+            }
+
+            std::vector<string> uc_vector;
+            std::vector<std::string> file_vector = get_all_file_path(file_dir);
+
+            for(int i=0; i<file_vector.size(); i++)
+            {
+                std::string uc = get_file_name(file_vector[i]);
+                uc_vector.push_back(uc);
+            }
+
+            SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
+            std::map<std::string, bool> is_uc_map = sd_sql->check_uc_by_mysql(uc_vector);
+            delete sd_sql;
+
+            std::vector<std::string> move_file_vector;
+            for(int i=0; i<file_vector.size(); i++)
+            {
+                std::string file_name = get_file_name(file_vector[i]);
+                if(is_uc_map[file_name] && is_uc)
+                {
+                    move_file_vector.push_back(file_vector[i]);
+                }
+                else if((! is_uc_map[file_name]) && (! is_uc))
+                {
+                    move_file_vector.push_back(file_vector[i]);
+                }
+            }
+            move_file_vector_to_dir(move_file_vector, save_dir);
+        }
+        else
+        {
+            if(is_uc)
+            {
+                ucd_param_opt->print_command_info("move_uc");
+            }
+            else
+            {
+                ucd_param_opt->print_command_info("move_not_uc");
+            }
+            return -1;
+        }   
+    }
+    else if(command_1 == "test")
+    {
+        std::string ucd_path_1 = argv[2];
+        std::string ucd_path_2 = argv[3];
+        UCDataset a = new UCDataset(ucd_path1);
+        UCDataset b = new UCDataset(ucd_path2);
+
+        UCDataset c = (*a) + (*b);
+        c.print_ucd_info();
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {

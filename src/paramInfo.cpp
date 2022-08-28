@@ -582,6 +582,22 @@ void UcdParamOpt::load_param_info()
     UcdParamOpt::add_param(param_buddha_bless);
 
 
+    // move_uc
+    ParamInfo * param_move_uc = new ParamInfo("move_uc");
+    param_move_uc->group = "sync";
+    param_move_uc->grammar = "ucd move_uc save_dir";
+    param_move_uc->english_explain = "move file with name in uc format";
+    param_move_uc->chinese_explain = "";   
+    UcdParamOpt::add_param(param_move_uc);
+
+    // move_not_uc
+    ParamInfo * param_move_not_uc = new ParamInfo("move_not_uc");
+    param_move_not_uc->group = "sync";
+    param_move_not_uc->grammar = "ucd buddha_bless {name}";
+    param_move_not_uc->english_explain = "move file when filename not in uc format";
+    param_move_not_uc->chinese_explain = "";   
+    UcdParamOpt::add_param(param_move_not_uc);
+
 }
 
 

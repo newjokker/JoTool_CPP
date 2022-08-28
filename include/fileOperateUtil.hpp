@@ -46,8 +46,11 @@ void create_folder(std::string);
 // 拷贝文件
 void copy_file(std::string src, std::string des);
 
-// 移动文件
+// just use rename 
 void move_file(const std::string& src, const std::string& dst, const bool keep_src=false);
+
+// 
+void move_file_vector_to_dir(std::vector<std::string> file_vector, std::string save_dir);
 
 // 删除文件
 void remove_file(std::string);

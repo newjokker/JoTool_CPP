@@ -238,22 +238,23 @@ std::string get_file_by_suffix_set(std::string folder, std::string name, std::se
     return "";
 }
 
-// // 移动文件，可以设置是否删除源文件 (代码有 bug 先不要使用)
-// void move_file(const std::string& src, const std::string& dst, const bool keep_src)
-// {
-//     std::ifstream ifs(src, std::ios::binary);
-//     std::ofstream ofs(dst, std::ios::binary);
-//     if (!ifs.is_open()){
-//         std::cout << "open src file fail: " + src << std::endl;
-//     }
-//     ofs << ifs.rdbuf();
-//     ifs.close(); 
-//     ofs.close();
-//     if (!keep_src && 0 != remove(src.c_str()))
-//     {
-//         std::cerr << "remove src file fail: " + src << std::endl;
-//     }
-// }
+void move_file_vector_to_dir(std::vector<std::string> file_vector, std::string save_dir)
+{
+    if(! is_dir(save_dir))
+    {
+        std::cout << "save_dir not exists : " << save_dir << std::endl;
+        throw "save_dir not exists";
+    }
+
+    for(int i=0; i<file_vector.size(); i++)
+    {
+        std::string file_path = file_vector[i];
+        std::string file_name = get_file_name_suffix(file_vector[i]);
+        std::string save_path = save_dir + "/" + file_name;
+        std::cout << "move " << file_path << " -> " << save_path << std::endl;
+        rename(file_path.c_str(), save_path.c_str());
+    }
+}
 
 void remove_file(std::string file_path)
 {

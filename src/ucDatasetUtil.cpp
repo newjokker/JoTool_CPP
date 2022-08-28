@@ -80,12 +80,10 @@ void UCDataset::parse_ucd(bool parse_shape_info)
     if(update_time != nullptr){ UCDataset::update_time = update_time; }
     if(describe != nullptr){ UCDataset::describe = describe; }
     if(label_used != nullptr){ UCDataset::label_used = label_used; }
-    if(uc_list != nullptr)
-    { 
-        UCDataset::uc_list = uc_list; 
-        UCDataset::unique();
-    }
-    
+    if(uc_list != nullptr){ UCDataset::uc_list = uc_list; }
+
+    UCDataset::unique();
+
     // parse shape_info
     if(parse_shape_info)
     {
@@ -147,7 +145,8 @@ void UCDataset::print_ucd_info()
     }
     else
     {
-        std::cout << "ucd_path not exists : " << UCDataset::json_path;
+        std::cout << "ucd_path not exists : " << UCDataset::json_path << std::endl;
+        return;
     }
     std::cout << "--------------------------------" << std::endl;
 }
@@ -166,6 +165,9 @@ void UCDataset::unique()
 {
     std::set<std::string> uc_set(UCDataset::uc_list.begin(), UCDataset::uc_list.end());
     UCDataset::uc_list.assign(uc_set.begin(), uc_set.end());
+
+    std::set<std::string> label_set(UCDataset::label_used.begin(), UCDataset::label_used.end());
+    UCDataset::uc_list.assign(label_set.begin(), label_set.end());
 }
 
 std::map<std::string, std::map<std::string, int> > UCDataset::count_tags()
@@ -483,6 +485,121 @@ void UCDataset::save_to_labelme_json_with_assign_uc(std::string save_json_path, 
     o << std::setw(4) << json_info << std::endl;
 }
 
+// merge ucd
+UCDataset operator+(UCDataset &ucd_1, UCDataset &ucd_2)
+{
+    UCDataset ucd("");
+
+    // dataset_name
+    if((ucd_1.dataset_name) == "" && (ucd_2.dataset_name != ""))
+    {
+        ucd.dataset_name = ucd_2.dataset_name;
+    }
+    else
+    {
+        ucd.dataset_name = ucd_1.dataset_name;
+    }
+
+    // model_version
+    if((ucd_1.model_version) == "" && (ucd_2.model_version != ""))
+    {
+        ucd.model_version = ucd_2.model_version;
+    }
+    else
+    {
+        ucd.model_version = ucd_1.model_version;
+    }
+
+    // add_time
+    if((ucd_1.add_time) == -1 && (ucd_2.add_time != -1))
+    {
+        ucd.add_time = ucd_2.add_time;
+    }
+    else
+    {
+        ucd.add_time = ucd_1.add_time;
+    }
+
+    // update_time
+    if((ucd_1.update_time) == -1 && (ucd_2.update_time != -1))
+    {
+        ucd.update_time = ucd_2.update_time;
+    }
+    else
+    {
+        ucd.update_time = ucd_1.update_time;
+    }
+
+    // describe
+    if((ucd_1.describe) == "" && (ucd_2.describe != ""))
+    {
+        ucd.describe = ucd_2.describe;
+    }
+    else
+    {
+        ucd.describe = ucd_1.describe;
+    }
+
+    // uc_list
+    for(int i=0; i<ucd_1.uc_list.size(); i++)
+    {
+        ucd.uc_list.push_back(ucd_1.uc_list[i]);
+    }
+
+    for(int i=0; i<ucd_2.uc_list.size(); i++)
+    {
+        ucd.uc_list.push_back(ucd_2.uc_list[i]);
+    }
+
+    // label_used
+    for(int i=0; i<ucd_1.label_used.size(); i++)
+    {
+        ucd.label_used.push_back(ucd_1.label_used[i]);
+    }
+
+    for(int i=0; i<ucd_2.label_used.size(); i++)
+    {
+        ucd.label_used.push_back(ucd_2.label_used[i]);
+    }
+
+    // object_info
+    auto iter_1 = ucd_1.object_info.begin();
+    while(iter_1 != ucd_1.object_info.end())
+    {
+        std::string uc = iter_1->first;
+        for(int i=0; i<iter_1->second.size(); i++)
+        {
+            LabelmeObj *obj = iter_1->second[i];
+            if(! ucd.has_obj(uc, obj))
+            {
+                ucd.object_info[uc].push_back(obj);
+            }
+        }
+    }
+    
+    auto iter_2 = ucd_1.object_info.begin();
+    while(iter_2 != ucd_1.object_info.end())
+    {
+        std::string uc = iter_2->first;
+        for(int i=0; i<iter_2->second.size(); i++)
+        {
+            LabelmeObj *obj = iter_2->second[i];
+            if(! ucd.has_obj(uc, obj))
+            {
+                ucd.object_info[uc].push_back(obj);
+            }
+        }
+    }
+    return ucd;
+}
+
+// minus ucd
+UCDataset operator-(UCDataset &ucd_1, UCDataset &ucd_2)
+{
+    // 
+}
+
+
 //
 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
@@ -673,16 +790,23 @@ void UCDatasetUtil::search_ucd()
     httplib::Client cli(check_url);
     auto res = cli.Get("/ucd/check");
     
-    json data = json::parse(res->body);
-    // customer
-    for(int i=0; i<data["official"].size(); i++)
+    if(res != nullptr)
     {
-        std::cout << "official : " << data["official"][i] << std::endl;
+        json data = json::parse(res->body);
+        // customer
+        for(int i=0; i<data["official"].size(); i++)
+        {
+            std::cout << "official : " << data["official"][i] << std::endl;
+        }
+        // official
+        for(int i=0; i<data["customer"].size(); i++)
+        {
+            std::cout << "customer : " << data["customer"][i] << std::endl;
+        }
     }
-    // official
-    for(int i=0; i<data["customer"].size(); i++)
+    else
     {
-        std::cout << "customer : " << data["customer"][i] << std::endl;
+        std::cout << "connect error : " << check_url << std::endl;
     }
 }
 
@@ -1293,16 +1417,3 @@ void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std
 }
 
 
-// void UCDatasetUtil::uc_check(std::vector<std::string> file_vector)
-// {
-
-//     std::vector<std::string> file_vector = get_all_file_path(file_dir);
-
-//     SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
-
-//     std::vector<std::string> uc_vector {uc};
-//     std::map<std::string, bool> is_uc_map = sd_sql->check_uc_by_mysql(uc_vector);
-
-
-
-// }
