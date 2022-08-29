@@ -467,6 +467,13 @@ int main(int argc, char ** argv)
             return -1;       
         }
     }
+    else if(command_1 == "from_file")
+    {
+        ucd_param_opt->not_ready(command_1);
+    
+        // 只根据把文件名获取 uc 不去解析其中的 内容
+    
+    }
     else if(command_1 == "parse_xml")
     {
         if(argc == 4)

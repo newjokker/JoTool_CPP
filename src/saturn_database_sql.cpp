@@ -40,16 +40,16 @@ std::map<std::string, bool> SaturnDatabaseSQL::check_uc_by_mysql(std::vector<std
     for(int i=0; i<uc_vector.size(); i++)
     {
         std::string uc = uc_vector[i];
-        std::string serarch_str = "SELECT MD5 FROM MD5_uc WHERE UC = '" + uc + "';";
+        std::string serarch_str = "SELECT md5 FROM Md5ToUc WHERE uc = '" + uc + "';";
         mysql_query(conn, serarch_str.c_str());       
         res = mysql_store_result(conn);      
         if(!res)                                
         {
             std::cout << "saturndatabase sql query error" << std::endl;
             throw "saturndatabase sql query error";
-        }
-        int rows = mysql_num_rows(res);               
+        }   
         int cols = mysql_num_fields(res);  
+        int rows = mysql_num_rows(res);            
 
         if(rows > 0)
         {
@@ -251,7 +251,7 @@ std::map<std::string, std::string> SaturnDatabaseSQL::get_md5_uc_map_from_md5_ve
     std::string serarch_str;
     for(int i=0; i<md5_vector.size(); i++)
     {
-        serarch_str = "SELECT uc FROM MD5_uc WHERE MD5 = '" + md5_vector[i] + "';";
+        serarch_str = "SELECT uc FROM Md5ToUc WHERE md5 = '" + md5_vector[i] + "';";
         mysql_query(conn, serarch_str.c_str());       
         res = mysql_store_result(conn);      
         if(!res)                                
@@ -298,7 +298,7 @@ std::map<std::string, std::string> SaturnDatabaseSQL::get_uc_md5_map_from_uc_vec
     std::string serarch_str;
     for(int i=0; i<uc_vector.size(); i++)
     {
-        serarch_str = "SELECT uc FROM MD5_uc WHERE UC = '" + uc_vector[i] + "';";
+        serarch_str = "SELECT uc FROM Md5ToUc WHERE uc = '" + uc_vector[i] + "';";
         mysql_query(conn, serarch_str.c_str());       
         res = mysql_store_result(conn);      
         if(!res)                                
