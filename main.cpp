@@ -74,6 +74,8 @@ using namespace std;
 
 // ucd say support english
 
+// 上传失败需要进行提示，很可能上传后直接就是个空的
+
 
 int main(int argc, char ** argv)
 {

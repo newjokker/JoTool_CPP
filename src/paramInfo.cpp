@@ -598,7 +598,30 @@ void UcdParamOpt::load_param_info()
     param_move_not_uc->chinese_explain = "";   
     UcdParamOpt::add_param(param_move_not_uc);
 
+    // not_ready
+    ParamInfo * param_not_ready = new ParamInfo("not_ready");
+    param_not_ready->group = "not_ready";
+    param_not_ready->grammar = "ucd buddha_bless {name}";
+    param_not_ready->english_explain = "move file when filename not in uc format";
+    param_not_ready->chinese_explain = "";   
+    UcdParamOpt::add_param(param_not_ready);
+
 }
 
+void UcdParamOpt::not_ready(std::string method_name)
+{
+    if(method_name == "")
+    {
+        std::cout << "----------------------------" << std::endl;
+        std::cout << "* this method is not ready" << std::endl;
+        std::cout << "----------------------------" << std::endl;
+    }
+    else
+    {
+        std::cout << "----------------------------" << std::endl;
+        std::cout << "* method " << method_name << " is not ready" << std::endl;
+        std::cout << "----------------------------" << std::endl;
+    }
 
+}
 
