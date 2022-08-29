@@ -167,7 +167,7 @@ void UCDataset::unique()
     UCDataset::uc_list.assign(uc_set.begin(), uc_set.end());
 
     std::set<std::string> label_set(UCDataset::label_used.begin(), UCDataset::label_used.end());
-    UCDataset::uc_list.assign(label_set.begin(), label_set.end());
+    UCDataset::label_used.assign(label_set.begin(), label_set.end());
 }
 
 std::map<std::string, std::map<std::string, int> > UCDataset::count_tags()

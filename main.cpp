@@ -1197,13 +1197,13 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "test")
     {
-        std::string ucd_path_1 = argv[2];
-        std::string ucd_path_2 = argv[3];
-        UCDataset a = new UCDataset(ucd_path1);
-        UCDataset b = new UCDataset(ucd_path2);
+        // std::string ucd_path_1 = argv[2];
+        // std::string ucd_path_2 = argv[3];
+        // UCDataset a(ucd_path_1);
+        // UCDataset b(ucd_path_2);
 
-        UCDataset c = (*a) + (*b);
-        c.print_ucd_info();
+        // UCDataset c = a + b;
+        // c.print_ucd_info();
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {
