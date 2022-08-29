@@ -598,13 +598,21 @@ void UcdParamOpt::load_param_info()
     param_move_not_uc->chinese_explain = "";   
     UcdParamOpt::add_param(param_move_not_uc);
 
-    // not_ready
-    ParamInfo * param_not_ready = new ParamInfo("not_ready");
-    param_not_ready->group = "not_ready";
-    param_not_ready->grammar = "ucd buddha_bless {name}";
-    param_not_ready->english_explain = "move file when filename not in uc format";
-    param_not_ready->chinese_explain = "";   
-    UcdParamOpt::add_param(param_not_ready);
+    // to_swin
+    ParamInfo * param_to_swin = new ParamInfo("to_swin");
+    param_to_swin->group = "convert";
+    param_to_swin->grammar = "";
+    param_to_swin->english_explain = "";
+    param_to_swin->chinese_explain = "转为 swintrnasform 训练需求的格式，具体实现的时候格式问张果容";   
+    UcdParamOpt::add_param(param_to_swin);
+
+    // from_file
+    ParamInfo * param_from_file = new ParamInfo("from_file");
+    param_from_file->group = "sync";
+    param_from_file->grammar = "";
+    param_from_file->english_explain = "";
+    param_from_file->chinese_explain = "只获取指定文件夹下面文件的 uc 组织成一个 ucd, 不去解析具体文件中的内容 ";   
+    UcdParamOpt::add_param(param_from_file);
 
 }
 

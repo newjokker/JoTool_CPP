@@ -78,6 +78,18 @@ using namespace std;
 
 // 拿到 ucd 中对应的图片的路径，uc 为结尾，这样方便模型检测
 
+// 将 post 测试代码的标准接口改为接收 ucd 数据
+
+// save 中 img 和 xml 不再生成 xml img 等文件夹，直接放到指定的目录下面就行
+
+// json数据转swin格式，原图+分割图
+
+// 入库等操作也是可以在里面搞一套，只能拿数据，不能改数据，可以将未入库的图片上传到某一个地址
+
+// 解析出来的 json 中存放的 jpg 图片是压缩过的，这样存放的数据能小一点
+
+// from_xml from_json 的时候，可以只用他们的名字，不解析他们的内容，这样能快非常多 from_file 
+
 
 int main(int argc, char ** argv)
 {
@@ -110,7 +122,7 @@ int main(int argc, char ** argv)
     std::string sql_db = "Saturn_Database_beta";
     
     // version
-    std::string app_version = "v1.2";
+    std::string app_version = "v1.3";
 
     // cache dir
     std::string cache_dir;
@@ -1246,6 +1258,33 @@ int main(int argc, char ** argv)
         // UCDataset c = a + b;
         // c.print_ucd_info();
     }
+    else if(command_1 == "img_url")
+    {
+        if(argc == 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_txt_path = argv[3];
+            
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd();
+
+            for(int i=0; i<ucd->uc_list.size(); i++)
+            {
+                std::cout << "http://" + ucd_util->host + ":" + std::to_string(ucd_util->port) + "/file/" + ucd->uc_list[i] + ".jpg" << std::endl;
+            }
+
+            // todo 保存为  txt
+
+        }
+        else if(command_1 == "from_file")
+        {
+            // 获取文件的 uc 组织成 ucd 
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {
         ucd_param_opt->print_similar_command_info(command_1);
@@ -1258,7 +1297,7 @@ int main(int argc, char ** argv)
     }
 
     delete ucd_util;
-    delete ucd_param_opt;                         
+    delete ucd_param_opt;
     end_time = clock();
     std::cout << "---------------" << std::endl;
     std::cout << "use time " << (double)(end_time-start_time)/CLOCKS_PER_SEC << " s" << std::endl;
