@@ -814,6 +814,11 @@ void UCDatasetUtil::delete_ucd(std::string std_name)
 {
     httplib::Client cli(UCDatasetUtil::root_url);
     auto res = cli.Delete("/ucd/delete/" + std_name + ".json");
+    if(res == nullptr)
+    {
+        std::cout << "delete failed !" << std::endl;
+        throw "delete failed !";
+    }
 }
 
 void UCDatasetUtil::upload_ucd(std::string ucd_path, std::string assign_ucd_name)

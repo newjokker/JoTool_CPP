@@ -76,6 +76,8 @@ using namespace std;
 
 // 上传失败需要进行提示，很可能上传后直接就是个空的
 
+// 拿到 ucd 中对应的图片的路径，uc 为结尾，这样方便模型检测
+
 
 int main(int argc, char ** argv)
 {
@@ -537,6 +539,9 @@ int main(int argc, char ** argv)
         // ucdataset 增加 merge 函数，用于两两合并
         // 合并 uc 和 obj
 
+        ucd_param_opt->not_ready("merge");
+        return -1;
+
         if(argc >= 5)
         {
             std::string save_path = argv[2];
@@ -556,6 +561,9 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "minus")
     {
+        ucd_param_opt->not_ready("minus");
+        return -1;
+
         if(argc == 5)
         {
             std::string ucd_save_path = argv[2];
@@ -796,6 +804,10 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "cut_small_img")
     {
+
+        ucd_param_opt->not_ready(command_1);
+        return -1;
+
         if (argc == 6)
         {
             // get parameter
@@ -819,6 +831,10 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "crop_to_xml")
     {
+
+        ucd_param_opt->not_ready(command_1);
+        return -1;
+
         if (argc== 4)
         {
             std::string crop_dir = argv[2];
@@ -833,6 +849,11 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "xml_check")
     {
+
+        ucd_param_opt->not_ready(command_1);
+        return -1;
+
+
         if ((argc == 6))
         {
             std::string xml_dir = argv[2];
@@ -855,6 +876,9 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "format_xml")
     {
+        ucd_param_opt->not_ready(command_1);
+        return -1;
+
         // 传入 img 的话就规范 height, width
         // 格式化没有 prob 字段，读取 xml报错 的问题
     }
@@ -889,6 +913,9 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "filter")
     {
+        ucd_param_opt->not_ready(command_1);
+        return -1;
+
         // 对 ucd 进行过滤
         // used_label
         // conf
@@ -1004,6 +1031,9 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "acc")
     {
+        ucd_param_opt->not_ready(command_1);
+        return -1;
+
         // 对比两个 ucd 的对比结果，
         // ucd 作为标准结果，只允许 ucd 之间进行对比
         // 可以设置是否保存标准的画图
@@ -1011,10 +1041,16 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "to_yolo")
     {
+        ucd_param_opt->not_ready(command_1);
+        return -1;
+
         // 转为 yolo 的训练格式，vit 的训练格式 faster rcnn csra 的训练格式
     }
     else if(command_1 == "gif")
     {
+        ucd_param_opt->not_ready(command_1);
+        return -1;
+
         // 屏幕闪烁一些标准的 gif 图
         // 比如 你真棒，我很忙，你走开，别烦我
     }
@@ -1199,6 +1235,9 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "test")
     {
+        ucd_param_opt->not_ready(command_1);
+        return -1;
+
         // std::string ucd_path_1 = argv[2];
         // std::string ucd_path_2 = argv[3];
         // UCDataset a(ucd_path_1);
