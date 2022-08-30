@@ -614,6 +614,14 @@ void UcdParamOpt::load_param_info()
     param_from_file->chinese_explain = "只获取指定文件夹下面文件的 uc 组织成一个 ucd, 不去解析具体文件中的内容 ";   
     UcdParamOpt::add_param(param_from_file);
 
+    // uc_analysis
+    ParamInfo * param_uc_analysis = new ParamInfo("uc_analysis");
+    param_uc_analysis->group = "info";
+    param_uc_analysis->grammar = "ucd uc_analysis ucd_path";
+    param_uc_analysis->english_explain = "";
+    param_uc_analysis->chinese_explain = "分析 uc 的组成，看前三位即可";   
+    UcdParamOpt::add_param(param_uc_analysis);
+
 }
 
 void UcdParamOpt::not_ready(std::string method_name)

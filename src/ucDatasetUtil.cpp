@@ -1431,4 +1431,55 @@ void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std
     }
 }
 
+void UCDatasetUtil::uc_analysis(std::string ucd_path)
+{
+    if(! is_ucd_path(ucd_path))
+    {
+        std::cout << "error ucd_path : " << ucd_path << std::endl;
+        throw "error ucd_path";
+    }
 
+    std::map<std::string, int>  uc_date_map;
+    UCDataset *ucd = new UCDataset(ucd_path);
+    ucd->parse_ucd();
+
+    for(int i=0; i<ucd->uc_list.size(); i++)
+    {
+        std::string uc_head = ucd->uc_list[i].substr(0, 3);
+        if(uc_date_map.count(uc_head) == 0)
+        {
+            uc_date_map[uc_head] = 1;
+        }
+        else
+        {
+            uc_date_map[uc_head] += 1;
+        }
+    }
+
+
+    // uc to data
+    std::map<std::string, int> comparison_table = 
+                            {{"0", 0}, {"1", 1}, {"2", 2}, {"3", 3}, {"4", 4}, {"5", 5}, {"6", 6}, {"7", 7}, {"8", 8}, {"9", 9}, 
+                            {"a", 10}, {"b", 11}, {"c", 12}, {"d", 13}, {"e", 14}, {"f", 15}, {"g", 16}, {"h", 17}, {"i", 18},
+                            {"j", 19}, {"k", 20}, {"m", 21}, {"n", 22}, {"p", 23}, {"q", 24}, {"r", 25}, {"s", 26}, {"t", 27},
+                            {"u", 28}, {"v", 29}, {"w", 30}, {"x", 31}, {"y", 32}, {"z", 33}};
+
+    std::map<std::string, int> year_dict = {{"A", 2019}, {"B", 2020}, {"C", 2021}, {"D", 2022}, {"E", 2023}, {"F", 2024}, {"G", 2025}, {"Z", 9999}};
+
+    auto iter = uc_date_map.begin();
+    while(iter != uc_date_map.end())
+    {
+        std::string uc = iter->first;
+        int year = year_dict[uc.substr(0, 1)];
+        int month = comparison_table[uc.substr(1, 1)] - 9 ;
+        int day = comparison_table[uc.substr(2, 1)] - 9 ;
+        if(month > 12)
+        {
+            month -= 12;
+            day += 15;
+        }
+        std::string date = std::to_string(year) + "-" + std::to_string(month) + "-" + std::to_string(day);
+        std::cout << uc << "   " << std::setw(10) << std::left << date << "   " << iter->second << std::endl;
+        iter++;
+    }
+}

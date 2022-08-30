@@ -90,6 +90,9 @@ using namespace std;
 
 // from_xml from_json 的时候，可以只用他们的名字，不解析他们的内容，这样能快非常多 from_file 
 
+// ucd 的时间分析，可以看出来有多少是新的数据，有多少是之前入库的数据
+
+
 
 int main(int argc, char ** argv)
 {
@@ -1281,16 +1284,29 @@ int main(int argc, char ** argv)
             }
 
             // todo 保存为  txt
-
-        }
-        else if(command_1 == "from_file")
-        {
-            // 获取文件的 uc 组织成 ucd 
         }
         else
         {
             ucd_param_opt->print_command_info(command_1);
         }
+    }
+    else if(command_1 == "uc_analysis")
+    {
+        // 对 uc 进行分析，uc 能读取日期，统计 uc 日期的分布 
+
+        if(argc == 3)
+        {
+            std::string ucd_path = argv[2];
+            ucd_util->uc_analysis(ucd_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "from_file")
+    {
+        // 获取文件的 uc 组织成 ucd 
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {

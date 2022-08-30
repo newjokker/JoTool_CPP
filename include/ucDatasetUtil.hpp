@@ -175,6 +175,9 @@ class UCDatasetUtil
 
         // uc_check
         void uc_check(std::vector<std::string> file_vector);
+
+        // uc_analysis
+        void uc_analysis(std::string ucd_path);
         
     private:
         
