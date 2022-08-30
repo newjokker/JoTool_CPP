@@ -925,6 +925,26 @@ void UCDatasetUtil::get_ucd_from_json_dir(std::string json_dir, std::string ucd_
     delete ucd;
 }
 
+void UCDatasetUtil::get_ucd_from_file_dir(std::string file_dir, std::string ucd_path)
+{
+    std::vector<std::string> json_path_vector = get_all_file_path_recursive(file_dir);
+
+    UCDataset* ucd = new UCDataset(ucd_path);
+    std::string uc, json_path;
+
+    for(int i=0; i<json_path_vector.size(); i++)
+    {
+        uc = get_file_name(json_path_vector[i]);
+        if(is_uc(uc))
+        {
+            std::cout << i << ", add file : " << json_path_vector[i] << std::endl;
+            ucd->uc_list.push_back(uc);
+        }
+    }
+    ucd->save_to_ucd(ucd_path);
+    delete ucd;
+}
+
 void UCDatasetUtil::merge_ucds(std::string save_path, std::vector<std::string> ucd_path_vector)
 {
 
@@ -1022,7 +1042,7 @@ void UCDatasetUtil::ucd_minus(std::string save_path, std::string ucd_path_1, std
 
 bool UCDatasetUtil::is_ucd_path(std::string ucd_path)
 {
-    if((! is_file(ucd_path)) || (ucd_path.substr(ucd_path.size()-5, ucd_path.size()) != ".json"))
+    if((! is_file(ucd_path)) || (ucd_path.substr(ucd_path.size()-5, 5) != ".json"))
     {
         return false;
     }
@@ -1483,3 +1503,8 @@ void UCDatasetUtil::uc_analysis(std::string ucd_path)
         iter++;
     }
 }
+
+
+
+
+

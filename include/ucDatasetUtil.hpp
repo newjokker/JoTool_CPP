@@ -151,6 +151,9 @@ class UCDatasetUtil
         // 将 labelme json 信息保存到 ucd 中
         void get_ucd_from_json_dir(std::string json_dir, std::string ucd_path);
         
+        // 从文件中获取 ucd，只解析文件名，不解析文件内容
+        void get_ucd_from_file_dir(std::string file_dir, std::string ucd_path);
+
         // 将多个 ucd 进行合并
         void merge_ucds(std::string save_path, std::vector<std::string> ucd_path_vector);
         

@@ -327,7 +327,7 @@ void UcdParamOpt::load_param_info()
     param_from_img->group = "sync";
     param_from_img->grammar = "ucd from_img img_dir ucd_save_path";
     param_from_img->english_explain = "get ucd from loacal data(img)";
-    param_from_img->chinese_explain = "本地文件生成数据集";   
+    param_from_img->chinese_explain = "(递归)本地文件生成数据集";   
     UcdParamOpt::add_param(param_from_img);
     
     // from_xml
@@ -335,7 +335,7 @@ void UcdParamOpt::load_param_info()
     param_from_xml->group = "sync";
     param_from_xml->grammar = "ucd from_xml xml_dir ucd_save_path";
     param_from_xml->english_explain = "get ucd from loacal data(img, xml)";
-    param_from_xml->chinese_explain = "本地 voc_xml 文件生成 ucd, ucd中包含 dete_obj 信息";   
+    param_from_xml->chinese_explain = "(递归)本地 voc_xml 文件生成 ucd, ucd中包含 dete_obj 信息";   
     UcdParamOpt::add_param(param_from_xml);
     
     // from_json
@@ -343,7 +343,7 @@ void UcdParamOpt::load_param_info()
     param_from_json->group = "sync";
     param_from_json->grammar = "ucd from_json json_dir ucd_save_path";
     param_from_json->english_explain = "get ucd from loacal data(img, json)";
-    param_from_json->chinese_explain = "本地 labelme_json 文件生成 ucd, ucd中包含 dete_obj 信息";   
+    param_from_json->chinese_explain = "(递归)本地 labelme_json 文件生成 ucd, ucd中包含 dete_obj 信息";   
     UcdParamOpt::add_param(param_from_json);
     
     // info
@@ -566,11 +566,12 @@ void UcdParamOpt::load_param_info()
     UcdParamOpt::add_param(param_uc_check);
 
     // god blass me
+    // todo 可以把保佑人的名字加在佛陀嘴边
     ParamInfo * param_god_bless = new ParamInfo("god_bless");
     param_god_bless->group = "fun";
     param_god_bless->grammar = "ucd god_bless {name}";
     param_god_bless->english_explain = "god bless";
-    param_god_bless->chinese_explain = "";   
+    param_god_bless->chinese_explain = "上帝保佑";   
     UcdParamOpt::add_param(param_god_bless);
 
     // buddha blass me
@@ -578,14 +579,14 @@ void UcdParamOpt::load_param_info()
     param_buddha_bless->group = "fun";
     param_buddha_bless->grammar = "ucd buddha_bless {name}";
     param_buddha_bless->english_explain = "buddha bless";
-    param_buddha_bless->chinese_explain = "";   
+    param_buddha_bless->chinese_explain = "佛陀保佑";   
     UcdParamOpt::add_param(param_buddha_bless);
 
 
     // move_uc
     ParamInfo * param_move_uc = new ParamInfo("move_uc");
     param_move_uc->group = "sync";
-    param_move_uc->grammar = "ucd move_uc save_dir";
+    param_move_uc->grammar = "ucd move_uc file_dir save_dir";
     param_move_uc->english_explain = "move file with name in uc format";
     param_move_uc->chinese_explain = "";   
     UcdParamOpt::add_param(param_move_uc);
@@ -593,7 +594,7 @@ void UcdParamOpt::load_param_info()
     // move_not_uc
     ParamInfo * param_move_not_uc = new ParamInfo("move_not_uc");
     param_move_not_uc->group = "sync";
-    param_move_not_uc->grammar = "ucd buddha_bless {name}";
+    param_move_not_uc->grammar = "ucd move_not_uc file_dir save_dir";
     param_move_not_uc->english_explain = "move file when filename not in uc format";
     param_move_not_uc->chinese_explain = "";   
     UcdParamOpt::add_param(param_move_not_uc);
@@ -609,9 +610,9 @@ void UcdParamOpt::load_param_info()
     // from_file
     ParamInfo * param_from_file = new ParamInfo("from_file");
     param_from_file->group = "sync";
-    param_from_file->grammar = "";
+    param_from_file->grammar = "ucd from_file file_dir";
     param_from_file->english_explain = "";
-    param_from_file->chinese_explain = "只获取指定文件夹下面文件的 uc 组织成一个 ucd, 不去解析具体文件中的内容 ";   
+    param_from_file->chinese_explain = "(递归)只获取指定文件夹下面文件的 uc 组织成一个 ucd, 不去解析具体文件中的内容 ";   
     UcdParamOpt::add_param(param_from_file);
 
     // uc_analysis

@@ -84,15 +84,14 @@ void SaturnDatabaseSQL::rename_img_dir(std::string img_dir, int buffer_img_size)
     std::vector<std::string> img_path_vector = get_all_file_path_recursive(img_dir, suffixs);
     std::vector<std::string> md5_vector;
     std::string md5_str;
-    std::map<std::string, std::string> md5_img_path_map;
+    std::map<std::string, std::string> img_path_md5_map;
 
-    // 
     for(int i=0; i<img_path_vector.size(); i++)
     {
         md5_str = get_file_md5(img_path_vector[i]);
         md5_vector.push_back(md5_str);
         std::cout << i << ", " << "get md5 : " << img_path_vector[i] << ", " << md5_str << std::endl;
-        md5_img_path_map[md5_str] = img_path_vector[i];
+        img_path_md5_map[img_path_vector[i]] = md5_str;
     }
 
     // get uc by md5
@@ -103,16 +102,17 @@ void SaturnDatabaseSQL::rename_img_dir(std::string img_dir, int buffer_img_size)
     std::string img_folder;
     std::string img_suffix;
     std::string new_img_path;
-    auto iter = md5_uc_map.begin();
-    while(iter != md5_uc_map.end())
+    auto iter = img_path_md5_map.begin();
+    while(iter != img_path_md5_map.end())
     {
-        img_path = md5_img_path_map[iter->first];
+        img_path = iter->first;
+        string uc = md5_uc_map[iter->second];
         img_folder = get_file_folder(img_path);
         img_suffix = get_file_suffix(img_path);
-        new_img_path = img_folder + "/" + iter->second + img_suffix;
+        new_img_path = img_folder + "/" + uc + img_suffix;
         // rename 
         rename(img_path.c_str(), new_img_path.c_str());
-        // std::cout << img_path << " : " << new_img_path << std::endl;
+
         iter ++;
     }
 }
@@ -129,7 +129,7 @@ void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_
     std::vector<std::string> img_path_vector = get_all_file_path(img_dir, suffixs);
     std::vector<std::string> md5_vector;
     std::string md5_str;
-    std::map<std::string, std::string> md5_img_path_map;
+    std::map<std::string, std::string> img_path_md5_map;
     std::string img_path, xml_path, img_name, img_suffix;
     std::string new_img_path, new_xml_path;
     // 
@@ -145,7 +145,7 @@ void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_
                 md5_str = get_file_md5(img_path_vector[i]);
                 md5_vector.push_back(md5_str);
                 std::cout << i << ", " << "get md5 : " << img_path_vector[i] << ", " << md5_str << std::endl;
-                md5_img_path_map[md5_str] = img_path_vector[i];
+                img_path_md5_map[img_path_vector[i]] = md5_str;
             }
             else
             {
@@ -158,16 +158,17 @@ void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_
     std::map<std::string, std::string> md5_uc_map = SaturnDatabaseSQL::get_md5_uc_map_from_md5_vector(md5_vector);
 
     // rename
-    auto iter = md5_uc_map.begin();
-    while(iter != md5_uc_map.end())
+    auto iter = img_path_md5_map.begin();
+    while(iter != img_path_md5_map.end())
     {
-        img_path = md5_img_path_map[iter->first];
+        string uc = md5_uc_map[iter->second];
+        img_path = iter->first;
         img_name = get_file_name(img_path);
         xml_path = xml_dir + "/" + img_name + ".xml";
         img_suffix = get_file_suffix(img_path);
-        new_img_path = img_dir + "/" + iter->second + img_suffix;
-        new_xml_path = xml_dir + "/" + iter->second + ".xml";
-        // rename 
+        new_img_path = img_dir + "/" + uc + img_suffix;
+        new_xml_path = xml_dir + "/" + uc + ".xml";
+
         rename(img_path.c_str(), new_img_path.c_str());
         rename(xml_path.c_str(), new_xml_path.c_str());
         // std::cout << img_path << " : " << new_img_path << std::endl;
@@ -180,33 +181,34 @@ void SaturnDatabaseSQL::rename_img_json_dir(std::string img_dir, std::string jso
 
     if((! is_dir(img_dir)) || (! is_dir(json_dir)))
     {
-        std::cout << "image_dir or json_dir not exists : " << img_dir << std::endl;
+        std::cout << "image dir or xml dir not exists : " << img_dir << std::endl;
     }
 
     std::set<std::string> suffixs {".jpg", ".JPG", ".png", ".PNG"};
     std::vector<std::string> img_path_vector = get_all_file_path(img_dir, suffixs);
     std::vector<std::string> md5_vector;
     std::string md5_str;
-    std::map<std::string, std::string> md5_img_path_map;
-    std::string img_path, json_path, img_name, img_suffix;
+    std::map<std::string, std::string> img_path_md5_map;
+    std::string img_path, xml_path, img_name, img_suffix;
     std::string new_img_path, new_xml_path;
     // 
     for(int i=0; i<img_path_vector.size(); i++)
     {
+        // todo 如果存在对应的 xml path
         img_name = get_file_name(img_path_vector[i]);
-        json_path = json_dir + "/" + img_name + ".json";
+        xml_path = json_dir + "/" + img_name + ".json";
         if(! is_uc(img_name))
         {
-            if(is_file(json_path))
+            if(is_file(xml_path))
             {
                 md5_str = get_file_md5(img_path_vector[i]);
                 md5_vector.push_back(md5_str);
                 std::cout << i << ", " << "get md5 : " << img_path_vector[i] << ", " << md5_str << std::endl;
-                md5_img_path_map[md5_str] = img_path_vector[i];
+                img_path_md5_map[img_path_vector[i]] = md5_str;
             }
             else
             {
-                std::cout << "can't find json_path : " << json_path << std::endl;
+                std::cout << "can't find xml_path : " << xml_path << std::endl;
             }
         }
     }
@@ -215,18 +217,19 @@ void SaturnDatabaseSQL::rename_img_json_dir(std::string img_dir, std::string jso
     std::map<std::string, std::string> md5_uc_map = SaturnDatabaseSQL::get_md5_uc_map_from_md5_vector(md5_vector);
 
     // rename
-    auto iter = md5_uc_map.begin();
-    while(iter != md5_uc_map.end())
+    auto iter = img_path_md5_map.begin();
+    while(iter != img_path_md5_map.end())
     {
-        img_path = md5_img_path_map[iter->first];
+        string uc = md5_uc_map[iter->second];
+        img_path = iter->first;
         img_name = get_file_name(img_path);
-        json_path = json_dir + "/" + img_name + ".json";
+        xml_path = json_dir + "/" + img_name + ".json";
         img_suffix = get_file_suffix(img_path);
-        new_img_path = img_dir + "/" + iter->second + img_suffix;
-        new_xml_path = json_dir + "/" + iter->second + ".json";
-        // rename 
+        new_img_path = img_dir + "/" + uc + img_suffix;
+        new_xml_path = json_dir + "/" + uc + ".json";
+
         rename(img_path.c_str(), new_img_path.c_str());
-        rename(json_path.c_str(), new_xml_path.c_str());
+        rename(xml_path.c_str(), new_xml_path.c_str());
         // std::cout << img_path << " : " << new_img_path << std::endl;
         iter ++;
     }

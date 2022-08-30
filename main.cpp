@@ -82,8 +82,6 @@ using namespace std;
 
 // save 中 img 和 xml 不再生成 xml img 等文件夹，直接放到指定的目录下面就行
 
-// json数据转swin格式，原图+分割图
-
 // 入库等操作也是可以在里面搞一套，只能拿数据，不能改数据，可以将未入库的图片上传到某一个地址
 
 // 解析出来的 json 中存放的 jpg 图片是压缩过的，这样存放的数据能小一点
@@ -224,7 +222,6 @@ int main(int argc, char ** argv)
         else if (argc == 4)
         {
             ucd_save_path = argv[3];
-            //
             if(is_dir(ucd_save_path))
             {
                 ucd_save_path += "/" + ucd_name + ".json";
@@ -277,9 +274,6 @@ int main(int argc, char ** argv)
             }
 
             bool need_img, need_xml;
-            std::string save_img_dir = save_dir + "/" + "img";
-            std::string save_xml_dir = save_dir + "/" + "xml";
-        
             if(save_mode[0] == '0')
             {
                 need_img = false;
@@ -287,10 +281,6 @@ int main(int argc, char ** argv)
             else
             {
                 need_img = true;
-                if(! is_dir(save_img_dir))
-                {
-                    create_folder(save_img_dir);
-                }
             }
 
             if(save_mode[1] == '0')
@@ -300,10 +290,6 @@ int main(int argc, char ** argv)
             else
             {
                 need_xml = true;
-                if(! is_dir(save_xml_dir))
-                {
-                    create_folder(save_xml_dir);
-                }
             }
 
             UCDataset* ucd = new UCDataset(ucd_path);
@@ -321,8 +307,8 @@ int main(int argc, char ** argv)
                 uc_vector = ucd->uc_list;
             }
 
-            if(need_img){ucd_util->load_img(save_img_dir, uc_vector);}
-            if(need_xml){ucd_util->load_xml(save_xml_dir, uc_vector);}
+            if(need_img){ucd_util->load_img(save_dir, uc_vector);}
+            if(need_xml){ucd_util->load_xml(save_dir, uc_vector);}
             delete ucd;
         }
         else
@@ -460,9 +446,9 @@ int main(int argc, char ** argv)
     {
         if(argc == 4)
         {
-            std::string xml_dir = argv[2];
+            std::string json_dir = argv[2];
             std::string ucd_path = argv[3];
-            ucd_util->get_ucd_from_json_dir(xml_dir, ucd_path);
+            ucd_util->get_ucd_from_json_dir(json_dir, ucd_path);
         }
         else
         {
@@ -472,10 +458,17 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "from_file")
     {
-        ucd_param_opt->not_ready(command_1);
-    
-        // 只根据把文件名获取 uc 不去解析其中的 内容
-    
+        if(argc == 4)
+        {
+            std::string file_dir = argv[2];
+            std::string ucd_path = argv[3];
+            ucd_util->get_ucd_from_file_dir(file_dir, ucd_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+            return -1;       
+        }
     }
     else if(command_1 == "parse_xml")
     {
@@ -1056,6 +1049,8 @@ int main(int argc, char ** argv)
         ucd_param_opt->not_ready(command_1);
         return -1;
 
+        // 只考虑 正框的情况，其他的不进行处理
+
         // 对比两个 ucd 的对比结果，
         // ucd 作为标准结果，只允许 ucd 之间进行对比
         // 可以设置是否保存标准的画图
@@ -1133,9 +1128,6 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "uc_check")
     {
-        // 查看是不是所有的文件都是 uc 格式命名的，去数据库中进行对比
-        // 对于不符合 uc 规范的文件可以进行路径提取，或者文件移动到指定文件夹
-
         if(argc == 3)
         {
             std::string file_dir = argv[2];
@@ -1292,8 +1284,6 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "uc_analysis")
     {
-        // 对 uc 进行分析，uc 能读取日期，统计 uc 日期的分布 
-
         if(argc == 3)
         {
             std::string ucd_path = argv[2];
@@ -1303,10 +1293,6 @@ int main(int argc, char ** argv)
         {
             ucd_param_opt->print_command_info(command_1);
         }
-    }
-    else if(command_1 == "from_file")
-    {
-        // 获取文件的 uc 组织成 ucd 
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {
