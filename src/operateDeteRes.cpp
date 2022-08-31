@@ -13,6 +13,10 @@
 #include "include/easyexif.h"
 #include "include/imageinfo.hpp"
 #include "include/md5.hpp"
+#include <opencv2/opencv.hpp>
+#include <math.h>
+#include <algorithm>
+#include "ucDatasetUtil.hpp"
 
 namespace jotools
 {
@@ -366,6 +370,292 @@ void rename_xml_img_by_md5(std::string xml_folder, std::string img_folder)
 
 }
 
+float rect_iou(int x1, int y1, int h1, int w1, int x2, int y2, int h2, int w2)
+{
+    // 计算两个矩形的 iou
+    int endx = std::max(x1 + w1, x2 + w2);
+    int startx = std::min(x1, x2);
+    int width = w1 + w2 - (endx - startx);
+    int endy = std::max(y1 + h1, y2 + h2);
+    int starty = std::min(y1, y2);
+    int height = h1 + h2 - (endy - starty);
+    if (width > 0 && height > 0) {
+        int area = width * height;
+        int area1 = w1 * h1;
+        int area2 = w2 * h2;
+        float ratio = (float)area / (area1 + area2 - area);
+        return ratio;
+    } else {
+        return 0.0;
+    }
+}
 
+float dete_obj_iou(DeteObj a, DeteObj b)
+{
+    int x1 = a.x1;
+    int y1 = a.y1;
+    int h1 = a.y2 - a.y1;
+    int w1 = a.x2 - a.x1;
+
+    int x2 = b.x1;
+    int y2 = b.y1;
+    int h2 = b.y2 - b.y1;
+    int w2 = b.x2 - b.x1;
+
+    return rect_iou(x1, y1, h1, w1, x2, y2, h2, w2);
+}
+
+
+
+
+//
+
+
+DeteAcc::DeteAcc()
+{
+    DeteAcc::iou = 0.5;
+}
+
+std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and_standard(DeteRes a, DeteRes b)
+{
+
+    // 没有置信度的话不好排列，这个比较恶心，当没有置信度的时候直接随机排列吧
+
+    // todo dete_res 中的对象，根据 conf 进行排列，从大到小
+
+    // 增加函数 sort_alarm_by_conf
+
+    float iou_th = 0.5;
+    std::map<int, bool> has_obj_map;
+    std::map<std::string, std::map<std::string, int> > acc_res;
+    acc_res["correct"] = {};
+    acc_res["miss"] = {};
+    acc_res["extra"] = {};
+    acc_res["mistake"] = {};
+
+
+    for(int i=0; i<b.alarms.size(); i++)
+    {
+        has_obj_map[i] = false;
+    }
+
+    for(int i=0; i<a.alarms.size(); i++)
+    {
+        DeteObj max_iou_obj;
+        float max_iou = 0;
+        int max_iou_index = -1;
+        //
+        for(int j=0; j<b.alarms.size(); j++)
+        {
+            float each_iou = dete_obj_iou(a.alarms[i], b.alarms[j]);
+            if((each_iou > max_iou) && (has_obj_map[i] == false))
+            {
+                max_iou = each_iou;
+                max_iou_obj = b.alarms[j];
+                max_iou_index = j;
+            }
+        }
+
+        if(max_iou > DeteAcc::iou)
+        {
+            if(a.alarms[i].tag == max_iou_obj.tag)
+            {
+                // std::cout << "correct   : ";
+                // a.alarms[i].print_format();
+                has_obj_map[max_iou_index] = true;
+                if(acc_res["correct"].count(a.alarms[i].tag) == 0)
+                {
+                    acc_res["correct"][a.alarms[i].tag] = 1;
+                }
+                else
+                {
+                    acc_res["correct"][a.alarms[i].tag] += 1;
+                }
+            }
+            else
+            {
+                // std::cout << "mistake   : ";
+                // a.alarms[i].print_format();
+                if(acc_res["mistake"].count(a.alarms[i].tag) == 0)
+                {
+                    acc_res["mistake"][a.alarms[i].tag] = 1;
+                }
+                else
+                {
+                    acc_res["mistake"][a.alarms[i].tag] += 1;
+                }                
+            }
+        }
+        else
+        {
+            // std::cout << "extra     : ";
+            // a.alarms[i].print_format();
+            if(acc_res["extra"].count(a.alarms[i].tag) == 0)
+            {
+                acc_res["extra"][a.alarms[i].tag] = 1;
+            }
+            else
+            {
+                acc_res["extra"][a.alarms[i].tag] += 1;
+            }       
+        }
+    }
+
+    // 检查漏检
+    for(int i=0; i<b.alarms.size(); i++)
+    {
+        if(has_obj_map[i] == false)
+        {
+            // std::cout << "miss      : ";
+            // b.alarms[i].print_format();
+            if(acc_res["miss"].count(b.alarms[i].tag) == 0)
+            {
+                acc_res["miss"][b.alarms[i].tag] = 1;
+            }
+            else
+            {
+                acc_res["miss"][b.alarms[i].tag] += 1;
+            }   
+        }
+    }
+
+    // // print
+    // auto iter = acc_res.begin();
+    // while(iter != acc_res.end())
+    // {
+    //     std::map<std::string, int> each_res = iter->second;
+    //     auto iter_2 = each_res.begin();
+    //     while(iter_2 != each_res.end())
+    //     {
+    //         std::cout << iter->first << ", " << iter_2->first << ", " << iter_2->second << std::endl;
+    //         iter_2 ++;
+    //     }
+    //     iter ++;
+    // }
+    return acc_res;
+}
+
+
+std::map<std::string, std::map<std::string, int> > merge_compare_res(std::map<std::string, std::map<std::string, int> > b, std::map<std::string, std::map<std::string, int> > a)
+{
+    // 将两个检测结果进行合并
+
+    auto iter_a = a.begin();
+    while(iter_a != a.end())
+    {
+        std::map<std::string, int> each_res;
+        each_res = iter_a->second;
+        
+        if(b.count(iter_a->first)==0)
+        {
+            b[iter_a->first] = {};
+        }
+        
+        auto iter_a2 = each_res.begin();
+        while(iter_a2 != each_res.end())
+        {
+            if(b[iter_a->first].count(iter_a2->first) == 0)
+            {
+                b[iter_a->first][iter_a2->first] = 0;
+            }
+
+            b[iter_a->first][iter_a2->first] += 1;
+
+            iter_a2++;
+        }
+        iter_a++;
+    }
+
+    // auto iter = b.begin();
+    // while(iter != b.end())
+    // {
+    //     std::map<std::string, int> each_res = iter->second;
+    //     auto iter_2 = each_res.begin();
+    //     while(iter_2 != each_res.end())
+    //     {
+    //         std::cout << iter->first << ", " << iter_2->first << ", " << iter_2->second << std::endl;
+    //         iter_2 ++;
+    //     }
+    //     iter ++;
+    // }
+
+    return b;
+}
+
+void DeteAcc::cal_acc_rec(std::string ucd_customer, std::string ucd_standard)
+{
+    // 解析两个 ucd 对应的 object
+
+    if(! (is_file(ucd_customer) && is_file(ucd_standard)))
+    {
+        std::cout << "ucd path not exists " << std::endl;
+        throw "ucd path not exists";
+    }
+
+    jotools::DeteAcc* acc = new DeteAcc();
+
+    UCDataset* ucd_a = new UCDataset(ucd_customer);
+    UCDataset* ucd_b = new UCDataset(ucd_standard);
+    ucd_a->parse_ucd(true);
+    ucd_b->parse_ucd(true);
+
+    std::map<std::string, std::map<std::string, int> > compare_res;
+
+    auto iter_b = ucd_b->object_info.begin();
+    while(iter_b != ucd_b->object_info.end())
+    {
+        std::string uc = iter_b->first;
+        DeteRes *each_b = new DeteRes();
+        DeteRes *each_a = new DeteRes();
+        ucd_b->get_dete_res_with_assign_uc(each_b, uc);
+        ucd_a->get_dete_res_with_assign_uc(each_a, uc);
+
+        std::map<std::string, std::map<std::string, int> > each_compare_res = acc->compare_customer_and_standard(*each_a, *each_b);
+
+        compare_res = merge_compare_res(compare_res, each_compare_res);
+
+        iter_b ++;
+    }
+
+    // print
+    std::map<std::string, int> static_res;
+    //
+    std::cout << "----------------------------------------" << std::endl;
+    std::cout << "             stastic result             " << std::endl;
+    std::cout << "----------------------------------------" << std::endl;
+    //
+    auto iter = compare_res.begin();
+    while(iter != compare_res.end())
+    {
+        static_res[iter->first] = 0;
+        std::map<std::string, int> each_res = iter->second;
+        auto iter_2 = each_res.begin();
+        while(iter_2 != each_res.end())
+        {
+            std::cout << std::setw(10) << std::left << iter->first << "     " << std::setw(15) << std::left << iter_2->first << "     " << iter_2->second << std::endl;
+            static_res[iter->first] += iter_2->second;
+            iter_2 ++;
+        }
+        iter ++;
+    }
+    std::cout << "----------------------------------------" << std::endl;
+
+    auto iter_res = static_res.begin();
+    while(iter_res != static_res.end())
+    {
+        std::cout << std::setw(10) << std::left << iter_res->first << "     " <<  iter_res->second << std::endl;
+        iter_res++;
+    }
+
+    float correct = static_res["correct"];
+    float extra = static_res["extra"];
+    float miss = static_res["miss"];
+    float mistake = static_res["mistake"];
+    std::cout << "----------------------------------------" << std::endl;
+    std::cout << std::setw(10) << std::left << "accurate" << "     " <<  (correct)/(correct +  extra + mistake) << std::endl;    
+    std::cout << std::setw(10) << std::left << "recall" << "     " <<  (correct)/(correct +  miss + mistake) << std::endl;    
+    std::cout << "----------------------------------------" << std::endl;
+
+}
 
 }

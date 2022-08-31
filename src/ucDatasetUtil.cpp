@@ -416,6 +416,8 @@ void UCDataset::save_to_voc_xml_with_assign_uc(std::string save_path, std::strin
 
     DeteRes* dete_res = new DeteRes();
 
+    if(UCDataset::object_info.count(uc) != 0)
+    {
     for(int i=0; i<UCDataset::object_info[uc].size(); i++)
     {
         LabelmeObj* obj = UCDataset::object_info[uc][i];
@@ -435,7 +437,28 @@ void UCDataset::save_to_voc_xml_with_assign_uc(std::string save_path, std::strin
     dete_res->depth = depth;
     dete_res->img_path = img_path;
     dete_res->save_to_xml(save_path);
+    }
     delete dete_res;
+}
+
+void UCDataset::get_dete_res_with_assign_uc(jotools::DeteRes *dete_res, std::string uc)
+{
+    if(UCDataset::object_info.count(uc) != 0)
+    {
+        for(int i=0; i<UCDataset::object_info[uc].size(); i++)
+        {
+            LabelmeObj* obj = UCDataset::object_info[uc][i];
+            if(obj->shape_type == "rectangle")
+            {
+                int x1 = obj->points[0][0];
+                int y1 = obj->points[0][1];
+                int x2 = obj->points[1][0];
+                int y2 = obj->points[1][1];
+                std::string tag = obj->label;
+                dete_res->add_dete_obj(x1, y1, x2, y2, -1, tag);
+            }
+        }
+    }
 }
 
 void UCDataset::save_to_labelme_json_with_assign_uc(std::string save_json_path, std::string img_path, std::string uc)
@@ -468,14 +491,18 @@ void UCDataset::save_to_labelme_json_with_assign_uc(std::string save_json_path, 
     }
 
     std::map<std::string, nlohmann::json> obj_info;
-    for(int i=0; i<UCDataset::object_info[uc].size(); i++)
+    
+    if(UCDataset::object_info.count(uc) != 0)
     {
-        LabelmeObj* obj = UCDataset::object_info[uc][i];
-        obj_info["shape_type"] = obj->shape_type;
-        obj_info["label"] = obj->label;
-        obj_info["points"] = obj->points;
-        json_info["shapes"].push_back(obj_info);
-        delete obj;
+        for(int i=0; i<UCDataset::object_info[uc].size(); i++)
+        {
+            LabelmeObj* obj = UCDataset::object_info[uc][i];
+            obj_info["shape_type"] = obj->shape_type;
+            obj_info["label"] = obj->label;
+            obj_info["points"] = obj->points;
+            json_info["shapes"].push_back(obj_info);
+            delete obj;
+        }
     }
 
     std::string img_suffix = get_file_suffix(img_path);

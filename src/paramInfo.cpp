@@ -528,9 +528,9 @@ void UcdParamOpt::load_param_info()
     // acc
     ParamInfo * param_acc = new ParamInfo("acc");
     param_acc->group = "opt";
-    param_acc->grammar = "";
-    param_acc->english_explain = "";
-    param_acc->chinese_explain = "";   
+    param_acc->grammar = "ucd acc ucd_customer, ucd_standard";
+    param_acc->english_explain = "get acc rec from two ucd";
+    param_acc->chinese_explain = "两个 ucd 之间计算精准率和召回率";   
     UcdParamOpt::add_param(param_acc);
 
     // gif

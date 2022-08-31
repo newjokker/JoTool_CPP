@@ -35,7 +35,27 @@ namespace jotools
     // 将对应的 xml 和 img 重命名为 img 的 md5
     void rename_xml_img_by_md5(std::string xml_folder, std::string img_folder);
 
-}
 
+    class DeteAcc
+    {
+        public:
+
+
+            // iou 阈值
+            float iou;
+
+            DeteAcc();
+
+            // 对比一个 dete_res 结果
+            std::map<std::string, std::map<std::string, int> > compare_customer_and_standard(DeteRes a, DeteRes b);
+
+            // 检测结果计算 acc rec
+            void cal_acc_rec(std::string ucd_customer, std::string ucd_standard);
+
+
+    };
+
+
+}
 
 #endif

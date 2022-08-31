@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include "include/lablelmeObj.hpp"
+#include "include/deteRes.hpp"
 
 class UCDataset
 {
@@ -80,6 +81,9 @@ class UCDataset
         
         // 保存一个 xml 文件
         void save_to_voc_xml_with_assign_uc(std::string save_path, std::string img_path, std::string assign_uc);
+
+        // 保存为一个 dete_res
+        void get_dete_res_with_assign_uc(jotools::DeteRes* dete_res, std::string assign_uc);
 
         // 保存一个 json 文件
         void save_to_labelme_json_with_assign_uc(std::string save_path, std::string img_path, std::string assign_uc);

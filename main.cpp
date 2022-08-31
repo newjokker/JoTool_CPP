@@ -1046,8 +1046,8 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "acc")
     {
-        ucd_param_opt->not_ready(command_1);
-        return -1;
+        // ucd_param_opt->not_ready(command_1);
+        // return -1;
 
         // 只考虑 正框的情况，其他的不进行处理
 
@@ -1055,6 +1055,27 @@ int main(int argc, char ** argv)
         // ucd 作为标准结果，只允许 ucd 之间进行对比
         // 可以设置是否保存标准的画图
         // 直接画出 0.1 ~ 0.9 的统计数据
+
+        // 因为 没有记录 conf 信息，所以不好改变 config 得到不同 config 下面的结果
+
+        // 生成结果为一个 ucd ，每个标签就是对应的检测结果
+
+        // 其实直接在屏幕上简单打印出来就行了，没必要画出多么规范的图出来
+
+        // 为了推广使用和自己和别人的进行对比，举一些比较极端的例子，肯定会有差异的，指出这些差异的原因和解决方案，用 ucd 
+
+        if(argc == 4)
+        {
+            std::string ucd_customer = argv[2];
+            std::string ucd_standard = argv[3];
+            jotools::DeteAcc* acc = new DeteAcc();
+            acc->cal_acc_rec(ucd_customer, ucd_standard);
+            delete acc;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
     else if(command_1 == "to_yolo")
     {
