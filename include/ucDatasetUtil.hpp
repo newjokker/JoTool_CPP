@@ -8,6 +8,10 @@
 #include "include/lablelmeObj.hpp"
 #include "include/deteRes.hpp"
 
+
+using namespace jotools;
+
+
 class UCDataset
 {
     public:
@@ -69,6 +73,9 @@ class UCDataset
 
         // 增量解析 xml 数据到 ucd 中
         void add_voc_xml_info(std::string uc, std::string voc_xml_path);
+
+        // 增量 添加 deteRes 数据到 ucd 中
+        void add_dete_res_info(std::string uc, DeteRes dete_res);
         
         // 增量解析 labelme 的 json 数据
         void add_labelme_json_info(std::string uc, std::string labelme_json_path);

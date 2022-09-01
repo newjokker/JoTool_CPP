@@ -14,7 +14,6 @@
 #include "include/ucDatasetUtil.hpp"
 #include "include/deteRes.hpp"
 #include "include/pystring.h"
-#include "include/deteRes.hpp"
 #include "include/strToImg.hpp"
 #include "include/lablelmeObj.hpp"
 #include "include/easyexif.h"
@@ -356,6 +355,27 @@ void UCDataset::add_saturndatabase_json_info(std::string uc, std::string labelme
                 std::cout << "repeated obj : " << uc << ", " << obj->label << std::endl;
             }
         }
+}
+
+void UCDataset::add_dete_res_info(std::string uc, DeteRes dete_res)
+{
+    for(int i; i<dete_res.alarms.size(); i++)
+    {
+        DeteObj dete_obj = dete_res.alarms[i];
+        RectangleObj* obj = new RectangleObj();
+        obj->label = dete_obj.tag;
+        obj->points = {{(double)dete_obj.x1, (double)dete_obj.y1}, {(double)dete_obj.x2, (double)dete_obj.y2}};
+        if(! UCDataset::has_obj(uc, obj))
+        {
+            UCDataset::object_info[uc].push_back(obj);
+        }
+        else
+        {
+            std::cout << "repeated obj : " << uc << ", " << obj->label << std::endl; 
+        }
+    }
+    
+    UCDataset::uc_list.push_back(uc);
 }
 
 void UCDataset::save_to_ucd(std::string save_path)

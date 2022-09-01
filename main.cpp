@@ -90,6 +90,9 @@ using namespace std;
 
 // ucd 的时间分析，可以看出来有多少是新的数据，有多少是之前入库的数据
 
+// 在 object_info 中对于每一个对象增加 conf 信息，
+
+// 我之前的 python acc 代码有问题，计算正确的个数的时候明显不对，需要修改
 
 
 int main(int argc, char ** argv)
@@ -820,8 +823,8 @@ int main(int argc, char ** argv)
     else if(command_1 == "cut_small_img")
     {
 
-        ucd_param_opt->not_ready(command_1);
-        return -1;
+        // ucd_param_opt->not_ready(command_1);
+        // return -1;
 
         if (argc == 6)
         {
@@ -1046,15 +1049,6 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "acc")
     {
-        // ucd_param_opt->not_ready(command_1);
-        // return -1;
-
-        // 只考虑 正框的情况，其他的不进行处理
-
-        // 对比两个 ucd 的对比结果，
-        // ucd 作为标准结果，只允许 ucd 之间进行对比
-        // 可以设置是否保存标准的画图
-        // 直接画出 0.1 ~ 0.9 的统计数据
 
         // 因为 没有记录 conf 信息，所以不好改变 config 得到不同 config 下面的结果
 
@@ -1064,12 +1058,18 @@ int main(int argc, char ** argv)
 
         // 为了推广使用和自己和别人的进行对比，举一些比较极端的例子，肯定会有差异的，指出这些差异的原因和解决方案，用 ucd 
 
-        if(argc == 4)
+        // 生成的结果是 ucd 
+        // 结果中记录每一个 uc 对应的检测结果，方便生成细致的 ucd 
+
+        // 每个标签计算 acc res
+
+        if(argc == 5)
         {
             std::string ucd_customer = argv[2];
             std::string ucd_standard = argv[3];
+            std::string ucd_save_res = argv[4];
             jotools::DeteAcc* acc = new DeteAcc();
-            acc->cal_acc_rec(ucd_customer, ucd_standard);
+            acc->cal_acc_rec(ucd_customer, ucd_standard, ucd_save_res);
             delete acc;
         }
         else

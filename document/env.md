@@ -24,6 +24,7 @@
     * ./bootstrap --prefix=/usr/local/cmake, 编译 cmake
     * make，编译
     * make install，安装
+    * alias cmake=/usr/local/cmake/bin/cmake， 成功之后，在bash_aliases加个别名， 
 
 * 安装 opencv 环境
   * refer : https://docs.opencv.org/4.x/d7/d9f/tutorial_linux_install.html 

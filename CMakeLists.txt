@@ -83,19 +83,20 @@ set_property(TARGET ucd PROPERTY CXX_STANDARD 14)
 
 
 
-MESSAGE(STATUS, "------------------------------------------------------------")
 
-MESSAGE("${TORCH_LIBRARIES}")
+# MESSAGE(STATUS, "------------------------------------------------------------")
 
-MESSAGE("${OpenCV_LIBS}")
+# MESSAGE("${TORCH_LIBRARIES}")
 
-MESSAGE("${PROJECT_SOURCE_DIR}")
+# MESSAGE("${OpenCV_LIBS}")
 
-MESSAGE("${TORCH_INCLUDE_DIRS}")
+# MESSAGE("${PROJECT_SOURCE_DIR}")
 
-MESSAGE("${OpenCV_INCLUDE_DIRS}")
+# MESSAGE("${TORCH_INCLUDE_DIRS}")
 
-MESSAGE(STATUS, "------------------------------------------------------------")
+# MESSAGE("${OpenCV_INCLUDE_DIRS}")
+
+# MESSAGE(STATUS, "------------------------------------------------------------")
 
 
 # ---------------------- 安装规则 --------------------------------

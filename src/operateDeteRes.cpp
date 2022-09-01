@@ -406,24 +406,21 @@ float dete_obj_iou(DeteObj a, DeteObj b)
 }
 
 
-
-
 //
-
 
 DeteAcc::DeteAcc()
 {
     DeteAcc::iou = 0.5;
 }
 
-std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and_standard(DeteRes a, DeteRes b)
+std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and_standard(DeteRes a, DeteRes b, std::string uc, UCDataset* compare_res_ucd)
 {
 
     // 没有置信度的话不好排列，这个比较恶心，当没有置信度的时候直接随机排列吧
-
-    // todo dete_res 中的对象，根据 conf 进行排列，从大到小
-
+    // todo dete_res 中的对象，根据 conf 进行排列，从大到小\
     // 增加函数 sort_alarm_by_conf
+
+    DeteRes* compare_dete_res = new DeteRes();
 
     float iou_th = 0.5;
     std::map<int, bool> has_obj_map;
@@ -432,7 +429,6 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
     acc_res["miss"] = {};
     acc_res["extra"] = {};
     acc_res["mistake"] = {};
-
 
     for(int i=0; i<b.alarms.size(); i++)
     {
@@ -448,7 +444,7 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
         for(int j=0; j<b.alarms.size(); j++)
         {
             float each_iou = dete_obj_iou(a.alarms[i], b.alarms[j]);
-            if((each_iou > max_iou) && (has_obj_map[i] == false))
+            if((each_iou > max_iou) && (has_obj_map[j] == false))
             {
                 max_iou = each_iou;
                 max_iou_obj = b.alarms[j];
@@ -460,9 +456,10 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
         {
             if(a.alarms[i].tag == max_iou_obj.tag)
             {
-                // std::cout << "correct   : ";
-                // a.alarms[i].print_format();
                 has_obj_map[max_iou_index] = true;
+                DeteObj correct_dete_obj = a.alarms[i];
+                correct_dete_obj.tag = "correct_" + a.alarms[i].tag;
+                compare_dete_res->add_dete_obj(correct_dete_obj);
                 if(acc_res["correct"].count(a.alarms[i].tag) == 0)
                 {
                     acc_res["correct"][a.alarms[i].tag] = 1;
@@ -474,8 +471,9 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
             }
             else
             {
-                // std::cout << "mistake   : ";
-                // a.alarms[i].print_format();
+                DeteObj mistake_dete_obj = a.alarms[i];
+                mistake_dete_obj.tag = "mistake_" + a.alarms[i].tag;
+                compare_dete_res->add_dete_obj(mistake_dete_obj);
                 if(acc_res["mistake"].count(a.alarms[i].tag) == 0)
                 {
                     acc_res["mistake"][a.alarms[i].tag] = 1;
@@ -488,8 +486,9 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
         }
         else
         {
-            // std::cout << "extra     : ";
-            // a.alarms[i].print_format();
+            DeteObj extra_dete_obj = a.alarms[i];
+            extra_dete_obj.tag = "extra_" + a.alarms[i].tag;
+            compare_dete_res->add_dete_obj(extra_dete_obj);
             if(acc_res["extra"].count(a.alarms[i].tag) == 0)
             {
                 acc_res["extra"][a.alarms[i].tag] = 1;
@@ -506,8 +505,10 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
     {
         if(has_obj_map[i] == false)
         {
-            // std::cout << "miss      : ";
-            // b.alarms[i].print_format();
+            DeteObj miss_dete_obj = b.alarms[i];
+            miss_dete_obj.tag = "miss_" + b.alarms[i].tag;
+            compare_dete_res->add_dete_obj(miss_dete_obj);
+            //
             if(acc_res["miss"].count(b.alarms[i].tag) == 0)
             {
                 acc_res["miss"][b.alarms[i].tag] = 1;
@@ -518,6 +519,8 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
             }   
         }
     }
+
+    
 
     // // print
     // auto iter = acc_res.begin();
@@ -532,14 +535,14 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
     //     }
     //     iter ++;
     // }
+
+    compare_res_ucd->add_dete_res_info(uc, *compare_dete_res);
     return acc_res;
 }
-
 
 std::map<std::string, std::map<std::string, int> > merge_compare_res(std::map<std::string, std::map<std::string, int> > b, std::map<std::string, std::map<std::string, int> > a)
 {
     // 将两个检测结果进行合并
-
     auto iter_a = a.begin();
     while(iter_a != a.end())
     {
@@ -559,13 +562,13 @@ std::map<std::string, std::map<std::string, int> > merge_compare_res(std::map<st
                 b[iter_a->first][iter_a2->first] = 0;
             }
 
-            b[iter_a->first][iter_a2->first] += 1;
+            b[iter_a->first][iter_a2->first] += iter_a2->second;
 
             iter_a2++;
         }
         iter_a++;
     }
-
+    
     // auto iter = b.begin();
     // while(iter != b.end())
     // {
@@ -582,7 +585,7 @@ std::map<std::string, std::map<std::string, int> > merge_compare_res(std::map<st
     return b;
 }
 
-void DeteAcc::cal_acc_rec(std::string ucd_customer, std::string ucd_standard)
+void DeteAcc::cal_acc_rec(std::string ucd_customer, std::string ucd_standard, std::string save_ucd_path)
 {
     // 解析两个 ucd 对应的 object
 
@@ -601,6 +604,10 @@ void DeteAcc::cal_acc_rec(std::string ucd_customer, std::string ucd_standard)
 
     std::map<std::string, std::map<std::string, int> > compare_res;
 
+    // todo 记录每一个 obj 对应的检测结果
+
+    UCDataset* compare_res_ucd = new UCDataset();
+
     auto iter_b = ucd_b->object_info.begin();
     while(iter_b != ucd_b->object_info.end())
     {
@@ -610,11 +617,10 @@ void DeteAcc::cal_acc_rec(std::string ucd_customer, std::string ucd_standard)
         ucd_b->get_dete_res_with_assign_uc(each_b, uc);
         ucd_a->get_dete_res_with_assign_uc(each_a, uc);
 
-        std::map<std::string, std::map<std::string, int> > each_compare_res = acc->compare_customer_and_standard(*each_a, *each_b);
-
+        std::map<std::string, std::map<std::string, int> > each_compare_res = acc->compare_customer_and_standard(*each_a, *each_b, uc, compare_res_ucd);
         compare_res = merge_compare_res(compare_res, each_compare_res);
-
         iter_b ++;
+
     }
 
     // print
@@ -655,6 +661,8 @@ void DeteAcc::cal_acc_rec(std::string ucd_customer, std::string ucd_standard)
     std::cout << std::setw(10) << std::left << "accurate" << "     " <<  (correct)/(correct +  extra + mistake) << std::endl;    
     std::cout << std::setw(10) << std::left << "recall" << "     " <<  (correct)/(correct +  miss + mistake) << std::endl;    
     std::cout << "----------------------------------------" << std::endl;
+
+    compare_res_ucd->save_to_ucd(save_ucd_path);
 
 }
 
