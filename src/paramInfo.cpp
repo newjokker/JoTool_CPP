@@ -639,6 +639,14 @@ void UcdParamOpt::load_param_info()
     param_filter_by_tags->chinese_explain = "对 ucd 指定标签过滤";   
     UcdParamOpt::add_param(param_filter_by_tags);
 
+    // filter_by_nms
+    ParamInfo * param_filter_by_nms = new ParamInfo("filter_by_nms");
+    param_filter_by_nms->group = "filter";
+    param_filter_by_nms->grammar = "ucd filter_by_nms ucd_path save_ucd_path nms_th ignore_tag(true|false)";
+    param_filter_by_nms->english_explain = "do nms ";
+    param_filter_by_nms->chinese_explain = "对 ucd 进行 nms 过滤";   
+    UcdParamOpt::add_param(param_filter_by_nms);
+
 }
 
 void UcdParamOpt::not_ready(std::string method_name)

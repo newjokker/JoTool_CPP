@@ -104,6 +104,9 @@ class UCDataset
         // 根据面积进行过滤
         void filter_by_area(float area_th);
 
+        // 对 ucd 做 nms
+        void filter_by_nms(float nms_th, bool ignore_tag);
+
 
     private:
         std::string json_path;

@@ -608,8 +608,6 @@ void DeteAcc::cal_acc_rec(std::string ucd_customer, std::string ucd_standard, st
 
     std::map<std::string, std::map<std::string, int> > compare_res;
 
-    // todo 记录每一个 obj 对应的检测结果
-
     UCDataset* compare_res_ucd = new UCDataset();
 
     auto iter_b = ucd_b->object_info.begin();

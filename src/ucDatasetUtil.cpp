@@ -491,7 +491,8 @@ void UCDataset::get_dete_res_with_assign_uc(jotools::DeteRes *dete_res, std::str
                 int x2 = obj->points[1][0];
                 int y2 = obj->points[1][1];
                 std::string tag = obj->label;
-                dete_res->add_dete_obj(x1, y1, x2, y2, -1, tag);
+                float conf = obj->conf;
+                dete_res->add_dete_obj(x1, y1, x2, y2, conf, tag);
             }
         }
     }
@@ -572,6 +573,24 @@ void UCDataset::filter_by_conf(float conf_th)
     }
 }
 
+void UCDataset::filter_by_nms(float nms_th, bool ignore_tag)
+{
+    // 先用比较搓的办法，后续要进行重写
+
+    UCDataset* ucd = new UCDataset();
+
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        std::string uc = iter->first;
+        DeteRes* dete_res = new DeteRes();
+        UCDataset::get_dete_res_with_assign_uc(dete_res, uc);
+        dete_res->do_nms(nms_th, ignore_tag);
+        ucd->add_dete_res_info(uc, *dete_res);
+        iter++;
+    }
+    UCDataset::object_info = ucd->object_info;
+}
 
 // merge ucd
 UCDataset operator+(UCDataset &ucd_1, UCDataset &ucd_2)

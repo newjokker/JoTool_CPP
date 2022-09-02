@@ -573,19 +573,22 @@ bool dete_obj_greater_sort(DeteObj a, DeteObj b)
 }
 
 bool dete_obj_less_sort(DeteObj a, DeteObj b)
-{
-    if(a.conf <= b.conf)
+{    
+    if(a.conf >= b.conf)
     {
-        return true;
+        return false;
     }
     else
     {
-        return false;
+        return true;
     }
 }
 
 void DeteRes::sort_by_conf(bool reverse)
 {
+
+    // compare 函数的设计，有几个奇怪的性质 refer:https://blog.csdn.net/YFaris/article/details/123692394
+    
     if(reverse == true)
     {
         // 大的放前面

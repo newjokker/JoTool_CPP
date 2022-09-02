@@ -1057,12 +1057,7 @@ int main(int argc, char ** argv)
 
         // 生成结果为一个 ucd ，每个标签就是对应的检测结果
 
-        // 其实直接在屏幕上简单打印出来就行了，没必要画出多么规范的图出来
-
         // 为了推广使用和自己和别人的进行对比，举一些比较极端的例子，肯定会有差异的，指出这些差异的原因和解决方案，用 ucd 
-
-        // 生成的结果是 ucd 
-        // 结果中记录每一个 uc 对应的检测结果，方便生成细致的 ucd 
 
         // 每个标签计算 acc res
 
@@ -1277,18 +1272,16 @@ int main(int argc, char ** argv)
         // return -1;
 
 
-        DeteRes *a = new DeteRes();
+        std::string ucd_path = argv[2];
 
-        a->add_dete_obj(1,1,2,2,0.5,"a");
-        a->add_dete_obj(1,1,2,2,0.34,"a");
-        a->add_dete_obj(1,1,2,2,0.67,"a");
-        a->add_dete_obj(1,1,2,2,0.27,"b");
-        a->add_dete_obj(1,1,2,2,0.87,"a");
+        UCDataset* ucd = new UCDataset(ucd_path);
+        ucd->parse_ucd(true);
+
+        DeteRes* a = new DeteRes();
         
+        ucd->get_dete_res_with_assign_uc(a, "Dsk0j5y");
 
-        a->do_nms(0.5, false);
-
-        a->print_format();
+        a->sort_by_conf();
 
     }
     else if(command_1 == "filter_by_tags")
@@ -1301,7 +1294,36 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "filter_by_nms")
     {
-        // 对结果做 nms
+        if(argc == 6)
+        {
+            std::string ucd_path = argv[2];
+            std::string ucd_save_path = argv[3];
+            float nms_th = std::stof(argv[4]);
+            std::string ignore_tag_str = argv[5];
+            bool ignore_tag = true;
+
+            if((ignore_tag_str != "true") && (ignore_tag_str != "True") && (ignore_tag_str != "1"))
+            {
+                ignore_tag = false;
+            }
+
+            //
+            if(! is_file(ucd_path))
+            {
+                std::cout << "ucd_path not exists : " << ucd_path;
+                throw "ucd_path not exists";
+            }
+
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->filter_by_nms(nms_th, ignore_tag);
+            ucd->save_to_ucd(ucd_save_path);
+            delete ucd; 
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
     else if(command_1 == "filter_by_conf")
     {
@@ -1322,9 +1344,6 @@ int main(int argc, char ** argv)
 
             UCDataset* ucd = new UCDataset(ucd_path);
             ucd->parse_ucd(true);
-
-            std::cout << ucd->object_info.size() << std::endl;
-
             ucd->filter_by_conf(conf_th);
             ucd->save_to_ucd(ucd_save_path);
             delete ucd; 
