@@ -95,6 +95,15 @@ class UCDataset
         // 保存一个 json 文件
         void save_to_labelme_json_with_assign_uc(std::string save_path, std::string img_path, std::string assign_uc);
         
+        // 根据阈值进行过滤
+        void filter_by_conf(float conf_th);
+
+        // 根据标签进行过滤
+        void filter_by_tags(std::vector<std::string> tags);
+
+        // 根据面积进行过滤
+        void filter_by_area(float area_th);
+
 
     private:
         std::string json_path;

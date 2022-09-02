@@ -548,6 +548,31 @@ void UCDataset::save_to_labelme_json_with_assign_uc(std::string save_json_path, 
     o << std::setw(4) << json_info << std::endl;
 }
 
+void UCDataset::filter_by_conf(float conf_th)
+{
+    // todo 是不是有垃圾需要删掉，如何删除
+    std::vector<DeteObj> new_alarms;
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        std::vector<LabelmeObj*> objs = iter->second;
+        for(auto iter_o = objs.begin(); iter_o != objs.end();)
+        {
+            if((*iter_o)->conf < conf_th)
+            {
+                iter_o = objs.erase(iter_o);
+            }
+            else
+            {
+                iter_o++;
+            }
+        }
+        iter->second = objs;
+        iter++;
+    }
+}
+
+
 // merge ucd
 UCDataset operator+(UCDataset &ucd_1, UCDataset &ucd_2)
 {

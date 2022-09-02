@@ -623,6 +623,22 @@ void UcdParamOpt::load_param_info()
     param_uc_analysis->chinese_explain = "分析 uc 的组成，看前三位即可";   
     UcdParamOpt::add_param(param_uc_analysis);
 
+    // filter_by_conf
+    ParamInfo * param_filter_by_conf = new ParamInfo("filter_by_conf");
+    param_filter_by_conf->group = "filter";
+    param_filter_by_conf->grammar = "ucd filter_by_conf ucd_path save_ucd_path conf_th";
+    param_filter_by_conf->english_explain = "";
+    param_filter_by_conf->chinese_explain = "对 ucd 进行指定阈值过滤";   
+    UcdParamOpt::add_param(param_filter_by_conf);
+
+    // filter_by_tags
+    ParamInfo * param_filter_by_tags = new ParamInfo("filter_by_tags");
+    param_filter_by_tags->group = "filter";
+    param_filter_by_tags->grammar = "ucd filter_by_conf ucd_path save_ucd_path tag1,tag2,tag3";
+    param_filter_by_tags->english_explain = "";
+    param_filter_by_tags->chinese_explain = "对 ucd 指定标签过滤";   
+    UcdParamOpt::add_param(param_filter_by_tags);
+
 }
 
 void UcdParamOpt::not_ready(std::string method_name)

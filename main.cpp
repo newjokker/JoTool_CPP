@@ -94,6 +94,9 @@ using namespace std;
 
 // 在 object_info 中对于每一个对象增加 conf 信息，
 
+// 根据阈值范围进行统计，默认 0.1 一个级别
+
+
 
 int main(int argc, char ** argv)
 {
@@ -1287,6 +1290,49 @@ int main(int argc, char ** argv)
 
         a->print_format();
 
+    }
+    else if(command_1 == "filter_by_tags")
+    {
+        // 根据阈值进行过滤
+
+
+
+
+    }
+    else if(command_1 == "filter_by_nms")
+    {
+        // 对结果做 nms
+    }
+    else if(command_1 == "filter_by_conf")
+    {
+        if(argc == 5)
+        {
+            std::string ucd_path = argv[2];
+            std::string ucd_save_path = argv[3];
+            float conf_th = std::stof(argv[4]);
+
+            //
+            if(! is_file(ucd_path))
+            {
+                std::cout << "ucd_path not exists : " << ucd_path;
+                throw "ucd_path not exists";
+            }
+
+            std::cout << ucd_path << std::endl;
+
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+
+            std::cout << ucd->object_info.size() << std::endl;
+
+            ucd->filter_by_conf(conf_th);
+            ucd->save_to_ucd(ucd_save_path);
+            delete ucd; 
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
     else if(command_1 == "img_url")
     {
