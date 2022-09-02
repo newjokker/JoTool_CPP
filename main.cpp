@@ -18,7 +18,7 @@
 #include "include/paramInfo.hpp"
 #include "include/printCpp.hpp"
 #include "include/lablelmeObj.hpp"
-
+#include <algorithm>
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 #include "include/lablelmeObj.hpp"
@@ -90,9 +90,9 @@ using namespace std;
 
 // ucd 的时间分析，可以看出来有多少是新的数据，有多少是之前入库的数据
 
-// 在 object_info 中对于每一个对象增加 conf 信息，
-
 // 我之前的 python acc 代码有问题，计算正确的个数的时候明显不对，需要修改
+
+// 在 object_info 中对于每一个对象增加 conf 信息，
 
 
 int main(int argc, char ** argv)
@@ -1270,16 +1270,24 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "test")
     {
-        ucd_param_opt->not_ready(command_1);
-        return -1;
+        // ucd_param_opt->not_ready(command_1);
+        // return -1;
 
-        // std::string ucd_path_1 = argv[2];
-        // std::string ucd_path_2 = argv[3];
-        // UCDataset a(ucd_path_1);
-        // UCDataset b(ucd_path_2);
 
-        // UCDataset c = a + b;
-        // c.print_ucd_info();
+        DeteRes *a = new DeteRes();
+
+        a->add_dete_obj(1,1,2,2,0.5,"a");
+        a->add_dete_obj(1,1,2,2,0.34,"a");
+        a->add_dete_obj(1,1,2,2,0.67,"a");
+        a->add_dete_obj(1,1,2,2,0.27,"b");
+        a->add_dete_obj(1,1,2,2,0.87,"a");
+        
+
+        a->do_nms(0.5, false);
+
+        a->print_format();
+
+
     }
     else if(command_1 == "img_url")
     {

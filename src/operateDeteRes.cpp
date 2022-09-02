@@ -420,6 +420,10 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
     // todo dete_res 中的对象，根据 conf 进行排列，从大到小\
     // 增加函数 sort_alarm_by_conf
 
+    // sort by conf 
+    a.sort_by_conf();
+    b.sort_by_conf();
+
     DeteRes* compare_dete_res = new DeteRes();
 
     float iou_th = 0.5;

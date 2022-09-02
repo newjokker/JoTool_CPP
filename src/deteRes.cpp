@@ -560,4 +560,122 @@ int DeteRes::crop_dete_obj(std::string save_dir, bool split_by_tag, std::string 
     }
 }
 
+bool dete_obj_greater_sort(DeteObj a, DeteObj b)
+{
+    if(a.conf >= b.conf)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool dete_obj_less_sort(DeteObj a, DeteObj b)
+{
+    if(a.conf <= b.conf)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void DeteRes::sort_by_conf(bool reverse)
+{
+    if(reverse == true)
+    {
+        // 大的放前面
+        std::sort(DeteRes::alarms.begin(), DeteRes::alarms.end(), dete_obj_greater_sort);
+    }
+    else
+    {
+        // 小的放前面
+        std::sort(DeteRes::alarms.begin(), DeteRes::alarms.end(), dete_obj_less_sort);
+    }
+}
+
+float iou_between_obj(DeteObj a, DeteObj b, bool ignore_tag=false)
+{
+
+    if((ignore_tag == false) && (a.tag != b.tag))
+    {
+        return false;
+    }
+
+    int x1 = a.x1;
+    int y1 = a.y1;
+    int h1 = a.y2 - a.y1;
+    int w1 = a.x2 - a.x1;
+    int x2 = b.x1;
+    int y2 = b.y1;
+    int h2 = b.y2 - b.y1;
+    int w2 = b.x2 - b.x1;
+
+    int endx = std::max(x1 + w1, x2 + w2);
+    int startx = std::min(x1, x2);
+    int width = w1 + w2 - (endx - startx);
+    int endy = std::max(y1 + h1, y2 + h2);
+    int starty = std::min(y1, y2);
+    int height = h1 + h2 - (endy - starty);
+    if (width > 0 && height > 0) {
+        int area = width * height;
+        int area1 = w1 * h1;
+        int area2 = w2 * h2;
+        float ratio = (float)area / (area1 + area2 - area);
+        return ratio;
+    } else {
+        return 0.0;
+    }
+}
+
+void DeteRes::do_nms(float threshold, bool ignore_tag)
+{
+    // 从大到小排列，结果不进行反转
+    DeteRes::sort_by_conf(false);
+    std::vector<DeteObj> alarms_origin = DeteRes::alarms;
+    std::vector<DeteObj> alarms_res;
+
+    // 
+    if(alarms_origin.size() > 0)
+    {
+        alarms_res.push_back(alarms_origin.back());
+        alarms_origin.pop_back();
+    }
+    else
+    {
+        return ;
+    }
+
+    // 
+    while(alarms_origin.size() > 0)
+    {
+        DeteObj each_obj = alarms_origin.back();
+        alarms_origin.pop_back();
+        //
+        bool is_add = true;
+        for(int i=0; i<alarms_res.size(); i++)
+        {
+            float each_iou = iou_between_obj(alarms_res[i], each_obj, ignore_tag);
+            if(each_iou > threshold)
+            {
+                is_add = false;
+                break;
+            }
+        }
+
+        if(is_add)
+        {
+            alarms_res.push_back(each_obj);
+        }
+    }
+    DeteRes::alarms = alarms_res;
+
+}
+
+
+
 }

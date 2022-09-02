@@ -76,8 +76,13 @@ class DeteRes
         int add_dete_obj(DeteObj dete_obj);
         int add_dete_obj(int x1, int y1, int x2, int y2, float conf, std::string tag);
         int draw_dete_res(std::string save_path, std::string assign_img, std::map<std::string, Color> color_dirt);
-        //
-        int do_nms(float threshold, bool ignore_tag);
+        
+        // 根据置信度对 dete_obj 进行排序
+        void sort_by_conf(bool reverse=false);
+        
+        // 结果进行 nms 处理
+        void do_nms(float threshold, bool ignore_tag);
+        
         int do_nms_center_point(bool ignore_tag);
         int filter_by_area(float area_th, std::string mode, bool update);
         int filter_by_tags(std::vector<std::string> tags);

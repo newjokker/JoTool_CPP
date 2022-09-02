@@ -14,9 +14,15 @@ class LabelmeObj
         std::vector< std::vector<double> > points;
         std::string shape_type = "None";
         std::set<std::string> flags;
+
+        // 置信度信息，这个数据还是很重要的，想想还是加上去了
+        float conf;
+        
         int group_id;
+        
         // 打印 obj 信息
         virtual void print_info() = 0;
+        
         // 判断指针指向的对象是否相等
         virtual bool equal_to(LabelmeObj *obj) = 0;
 

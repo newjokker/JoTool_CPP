@@ -5,6 +5,7 @@
 void PointObj::print_info()
 {
     std::cout << "label         : " << PointObj::label << std::endl;
+    std::cout << "conf         : " << PointObj::conf << std::endl;
     std::cout << "shape_type    : " << PointObj::shape_type << std::endl;
     std::cout << "points        : (" << PointObj::points[0][0] << ", " << PointObj::points[0][1] << ")" << std::endl;
 }
@@ -12,6 +13,7 @@ void PointObj::print_info()
 void LineObj::print_info()
 {
     std::cout << "label         : " << LineObj::label << std::endl;
+    std::cout << "conf         : " << LineObj::conf << std::endl;
     std::cout << "shape_type    : " << LineObj::shape_type << std::endl;
     std::cout << "points        : (" << LineObj::points[0][0] << ", " << LineObj::points[0][1] << "), ";
     std::cout << LineObj::points[1][0] << ", " << LineObj::points[1][1] << ")" << std::endl;
@@ -20,6 +22,7 @@ void LineObj::print_info()
 void LineStripObj::print_info()
 {
     std::cout << "label         : " << LineStripObj::label << std::endl;
+    std::cout << "conf         : " << LineStripObj::conf << std::endl;
     std::cout << "shape_type    : " << LineStripObj::shape_type << std::endl;
     std::cout << "points_count  : " << LineStripObj::points.size() << std::endl;
 }
@@ -27,6 +30,7 @@ void LineStripObj::print_info()
 void CircleObj::print_info()
 {
     std::cout << "label         : " << CircleObj::label << std::endl;
+    std::cout << "conf         : " << CircleObj::conf << std::endl;
     std::cout << "shape_type    : " << CircleObj::shape_type << std::endl;
     std::cout << "points        : (" << CircleObj::points[0][0] << ", " << CircleObj::points[0][1] << "), ";
     std::cout << CircleObj::points[1][0] << ", " << CircleObj::points[1][1] << ")" << std::endl;
@@ -35,6 +39,7 @@ void CircleObj::print_info()
 void RectangleObj::print_info()
 {
     std::cout << "label         : " << RectangleObj::label << std::endl;
+    std::cout << "conf         : " << RectangleObj::conf << std::endl;
     std::cout << "shape_type    : " << RectangleObj::shape_type << std::endl;
     // x1, x2, y1, y2
     std::cout << "points        : (" << RectangleObj::points[0][0] << ", " << RectangleObj::points[0][1] << ", ";
@@ -44,6 +49,7 @@ void RectangleObj::print_info()
 void PolygonObj::print_info()
 {
     std::cout << "label         : " << PolygonObj::label << std::endl;
+    std::cout << "copnf         : " << PolygonObj::conf << std::endl;
     std::cout << "shape_type    : " << PolygonObj::shape_type << std::endl;
     std::cout << "points_count  : " << PolygonObj::points.size() << std::endl;
 }
@@ -222,31 +228,37 @@ bool PolygonObj::equal_to(LabelmeObj* other_obj)
 PointObj::PointObj():LabelmeObj()
 {
     PointObj::shape_type = "point";
+    PointObj::conf = -1;
 }
 
 LineObj::LineObj():LabelmeObj()
 {
     LineObj::shape_type = "line";
+    LineObj::conf = -1;
 }
 
 LineStripObj::LineStripObj():LabelmeObj()
 {
     LineStripObj::shape_type = "linestrip";
+    LineStripObj::conf = -1;
 }
 
 CircleObj::CircleObj():LabelmeObj()
 {
     CircleObj::shape_type = "circle";
+    CircleObj::conf = -1;
 }
 
 RectangleObj::RectangleObj():LabelmeObj()
 {
     RectangleObj::shape_type = "rectangle";
+    RectangleObj::conf = -1;
 }
 
 PolygonObj::PolygonObj():LabelmeObj()
 {
     PolygonObj::shape_type = "polygon";
+    PolygonObj::conf = -1;
 }
 
 
