@@ -96,6 +96,7 @@ using namespace std;
 
 // 根据阈值范围进行统计，默认 0.1 一个级别
 
+// 将很详细的参数和值放在 配置文件中，这样可以进行编辑，但是也不需要在代码中重复的输入操作
 
 
 int main(int argc, char ** argv)
@@ -1287,9 +1288,8 @@ int main(int argc, char ** argv)
     else if(command_1 == "filter_by_tags")
     {
         // 根据阈值进行过滤
-
-
-
+        ucd_param_opt->not_ready(command_1);
+        return -1;
 
     }
     else if(command_1 == "filter_by_nms")
@@ -1381,6 +1381,19 @@ int main(int argc, char ** argv)
         {
             std::string ucd_path = argv[2];
             ucd_util->uc_analysis(ucd_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "conf_analysis")
+    {
+        // ucd 的置信度分布
+        if(argc == 3)
+        {
+            std::string ucd_path = argv[2];
+            ucd_util->conf_analysis(ucd_path);
         }
         else
         {

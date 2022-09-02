@@ -204,6 +204,9 @@ class UCDatasetUtil
 
         // uc_analysis
         void uc_analysis(std::string ucd_path);
+
+        // conf_analysis
+        void conf_analysis(std::string ucd_path);
         
     private:
         

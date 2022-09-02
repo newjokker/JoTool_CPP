@@ -1610,6 +1610,70 @@ void UCDatasetUtil::uc_analysis(std::string ucd_path)
     }
 }
 
+void UCDatasetUtil::conf_analysis(std::string ucd_path)
+{
+    UCDataset* ucd = new UCDataset(ucd_path);
+    ucd->parse_ucd(true);
+    std::vector<float> conf_vector;
+
+    auto iter = ucd->object_info.begin();
+    while(iter != ucd->object_info.end())
+    {
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            conf_vector.push_back(iter->second[i]->conf);
+        }
+        iter++;
+    }
+
+    // 排序
+    std::sort(conf_vector.begin(), conf_vector.end());
+
+    if(conf_vector.size() < 10)
+    {
+        std::cout << "数据量太小，没必要分析，自己打开文件去看吧" << std::endl;
+        return; 
+    }
+
+    // 按照百分位数进行分析
+    int seg_count = 50;
+    int conf_size = conf_vector.size();
+    std::map<float, int> conf_map;
+    
+    std::cout << "------------------------------" << std::endl;
+
+    for(int i=0; i<seg_count; i++)
+    {
+        std::cout << i << "/" << seg_count << "   " << conf_vector[(conf_size/seg_count)*i] << std::endl; 
+    }
+    
+
+    std::cout << "------------------------------" << std::endl;
+
+    for(int i=0; i<conf_size; i++)
+    {
+        int conf = (int)(conf_vector[i] * seg_count);
+        if(conf_map.count(conf) == 0)
+        {
+            conf_map[conf] = 1;
+        }
+        else
+        {
+            conf_map[conf] += 1;
+        }
+    }
+
+    // 按照绝对值进行分析
+    for(int i=0; i<seg_count; i++)
+    {
+        float conf_value = i/(seg_count*0.1);
+        std::cout << std::setw(10) << std::left << conf_value << conf_map[i] << std::endl;
+    }
+
+    std::cout << "------------------------------" << std::endl;
+
+    delete ucd;
+}
 
 
 
