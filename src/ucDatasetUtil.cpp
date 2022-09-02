@@ -100,9 +100,22 @@ void UCDataset::parse_ucd(bool parse_shape_info)
                     std::string shape_type = iter.value()[i]["shape_type"];
                     std::string label = iter.value()[i]["label"];
                     std::vector< std::vector<double> > points = iter.value()[i]["points"];
+
+                    auto conf = iter.value()[i]["conf"];
+
                     LabelmeObj* obj = obj_factory.CreateObj(shape_type);
                     obj->label = label;
                     obj->points = points;
+
+                    if(conf == nullptr)
+                    {
+                        obj->conf = -1;                      
+                    }
+                    else
+                    {
+                        obj->conf = conf;
+                    }
+
                     UCDataset::object_info[uc].push_back(obj);
                 }
                 iter++;
@@ -274,6 +287,7 @@ void UCDataset::add_voc_xml_info(std::string uc, std::string voc_xml_path)
         DeteObj dete_obj = dete_res->alarms[i];
         RectangleObj* obj = new RectangleObj();
         obj->label = dete_obj.tag;
+        obj->conf = dete_obj.conf;
         obj->points = {{(double)dete_obj.x1, (double)dete_obj.y1}, {(double)dete_obj.x2, (double)dete_obj.y2}};
         if(! UCDataset::has_obj(uc, obj))
         {
@@ -307,7 +321,7 @@ void UCDataset::add_labelme_json_info(std::string uc, std::string labelme_json_p
         LabelmeObj* obj = obj_factory.CreateObj(shape_type);
         obj->points = shapes[i]["points"];
         obj->label = shapes[i]["label"];
-
+        obj->conf = -1;
         // 遍历查看是否已有这个对象
         if(! UCDataset::has_obj(uc, obj))
         {
@@ -344,7 +358,7 @@ void UCDataset::add_saturndatabase_json_info(std::string uc, std::string labelme
             LabelmeObj* obj = obj_factory.CreateObj(shape_type);
             obj->points = shapes[i]["points"];
             obj->label = shapes[i]["label"];
-
+            obj->conf = -1;
             // 遍历查看是否已有这个对象
             if(! UCDataset::has_obj(uc, obj))
             {
@@ -364,6 +378,7 @@ void UCDataset::add_dete_res_info(std::string uc, DeteRes dete_res)
         DeteObj dete_obj = dete_res.alarms[i];
         RectangleObj* obj = new RectangleObj();
         obj->label = dete_obj.tag;
+        obj->conf = dete_obj.conf;
         obj->points = {{(double)dete_obj.x1, (double)dete_obj.y1}, {(double)dete_obj.x2, (double)dete_obj.y2}};
         if(! UCDataset::has_obj(uc, obj))
         {
@@ -404,6 +419,7 @@ void UCDataset::save_to_ucd(std::string save_path)
             each_obj["shape_type"] = obj_vector[i]->shape_type;
             each_obj["label"] = obj_vector[i]->label;
             each_obj["points"] = obj_vector[i]->points;
+            each_obj["conf"] = obj_vector[i]->conf;
             shapes_info[iter->first].push_back(each_obj);
         }
         iter++;
@@ -645,7 +661,6 @@ UCDataset operator-(UCDataset &ucd_1, UCDataset &ucd_2)
 {
     // 
 }
-
 
 //
 

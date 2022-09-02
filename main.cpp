@@ -1287,7 +1287,6 @@ int main(int argc, char ** argv)
 
         a->print_format();
 
-
     }
     else if(command_1 == "img_url")
     {
