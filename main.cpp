@@ -30,21 +30,11 @@ using namespace std;
 
 // nginx 负载均衡，可以在风火轮上部署，转到 111 和 209 服务器上
 
-// 完善路径拼接（c++多一些 // 不会造成路径错误，少一些就会报错）
-
 // 完成 C++ 版本的 文件 服务，再部署到 docker 上面，这样在哪个服务器上都能方便进行启动
-
-// 获取数据是按照顺序还是随机获取需要修改配置文件 ucdconfig.ini， 
-
-// 完善报错信息，对于 upload 失败等进行提示
-
-// merge 支持 xml 合并（如何快速去重是个难以解决的问题，修改保存的结构，vector 改为 set）
 
 // 积极发挥服务化的各项功能，比如提交合并的数据
 
 // todo json 读取大文件太慢，能不能只读取需要的部分，比如打印 info 信息，不需要后面的 xml_info 信息，是否可以不读取到内存里，不行的话就直接自己写一个解析 json 的代码，用做快速解析
-
-// 一个专门的测试文件，针对每一个函数写一个对应的测试函数，就像在 guihub 上看到别人写的那样
 
 // 发布功能，快速部署到所有机器上
 
@@ -56,17 +46,7 @@ using namespace std;
 
 // 参数的有效性检查都是在函数里面去做，在外面不需要去做
 
-// 解释一下斜框矩形为什么不被包括在 labelme 中，因为不是标准结构，labelme 一直使用的点对结构信息进行存储
-
-// 斜框先不进行处理，先去掉
-
-// 没有地方存储置信度的，这个要注意一点
-
 // 忘记 xml，img，json 只记得 ucd 即可
-
-// 调整所有操作的粒度，以 uc 和 batch_uc 为单位，
-
-// 查看是不是一个文件夹中的数据都是 uc 命名 
 
 // todo merge 合并时候连带着 object_info 一起合并
 
@@ -78,12 +58,6 @@ using namespace std;
 
 // 拿到 ucd 中对应的图片的路径，uc 为结尾，这样方便模型检测
 
-// 将 post 测试代码的标准接口改为接收 ucd 数据
-
-// save 中 img 和 xml 不再生成 xml img 等文件夹，直接放到指定的目录下面就行
-
-// 入库等操作也是可以在里面搞一套，只能拿数据，不能改数据，可以将未入库的图片上传到某一个地址
-
 // 解析出来的 json 中存放的 jpg 图片是压缩过的，这样存放的数据能小一点
 
 // from_xml from_json 的时候，可以只用他们的名字，不解析他们的内容，这样能快非常多 from_file 
@@ -92,11 +66,8 @@ using namespace std;
 
 // 我之前的 python acc 代码有问题，计算正确的个数的时候明显不对，需要修改
 
-// 在 object_info 中对于每一个对象增加 conf 信息，
+// add config such as -c --c 
 
-// 根据阈值范围进行统计，默认 0.1 一个级别
-
-// 将很详细的参数和值放在 配置文件中，这样可以进行编辑，但是也不需要在代码中重复的输入操作
 
 
 int main(int argc, char ** argv)
@@ -826,24 +797,17 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "cut_small_img")
     {
-
-        // ucd_param_opt->not_ready(command_1);
-        // return -1;
-
-        if (argc == 6)
+        if (argc == 5)
         {
-            // get parameter
-            std::string xml_dir = argv[2];
-            std::string img_dir = argv[3];
-            std::string save_dir = argv[4];
-            std::string is_split_str = argv[5];
+            std::string ucd_path = argv[2];
+            std::string save_dir = argv[3];
+            std::string is_split_str = argv[4];
             bool is_split = true;
             if((is_split_str != "true") && (is_split_str != "True") && (is_split_str != "1"))
             {
                 is_split = false;
             }
-            // cut_small_img(xml_dir, img_dir, save_dir, is_split);
-            ucd_util->cut_small_img(img_dir, xml_dir, save_dir, is_split);
+            ucd_util->cut_small_img(ucd_path, save_dir, is_split);
         }
         else
         {

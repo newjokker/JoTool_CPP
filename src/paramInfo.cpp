@@ -437,7 +437,7 @@ void UcdParamOpt::load_param_info()
     // cut_small_img
     ParamInfo * param_cut_small_img = new ParamInfo("cut_small_img");
     param_cut_small_img->group = "opt";
-    param_cut_small_img->grammar = "ucd cut_small_img img_dir xml_dir save_dir is_split(true|1|True|false|0|False)";
+    param_cut_small_img->grammar = "ucd cut_small_img ucd_path save_dir is_split(true|1|True|false|0|False)";
     param_cut_small_img->english_explain = "cut img by dete obj";
     param_cut_small_img->chinese_explain = "裁剪出小图";   
     UcdParamOpt::add_param(param_cut_small_img);

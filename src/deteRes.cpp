@@ -523,9 +523,9 @@ cv::Mat DeteRes::get_sub_img_by_dete_obj(DeteObj dete_obj, bool RGB)
 
 void DeteRes::crop_dete_obj(std::string save_dir, bool split_by_tag, std::string save_name)
 {
-    if((DeteRes::img_path) == "" && (save_name == ""))
+    if((DeteRes::img_path) == "")
     {
-        throw "* img_path && save_name is empty !";
+        throw "* img_path is empty !";
     }
     
     if(save_name == "")

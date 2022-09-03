@@ -107,6 +107,9 @@ class UCDataset
         // 对 ucd 做 nms
         void filter_by_nms(float nms_th, bool ignore_tag);
 
+        // crop_dete_res
+        void crop_dete_res_with_assign_uc(std::string uc, std::string img_path, std::string save_dir);
+
 
     private:
         std::string json_path;
@@ -197,7 +200,7 @@ class UCDatasetUtil
         void print_words(std::string name, int width=50, int height=50);
         
         // 裁切小图
-        void cut_small_img(std::string img_dir, std::string xml_dir, std::string save_dir, bool is_split);
+        void cut_small_img(std::string ucd_path, std::string save_dir, bool is_split);
 
         // uc_check
         void uc_check(std::vector<std::string> file_vector);
