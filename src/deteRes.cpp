@@ -33,24 +33,21 @@ DeteRes::DeteRes(std::string xml_path, std::string img_path)
     }
 }
 
-int DeteRes::add_dete_obj(int x1, int y1, int x2, int y2, float conf, std::string tag)
+void DeteRes::add_dete_obj(int x1, int y1, int x2, int y2, float conf, std::string tag)
 {
     DeteObj a;
-
     a.x1 = x1;
     a.y1 = y1;
     a.x2 = x2;
     a.y2 = y2;
     a.conf = conf;
     a.tag = tag;
-
     DeteRes::add_dete_obj(a);
 }
 
-int DeteRes::add_dete_obj(DeteObj dete_obj)
+void DeteRes::add_dete_obj(DeteObj dete_obj)
 {
     DeteRes::alarms.push_back(dete_obj);
-    return 1;
 }
 
 void DeteRes::print_format()
@@ -71,19 +68,18 @@ void DeteRes::print_format()
     std::cout << "---------------------------------------" << std::endl;
 }
 
-int DeteRes::del_dete_obj(DeteObj dete_obj)
+void DeteRes::del_dete_obj(DeteObj dete_obj)
 {
     for(int i=0; i<DeteRes::alarms.size();i++)
     {
         if(DeteRes::alarms[i] == dete_obj)
         {
             DeteRes::alarms.erase(DeteRes::alarms.begin() + i);
-            return 1;
         }
     }
 }
 
-int DeteRes::filter_by_tags(std::vector<std::string> tags)
+void DeteRes::filter_by_tags(std::vector<std::string> tags)
 {
     std::vector<DeteObj> alarms;
     for(int i=0; i<DeteRes::alarms.size();i++)
@@ -103,7 +99,6 @@ int DeteRes::filter_by_tags(std::vector<std::string> tags)
         }
     }
     DeteRes::alarms = alarms;
-    return 1;
 }
 
 bool DeteRes::has_dete_obj(DeteObj dete_obj)
@@ -130,8 +125,10 @@ bool DeteRes::operator+(const DeteRes other)
         if (DeteRes::has_dete_obj(other.alarms[i]) == false)
         {
             DeteRes::add_dete_obj(other.alarms[i]);
+            return true;
         }
     }
+    return true;
 }
 
 DeteObj& DeteRes::operator[](const int i)
@@ -383,7 +380,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
     return false;
 }
 
-bool DeteRes::parse_img_info(std::string img_path)
+void DeteRes::parse_img_info(std::string img_path)
 {
     // mat
     cv::Mat image = cv::imread(img_path);
@@ -399,7 +396,7 @@ bool DeteRes::parse_img_info(std::string img_path)
     DeteRes::depth = 3;
 }
 
-int DeteRes::save_to_xml(std::string save_path)
+void DeteRes::save_to_xml(std::string save_path)
 {
     
     // refer : https://blog.csdn.net/K346K346/article/details/48750417
@@ -490,7 +487,6 @@ int DeteRes::save_to_xml(std::string save_path)
     }
     // save
     doc->SaveFile(save_path.c_str());
-    return true;
 }
 
 std::map<std::string, int> DeteRes::count_tags()
@@ -525,7 +521,7 @@ cv::Mat DeteRes::get_sub_img_by_dete_obj(DeteObj dete_obj, bool RGB)
     return ROI;
 }
 
-int DeteRes::crop_dete_obj(std::string save_dir, bool split_by_tag, std::string save_name)
+void DeteRes::crop_dete_obj(std::string save_dir, bool split_by_tag, std::string save_name)
 {
     if((DeteRes::img_path) == "" && (save_name == ""))
     {

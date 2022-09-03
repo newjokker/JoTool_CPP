@@ -65,17 +65,17 @@ class DeteRes
         std::vector<DeteObj> alarms;
         // todo img_ndarry 需要 opencv 这个库
         cv::Mat img_ndarry;
-        bool parse_img_info(std::string img_path);
+        void parse_img_info(std::string img_path);
         // func
-        int parse_json(std::string json_path);
-        int save_to_xml(std::string xml_path);
-        int save_to_json(std::string json_path);
-        int crop_dete_obj(std::string save_dir, bool split_by_tag=true, std::string save_name="");
+        void parse_json(std::string json_path);
+        void save_to_xml(std::string xml_path);
+        void save_to_json(std::string json_path);
+        void crop_dete_obj(std::string save_dir, bool split_by_tag=true, std::string save_name="");
         cv::Mat get_sub_img_by_dete_obj(DeteObj assign_dete_obj, bool RGB=true);
         cv::Mat get_img_array(bool RGB);
-        int add_dete_obj(DeteObj dete_obj);
-        int add_dete_obj(int x1, int y1, int x2, int y2, float conf, std::string tag);
-        int draw_dete_res(std::string save_path, std::string assign_img, std::map<std::string, Color> color_dirt);
+        void add_dete_obj(DeteObj dete_obj);
+        void add_dete_obj(int x1, int y1, int x2, int y2, float conf, std::string tag);
+        void draw_dete_res(std::string save_path, std::string assign_img, std::map<std::string, Color> color_dirt);
         
         // 根据置信度对 dete_obj 进行排序
         void sort_by_conf(bool reverse=false);
@@ -83,15 +83,15 @@ class DeteRes
         // 结果进行 nms 处理
         void do_nms(float threshold, bool ignore_tag);
         
-        int do_nms_center_point(bool ignore_tag);
-        int filter_by_area(float area_th, std::string mode, bool update);
-        int filter_by_tags(std::vector<std::string> tags);
-        int filter_by_conf();
-        int filter_by_mask();
-        int filter_by_dete_res();
-        int filter_by_topn();
-        int do_augment();
-        int del_dete_obj(DeteObj dete_obj);
+        void do_nms_center_point(bool ignore_tag);
+        void filter_by_area(float area_th, std::string mode, bool update);
+        void filter_by_tags(std::vector<std::string> tags);
+        void filter_by_conf();
+        void filter_by_mask();
+        void filter_by_dete_res();
+        void filter_by_topn();
+        void do_augment();
+        void del_dete_obj(DeteObj dete_obj);
         bool has_tag();
         bool has_dete_obj(DeteObj dete_obj);
         std::map<std::string, int> count_tags();

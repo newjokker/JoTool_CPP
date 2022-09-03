@@ -700,12 +700,6 @@ UCDataset operator+(UCDataset &ucd_1, UCDataset &ucd_2)
     return ucd;
 }
 
-// minus ucd
-UCDataset operator-(UCDataset &ucd_1, UCDataset &ucd_2)
-{
-    // 
-}
-
 //
 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
