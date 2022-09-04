@@ -1,4 +1,5 @@
 #include "include/lablelmeObj.hpp"
+#include <math.h>
 
 
 // 打印 obj 信息
@@ -223,6 +224,46 @@ bool PolygonObj::equal_to(LabelmeObj* other_obj)
 
     return true;
 }
+
+
+// get_area
+
+float PointObj::get_area()
+{
+    return 0;
+}
+
+float LineObj::get_area()
+{
+    return 0;
+}
+
+float LineStripObj::get_area()
+{
+    return 0;
+}
+
+float CircleObj::get_area()
+{
+    float r = std::sqrt(std::pow((CircleObj::points[1][0] - CircleObj::points[0][0]), 2) +  std::pow((CircleObj::points[1][1] - CircleObj::points[0][1]), 2));
+    float area = 3.1415925 * r * r;
+    return area;
+}
+
+float RectangleObj::get_area()
+{
+    float m = RectangleObj::points[1][0] - RectangleObj::points[0][0];
+    float n = RectangleObj::points[1][1] - RectangleObj::points[0][1];
+    float area = m * n;
+    return area;
+}
+
+float PolygonObj::get_area()
+{
+    // todo get the area of polygon
+    return 0;
+}
+
 
 // 构造函数
 PointObj::PointObj():LabelmeObj()

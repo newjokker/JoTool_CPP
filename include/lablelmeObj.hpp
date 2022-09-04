@@ -26,6 +26,9 @@ class LabelmeObj
         // 判断指针指向的对象是否相等
         virtual bool equal_to(LabelmeObj *obj) = 0;
 
+        // get_area
+        virtual float get_area() =0;
+
 };
 
 
@@ -36,6 +39,7 @@ class PointObj : public LabelmeObj
         PointObj();
         void print_info();
         bool equal_to(LabelmeObj *obj);
+        float get_area();
 };
 
 class LineObj : public LabelmeObj
@@ -44,6 +48,7 @@ class LineObj : public LabelmeObj
         LineObj();
         void print_info();
         bool equal_to(LabelmeObj *obj);
+        float get_area();
 };
 
 class LineStripObj : public LabelmeObj
@@ -52,6 +57,7 @@ class LineStripObj : public LabelmeObj
         LineStripObj();
         void print_info();
         bool equal_to(LabelmeObj *obj);
+        float get_area();
 };
 
 class CircleObj : public LabelmeObj
@@ -60,6 +66,7 @@ class CircleObj : public LabelmeObj
         CircleObj();
         void print_info();
         bool equal_to(LabelmeObj *obj);
+        float get_area();
 };
 
 class RectangleObj : public LabelmeObj
@@ -68,6 +75,7 @@ class RectangleObj : public LabelmeObj
         RectangleObj();
         void print_info();
         bool equal_to(LabelmeObj *obj);
+        float get_area();
 };
 
 class PolygonObj : public LabelmeObj
@@ -76,6 +84,7 @@ class PolygonObj : public LabelmeObj
         PolygonObj();
         void print_info();
         bool equal_to(LabelmeObj *obj);
+        float get_area();
 };
 
 class LabelmeObjFactory

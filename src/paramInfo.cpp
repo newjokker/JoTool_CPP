@@ -644,8 +644,24 @@ void UcdParamOpt::load_param_info()
     param_filter_by_nms->group = "filter";
     param_filter_by_nms->grammar = "ucd filter_by_nms ucd_path save_ucd_path nms_th ignore_tag(true|false)";
     param_filter_by_nms->english_explain = "do nms ";
-    param_filter_by_nms->chinese_explain = "对 ucd 进行 nms 过滤";   
+    param_filter_by_nms->chinese_explain = "";   
     UcdParamOpt::add_param(param_filter_by_nms);
+
+    // conf_analysis
+    ParamInfo * param_conf_analysis = new ParamInfo("conf_analysis");
+    param_conf_analysis->group = "filter";
+    param_conf_analysis->grammar = "ucd conf_analysis ucd_path seg_count";
+    param_conf_analysis->english_explain = "";
+    param_conf_analysis->chinese_explain = "";   
+    UcdParamOpt::add_param(param_conf_analysis);
+
+    // area_analysis
+    ParamInfo * param_area_analysis = new ParamInfo("area_analysis");
+    param_area_analysis->group = "filter";
+    param_area_analysis->grammar = "ucd area_analysis ucd_path srg_count";
+    param_area_analysis->english_explain = " ";
+    param_area_analysis->chinese_explain = "";   
+    UcdParamOpt::add_param(param_area_analysis);
 
 }
 

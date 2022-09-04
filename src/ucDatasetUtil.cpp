@@ -1528,7 +1528,7 @@ void UCDatasetUtil::uc_analysis(std::string ucd_path)
     }
 }
 
-void UCDatasetUtil::conf_analysis(std::string ucd_path)
+void UCDatasetUtil::conf_analysis(std::string ucd_path, int seg_count)
 {
     UCDataset* ucd = new UCDataset(ucd_path);
     ucd->parse_ucd(true);
@@ -1554,7 +1554,6 @@ void UCDatasetUtil::conf_analysis(std::string ucd_path)
     }
 
     // 按照百分位数进行分析
-    int seg_count = 50;
     int conf_size = conf_vector.size();
     std::map<float, int> conf_map;
     
@@ -1562,7 +1561,8 @@ void UCDatasetUtil::conf_analysis(std::string ucd_path)
 
     for(int i=0; i<seg_count; i++)
     {
-        std::cout << i << "/" << seg_count << "   " << conf_vector[(conf_size/seg_count)*i] << std::endl; 
+        std::string seg_index = std::to_string(i) + "/" + std::to_string(seg_count);
+        std::cout << std::setw(10) << std::left << seg_index << conf_vector[(conf_size/seg_count)*i] << std::endl; 
     }
     
 
@@ -1584,7 +1584,7 @@ void UCDatasetUtil::conf_analysis(std::string ucd_path)
     // 按照绝对值进行分析
     for(int i=0; i<seg_count; i++)
     {
-        float conf_value = i/(seg_count*0.1);
+        float conf_value = i/(seg_count * 1.0);
         std::cout << std::setw(10) << std::left << conf_value << conf_map[i] << std::endl;
     }
 
@@ -1593,6 +1593,86 @@ void UCDatasetUtil::conf_analysis(std::string ucd_path)
     delete ucd;
 }
 
+void UCDatasetUtil::area_analysis(std::string ucd_path, int seg_count)
+{
+    UCDataset* ucd = new UCDataset(ucd_path);
+    ucd->parse_ucd(true);
+    std::vector<float> area_vector;
+
+    float area_max = 0;
+    float area_min = std::pow(10, 8);
+    auto iter = ucd->object_info.begin();
+    while(iter != ucd->object_info.end())
+    {
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            float each_area = iter->second[i]->get_area();
+            area_vector.push_back(each_area);
+
+            if(each_area > area_max)
+            {
+                area_max = each_area;
+            }
+            
+            if(each_area < area_min)
+            {
+                area_min = each_area;
+            }
+        }
+        iter++;
+    }
+
+    // 排序
+    std::sort(area_vector.begin(), area_vector.end());
+
+    if(area_vector.size() < seg_count)
+    {
+        std::cout << "数据量太小，没必要分析，自己打开文件去看吧" << std::endl;
+        return; 
+    }
+
+    // 按照百分位数进行分析
+    int area_size = area_vector.size();
+    std::map<int, int> area_map;
+    
+    std::cout << "------------------------------" << std::endl;
+    std::cout << "area_min" << "     " << area_min << std::endl;
+    std::cout << "area_max" << "     " << area_max << std::endl;
+    std::cout << "------------------------------" << std::endl;
+
+    for(int i=0; i<seg_count; i++)
+    {
+        std::string seg_index = std::to_string(i) + "/" + std::to_string(seg_count);
+        std::cout << std::setw(10) << std::left << seg_index << area_vector[(area_size/seg_count)*i] << std::endl; 
+    }
+    
+    std::cout << "------------------------------" << std::endl;
+
+    float area_seg = (area_max - area_min);
+
+    for(int i=0; i<area_size; i++)
+    {
+        int area = (int)seg_count * ((area_vector[i] - area_min) / (area_seg * 1.0));
+        if(area_map.count(area) == 0)
+        {
+            area_map[area] = 1;
+        }
+        else
+        {
+            area_map[area] += 1;
+        }
+    }
+
+    // 按照绝对值进行分析
+    for(int i=0; i<seg_count; i++)
+    {
+        float conf_value = i/(seg_count * 1.0);
+        std::cout << std::setw(10) << std::left << conf_value << area_map[i] << std::endl;
+    }
+
+    std::cout << "------------------------------" << std::endl;
+    delete ucd;
+}
 
 
 

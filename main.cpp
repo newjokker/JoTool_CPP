@@ -68,6 +68,10 @@ using namespace std;
 
 // add config such as -c --c 
 
+// all analysis in analysis 
+
+// 
+
 
 
 int main(int argc, char ** argv)
@@ -1354,10 +1358,27 @@ int main(int argc, char ** argv)
     else if(command_1 == "conf_analysis")
     {
         // ucd 的置信度分布
-        if(argc == 3)
+        if(argc == 4)
         {
             std::string ucd_path = argv[2];
-            ucd_util->conf_analysis(ucd_path);
+            int seg_count = std::stoi(argv[3]);
+            ucd_util->conf_analysis(ucd_path, seg_count);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "area_analysis")
+    {
+        ucd_param_opt->not_ready(command_1);
+        return -1;
+
+        if(argc == 4)
+        {
+            std::string ucd_path = argv[2];
+            int seg_count = std::stoi(argv[3]);
+            ucd_util->area_analysis(ucd_path, seg_count);
         }
         else
         {

@@ -209,7 +209,11 @@ class UCDatasetUtil
         void uc_analysis(std::string ucd_path);
 
         // conf_analysis
-        void conf_analysis(std::string ucd_path);
+        void conf_analysis(std::string ucd_path, int seg_count);
+
+        // area_analysis
+        void area_analysis(std::string ucd_path, int seg_count);
+
         
     private:
         
