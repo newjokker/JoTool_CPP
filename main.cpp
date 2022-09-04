@@ -70,7 +70,11 @@ using namespace std;
 
 // all analysis in analysis 
 
-// 
+// add meachine learning , basic content,  
+
+// auto support normal classify model vgg, vit etc 
+
+
 
 
 
@@ -1323,6 +1327,10 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "img_url")
     {
+
+        ucd_param_opt->not_ready(command_1);
+        return -1;
+
         if(argc == 4)
         {
             std::string ucd_path = argv[2];
@@ -1384,6 +1392,33 @@ int main(int argc, char ** argv)
         {
             ucd_param_opt->print_command_info(command_1);
         }
+    }
+    else if(command_1 == "train_vgg")
+    {
+        // train vgg with ucd and config.ini
+
+        // cpp and vgg_docker, by python or other language, use ucd as std input param 
+
+    }
+    else if(command_1 == "train_vit")
+    {
+        // train vit with ucd and config 
+    }
+    else if(command_1 == "server_info")
+    {
+        // check if sshpass is installed, apt list --installed | grep sshpass/focal
+        // c++ run bash 
+        // use sshpass -p txkj ssh txkj@192.168.3.101 "nvidia-smi"
+        // ucd server_info 221 101 
+        // drive | gpu type | free space (gpu)
+
+        std::system("ls -l >test.txt"); // 执行 UNIX 命令 "ls -l >test.txt"
+        std::cout << std::ifstream("test.txt").rdbuf();
+        // std::system("sudo su ; ucd | grep filter"); // 执行 UNIX 命令 "ls -l >test.txt"
+
+        // std::system("mkdir /home/jokker/test");
+        return -1;
+
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {
