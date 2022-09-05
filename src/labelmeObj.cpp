@@ -1,6 +1,6 @@
 #include "include/lablelmeObj.hpp"
 #include <math.h>
-
+#include <cmath>
 
 // 打印 obj 信息
 void PointObj::print_info()

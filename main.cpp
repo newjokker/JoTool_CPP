@@ -74,7 +74,9 @@ using namespace std;
 
 // auto support normal classify model vgg, vit etc 
 
+// 小图也是唯一的，也可以弄成缓存,
 
+// 裁剪训练的图也是唯一的，也可以弄成缓存
 
 
 
@@ -1404,6 +1406,39 @@ int main(int argc, char ** argv)
     {
         // train vit with ucd and config 
     }
+    else if(command_1 == "test_vgg")
+    {
+        // 测试 vgg，支持 dete_model 格式即可运行
+    }
+    else if(command_1 == "test_yolov5")
+    {
+        // 支持 yolov5 格式的检测，用的是一个 docker，指定模型和配置文件即可
+        // 将我们已经发布的功能注册到某一个 docker 里面，只需 申请检测即可，
+        // 申请检测一个模型到，jibei_24_model 这个docker 中，启动 docker ，下载对应的 ucd，根据 ucd 下载对应的 图片，检测图片，结果打包为 ucd，ucd 上传（完善 ucd 相关的信息）
+        // 专门开辟一个文件夹，用于存放 模型自动跑出来的结果（如何防止文件夹的结果报错）
+        // 每一个常用的 model 处理成一个 支持 ucd 的docker，这样就能非常方便地去使用了
+        // 我们有一些标准的 model 
+        // 模型的日志之类的如何处理，应该会比较麻烦的吧？直接返回一个文件夹，就是存放日志信息的，还是 一直保持和检测代码的联系
+
+        // test_docker , 查看可用的 test_docker 的列表，每个服务器的容量之类的也可以看
+        // assign_model_name, assign_ucd_name,  assign_config_path
+        // 如何知道什么时候处理结束？
+        // 如何也现有的 docker 进行兼容，只需要 dete_model_name.py 都符合需要的格式即可
+            // docker 指定 port
+            // docker 检测信息和 ucd 进行同步
+            // docker 能实时查看检测进度，
+            // docker 将检测结果的 ucd 上传到 服务器上，上传失败的话直接
+            // docker 可以被命令杀掉，
+            // docker 在不使用的时候不占用着空间，最好能在不使用的时候 都不要启动，
+            // docker 
+            // ucd 最好使用一套松散的接口和 docker 进行交互，可以查看有多少资源可以进行训练，可以进行检测，
+            // ucd 先实现控制当前的服务器的
+
+
+        // v6 交互逻辑直接使用 C++ 进行编写，C++ 调用python，这样就不怕代码被随意的更改了，
+
+
+    }
     else if(command_1 == "server_info")
     {
         // check if sshpass is installed, apt list --installed | grep sshpass/focal
@@ -1412,11 +1447,34 @@ int main(int argc, char ** argv)
         // ucd server_info 221 101 
         // drive | gpu type | free space (gpu)
 
-        std::system("ls -l >test.txt"); // 执行 UNIX 命令 "ls -l >test.txt"
-        std::cout << std::ifstream("test.txt").rdbuf();
+        // std::system("sshpass -p txkj ssh txkj@192.168.3.101 nvidia-smi"); // 执行 UNIX 命令 "ls -l >test.txt"
+        // std::cout << "200 : ";
+        
+        std::system("echo -n '221 : '  && nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
+        
+        std::system("echo -n '200 : '  && sshpass -p txkj2020 ssh txkj@192.168.3.200 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
+        
+        std::system("echo -n '155 : '  && sshpass -p ldq ssh ldq@192.168.3.155 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
+        
+        std::system("echo -n '21  : '  && sshpass -p ldq ssh ldq@192.168.3.21 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
+        
+        std::system("echo -n '101 : '  && sshpass -p txkj ssh txkj@192.168.3.101 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
+        
+        std::system("echo -n '132 : '  && sshpass -p txkj ssh txkj@192.168.3.101 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
+        
+        
+        // std::system("sshpass -p txkj2020 ssh txkj@192.168.3.200 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
+        
+        
+        // std::cout << std::ifstream("test.txt").rdbuf();
         // std::system("sudo su ; ucd | grep filter"); // 执行 UNIX 命令 "ls -l >test.txt"
-
         // std::system("mkdir /home/jokker/test");
+
+
+        // nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}', 查看驱动版本
+        // 
+
+
         return -1;
 
     }
