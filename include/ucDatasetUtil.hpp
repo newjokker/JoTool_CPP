@@ -123,6 +123,7 @@ class UCDatasetUtil
         std::string cache_dir;
         std::string cache_img_dir;
         std::string cache_xml_dir;
+        std::string cache_crop_dir;
         
         // ucd json_path
         std::string json_path;

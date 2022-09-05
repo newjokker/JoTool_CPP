@@ -1398,8 +1398,11 @@ int main(int argc, char ** argv)
     else if(command_1 == "train_vgg")
     {
         // train vgg with ucd and config.ini
-
         // cpp and vgg_docker, by python or other language, use ucd as std input param 
+
+        // 共享缓存文件夹
+        // 指定输出 model 文件夹
+        // 查看训练状态，阻塞 
 
     }
     else if(command_1 == "train_vit")
