@@ -103,6 +103,10 @@
   * refer : https://github.com/yhirose/cpp-httplib 
   * 下载好 git 之后 (1) mkdir build (2) cmake .. (3) make install 即可 
 
+* mysql 安装
+  * apt-get install libmysqld-dev
+  * 
+
 ### 环境安装的通用步骤
 
 * apt-cache search pkg_name ，去找可以安装的库的名字

@@ -812,14 +812,14 @@ void UCDatasetUtil::load_file(std::string url, std::string save_path, int index)
     }
     else
     {
-        if(index != -1)
-        {
-            std::cout << index << " "<< "* load " << UCDatasetUtil::root_url << url << std::endl;
-        }
-        else
-        {
-            std::cout << "* load " << UCDatasetUtil::root_url << url << std::endl;
-        }
+        // if(index != -1)
+        // {
+        //     std::cout << index << " "<< "* load " << UCDatasetUtil::root_url << url << std::endl;
+        // }
+        // else
+        // {
+        //     std::cout << "* load " << UCDatasetUtil::root_url << url << std::endl;
+        // }
         httplib::Client cli(UCDatasetUtil::root_url);
         auto res = cli.Get(url);
 

@@ -90,6 +90,8 @@ class Yolov5
     
 	public:
 		//
+		std::string model_name;
+		//
 		std::string model_path;
 		std::string config_path;
 		int img_size;

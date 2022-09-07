@@ -41,7 +41,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../build)
 set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH} "/home/libtorch" )
 set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH} "/usr/local/cuda-10.2" )
 
-# find_package(Torch REQUIRED)
+find_package(Torch REQUIRED)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
@@ -60,7 +60,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRCLIST)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/tools SRCLIST)
 
-add_library(saturntools_v1.4 SHARED ${SRCLIST})   
+# add_library(saturntools_v1.4 SHARED ${SRCLIST})   
+add_library(saturntools_v1.4.1 SHARED ${SRCLIST})   
 # add_library(saturntools STATIC ${SRCLIST})   
 
 add_executable(ucd main.cpp)
@@ -68,12 +69,10 @@ add_executable(ucd main.cpp)
 
 target_link_libraries(
     ucd 
-    # ${TORCH_LIBRARIES}
+    ${TORCH_LIBRARIES}
     ${OpenCV_LIBS}
     OpenSSL::Crypto OpenSSL::SSL
-    # curlpp
-    # curl
-    saturntools_v1.4
+    saturntools_v1.4.1
 	nlohmann_json::nlohmann_json
     ${MYSQL_LIBS}
 )
