@@ -1,0 +1,14 @@
+FROM nvidia/cuda:10.2-cudnn7-runtime-ubuntu16.04
+
+RUN mkdir /v0.0.1
+
+WORKDIR /v0.0.1
+
+COPY ./v0.0.1 /v0.0.1
+
+RUN mv /v0.0.1/so_dir/* /usr/lib/ 
+
+CMD ["/v0.0.1/start_server.sh"]
+
+
+# docker run --gpus device=0 -v /home/disk2/prebase_dete:/usr/logs -d detect_server:v0.0.3
