@@ -30,6 +30,9 @@ std::string get_file_suffix(std::string);
 std::string get_file_name(std::string);
 std::string get_file_name_suffix(std::string);
 
+// 这个函数的实现有问题，需要进行调整？
+int get_file_size(std::string);
+
 std::vector<std::string> get_all_file_path(std::string);
 std::vector<std::string> get_all_file_path(std::string, std::set<std::string>);
 std::vector<std::string> get_all_file_path_recursive(std::string);

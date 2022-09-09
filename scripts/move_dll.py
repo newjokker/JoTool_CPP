@@ -6,6 +6,7 @@
 
 import os
 import shutil
+import sys
 
 # 运行 ldd 可执行文件地址 > reqired.txt
 # python move_dll.py 即可将依赖的 so 保存到文件夹中
@@ -16,7 +17,6 @@ import shutil
 # 将所有的结果打成一个包，用这个脚本不同参数能直接安装就行
 # 修改文件权限
 # 将文件移动到对应的地方
-
 
 def move_require_so_to_assign_dir(require_txt_path, so_dir):
     """将动态库移动到指定路径"""
@@ -48,22 +48,27 @@ def get_require_txt(app_path, require_txt_path):
 
 if __name__ == "__main__":
 
+    if len(sys.argv) != 3:
+        print("move_dll app_path save_dir")
+    else:
+        appPath = sys.argv[1]
+        saveDir = sys.argv[2]
 
-    # ---------------------------
-    appPath = r"/usr/code/build/ucd"
-    saveDir = r"/usr/code/scripts/ucd_server"
-    # ---------------------------
+        # # ---------------------------
+        # appPath = r"/usr/code/build/ucd"
+        # saveDir = r"/usr/code/scripts/ucd_server"
+        # # ---------------------------
 
-    saveTxtPath = os.path.join(saveDir, "require.txt")
-    soDir = os.path.join(saveDir, "so_dir")
-    os.makedirs(saveDir)
-    os.makedirs(soDir)
+        saveTxtPath = os.path.join(saveDir, "require.txt")
+        soDir = os.path.join(saveDir, "so_dir")
+        os.makedirs(saveDir)
+        os.makedirs(soDir)
 
-    get_require_txt(appPath, saveTxtPath)
-    move_require_so_to_assign_dir(saveTxtPath, soDir)
-    shutil.copy(appPath, os.path.join(saveDir, os.path.split(appPath)[1]))
+        get_require_txt(appPath, saveTxtPath)
+        move_require_so_to_assign_dir(saveTxtPath, soDir)
+        shutil.copy(appPath, os.path.join(saveDir, os.path.split(appPath)[1]))
 
-    pass
+
 
 
 

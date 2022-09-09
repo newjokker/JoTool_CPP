@@ -15,3 +15,14 @@ CREATE TABLE prebase_yolo5_0_4_0 (
 
 # DROP TABLE prebase_yolo5_0_4_0;
 
+# 远程登录  mysql -h 192.168.3.101 -u root -p , 回车之后输入密码即可登录上
+
+# ucd dete_res;
+# select count(*) from prebase_yolo5_0_4_0;
+
+
+
+
+
+
+

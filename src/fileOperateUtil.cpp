@@ -276,3 +276,13 @@ void copy_file(std::string src, std::string des)
     fclose(in);
     fclose(out);
 }
+
+int get_file_size(std::string file_path)
+{
+    FILE *fp=fopen(file_path.c_str(), "r");  
+    if(!fp) return -1;  
+    fseek(fp, 0L, SEEK_END);  
+    int size = ftell(fp);  
+    fclose(fp);  
+    return size;  
+}

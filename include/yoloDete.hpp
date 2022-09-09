@@ -135,10 +135,22 @@ void Yolov5::model_restore()
 
 DeteRes Yolov5::dete(cv::Mat image_region)
 {
+
+	// get dete_res
+    DeteRes dete_res;
 		
     // resize img 
     cv::Mat image;
-    cv::resize(image_region, image, cv::Size(Yolov5::img_size, Yolov5::img_size));
+
+	try
+	{
+    	cv::resize(image_region, image, cv::Size(Yolov5::img_size, Yolov5::img_size));
+	}
+	catch(std::exception e)
+	{
+        std::cout<< "resize error" << std::endl;
+		return dete_res;
+    }
 	
     // img -> tensor
     torch::Tensor imgTensor = torch::from_blob(image.data, { 1, image.rows, image.cols, image.channels() }, torch::kByte);
@@ -156,8 +168,6 @@ DeteRes Yolov5::dete(cv::Mat image_region)
     // do nms
     auto dets = non_max_suppression(preds, Yolov5::conf_threshold, 0.5); // 0.35s
 
-    // get dete_res
-    DeteRes dete_res;
     DeteObj dete_obj;
     if (dets.size() > 0)
     {
