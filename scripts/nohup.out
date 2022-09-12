@@ -1,0 +1,15 @@
+-------------------------------------------------------------------------------
+ucd /usr/save_xml_dir /usr/ucd_cache_dir  /usr/dete_log_dir_1 /usr/load_ucd_dir/load_ucd_dir_1 prebase_yolo5_0_4_0 /home/server/config.ini prebase 192.168.3.11111101
+-------------------------------------------------------------------------------
+--------------------------------
+classes : BGXJ_sub,DBTZB_sub,GDGZ_sub,LK_set,LLB_set,LQ_set,LSJ_set,LSSXJ_sub,LXJT_set,LZC_set,L_set,PGB_sub,PTDB_set,PTTZB_sub,QYB_sub,SJB_sub,SXJ_set,TLD_set,TLH_set,TLX_set,TXXJ_sub,UBGB_sub,UGH_sub,ULS_sub,WTGB_sub,XCXJCT_sub,XXH_sub,XXXJ_sub,YCH_sub,YJXJ_sub,ZGB_sub,ZHGH_sub,bljyz,ccb,dx_yw,dxjyz,fhjyz,fw,fzc,fzc_pair,fzc_ps,jyz_gjgm,jyz_pp,nc,ring,ringL,tcjyz,tower_bhm,tower_fn,tower_fnqn,tower_hd,tower_lsb,tower_sign,tower_td,tower_tj,tower_yw,tower_zwdj,
+visible_classes : BGXJ_sub,DBTZB_sub,GDGZ_sub,LK_set,LLB_set,LQ_set,LSJ_set,LSSXJ_sub,LXJT_set,LZC_set,L_set,PGB_sub,PTDB_set,PTTZB_sub,QYB_sub,SJB_sub,SXJ_set,TLD_set,TLH_set,TLX_set,TXXJ_sub,UBGB_sub,UGH_sub,ULS_sub,WTGB_sub,XCXJCT_sub,XXH_sub,XXXJ_sub,YCH_sub,YJXJ_sub,ZGB_sub,ZHGH_sub,bljyz,ccb,dx_yw,dxjyz,fhjyz,fw,fzc,fzc_pair,fzc_ps,jyz_gjgm,jyz_pp,nc,ring,ringL,tcjyz,tower_bhm,tower_fn,tower_fnqn,tower_hd,tower_lsb,tower_sign,tower_td,tower_tj,tower_yw,tower_zwdj,
+img_size : 1024
+model_path : /home/server/models/prebase_yolo5_0_4_0.torchscript
+conf_threshold : 0.5
+augment : 0
+--------------------------------
+[3000 x 3000]
+* model restore success
+waiting from : Fri Sep  9 09:37:08 2022
+

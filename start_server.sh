@@ -1,3 +1,0 @@
-#!/bin/bash
-
-./build/ucd /usr/logs prebase_yolo5_0_4_0 /home/server/config.ini prebase 192.168.3.111 11101

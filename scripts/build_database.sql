@@ -2,7 +2,7 @@
 
 USE dete_res;
 
-CREATE TABLE prebase_yolo5_0_4_0 (
+CREATE TABLE prebase_yolo5_0_5_0 (
   uc      CHAR(10) NOT NULL,
   tag     CHAR(10) NOT NULL,
   x1      DOUBLE NOT NULL,

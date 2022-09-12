@@ -13,6 +13,6 @@ RUN mv /v0.0.1/so_dir/* /usr/lib/
 CMD ["/v0.0.1/start_server.sh"]
 
 
-# docker run --gpus device=0 -v /home/disk2/prebase_dete:/usr/logs -it detect_server:v0.0.4 /bin/bash
+# docker run --gpus device=0 -v /home/disk2/prebase_dete:/usr/logs --restart=always -it dete_server:prebase_0_5_5 /bin/bash
 
 
