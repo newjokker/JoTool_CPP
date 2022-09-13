@@ -40,20 +40,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../build)
 #set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH} "~/libtorch/libtorch")
 set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH} "/home/libtorch" )
 set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH} "/usr/local/cuda-10.2" )
-
-find_package(Torch REQUIRED)
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
-# SET(Torch_DIR /usr/del/torch/share/cmake/Torch)
-
+# find_package(Torch REQUIRED)
 find_package( OpenCV REQUIRED )
-
 find_package(OpenSSL REQUIRED)
-
-# find_package(MYSQL REQUIRED)
-
-FIND_PACKAGE(nlohmann_json REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 include_directories(${OPENSSL_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -64,12 +56,12 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/tools SRCLIST)
 add_library(saturntools_v1.4.1 SHARED ${SRCLIST})   
 # add_library(saturntools STATIC ${SRCLIST})   
 
-add_executable(dete_server main.cpp)
+add_executable(ucd main.cpp)
 
 
 target_link_libraries(
-    dete_server 
-    ${TORCH_LIBRARIES}
+    ucd 
+    # ${TORCH_LIBRARIES}
     ${OpenCV_LIBS}
     OpenSSL::Crypto OpenSSL::SSL
     saturntools_v1.4.1
@@ -78,7 +70,7 @@ target_link_libraries(
 )
     
 
-set_property(TARGET dete_server PROPERTY CXX_STANDARD 14)
+set_property(TARGET ucd PROPERTY CXX_STANDARD 14)
 
 
 
