@@ -44,6 +44,13 @@ using namespace std;
 // 共享缓存 xml 文件夹，分开投喂 ucd 文件夹（每次重新启动，历史数据都要先清空？重启之后任务就没了，如何解决这个问题），多个进程一起跑
 
 
+
+// 多个服务一起跑，共享 xml 缓存即可
+// 
+
+
+
+
 void dete_res_to_mysql(std::map<std::string, std::string> xml_map, std::string table_name)
 {
     // sql info 
@@ -184,6 +191,9 @@ int main(int argc, char ** argv)
                 }
                 else
                 {
+                    // 一个 ucd 测试完毕之后要一起入库，所以之前的 xml 也要顺便带上
+                    // 如何解决整个 ucd 都已经入库的问题，需要通过表自己去重去解决
+                    xml_map[uc] = each_save_path;
                     std::cout << j << "/" << ucd_count << ", ignore img : "<< uc << std::endl;
                 }
                 remove(save_img_path.c_str());
