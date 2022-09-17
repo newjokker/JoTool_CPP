@@ -869,7 +869,7 @@ void UCDatasetUtil::load_img(std::string save_dir, std::vector<std::string> uc_l
             else
             {
                 UCDatasetUtil::load_file(img_url, save_img_path, i); 
-                // std::cout << i << ", load img : " << save_img_path << std::endl;
+                std::cout << i << ", load img : " << save_img_path << std::endl;
             }
         }
         else
