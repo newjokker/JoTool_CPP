@@ -89,12 +89,15 @@ class UCDataset
         // 保存一个 xml 文件
         void save_to_voc_xml_with_assign_uc(std::string save_path, std::string img_path, std::string assign_uc);
 
+        // 保存一个 json 文件
+        void save_to_labelme_json_with_assign_uc(std::string save_path, std::string img_path, std::string assign_uc);
+
+        // save_to_yolo_train_data
+        void save_to_yolo_train_txt_with_assign_uc(std::string save_path, std::string img_path, std::string assign_uc, std::vector<std::string> label_list);
+
         // 保存为一个 dete_res
         void get_dete_res_with_assign_uc(jotools::DeteRes* dete_res, std::string assign_uc);
 
-        // 保存一个 json 文件
-        void save_to_labelme_json_with_assign_uc(std::string save_path, std::string img_path, std::string assign_uc);
-        
         // 根据阈值进行过滤
         void filter_by_conf(float conf_th);
 
@@ -154,8 +157,8 @@ class UCDatasetUtil
         // 从 ucd 中解析出指定 uc 的 voc_xml 文件 （img_dir 用于读取图片的长宽，要是不存在的话那么就设置为 -1）
         void parse_voc_xml(std::string img_dir, std::string save_dir, std::string ucd_path);
 
-        // 从 json 中解析 xml 并保存
-        void save_to_xml(std::string save_path, std::vector<std::string>);
+        // to yolo train_data
+        void parse_yolo_train_data(std::string img_dir, std::string save_dir, std::string ucd_path, std::vector<std::string> label_list = {});
         
         // 查看库中的 ucd
         void search_ucd();
@@ -215,7 +218,7 @@ class UCDatasetUtil
         // area_analysis
         void area_analysis(std::string ucd_path, int seg_count);
 
-        
+
     private:
         
         // 下载云上的数据

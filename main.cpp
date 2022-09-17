@@ -80,6 +80,12 @@ using namespace std;
 
 // 数据集推荐代码，ucd recommend ucd_1, ucd_2 ; ucd_1 是已有的数据集，ucd_2 是预测出来的数据集（还未进行标注），从大数据集中挑选更容易标注的数据来
 
+// parse xml , ignore when xml exists
+
+// print when error ()
+
+// to_yolo_txt
+
 int main(int argc, char ** argv)
 {
 
@@ -111,7 +117,7 @@ int main(int argc, char ** argv)
     std::string sql_db = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.4";
+    std::string app_version = "v1.4.1";
 
     // cache dir
     std::string cache_dir;
@@ -1052,10 +1058,26 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "to_yolo")
     {
-        ucd_param_opt->not_ready(command_1);
-        return -1;
-
-        // 转为 yolo 的训练格式，vit 的训练格式 faster rcnn csra 的训练格式
+        if(argc == 4 || argc == 5)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_dir = argv[3];
+            if(argc == 4)
+            {
+                ucd_util->parse_yolo_train_data(ucd_util->cache_img_dir, save_dir, ucd_path);
+            }
+            else
+            {
+                std::vector<std::string> label_list;
+                std::string label_list_str = argv[4];
+                label_list = pystring::split(label_list_str, ",");
+                ucd_util->parse_yolo_train_data(ucd_util->cache_img_dir, save_dir, ucd_path, label_list);
+            }
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
     else if(command_1 == "gif")
     {
@@ -1247,16 +1269,16 @@ int main(int argc, char ** argv)
         // return -1;
 
 
-        std::string ucd_path = argv[2];
+        UCDataset * ucd = new UCDataset("/home/jokker/del/fzc_test.json");
 
-        UCDataset* ucd = new UCDataset(ucd_path);
         ucd->parse_ucd(true);
 
-        DeteRes* a = new DeteRes();
-        
-        ucd->get_dete_res_with_assign_uc(a, "Dsk0j5y");
+        std::string save_path = "/home/jokker/del/Czr01ey.txt";
+        std::string img_path = "/home/jokker/ucd_cache/img_cache/Czr01ey.jpg";
+        std::string uc = "Czr01ey";
+        std::vector<std::string> label_list {"Fnormal", "fzc_broken"};
 
-        a->sort_by_conf();
+        ucd->save_to_yolo_train_txt_with_assign_uc(save_path, img_path, uc, label_list);
 
     }
     else if(command_1 == "filter_by_tags")

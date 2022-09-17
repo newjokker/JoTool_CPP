@@ -477,6 +477,97 @@ void UCDataset::save_to_voc_xml_with_assign_uc(std::string save_path, std::strin
     delete dete_res;
 }
 
+void UCDataset::save_to_yolo_train_txt_with_assign_uc(std::string save_path, std::string img_path, std::string uc, std::vector<std::string> label_list)
+{
+    std::map<std::string, int> label_map;
+    for(int i=0; i<label_list.size(); i++)
+    {
+        label_map[label_list[i]] = i;
+    }
+
+    float height, width, depth;
+    if(is_file(img_path))
+    {
+        FILE *file = fopen(img_path.c_str(), "rb");
+        auto imageInfo = getImageInfo<IIFileReader>(file);
+        fclose(file);
+        height = imageInfo.getHeight();
+        width =  imageInfo.getWidth();
+        depth = 3;
+    }
+    else
+    {
+        std::cout << "ignore, img_path not exists : " << img_path << std::endl; 
+        return;
+    }
+
+    std::vector< std::vector<std::string> > txt_info;
+    float dh = 1.0 / height;
+    float dw = 1.0 / width;
+
+    if(UCDataset::object_info.count(uc) != 0)
+    {
+        for(int i=0; i<UCDataset::object_info[uc].size(); i++)
+        {
+            LabelmeObj* obj = UCDataset::object_info[uc][i];
+            std::vector<std::string> each_txt_info;
+            if(obj->shape_type == "rectangle")
+            {
+                float x1 = obj->points[0][0];
+                float y1 = obj->points[0][1];
+                float x2 = obj->points[1][0];
+                float y2 = obj->points[1][1];
+                std::string tag = obj->label;
+
+                if(label_map.count(tag) == 0)
+                {
+                    std::cout << "tag not in tag_list, " << tag << std::endl;
+                    continue;
+                }
+                else
+                {
+                    float x = ((x1 + x2) / 2.0 - 1) * dw;
+                    float y = ((y1 + y2) / 2.0 - 1) * dh;
+                    float w = (x2 - x1) * dw;
+                    float h = (y2 - y1) * dh;
+
+                    if((x <= 1) && (y <= 1) && (w <= 1) && (h <= 1))
+                    {
+                        int label_index = label_map[tag];
+                        each_txt_info.push_back(std::to_string(label_index));   
+                        each_txt_info.push_back(std::to_string(x));   
+                        each_txt_info.push_back(std::to_string(y));   
+                        each_txt_info.push_back(std::to_string(w));   
+                        each_txt_info.push_back(std::to_string(h));
+                        txt_info.push_back(each_txt_info);
+                    }
+                    else
+                    {
+                        std::cout << "x, y, w, h, not in range [0, 1]" << std::endl;
+                        continue;
+                    }
+                }
+            }
+        }
+
+        // save to txt
+        std::ofstream ofs;
+        ofs.open(save_path);
+        if (!ofs.is_open()) 
+        {
+            std::cout << "Failed to open file : " << save_path << std::endl;
+        } 
+        else 
+        {
+            for(int i=0; i<txt_info.size(); i++)
+            {
+                ofs << txt_info[i][0] << ", " << txt_info[i][1] << ", " << txt_info[i][2] << ", " << txt_info[i][3] << ", " << txt_info[i][4] << "\n";
+            }
+            ofs.close();
+        }
+    }
+}
+
 void UCDataset::get_dete_res_with_assign_uc(jotools::DeteRes *dete_res, std::string uc)
 {
     if(UCDataset::object_info.count(uc) != 0)
@@ -1426,8 +1517,15 @@ void UCDatasetUtil::parse_labelme_json(std::string img_dir, std::string save_dir
         if(is_file(img_path))
         {
             std::string json_path = save_dir + "/" + uc + ".json";
-            ucd->save_to_labelme_json_with_assign_uc(json_path, img_path, uc);
-            std::cout << index << ", parse json : " << uc << std::endl;
+            if(is_file(json_path))
+            {
+                std::cout << index << ", json exists, ignore : " << json_path << std::endl;
+            }
+            else
+            {
+                ucd->save_to_labelme_json_with_assign_uc(json_path, img_path, uc);
+                std::cout << index << ", parse json : " << uc << std::endl;
+            }
         }
         else
         {
@@ -1436,6 +1534,7 @@ void UCDatasetUtil::parse_labelme_json(std::string img_dir, std::string save_dir
         index += 1;
         iter ++;
     }
+    delete ucd;
 }
 
 void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std::string ucd_path)
@@ -1469,11 +1568,19 @@ void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std
         UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, {uc});
         std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
         
+
         if(is_file(img_path))
         {
             std::string xml_path = save_dir + "/" + uc + ".xml";
-            ucd->save_to_voc_xml_with_assign_uc(xml_path, img_path, uc);
-            std::cout << index << ", parse xml : " << uc << std::endl;
+            if(is_file(xml_path))
+            {
+                std::cout << index << ", xml exists, ignore : " << xml_path << std::endl;
+            }
+            else
+            {
+                ucd->save_to_voc_xml_with_assign_uc(xml_path, img_path, uc);
+                std::cout << index << ", parse xml : " << uc << std::endl;
+            }
         }
         else
         {
@@ -1482,6 +1589,76 @@ void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std
         index += 1;
         iter ++;
     }
+    delete ucd;
+}
+
+void UCDatasetUtil::parse_yolo_train_data(std::string img_dir, std::string save_dir, std::string ucd_path, std::vector<std::string> label_list)
+{
+    if(! is_dir(img_dir))
+    {
+        std::cout << "img_dir not exists : " << img_dir << std::endl;
+        throw "img_dir not exists";
+    }
+
+    if(! is_dir(save_dir))
+    {
+        std::cout << "save_dir not exists : " << save_dir << std::endl;
+        throw "save_dir not exists";
+    }
+
+    if(! is_file(ucd_path))
+    {
+        std::cout << "ucd_path not exists : " << ucd_path << std::endl;
+        throw "ucd_path not exists";
+    }
+
+    std::set<std::string> img_suffix {".jpg", ".JPG", ".png", ".PNG"};
+    UCDataset *ucd = new UCDataset(ucd_path);
+    ucd->parse_ucd(true);
+
+    if(label_list.size() == 0)
+    {
+        if(ucd->label_used.size() == 0)
+        {
+            std::cout << "label used list is empty, do complete it !" << std::endl;
+            throw "label list is empty and label used list is empty, do complete it";
+        }
+        else
+        {
+            label_list = ucd->label_used;
+        }
+    }
+
+    int index = 0;
+    auto iter = ucd->object_info.begin();
+    while(iter != ucd->object_info.end())
+    {
+        std::string uc = iter->first;
+        UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, {uc});
+        std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
+        
+
+        if(is_file(img_path))
+        {
+            std::string txt_path = save_dir + "/" + uc + ".txt";
+            if(is_file(txt_path))
+            {
+                std::cout << index << ", txt exists, ignore : " << txt_path << std::endl;
+            }
+            else
+            {
+                ucd->save_to_yolo_train_txt_with_assign_uc(txt_path, img_path, uc, label_list);
+                std::cout << index << ", parse txt : " << uc << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << "load img failed : " << img_path << std::endl;
+        }
+        index += 1;
+        iter ++;
+    }
+    delete ucd;
 }
 
 void UCDatasetUtil::uc_analysis(std::string ucd_path)

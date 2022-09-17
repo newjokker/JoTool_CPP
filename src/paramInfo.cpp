@@ -80,6 +80,15 @@ void ParamInfo::print_info()
     std::cout << "   " << ParamInfo::grammar << std::endl;
     std::cout << "   " << ParamInfo::english_explain << std::endl;
     std::cout << "   " << ParamInfo::chinese_explain << std::endl;
+
+    if(ParamInfo::demo.size() != 0)
+    {
+        std::cout << "   [demo]" << ParamInfo::chinese_explain << std::endl;
+        for(int i=0; i<ParamInfo::demo.size(); i++)
+        {
+            std::cout << "   " << ParamInfo::demo[i] << std::endl;
+        }
+    }
 }
 
 
@@ -504,9 +513,11 @@ void UcdParamOpt::load_param_info()
     // to_yolo
     ParamInfo * param_to_yolo = new ParamInfo("to_yolo");
     param_to_yolo->group = "convert";
-    param_to_yolo->grammar = "";
-    param_to_yolo->english_explain = "";
-    param_to_yolo->chinese_explain = "";   
+    param_to_yolo->grammar = "ucd to_yolo ucd_path save_dir {label_list}";
+    param_to_yolo->english_explain = "convert ucd to yolo train txt (format)";
+    param_to_yolo->chinese_explain = "";
+    param_to_yolo->demo.push_back("ucd to_yolo fzc_test_1.json ./yolo_train_txt ");   
+    param_to_yolo->demo.push_back("ucd to_yolo fzc_test_2.json ./yolo_train_txt Fnormal,fzc_broken");   
     UcdParamOpt::add_param(param_to_yolo);
 
     // to_vit
