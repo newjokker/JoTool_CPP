@@ -27,7 +27,6 @@ using namespace jotools;
 using namespace std;
 
 
-
 // nginx 负载均衡，可以在风火轮上部署，转到 111 和 209 服务器上
 
 // 完成 C++ 版本的 文件 服务，再部署到 docker 上面，这样在哪个服务器上都能方便进行启动
@@ -40,51 +39,38 @@ using namespace std;
 
 // 下载某一些图片报错，可能是没有按照各个后缀依次寻找图片
 
-// 快速测试代码的稳定性，重要的是同步功能，（保留下载到本地的选项）
-
 // 交互设计之类的全部抄 git 的
-
-// 参数的有效性检查都是在函数里面去做，在外面不需要去做
-
-// 忘记 xml，img，json 只记得 ucd 即可
 
 // todo merge 合并时候连带着 object_info 一起合并
 
 // app for install 
 
-// ucd say support english
-
 // 上传失败需要进行提示，很可能上传后直接就是个空的
-
-// 拿到 ucd 中对应的图片的路径，uc 为结尾，这样方便模型检测
 
 // 解析出来的 json 中存放的 jpg 图片是压缩过的，这样存放的数据能小一点
 
 // from_xml from_json 的时候，可以只用他们的名字，不解析他们的内容，这样能快非常多 from_file 
 
-// ucd 的时间分析，可以看出来有多少是新的数据，有多少是之前入库的数据
-
 // 我之前的 python acc 代码有问题，计算正确的个数的时候明显不对，需要修改
 
 // add config such as -c --c 
 
-// all analysis in analysis 
-
 // add meachine learning , basic content,  
 
-// auto support normal classify model vgg, vit etc 
-
-// 小图也是唯一的，也可以弄成缓存,
-
 // 裁剪训练的图也是唯一的，也可以弄成缓存
-
-// 数据集推荐代码，ucd recommend ucd_1, ucd_2 ; ucd_1 是已有的数据集，ucd_2 是预测出来的数据集（还未进行标注），从大数据集中挑选更容易标注的数据来
 
 // parse xml , ignore when xml exists
 
 // print when error ()
 
-// to_yolo_txt
+// 完善 merge 函数，合并 obj_info 信息 
+
+// 使用进度条，来显示当前的进度，而不是打印所有的信息，只有报错的时候才打印对应的信息
+
+// 拿出所有的 uc 弄成一个新的 不带 obj 的 ucd 
+
+// has uc, uc 是否在 ucd 中
+
 
 int main(int argc, char ** argv)
 {
@@ -105,19 +91,19 @@ int main(int argc, char ** argv)
     start_time = clock();    
 
     // server
-    std::string host = "192.168.3.111";
-    int port = 11101;
+    std::string host        = "192.168.3.111";
+    int port                = 11101;
     std::string config_path;
     
     // sql info 
     int sql_port = 3306;
-    std::string sql_host = "192.168.3.101";
-    std::string sql_user = "root";
-    std::string sql_pwd = "root123";
-    std::string sql_db = "Saturn_Database_V1";
+    std::string sql_host    = "192.168.3.101";
+    std::string sql_user    = "root";
+    std::string sql_pwd     = "root123";
+    std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.4.1";
+    std::string app_version = "v1.4.2";
 
     // cache dir
     std::string cache_dir;
@@ -165,17 +151,22 @@ int main(int argc, char ** argv)
         xini_write.dump(config_path);   
     }
     
-    UCDatasetUtil* ucd_util = new UCDatasetUtil(host , port, cache_dir);
+    // init ucd_util
+    UCDatasetUtil* ucd_util = new UCDatasetUtil(host ,port, cache_dir);
     std::string command_1 = argv[1];
 
+    // must set ucd_cache 
     if((! is_dir(cache_dir)) && (command_1 != "set"))
     {
         std::cout << "cache_dir not exists, edit ucdconfig.ini cache/cache_dir : " << std::endl;
         std::cout << "ucdconfig path : " << config_path << std::endl;
+        std::cout << "-----------------------------------------------------------" << std::endl;
         std::cout << "set cache_dir with 'ucd set cache_dir {cache_dir}' " << std::endl;
+        std::cout << "-----------------------------------------------------------" << std::endl;
         throw "cache_dir not exists!";
     }
 
+    // all command
     if(command_1 == "check")
     {
         if(argc == 2)
@@ -507,7 +498,7 @@ int main(int argc, char ** argv)
     else if(command_1 == "show")
     {
         std::string uc;
-        if(argc = 3)
+        if(argc == 3)
         {
             uc = argv[2];
         }
@@ -544,13 +535,6 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "merge")
     {
-
-        // ucdataset 增加 merge 函数，用于两两合并
-        // 合并 uc 和 obj
-
-        ucd_param_opt->not_ready("merge");
-        return -1;
-
         if(argc >= 5)
         {
             std::string save_path = argv[2];
@@ -876,14 +860,6 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
-    else if(command_1 == "format_xml")
-    {
-        ucd_param_opt->not_ready(command_1);
-        return -1;
-
-        // 传入 img 的话就规范 height, width
-        // 格式化没有 prob 字段，读取 xml报错 的问题
-    }
     else if(command_1 == "say")
     {
         if((argc == 3) || (argc == 4) || (argc == 5))
@@ -1196,7 +1172,7 @@ int main(int argc, char ** argv)
             return -1;
         }        
     }
-    else if((command_1 == "move_uc") || (command_1 == "move_not_uc"))
+    else if(command_1 == "move_uc" || command_1 == "move_not_uc")
     {
 
         // the same name not different suffix 
@@ -1265,20 +1241,14 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "test")
     {
-        // ucd_param_opt->not_ready(command_1);
-        // return -1;
 
+        UCDataset * ucd_1 = new UCDataset("/home/ldq/ucd_dir/recommend_base.json");
 
-        UCDataset * ucd = new UCDataset("/home/jokker/del/fzc_test.json");
+        ucd_1->parse_ucd(true);
 
-        ucd->parse_ucd(true);
+        ucd_1->add_ucd_info("/home/ldq/ucd_dir/recommend_random.json");
 
-        std::string save_path = "/home/jokker/del/Czr01ey.txt";
-        std::string img_path = "/home/jokker/ucd_cache/img_cache/Czr01ey.jpg";
-        std::string uc = "Czr01ey";
-        std::vector<std::string> label_list {"Fnormal", "fzc_broken"};
-
-        ucd->save_to_yolo_train_txt_with_assign_uc(save_path, img_path, uc, label_list);
+        ucd_1->save_to_ucd("/home/ldq/ucd_dir/merge_test.json");
 
     }
     else if(command_1 == "filter_by_tags")
@@ -1416,53 +1386,6 @@ int main(int argc, char ** argv)
         {
             ucd_param_opt->print_command_info(command_1);
         }
-    }
-    else if(command_1 == "train_vgg")
-    {
-        // train vgg with ucd and config.ini
-        // cpp and vgg_docker, by python or other language, use ucd as std input param 
-
-        // 共享缓存文件夹
-        // 指定输出 model 文件夹
-        // 查看训练状态，阻塞 
-
-    }
-    else if(command_1 == "train_vit")
-    {
-        // train vit with ucd and config 
-    }
-    else if(command_1 == "test_vgg")
-    {
-        // 测试 vgg，支持 dete_model 格式即可运行
-    }
-    else if(command_1 == "test_yolov5")
-    {
-        // 支持 yolov5 格式的检测，用的是一个 docker，指定模型和配置文件即可
-        // 将我们已经发布的功能注册到某一个 docker 里面，只需 申请检测即可，
-        // 申请检测一个模型到，jibei_24_model 这个docker 中，启动 docker ，下载对应的 ucd，根据 ucd 下载对应的 图片，检测图片，结果打包为 ucd，ucd 上传（完善 ucd 相关的信息）
-        // 专门开辟一个文件夹，用于存放 模型自动跑出来的结果（如何防止文件夹的结果报错）
-        // 每一个常用的 model 处理成一个 支持 ucd 的docker，这样就能非常方便地去使用了
-        // 我们有一些标准的 model 
-        // 模型的日志之类的如何处理，应该会比较麻烦的吧？直接返回一个文件夹，就是存放日志信息的，还是 一直保持和检测代码的联系
-
-        // test_docker , 查看可用的 test_docker 的列表，每个服务器的容量之类的也可以看
-        // assign_model_name, assign_ucd_name,  assign_config_path
-        // 如何知道什么时候处理结束？
-        // 如何也现有的 docker 进行兼容，只需要 dete_model_name.py 都符合需要的格式即可
-            // docker 指定 port
-            // docker 检测信息和 ucd 进行同步
-            // docker 能实时查看检测进度，
-            // docker 将检测结果的 ucd 上传到 服务器上，上传失败的话直接
-            // docker 可以被命令杀掉，
-            // docker 在不使用的时候不占用着空间，最好能在不使用的时候 都不要启动，
-            // docker 
-            // ucd 最好使用一套松散的接口和 docker 进行交互，可以查看有多少资源可以进行训练，可以进行检测，
-            // ucd 先实现控制当前的服务器的
-
-
-        // v6 交互逻辑直接使用 C++ 进行编写，C++ 调用python，这样就不怕代码被随意的更改了，
-
-
     }
     else if(command_1 == "server_info")
     {

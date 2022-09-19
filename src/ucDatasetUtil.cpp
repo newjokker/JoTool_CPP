@@ -393,6 +393,54 @@ void UCDataset::add_dete_res_info(std::string uc, DeteRes dete_res)
     UCDataset::uc_list.push_back(uc);
 }
 
+void UCDataset::add_ucd_info(std::string ucd_path)
+{
+    UCDataset * other = new UCDataset(ucd_path);
+    other->parse_ucd(true);
+
+    // merge uc_list
+    for(int i=0; i<other->uc_list.size(); i++)
+    {
+        UCDataset::uc_list.push_back(other->uc_list[i]);
+    }
+
+    // merge label_used
+    for(int i=0; i<other->label_used.size(); i++)
+    {
+        UCDataset::label_used.push_back(other->label_used[i]);
+    }
+
+    UCDataset::unique();
+
+    // merge object_info 
+    auto iter = other->object_info.begin();
+    while(iter != other->object_info.end())
+    {
+        std::string uc = iter->first;
+        if(UCDataset::object_info.count(uc) == 0)
+        {
+            UCDataset::object_info[uc] = other->object_info[uc]; 
+        }
+        else
+        {
+            for(int j=0; j<iter->second.size(); j++)
+            {
+                auto obj = iter->second[j];
+                if(! UCDataset::has_obj(uc, obj))
+                {
+                    UCDataset::object_info[uc].push_back(obj);
+                }
+                else
+                {
+                    // std::cout << "repeated obj : " << uc << ", " << obj->label << std::endl; 
+                }
+            }
+        }
+        iter++;
+    }
+    delete other;
+}
+
 void UCDataset::save_to_ucd(std::string save_path)
 {
     nlohmann::json json_info = {
@@ -1163,54 +1211,19 @@ void UCDatasetUtil::get_ucd_from_file_dir(std::string file_dir, std::string ucd_
 
 void UCDatasetUtil::merge_ucds(std::string save_path, std::vector<std::string> ucd_path_vector)
 {
+    if(ucd_path_vector.size() < 2)
+    {
+        std::cout << "ucd path vector count < 2" << std::endl;
+        throw "ucd path vector count < 2";
+    }
 
-    // todo object_info 也需要进行合并
-
-
-    // ucd path
+    UCDataset* ucd = new UCDataset(save_path);
     for(int i=0; i<ucd_path_vector.size(); i++)
     {
-        if(! is_file(ucd_path_vector[i]))
-        {
-            std::cout << "ucd path not exists : " << save_path << std::endl;
-            throw "ucd path not exists";
-        }
+        ucd->add_ucd_info(ucd_path_vector[i]);
     }
-    // merge 
-    UCDataset* merge = new UCDataset(save_path);
-    std::set<std::string> uc_set, used_label_set;
-    for(int i=0; i<ucd_path_vector.size(); i++)
-    {
-        UCDataset* ucd = new UCDataset(ucd_path_vector[i]);
-        ucd->parse_ucd();
-        // uc
-        for(int j=0; j<ucd->uc_list.size(); j++)
-        {
-            uc_set.insert(ucd->uc_list[j]);
-        }
-        // used label
-        for(int j=0; j<ucd->label_used.size(); j++)
-        {
-            used_label_set.insert(ucd->label_used[j]);
-        }
-        delete ucd;
-    }
-    // uc list
-    std::set<std::string>::iterator iter_uc = uc_set.begin();
-    while(iter_uc != uc_set.end())
-    {
-        merge->uc_list.push_back(iter_uc->data());
-        iter_uc ++;
-    }
-    // label used
-    std::set<std::string>::iterator iter_label = used_label_set.begin();
-    while(iter_label != used_label_set.end())
-    {
-        merge->label_used.push_back(iter_label->data());
-        iter_label ++;
-    }
-    merge->save_to_ucd(save_path);
-    delete merge;
+    ucd->save_to_ucd(save_path);
+    delete ucd;
 }
 
 void UCDatasetUtil::ucd_diff(std::string ucd_path_1, std::string ucd_path_2)

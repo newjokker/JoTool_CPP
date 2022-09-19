@@ -79,9 +79,12 @@ class UCDataset
         
         // 增量解析 labelme 的 json 数据
         void add_labelme_json_info(std::string uc, std::string labelme_json_path);
-        
+
         // 增量解析 saturndatabase 的 json 数据
         void add_saturndatabase_json_info(std::string uc, std::string labelme_json_path);
+
+        // 增量解析 ucd_info
+        void add_ucd_info(std::string ucd_path);
 
         // 保存为 ucd（斜框矩形如何进行保存）
         void save_to_ucd(std::string save_path);
