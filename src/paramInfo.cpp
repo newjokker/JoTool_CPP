@@ -384,7 +384,7 @@ void UcdParamOpt::load_param_info()
     param_merge->group = "opt";
     param_merge->grammar = "ucd merge save_path ucd_path1 ucd_path2 ...";
     param_merge->english_explain = "merge ucd info";
-    param_merge->chinese_explain = "合并数据集";   
+    param_merge->chinese_explain = "合并 ucd, 合并 uc_list label_used object_info 其他信息清空";   
     UcdParamOpt::add_param(param_merge);
     
     // minus
@@ -392,7 +392,7 @@ void UcdParamOpt::load_param_info()
     param_minus->group = "opt";
     param_minus->grammar = "ucd minus save_path ucd_path1 ucd_path2";
     param_minus->english_explain = "do minus operation between two ucd";
-    param_minus->chinese_explain = "减操作数据集";   
+    param_minus->chinese_explain = "减操作数据集，目前不操作 object_info 信息";   
     UcdParamOpt::add_param(param_minus);
     
     // diff

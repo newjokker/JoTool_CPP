@@ -609,7 +609,7 @@ void UCDataset::save_to_yolo_train_txt_with_assign_uc(std::string save_path, std
         {
             for(int i=0; i<txt_info.size(); i++)
             {
-                ofs << txt_info[i][0] << ", " << txt_info[i][1] << ", " << txt_info[i][2] << ", " << txt_info[i][3] << ", " << txt_info[i][4] << "\n";
+                ofs << txt_info[i][0] << " " << txt_info[i][1] << " " << txt_info[i][2] << " " << txt_info[i][3] << " " << txt_info[i][4] << "\n";
             }
             ofs.close();
         }

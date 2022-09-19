@@ -52,8 +52,8 @@ if __name__ == "__main__":
 
         saveTxtPath = os.path.join(saveDir, "require.txt")
         soDir = os.path.join(saveDir, "so_dir")
-        os.makedirs(saveDir)
-        os.makedirs(soDir)
+        os.makedirs(saveDir, exist_ok=True)
+        os.makedirs(soDir, exist_ok=True)
 
         get_require_txt(appPath, saveTxtPath)
         move_require_so_to_assign_dir(saveTxtPath, soDir)
