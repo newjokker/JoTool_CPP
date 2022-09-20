@@ -71,6 +71,12 @@ using namespace std;
 
 // has uc, uc 是否在 ucd 中
 
+// get 关键字拿到 ucd 中的信息，ucd get uc_list 
+
+// has 关键字对比 uc 是否在 ucd 中
+
+// drop 关键字，去掉 ucd 中的信息，保存为新的 ucd 
+
 
 int main(int argc, char ** argv)
 {
@@ -103,7 +109,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.4.3";
+    std::string app_version = "v1.4.4";
 
     // cache dir
     std::string cache_dir;
@@ -1424,6 +1430,163 @@ int main(int argc, char ** argv)
 
 
         return -1;
+
+    }
+    else if(command_1 == "get")
+    {
+        // 获取 uc_info 中的信息
+
+        // dataset_name, uc_count, model_name, model_version, add_time, update_time, describe, label_used, uc_list 
+
+        if(argc == 4)
+        {
+            std::string attr_name = argv[2];
+            std::string ucd_path = argv[3];
+
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd();
+            if(attr_name == "dataset_name")
+            {
+                std::cout << ucd->dataset_name << std::endl;
+            }
+            else if(attr_name == "model_name")
+            {
+                std::cout << ucd->model_name << std::endl;
+            }
+            else if(attr_name == "model_version")
+            {
+                std::cout << ucd->model_version << std::endl;     
+            }
+            else if(attr_name == "add_time")
+            {
+                std::cout << ucd->add_time << std::endl;     
+            }
+            else if(attr_name == "update_time")
+            {
+                std::cout << ucd->update_time << std::endl;     
+            }
+            else if(attr_name == "describe")
+            {
+                std::cout << ucd->describe << std::endl;     
+            }
+            else if(attr_name == "label_used")
+            {
+                for(int i=0; i<ucd->label_used.size()-1; i++)
+                {
+                    std::cout << ucd->label_used[i] << ",";
+                }
+                std::cout << ucd->label_used[ucd->label_used.size()-1] << std::endl;
+            }
+            else if(attr_name == "uc_list")
+            {
+                for(int i=0; i<ucd->uc_list.size()-1; i++)
+                {
+                    std::cout << ucd->uc_list[i] << ",";
+                }
+                std::cout << ucd->uc_list[ucd->uc_list.size()-1] << std::endl;
+            }
+            else if(attr_name == "uc_count")
+            {
+                std::cout << ucd->uc_list.size() << std::endl;     
+            }
+            else if(attr_name == "label_used_count")
+            {
+                std::cout << ucd->label_used.size() << std::endl;     
+            }
+            else
+            {
+                std::cout << "attr_name not in [dataset_name, uc_count, label_used_count, model_name, model_version, add_time, update_time, describe, label_used, uc_list]" << std::endl;     
+            }
+            return -1;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);  
+        }
+    }
+    else if(command_1 == "has_uc")
+    {
+        if(argc == 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string uc = argv[3];
+
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd();
+
+            for(int i=0; i<ucd->uc_list.size(); i++)
+            {
+                if(ucd->uc_list[i] == uc)
+                {
+                    std::cout << "True" << std::endl;
+                    return -1;
+                }
+            }
+            std::cout << "False" << std::endl;
+            return -1;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "drop")
+    {
+        if(argc == 5)
+        {
+            std::string attr_name = argv[2];
+            std::string ucd_path = argv[3];
+            std::string save_ucd_path = argv[4];
+
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd();
+            if(attr_name == "dataset_name")
+            {
+                ucd->dataset_name = "";
+            }
+            else if(attr_name == "model_name")
+            {
+                ucd->model_name = "";
+            }
+            else if(attr_name == "model_version")
+            {
+                ucd->model_version = "";    
+            }
+            else if(attr_name == "add_time")
+            {
+                ucd->add_time = -1;  
+            }
+            else if(attr_name == "update_time")
+            {
+                ucd->update_time = -1;
+            }
+            else if(attr_name == "describe")
+            {
+                ucd->describe = ""; 
+            }
+            else if(attr_name == "label_used")
+            {
+                ucd->label_used = {};
+            }
+            else if(attr_name == "uc_list")
+            {
+                ucd->uc_list = {};
+            }
+            else if(attr_name == "object_info")
+            {
+                ucd->object_info = {};
+            }
+            else
+            {
+                std::cout << "attr_name not in [dataset_name, object_info, model_name, model_version, add_time, update_time, describe, label_used, uc_list]" << std::endl;     
+            }
+            ucd->save_to_ucd(save_ucd_path);
+            return -1;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);  
+        }
 
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
