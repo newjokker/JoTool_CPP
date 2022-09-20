@@ -33,6 +33,9 @@ class UCDataset
         // labelme 中的对象 {uc: [PointObj, CricleObj, retangleObj ...]}
         std::map<std::string, std::vector<LabelmeObj*> > object_info;
 
+        // size_info {uc: [width, height]}
+        std::map<std::string, std::vector<int> > size_info;
+
         // ucd 新建的时间
         double add_time;
         

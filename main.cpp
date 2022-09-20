@@ -59,23 +59,11 @@ using namespace std;
 
 // 裁剪训练的图也是唯一的，也可以弄成缓存
 
-// parse xml , ignore when xml exists
-
 // print when error ()
-
-// 完善 merge 函数，合并 obj_info 信息 
-
 // 使用进度条，来显示当前的进度，而不是打印所有的信息，只有报错的时候才打印对应的信息
 
-// 拿出所有的 uc 弄成一个新的 不带 obj 的 ucd 
+// 是不是要把长宽信息 放到 ucd 中，使用一个新的字段进行存放 size_info, 这样的话不用每次都读取原图了，速度会非常的快
 
-// has uc, uc 是否在 ucd 中
-
-// get 关键字拿到 ucd 中的信息，ucd get uc_list 
-
-// has 关键字对比 uc 是否在 ucd 中
-
-// drop 关键字，去掉 ucd 中的信息，保存为新的 ucd 
 
 
 int main(int argc, char ** argv)
@@ -1099,7 +1087,6 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "help")
     {
-        // 输出指定 command 详细的参考
         if (argc == 3)
         {
             //
@@ -1434,10 +1421,6 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "get")
     {
-        // 获取 uc_info 中的信息
-
-        // dataset_name, uc_count, model_name, model_version, add_time, update_time, describe, label_used, uc_list 
-
         if(argc == 4)
         {
             std::string attr_name = argv[2];
@@ -1503,6 +1486,10 @@ int main(int argc, char ** argv)
         {
             ucd_param_opt->print_command_info(command_1);  
         }
+    }
+    else if(command_1 == "get_uc_info")
+    {
+        // 输出指定 uc 对应的信息
     }
     else if(command_1 == "has_uc")
     {

@@ -25,6 +25,8 @@ using namespace jotools;
 
 // CPP 写服务端 refer : https://blog.csdn.net/canlynetsky/article/details/119083255
 
+// 自己写的服务，上传下载大文件出错的问题，
+
 
 UCDataset::UCDataset(std::string json_path)
 {
@@ -71,6 +73,7 @@ void UCDataset::parse_ucd(bool parse_shape_info)
     auto describe = data["describe"];
     auto label_used = data["label_used"];
     auto uc_list = data["uc_list"];
+    auto size_info = data["size_info"];
 
     if(dataset_name != nullptr){ UCDataset::dataset_name = dataset_name; }
     if(model_name != nullptr){ UCDataset::model_name = model_name; }
@@ -80,6 +83,7 @@ void UCDataset::parse_ucd(bool parse_shape_info)
     if(describe != nullptr){ UCDataset::describe = describe; }
     if(label_used != nullptr){ UCDataset::label_used = label_used; }
     if(uc_list != nullptr){ UCDataset::uc_list = uc_list; }
+    if(size_info != nullptr){ UCDataset::size_info = size_info; }
 
     UCDataset::unique();
 
@@ -140,6 +144,7 @@ void UCDataset::print_ucd_info()
         std::cout << "update_time       : " << UCDataset::update_time << std::endl;
         std::cout << "describe          : " << UCDataset::describe << std::endl;
         std::cout << "label_used        : " << UCDataset::label_used.size() <<std::endl;
+        std::cout << "img_size_count    : " << UCDataset::size_info.size() <<std::endl;
         //
         if(UCDataset::label_used.size() > 0)
         {
@@ -282,6 +287,16 @@ void UCDataset::add_voc_xml_info(std::string uc, std::string voc_xml_path)
     // 增量解析 voc 标准的 xml 数据
 
     DeteRes* dete_res = new DeteRes(voc_xml_path);
+    
+    // img_size
+    int width = dete_res->width;
+    int height = dete_res->height;
+    if(width > 0 && height > 0)
+    {
+        UCDataset::size_info[uc] = {width, height};
+    }
+
+    // img_obj
     for(int i; i<dete_res->alarms.size(); i++)
     {
         DeteObj dete_obj = dete_res->alarms[i];
@@ -298,7 +313,7 @@ void UCDataset::add_voc_xml_info(std::string uc, std::string voc_xml_path)
             std::cout << "repeated obj : " << uc << ", " << obj->label << std::endl; 
         }
     }
-    
+    // uc_list 
     UCDataset::uc_list.push_back(uc);
 }
 
@@ -310,6 +325,15 @@ void UCDataset::add_labelme_json_info(std::string uc, std::string labelme_json_p
     auto shapes = data["shapes"];
     LabelmeObjFactory obj_factory;
 
+    // size 
+    int height = data["imageHeight"];
+    int width = data["imageWidth"];
+    if(width > 0 && height > 0)
+    {
+        UCDataset::size_info[uc] = {width, height};
+    }
+
+    // obj info
     if(shapes == nullptr)
     { 
         std::cout << "json obj is empty" << std::endl;
@@ -452,7 +476,8 @@ void UCDataset::save_to_ucd(std::string save_path)
         {"describe", UCDataset::describe},
         {"label_used", UCDataset::label_used},
         {"uc_list", UCDataset::uc_list},
-        {"shapes", {}}
+        {"shapes", {}},
+        {"size_info", UCDataset::size_info}
     };
 
     std::map<std::string, std::vector<nlohmann::json> > shapes_info;
@@ -481,21 +506,36 @@ void UCDataset::save_to_ucd(std::string save_path)
 void UCDataset::save_to_voc_xml_with_assign_uc(std::string save_path, std::string img_path, std::string uc)
 {
     int height, width, depth;
-    if(! is_file(img_path))
+    height = -1;
+    width = -1;
+    depth = -1;
+    
+    if(UCDataset::size_info.count(uc) != 0)
     {
-        std::cout << "img_path not exists : " << img_path << std::endl;
-        height = -1;
-        width = -1;
-        depth = -1;
+        std::vector<int> size_info = UCDataset::size_info[uc];
+        if(size_info.size() == 2)
+        {
+            width = size_info[0];
+            height = size_info[1];
+        }
     }
-    else
+
+    // 
+    if((height < 1) || (width < 1))
     {
-        FILE *file = fopen(img_path.c_str(), "rb");
-        auto imageInfo = getImageInfo<IIFileReader>(file);
-        fclose(file);
-        height = imageInfo.getHeight();
-        width =  imageInfo.getWidth();
-        depth = 3;
+        if(! is_file(img_path))
+        {
+            std::cout << "img_path not exist and size_info is empty, can't get img_size, ignore: " << uc << std::endl;
+        }
+        else
+        {
+            FILE *file = fopen(img_path.c_str(), "rb");
+            auto imageInfo = getImageInfo<IIFileReader>(file);
+            fclose(file);
+            height = imageInfo.getHeight();
+            width =  imageInfo.getWidth();
+            depth = 3;
+        }
     }
 
     DeteRes* dete_res = new DeteRes();
@@ -533,20 +573,38 @@ void UCDataset::save_to_yolo_train_txt_with_assign_uc(std::string save_path, std
         label_map[label_list[i]] = i;
     }
 
-    float height, width, depth;
-    if(is_file(img_path))
+    int height, width, depth;
+    height = -1;
+    width = -1;
+    depth = -1;
+    
+    if(UCDataset::size_info.count(uc) != 0)
     {
-        FILE *file = fopen(img_path.c_str(), "rb");
-        auto imageInfo = getImageInfo<IIFileReader>(file);
-        fclose(file);
-        height = imageInfo.getHeight();
-        width =  imageInfo.getWidth();
-        depth = 3;
+        std::vector<int> size_info = UCDataset::size_info[uc];
+        if(size_info.size() == 2)
+        {
+            width = size_info[0];
+            height = size_info[1];
+        }
     }
-    else
+
+    // 
+    if((height < 1) || (width < 1))
     {
-        std::cout << "ignore, img_path not exists : " << img_path << std::endl; 
-        return;
+        if(! is_file(img_path))
+        {
+            std::cout << "size_info is empty and img_path not exists, ignore this uc : " << uc << std::endl;
+            return;
+        }
+        else
+        {
+            FILE *file = fopen(img_path.c_str(), "rb");
+            auto imageInfo = getImageInfo<IIFileReader>(file);
+            fclose(file);
+            height = imageInfo.getHeight();
+            width =  imageInfo.getWidth();
+            depth = 3;
+        }
     }
 
     std::vector< std::vector<std::string> > txt_info;
@@ -747,116 +805,7 @@ void UCDataset::crop_dete_res_with_assign_uc(std::string uc, std::string img_pat
 }
 
 
-// merge ucd
-UCDataset operator+(UCDataset &ucd_1, UCDataset &ucd_2)
-{
-    UCDataset ucd("");
-
-    // dataset_name
-    if((ucd_1.dataset_name) == "" && (ucd_2.dataset_name != ""))
-    {
-        ucd.dataset_name = ucd_2.dataset_name;
-    }
-    else
-    {
-        ucd.dataset_name = ucd_1.dataset_name;
-    }
-
-    // model_version
-    if((ucd_1.model_version) == "" && (ucd_2.model_version != ""))
-    {
-        ucd.model_version = ucd_2.model_version;
-    }
-    else
-    {
-        ucd.model_version = ucd_1.model_version;
-    }
-
-    // add_time
-    if((ucd_1.add_time) == -1 && (ucd_2.add_time != -1))
-    {
-        ucd.add_time = ucd_2.add_time;
-    }
-    else
-    {
-        ucd.add_time = ucd_1.add_time;
-    }
-
-    // update_time
-    if((ucd_1.update_time) == -1 && (ucd_2.update_time != -1))
-    {
-        ucd.update_time = ucd_2.update_time;
-    }
-    else
-    {
-        ucd.update_time = ucd_1.update_time;
-    }
-
-    // describe
-    if((ucd_1.describe) == "" && (ucd_2.describe != ""))
-    {
-        ucd.describe = ucd_2.describe;
-    }
-    else
-    {
-        ucd.describe = ucd_1.describe;
-    }
-
-    // uc_list
-    for(int i=0; i<ucd_1.uc_list.size(); i++)
-    {
-        ucd.uc_list.push_back(ucd_1.uc_list[i]);
-    }
-
-    for(int i=0; i<ucd_2.uc_list.size(); i++)
-    {
-        ucd.uc_list.push_back(ucd_2.uc_list[i]);
-    }
-
-    // label_used
-    for(int i=0; i<ucd_1.label_used.size(); i++)
-    {
-        ucd.label_used.push_back(ucd_1.label_used[i]);
-    }
-
-    for(int i=0; i<ucd_2.label_used.size(); i++)
-    {
-        ucd.label_used.push_back(ucd_2.label_used[i]);
-    }
-
-    // object_info
-    auto iter_1 = ucd_1.object_info.begin();
-    while(iter_1 != ucd_1.object_info.end())
-    {
-        std::string uc = iter_1->first;
-        for(int i=0; i<iter_1->second.size(); i++)
-        {
-            LabelmeObj *obj = iter_1->second[i];
-            if(! ucd.has_obj(uc, obj))
-            {
-                ucd.object_info[uc].push_back(obj);
-            }
-        }
-    }
-    
-    auto iter_2 = ucd_1.object_info.begin();
-    while(iter_2 != ucd_1.object_info.end())
-    {
-        std::string uc = iter_2->first;
-        for(int i=0; i<iter_2->second.size(); i++)
-        {
-            LabelmeObj *obj = iter_2->second[i];
-            if(! ucd.has_obj(uc, obj))
-            {
-                ucd.object_info[uc].push_back(obj);
-            }
-        }
-    }
-    return ucd;
-}
-
-//
-
+// 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
 {
     UCDatasetUtil::host = host;
@@ -1046,8 +995,6 @@ void UCDatasetUtil::load_ucd(std::string ucd_name, std::string save_path)
     UCDatasetUtil::load_file("/ucd/" + ucd_name, save_path);
 }
 
-
-// 
 void UCDatasetUtil::search_ucd()
 {
     std::string check_url = "http://" + UCDatasetUtil::host + ":" + std::to_string(UCDatasetUtil::port);
@@ -1578,27 +1525,11 @@ void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std
     while(iter != ucd->object_info.end())
     {
         std::string uc = iter->first;
-        UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, {uc});
+        // UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, {uc});
         std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
-        
-
-        if(is_file(img_path))
-        {
-            std::string xml_path = save_dir + "/" + uc + ".xml";
-            if(is_file(xml_path))
-            {
-                std::cout << index << ", xml exists, ignore : " << xml_path << std::endl;
-            }
-            else
-            {
-                ucd->save_to_voc_xml_with_assign_uc(xml_path, img_path, uc);
-                std::cout << index << ", parse xml : " << uc << std::endl;
-            }
-        }
-        else
-        {
-            std::cout << "load img failed : " << img_path << std::endl;
-        }
+        std::string xml_path = save_dir + "/" + uc + ".xml";
+        ucd->save_to_voc_xml_with_assign_uc(xml_path, img_path, uc);
+        std::cout << index << ", parse xml : " << uc << std::endl;
         index += 1;
         iter ++;
     }
@@ -1647,27 +1578,12 @@ void UCDatasetUtil::parse_yolo_train_data(std::string img_dir, std::string save_
     while(iter != ucd->object_info.end())
     {
         std::string uc = iter->first;
-        UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, {uc});
+        // UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, {uc});
         std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
-        
+        std::string txt_path = save_dir + "/" + uc + ".txt";
+        ucd->save_to_yolo_train_txt_with_assign_uc(txt_path, img_path, uc, label_list);
+        std::cout << index << ", parse txt : " << uc << std::endl;
 
-        if(is_file(img_path))
-        {
-            std::string txt_path = save_dir + "/" + uc + ".txt";
-            if(is_file(txt_path))
-            {
-                std::cout << index << ", txt exists, ignore : " << txt_path << std::endl;
-            }
-            else
-            {
-                ucd->save_to_yolo_train_txt_with_assign_uc(txt_path, img_path, uc, label_list);
-                std::cout << index << ", parse txt : " << uc << std::endl;
-            }
-        }
-        else
-        {
-            std::cout << "load img failed : " << img_path << std::endl;
-        }
         index += 1;
         iter ++;
     }
