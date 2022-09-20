@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <nlohmann/json.hpp>
 #include "include/lablelmeObj.hpp"
+#include "include/tqdm.h"
 
 using json = nlohmann::json;
 using namespace jotools;
@@ -62,8 +63,7 @@ using namespace std;
 // print when error ()
 // 使用进度条，来显示当前的进度，而不是打印所有的信息，只有报错的时候才打印对应的信息
 
-// 是不是要把长宽信息 放到 ucd 中，使用一个新的字段进行存放 size_info, 这样的话不用每次都读取原图了，速度会非常的快
-
+// 清空有问题的数据，将缓存数据中大小为 0 的图片和 xml 全部删掉
 
 
 int main(int argc, char ** argv)
@@ -1235,13 +1235,18 @@ int main(int argc, char ** argv)
     else if(command_1 == "test")
     {
 
-        UCDataset * ucd_1 = new UCDataset("/home/ldq/ucd_dir/recommend_base.json");
+        UCDataset* ucd = new UCDataset("/home/ldq/ucd_dir/zgh.json");
 
-        ucd_1->parse_ucd(true);
+        ucd->parse_ucd();
 
-        ucd_1->add_ucd_info("/home/ldq/ucd_dir/recommend_random.json");
+        for(int i=0; i<ucd->uc_list.size(); i++)
+        {
+        
+            ucd_util->load_img_with_assign_uc("/home/ldq/ucd_dir/del_img", ucd->uc_list[i]);
 
-        ucd_1->save_to_ucd("/home/ldq/ucd_dir/merge_test.json");
+        }
+
+        return 0;
 
     }
     else if(command_1 == "filter_by_tags")
@@ -1487,10 +1492,6 @@ int main(int argc, char ** argv)
             ucd_param_opt->print_command_info(command_1);  
         }
     }
-    else if(command_1 == "get_uc_info")
-    {
-        // 输出指定 uc 对应的信息
-    }
     else if(command_1 == "has_uc")
     {
         if(argc == 4)
@@ -1574,7 +1575,40 @@ int main(int argc, char ** argv)
         {
             ucd_param_opt->print_command_info(command_1);  
         }
+    }
+    else if(command_1 == "uc_info")
+    {
+        // 打印指定的 uc 的信息
 
+        if(argc == 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string uc = argv[3];
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+
+            // size_info
+            std::cout << "-----------------------" << std::endl;
+            if(ucd->size_info.count(uc) > 0)
+            {
+                std::cout << "(w, h) : (" << ucd->size_info[uc][0] << ", " << ucd->size_info[uc][1] << ")" << std::endl;
+            }
+            std::cout << "-----------------------" << std::endl;
+
+            // obj_info
+            if(ucd->object_info.count(uc) > 0)
+            {
+                for(int i=0; i<ucd->object_info[uc].size(); i++)
+                {
+                    ucd->object_info[uc][i]->print_info();
+                    std::cout << "-----------------------" << std::endl;
+                }
+            }
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {

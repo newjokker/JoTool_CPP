@@ -7,8 +7,6 @@
 #include <vector>
 #include "include/lablelmeObj.hpp"
 #include "include/deteRes.hpp"
-
-
 using namespace jotools;
 
 
@@ -154,6 +152,7 @@ class UCDatasetUtil
         
         // 下载图像 | xml | ucd
         void load_img(std::string save_dir, std::vector<std::string> uc_list);
+        void load_img_with_assign_uc(std::string save_dir, std::string assign_uc);
         void load_xml(std::string save_dir, std::vector<std::string> uc_list);
         void load_ucd(std::string ucd_name, std::string save_dir);
         

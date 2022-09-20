@@ -18,6 +18,7 @@
 #include "include/lablelmeObj.hpp"
 #include "include/easyexif.h"
 #include "include/imageinfo.hpp"
+#include "include/tqdm.h"
 
 using json = nlohmann::json;
 using namespace jotools;
@@ -804,7 +805,6 @@ void UCDataset::crop_dete_res_with_assign_uc(std::string uc, std::string img_pat
     delete dete_res;
 }
 
-
 // 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
 {
@@ -894,20 +894,8 @@ void UCDatasetUtil::load_file(std::string url, std::string save_path, int index)
 {
     // refer : https://blog.csdn.net/harry49/article/details/115763383
 
-    if(is_file(save_path))
+    if(! is_file(save_path))
     {
-        std::cout << "* file exists ignore : " << save_path << std::endl;
-    }
-    else
-    {
-        // if(index != -1)
-        // {
-        //     std::cout << index << " "<< "* load " << UCDatasetUtil::root_url << url << std::endl;
-        // }
-        // else
-        // {
-        //     std::cout << "* load " << UCDatasetUtil::root_url << url << std::endl;
-        // }
         httplib::Client cli(UCDatasetUtil::root_url);
         auto res = cli.Get(url);
 
@@ -941,6 +929,8 @@ void UCDatasetUtil::load_img(std::string save_dir, std::vector<std::string> uc_l
 
     std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
 
+    tqdm bar;
+    int N = uc_list.size();
     for(int i=0; i<uc_list.size(); i++)
     {
         std::string img_url = "/file/" + uc_list[i] + ".jpg";
@@ -952,18 +942,48 @@ void UCDatasetUtil::load_img(std::string save_dir, std::vector<std::string> uc_l
             if(is_file(img_cache_path))
             {
                 copy_file(img_cache_path, save_img_path);
-                std::cout << i << " " << "* copy " << img_cache_path << std::endl;
             }
             else
             {
                 UCDatasetUtil::load_file(img_url, save_img_path, i); 
-                std::cout << i << ", load img : " << save_img_path << std::endl;
             }
         }
-        else
-        {
-            std::cout << i << ", file exists : " << save_img_path << std::endl;
-        }
+        bar.progress(i, N);
+    }
+    bar.finish();
+}
+
+void UCDatasetUtil::load_img_with_assign_uc(std::string save_dir, std::string uc)
+{
+
+
+    if(! is_dir(save_dir))
+    {
+        std::cout << "save dir not exists : " << save_dir << std::endl;
+        throw "save dir not exists";
+    }
+
+    std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
+    std::string img_cache_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, suffix);
+    std::string save_img_path = save_dir + "/" + uc + ".jpg";  
+    std::string img_url = "/file/" + uc + ".jpg";
+
+
+    std::cout << "-------------" << std::endl;
+    std::cout << "save_dir : " << save_dir << std::endl;
+    std::cout << "uc : " << uc << std::endl;
+    std::cout << "img_url : " << img_url << std::endl;
+    std::cout << "save_img_path : " << save_img_path << std::endl;
+    std::cout << "img_cache_path : " << img_cache_path << std::endl;
+    std::cout << "-------------" << std::endl;
+
+    if(is_file(img_cache_path))
+    {
+        copy_file(img_cache_path, save_img_path);
+    }
+    else
+    {
+        UCDatasetUtil::load_file(img_url, save_img_path); 
     }
 }
 
@@ -1422,8 +1442,7 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
     while(iter != ucd->object_info.end())
     {
         std::string uc = iter->first;
-        UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, {uc});
-
+        UCDatasetUtil::load_img_with_assign_uc(UCDatasetUtil::cache_img_dir, uc);
         std::set<std::string> img_suffix {".jpg", ".JPG", ".png", ".PNG"};
         std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
 
@@ -1434,8 +1453,8 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
         }
         else
         {
+            // std::cout << img_path << std::endl;
             ucd->crop_dete_res_with_assign_uc(uc, img_path,  save_dir);
-            std::cout << uc_index << ", cut_small_img : " << uc << std::endl;
         }
         uc_index += 1;
         iter++;
@@ -1471,7 +1490,7 @@ void UCDatasetUtil::parse_labelme_json(std::string img_dir, std::string save_dir
     while(iter != ucd->object_info.end())
     {
         std::string uc = iter->first;
-        UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, {uc});
+        UCDatasetUtil::load_img_with_assign_uc(UCDatasetUtil::cache_img_dir, uc);
         std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
         
         if(is_file(img_path))
@@ -1525,7 +1544,7 @@ void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std
     while(iter != ucd->object_info.end())
     {
         std::string uc = iter->first;
-        // UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, {uc});
+        // UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, uc);
         std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
         std::string xml_path = save_dir + "/" + uc + ".xml";
         ucd->save_to_voc_xml_with_assign_uc(xml_path, img_path, uc);
@@ -1578,12 +1597,11 @@ void UCDatasetUtil::parse_yolo_train_data(std::string img_dir, std::string save_
     while(iter != ucd->object_info.end())
     {
         std::string uc = iter->first;
-        // UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, {uc});
+        // UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, uc);
         std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
         std::string txt_path = save_dir + "/" + uc + ".txt";
         ucd->save_to_yolo_train_txt_with_assign_uc(txt_path, img_path, uc, label_list);
         std::cout << index << ", parse txt : " << uc << std::endl;
-
         index += 1;
         iter ++;
     }
