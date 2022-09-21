@@ -438,6 +438,14 @@ void UCDataset::add_ucd_info(std::string ucd_path)
 
     UCDataset::unique();
 
+    // merge size_info
+    auto iter_size = other->size_info.begin();
+    while(iter_size != other->size_info.end())
+    {
+        UCDataset::size_info[iter_size->first] = iter_size->second;
+        iter_size++;
+    }
+
     // merge object_info 
     auto iter = other->object_info.begin();
     while(iter != other->object_info.end())

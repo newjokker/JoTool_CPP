@@ -67,10 +67,6 @@ using namespace std;
 
 // label_used 是无序的要记得这个
 
-// 支持随机（按照顺序）取 ucd 的子集，指定长度即可
-
-// merge 时候要考虑到 size_info 的合并
-
 
 int main(int argc, char ** argv)
 {
