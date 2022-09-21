@@ -63,8 +63,6 @@ using namespace std;
 // print when error ()
 // 使用进度条，来显示当前的进度，而不是打印所有的信息，只有报错的时候才打印对应的信息
 
-// 清空有问题的数据，将缓存数据中大小为 0 的图片和 xml 全部删掉
-
 // label_used 是无序的要记得这个
 
 
@@ -793,6 +791,12 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "cut_small_img")
     {
+        // 裁剪到一半会报错
+        // 会出现几张图大小为 0 是不是 cv 读图报错导致的？
+
+        ucd_param_opt->not_ready();
+        return -1;
+
         if (argc == 5)
         {
             std::string ucd_path = argv[2];
@@ -1001,6 +1005,19 @@ int main(int argc, char ** argv)
         else
         {
             ucd_param_opt->print_command_info("cache_clear");
+        }
+    }
+    else if(command_1 == "cache_clean")
+    {
+        // 删除图片缓存中大小为 0 的空图片
+        if(argc == 2)
+        {
+            ucd_util->cache_clean();
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+            return -1;
         }
     }
     else if(command_1 == "acc")

@@ -5,16 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
-// #include <io.h>
 #include <vector>
 #include <set>
 #include <string.h>
 #include <sys/stat.h>
-
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-
 #include "../include/fileOperateUtil.hpp"
 
 
@@ -279,10 +275,8 @@ void copy_file(std::string src, std::string des)
 
 int get_file_size(std::string file_path)
 {
-    FILE *fp=fopen(file_path.c_str(), "r");  
-    if(!fp) return -1;  
-    fseek(fp, 0L, SEEK_END);  
-    int size = ftell(fp);  
-    fclose(fp);  
+    struct stat statbuf;  
+    stat(file_path.c_str(), &statbuf);  
+    int size=statbuf.st_size;  
     return size;  
 }

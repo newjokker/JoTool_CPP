@@ -226,6 +226,8 @@ class UCDatasetUtil
         // area_analysis
         void area_analysis(std::string ucd_path, int seg_count);
 
+        // 缓存文件清洗
+        void cache_clean();
 
     private:
         

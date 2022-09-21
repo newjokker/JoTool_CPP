@@ -807,6 +807,12 @@ void UCDataset::crop_dete_res_with_assign_uc(std::string uc, std::string img_pat
         return ;
     }
 
+    if(! is_file(img_path))
+    {
+        std::cout << "img_path not exists" << std::endl;
+        return;
+    }
+
     jotools::DeteRes* dete_res = new DeteRes();
     dete_res->parse_img_info(img_path);
     UCDataset::get_dete_res_with_assign_uc(dete_res, uc);
@@ -1148,8 +1154,10 @@ void UCDatasetUtil::get_ucd_from_img_dir(std::string img_dir, std::string ucd_pa
 {
     std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
     std::vector<std::string> img_path_vector = get_all_file_path_recursive(img_dir, suffix);
-
     UCDataset* ucd = new UCDataset(ucd_path);
+
+    tqdm bar;
+    int N = img_path_vector.size();
 
     std::string uc;
     for(int i=0; i<img_path_vector.size(); i++)
@@ -1159,7 +1167,7 @@ void UCDatasetUtil::get_ucd_from_img_dir(std::string img_dir, std::string ucd_pa
         if(is_uc(uc))
         {
             // get uc
-            std::cout << img_path_vector[i] << std::endl;
+            // std::cout << img_path_vector[i] << std::endl;
             ucd->uc_list.push_back(uc);
             // get img size
             FILE *file = fopen(img_path_vector[i].c_str(), "rb");
@@ -1169,7 +1177,9 @@ void UCDatasetUtil::get_ucd_from_img_dir(std::string img_dir, std::string ucd_pa
             int width =  imageInfo.getWidth();
             ucd->size_info[uc] = {width, height};
         }
+        bar.progress(i, N);
     }
+    bar.finish();
     ucd->save_to_ucd(ucd_path);
     delete ucd;
 }
@@ -1348,17 +1358,23 @@ void UCDatasetUtil::cache_clear()
 
     if(! is_dir(UCDatasetUtil::cache_img_dir))
     {
-        std::cout << "ucd path not exists" << std::endl;
+        std::cout << "cache_img_dir not exists" << std::endl;
     }
 
     // 清空全部缓存
     std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
     std::vector<std::string> all_img_path_vector = get_all_file_path(UCDatasetUtil::cache_img_dir, suffix);
+    
+    tqdm bar;
+    int N = all_img_path_vector.size();
+
     for(int i=0; i<all_img_path_vector.size(); i++)
     {
         remove(all_img_path_vector[i].c_str());
-        std::cout << i << " , remove : " << all_img_path_vector[i] << std::endl;
+        // std::cout << i << " , remove : " << all_img_path_vector[i] << std::endl;
+        bar.progress(i, N);
     }
+    bar.finish();
 }
 
 void UCDatasetUtil::cache_clear(std::string ucd_path)
@@ -1373,6 +1389,9 @@ void UCDatasetUtil::cache_clear(std::string ucd_path)
     UCDataset* ucd = new UCDataset(ucd_path);
     ucd->parse_ucd();
 
+    tqdm bar;
+    int N = ucd->uc_list.size();
+
     for(int i=0; i<ucd->uc_list.size(); i++)
     {
         std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, ucd->uc_list[i], suffix);
@@ -1382,7 +1401,9 @@ void UCDatasetUtil::cache_clear(std::string ucd_path)
             remove(img_path.c_str());
             std::cout << i << " , remove : " << img_path << std::endl;
         }
+        bar.progress(i, N);
     }
+    bar.finish();
     delete ucd;
 }
 
@@ -1483,13 +1504,14 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
     if(! is_dir(save_dir))
     {
         std::cout << "save dir not exists : " << save_dir << std::endl;
-        // throw "save dir not exists";
+        throw "save dir not exists";
         return;
     }
 
     if(! UCDatasetUtil::is_ucd_path(ucd_path))
     {
         std::cout << "ucd_path not exists : " << ucd_path << std::endl;
+        throw "ucd_path not exists";
         return;
     }
 
@@ -1512,7 +1534,6 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
         }
         else
         {
-            // std::cout << img_path << std::endl;
             ucd->crop_dete_res_with_assign_uc(uc, img_path,  save_dir);
         }
         uc_index += 1;
@@ -1866,5 +1887,31 @@ void UCDatasetUtil::area_analysis(std::string ucd_path, int seg_count)
     delete ucd;
 }
 
+void UCDatasetUtil::cache_clean()
+{
+    if(! is_dir(UCDatasetUtil::cache_img_dir))
+    {
+        std::cout << "ucd path not exists" << std::endl;
+    }
 
+    // 清空全部缓存
+    std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
+    std::vector<std::string> all_img_path_vector = get_all_file_path(UCDatasetUtil::cache_img_dir, suffix);
+
+    tqdm bar;
+    int N = all_img_path_vector.size();
+    int remove_count = 0;
+    for(int i=0; i<all_img_path_vector.size(); i++)
+    {
+        int file_size = get_file_size(all_img_path_vector[i]);
+        if(file_size == 0)
+        {
+            remove(all_img_path_vector[i].c_str());
+            remove_count += 1;
+        }
+        bar.progress(i, N);
+    }
+    bar.finish();
+    std::cout << "remove file count : " << remove_count << std::endl;
+}
 

@@ -30,9 +30,6 @@ std::string get_file_suffix(std::string);
 std::string get_file_name(std::string);
 std::string get_file_name_suffix(std::string);
 
-// 这个函数的实现有问题，需要进行调整？
-int get_file_size(std::string);
-
 std::vector<std::string> get_all_file_path(std::string);
 std::vector<std::string> get_all_file_path(std::string, std::set<std::string>);
 std::vector<std::string> get_all_file_path_recursive(std::string);
@@ -57,6 +54,9 @@ void move_file_vector_to_dir(std::vector<std::string> file_vector, std::string s
 
 // 删除文件
 void remove_file(std::string);
+
+// 获取文件大小
+int get_file_size(std::string file_path);
 
 // 判断指定后缀的文件是否存在
 std::string get_file_by_suffix_set(std::string folder, std::string name, std::set<std::string>);
