@@ -5,6 +5,7 @@
 #include <pwd.h>
 #include <time.h>
 #include <unistd.h>
+#include <algorithm>
 #include <opencv2/opencv.hpp>
 #include <nlohmann/json.hpp>
 #include "include/strToImg.hpp"
@@ -18,7 +19,6 @@
 #include "include/paramInfo.hpp"
 #include "include/printCpp.hpp"
 #include "include/lablelmeObj.hpp"
-#include <algorithm>
 #include <nlohmann/json.hpp>
 #include "include/lablelmeObj.hpp"
 #include "include/tqdm.h"
@@ -65,6 +65,12 @@ using namespace std;
 
 // 清空有问题的数据，将缓存数据中大小为 0 的图片和 xml 全部删掉
 
+// label_used 是无序的要记得这个
+
+// 支持随机（按照顺序）取 ucd 的子集，指定长度即可
+
+// merge 时候要考虑到 size_info 的合并
+
 
 int main(int argc, char ** argv)
 {
@@ -97,7 +103,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.4.4";
+    std::string app_version = "v1.4.5";
 
     // cache dir
     std::string cache_dir;
@@ -1604,6 +1610,29 @@ int main(int argc, char ** argv)
                     std::cout << "-----------------------" << std::endl;
                 }
             }
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "sub")
+    {
+        if(argc == 6)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_path = argv[3];
+            int count = std::stoi(argv[4]);
+            std::string is_random_str = argv[5];
+            bool is_random = true;
+            if((is_random_str == "false") || (is_random_str == "False") || (is_random_str == "0"))
+            {
+                is_random = false;
+            }
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->get_sub_ucd(count, is_random, save_path);
+            return -1;
         }
         else
         {

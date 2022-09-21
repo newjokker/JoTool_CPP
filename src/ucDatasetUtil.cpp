@@ -5,6 +5,7 @@
 #include <set>
 #include <time.h>
 #include <fstream>
+#include <algorithm>
 #include <nlohmann/json.hpp>
 #include <httplib.h>
 #include <string>
@@ -805,6 +806,48 @@ void UCDataset::crop_dete_res_with_assign_uc(std::string uc, std::string img_pat
     delete dete_res;
 }
 
+void UCDataset::get_sub_ucd(int sub_count, bool is_random, std::string save_path)
+{
+    if(sub_count > UCDataset::uc_list.size())
+    {
+        std::cout << "sub_count > uc_list.size()" << std::endl;
+        throw "sub_count > uc_list.size()";
+    }
+
+    UCDataset* new_ucd = new UCDataset(save_path);
+    new_ucd->dataset_name   = UCDataset::dataset_name;
+    new_ucd->model_version  = UCDataset::model_version;
+    new_ucd->model_name     = UCDataset::model_name;
+    new_ucd->describe       = UCDataset::describe;
+    new_ucd->add_time       = UCDataset::add_time;
+    new_ucd->update_time    = -1;
+    new_ucd->label_used     = UCDataset::label_used;
+    
+    // get new uc_list
+    std::vector<std::string> uc_list = UCDataset::uc_list;
+    if(is_random)
+    {
+        std::random_shuffle(uc_list.begin(), uc_list.end());
+    }
+    
+    // get new info
+    for(int i=0; i<sub_count; i++)
+    {
+        std::string uc = uc_list[i];
+        new_ucd->uc_list.push_back(uc_list[i]);
+        if(UCDataset::object_info.count(uc) > 0)
+        {
+            new_ucd->object_info[uc] = UCDataset::object_info[uc];
+        }
+
+        if(UCDataset::size_info.count(uc) > 0)
+        {        
+            new_ucd->size_info[uc] = UCDataset::size_info[uc];
+        }
+    }
+    new_ucd->save_to_ucd(save_path);
+}
+
 // 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
 {
@@ -1107,8 +1150,16 @@ void UCDatasetUtil::get_ucd_from_img_dir(std::string img_dir, std::string ucd_pa
 
         if(is_uc(uc))
         {
+            // get uc
             std::cout << img_path_vector[i] << std::endl;
             ucd->uc_list.push_back(uc);
+            // get img size
+            FILE *file = fopen(img_path_vector[i].c_str(), "rb");
+            auto imageInfo = getImageInfo<IIFileReader>(file);
+            fclose(file);
+            int height = imageInfo.getHeight();
+            int width =  imageInfo.getWidth();
+            ucd->size_info[uc] = {width, height};
         }
     }
     ucd->save_to_ucd(ucd_path);

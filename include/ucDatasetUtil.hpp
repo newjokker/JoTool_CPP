@@ -117,6 +117,9 @@ class UCDataset
         // crop_dete_res
         void crop_dete_res_with_assign_uc(std::string uc, std::string img_path, std::string save_dir);
 
+        // 获得子序列
+        void get_sub_ucd(int sub_count, bool is_random, std::string save_path);
+
 
     private:
         std::string json_path;

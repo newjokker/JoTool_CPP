@@ -700,6 +700,16 @@ void UcdParamOpt::load_param_info()
     param_has_uc->chinese_explain = "判断指定的 uc 是否在 ucd 的 uc_list 中";   
     param_has_uc->demo.push_back("ucd has_uc aqm.json Die11mk");
     UcdParamOpt::add_param(param_has_uc);
+    
+    // sub
+    ParamInfo * param_sub = new ParamInfo("sub");
+    param_sub->group = "sync";
+    param_sub->grammar = "ucd sub ucd_path save_ucd_path need_count is_random";
+    param_sub->english_explain = "";
+    param_sub->chinese_explain = "从 ucd 中取出子序列，可以选择是否为随机选取";   
+    param_sub->demo.push_back("ucd sub aqm.json aqm_sub.json 10 1");
+    param_sub->demo.push_back("ucd sub aqm.json aqm_sub.json 10 0");
+    UcdParamOpt::add_param(param_sub);
 
 }
 
