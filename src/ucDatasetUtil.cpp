@@ -562,7 +562,8 @@ void UCDataset::save_to_voc_xml_with_assign_uc(std::string save_path, std::strin
             int x2 = obj->points[1][0];
             int y2 = obj->points[1][1];
             std::string tag = obj->label;
-            dete_res->add_dete_obj(x1, y1, x2, y2, -1, tag);
+            float conf = obj->conf;
+            dete_res->add_dete_obj(x1, y1, x2, y2, conf, tag);
         }
     }
 
@@ -860,6 +861,22 @@ void UCDataset::get_sub_ucd(int sub_count, bool is_random, std::string save_path
         }
     }
     new_ucd->save_to_ucd(save_path);
+}
+
+void UCDataset::update_uc_list_by_object_info(std::string save_path)
+{
+    std::vector<std::string> uc_list;
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        if(iter->second.size() > 0)
+        {
+            uc_list.push_back(iter->first);
+        }
+        iter++;
+    }
+    UCDataset::uc_list = uc_list;
+    UCDataset::save_to_ucd(save_path);
 }
 
 // 

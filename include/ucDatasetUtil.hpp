@@ -120,6 +120,9 @@ class UCDataset
         // 获得子序列
         void get_sub_ucd(int sub_count, bool is_random, std::string save_path);
 
+        // 去除没有 object_info 的uc
+        void update_uc_list_by_object_info(std::string save_path);
+
 
     private:
         std::string json_path;

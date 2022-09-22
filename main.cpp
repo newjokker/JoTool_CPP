@@ -97,7 +97,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.4.5";
+    std::string app_version = "v1.4.6";
 
     // cache dir
     std::string cache_dir;
@@ -1270,7 +1270,7 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "filter_by_tags")
     {
-        // 根据阈值进行过滤
+        // 根据标签进行过滤
         ucd_param_opt->not_ready(command_1);
         return -1;
 
@@ -1646,6 +1646,23 @@ int main(int argc, char ** argv)
             ucd->parse_ucd(true);
             ucd->get_sub_ucd(count, is_random, save_path);
             return -1;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "update_uc_by_obj")
+    {
+        // 去除没有 obj_info 信息的 uc
+        if(argc == 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_path = argv[3];
+
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->update_uc_list_by_object_info(save_path);
         }
         else
         {
