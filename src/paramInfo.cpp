@@ -688,7 +688,7 @@ void UcdParamOpt::load_param_info()
     param_drop->group = "sync";
     param_drop->grammar = "ucd drop attr_name ucd_path save_ucd_path";
     param_drop->english_explain = "";
-    param_drop->chinese_explain = "获取 ucd 中的信息，dataset_name, object_info, model_name, model_version, add_time, update_time, describe, label_used, uc_list]";   
+    param_drop->chinese_explain = "获取 ucd 中的信息 dataset_name, object_info, model_name, model_version, add_time, update_time, describe, label_used, uc_list]";   
     param_drop->demo.push_back("ucd drop object_info aqm.json aqm_drop_object_info.json");
     UcdParamOpt::add_param(param_drop);
     
@@ -703,7 +703,7 @@ void UcdParamOpt::load_param_info()
     
     // sub
     ParamInfo * param_sub = new ParamInfo("sub");
-    param_sub->group = "sync";
+    param_sub->group = "opt";
     param_sub->grammar = "ucd sub ucd_path save_ucd_path need_count is_random";
     param_sub->english_explain = "";
     param_sub->chinese_explain = "从 ucd 中取出子序列，可以选择是否为随机选取";   
@@ -711,6 +711,16 @@ void UcdParamOpt::load_param_info()
     param_sub->demo.push_back("ucd sub aqm.json aqm_sub.json 10 0");
     UcdParamOpt::add_param(param_sub);
 
+    // split
+    ParamInfo * param_split = new ParamInfo("split");
+    param_split->group = "opt";
+    param_split->grammar = "ucd split ucd_path save_ucd_path_a save_ucd_path_a ratio";
+    param_split->english_explain = "";
+    param_split->chinese_explain = "将 ucd 按照比例划分为两个部分";   
+    param_split->demo.push_back("ucd split aqm.json aqm_a.json aqm_b.json 0.2");
+    param_split->demo.push_back("ucd split aqm.json aqm_a.json aqm_b.json 0.5");
+    UcdParamOpt::add_param(param_split);
+   
 }
 
 void UcdParamOpt::not_ready(std::string method_name)

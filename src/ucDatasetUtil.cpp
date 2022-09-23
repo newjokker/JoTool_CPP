@@ -879,6 +879,71 @@ void UCDataset::update_uc_list_by_object_info(std::string save_path)
     UCDataset::save_to_ucd(save_path);
 }
 
+void UCDataset::split(std::string ucd_part_a, std::string ucd_part_b, float ratio)
+{
+    
+    if(ratio <= 0 || ratio >= 1)
+    {
+        std::cout << "ratio should in (0, 1)" << std::endl;
+        throw "ratio should in (0, 1)";
+    }
+    
+    std::vector<std::string> uc_list = UCDataset::uc_list;
+    std::random_shuffle(uc_list.begin(), uc_list.end());
+    int count_for_a = ratio * uc_list.size();
+    
+    // ucd_a
+    UCDataset* ucd_a = new UCDataset(ucd_part_a);
+    ucd_a->dataset_name = UCDataset::dataset_name;
+    ucd_a->model_name = UCDataset::model_name;
+    ucd_a->model_version = UCDataset::model_version;
+    ucd_a->describe = UCDataset::describe;
+    ucd_a->add_time = -1;
+    ucd_a->update_time = -1;
+    ucd_a->label_used = UCDataset::label_used;
+    for(int i=0; i<count_for_a; i++)
+    {
+        std::string uc = uc_list[i];
+        ucd_a->uc_list.push_back(uc);
+        if(UCDataset::object_info.count(uc) > 0)
+        {
+            ucd_a->object_info[uc] = UCDataset::object_info[uc];
+        }
+        if(UCDataset::size_info.count(uc) > 0)
+        {
+            ucd_a->size_info[uc] = UCDataset::size_info[uc];
+        }
+    }
+    ucd_a->save_to_ucd(ucd_part_a);
+    delete ucd_a;
+
+    // ucd_b
+    UCDataset* ucd_b = new UCDataset(ucd_part_b);
+    ucd_b->dataset_name = UCDataset::dataset_name;
+    ucd_b->model_name = UCDataset::model_name;
+    ucd_b->model_version = UCDataset::model_version;
+    ucd_b->describe = UCDataset::describe;
+    ucd_b->add_time = -1;
+    ucd_b->update_time = -1;
+    ucd_b->label_used = UCDataset::label_used;
+    for(int i=count_for_a; i<uc_list.size(); i++)
+    {
+        std::string uc = uc_list[i];
+        ucd_b->uc_list.push_back(uc);
+        if(UCDataset::object_info.count(uc) > 0)
+        {
+            ucd_b->object_info[uc] = UCDataset::object_info[uc];
+        }
+        if(UCDataset::size_info.count(uc) > 0)
+        {
+            ucd_b->size_info[uc] = UCDataset::size_info[uc];
+        }
+    }
+    ucd_b->save_to_ucd(ucd_part_b);
+    delete ucd_b;
+}
+
+
 // 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
 {
@@ -1029,8 +1094,6 @@ void UCDatasetUtil::load_img(std::string save_dir, std::vector<std::string> uc_l
 
 void UCDatasetUtil::load_img_with_assign_uc(std::string save_dir, std::string uc)
 {
-
-
     if(! is_dir(save_dir))
     {
         std::cout << "save dir not exists : " << save_dir << std::endl;
@@ -1087,6 +1150,11 @@ void UCDatasetUtil::load_xml(std::string save_dir, std::vector<std::string> uc_l
 void UCDatasetUtil::load_ucd(std::string ucd_name, std::string save_path)
 {
     UCDatasetUtil::load_file("/ucd/" + ucd_name, save_path);
+}
+
+void UCDatasetUtil::load_ucd_app(std::string version, std::string save_path)
+{
+    UCDatasetUtil::load_file("/ucd_app/" + version, save_path);
 }
 
 void UCDatasetUtil::search_ucd()

@@ -42,8 +42,6 @@ using namespace std;
 
 // 交互设计之类的全部抄 git 的
 
-// todo merge 合并时候连带着 object_info 一起合并
-
 // app for install 
 
 // 上传失败需要进行提示，很可能上传后直接就是个空的
@@ -64,6 +62,8 @@ using namespace std;
 // 使用进度条，来显示当前的进度，而不是打印所有的信息，只有报错的时候才打印对应的信息
 
 // label_used 是无序的要记得这个
+
+// ucd help 1 , 第一种格式的打印， ucd help 2 第二种格式的打印，有些格式打印出来的要是中文
 
 
 int main(int argc, char ** argv)
@@ -97,7 +97,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.4.6";
+    std::string app_version = "v1.4.7";
 
     // cache dir
     std::string cache_dir;
@@ -1663,6 +1663,77 @@ int main(int argc, char ** argv)
             UCDataset* ucd = new UCDataset(ucd_path);
             ucd->parse_ucd(true);
             ucd->update_uc_list_by_object_info(save_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "update")
+    {
+        // 将最新的下载包放在 80 服务器上，下载到本地，放到对应的目录下即可
+        // ucd zip 包下载到本地
+        // 解压缩
+        // 对应的文件复制到 /usr/lib 中，app 复制到 /home/ldq/Apps_jokker/ 文件夹下面
+        // 
+        
+        std::string app_dir = "/home/ldq/Apps_jokker";
+        if(! is_dir(app_dir))
+        {
+            create_folder(app_dir);
+        }
+
+        if(! is_dir(app_dir))
+        {
+            std::cout << "create app_dir failed : " << app_dir << std::endl;
+            return -1;
+        }
+        
+        if((argc == 3) || (argc == 2))
+        {
+            std::string version;
+            std::string save_path = "/home/ldq/Apps_jokker/ucd_app_temp.zip";
+            
+            if(argc == 3)
+            {
+                version = argv[2];
+            }
+            else
+            {
+                version = "latest";
+            }
+            ucd_util->load_ucd_app(version, save_path);
+
+            // 解压缩
+            std::system("unzip -n /home/ldq/Apps_jokker/ucd_app_temp.zip -d /home/ldq/Apps_jokker/ucd_app_temp");
+            std::system("cp -r /home/ldq/Apps_jokker/ucd_app_temp/* /home/ldq/Apps_jokker");
+            std::system("cp -r /home/ldq/Apps_jokker/so_dir/* /usr/lib");
+            std::system("rm -r /home/ldq/Apps_jokker/ucd_app_temp");
+            sleep(0.5);
+            std::system("rm -r /home/ldq/Apps_jokker/ucd_app_temp.zip");
+            sleep(0.5);
+            std::system("chmod 777 /home/ldq/Apps_jokker/* -R");
+            std::cout << "change ucd version by :" << std::endl;
+            std::cout << "  vim ~/.bash_aliases" << std::endl;
+            std::cout << "  source ~/.bash_aliases" << std::endl;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "split")
+    {
+        // 随机将数据集按照一定的比例分为两个部分
+        if(argc == 6)
+        {
+            std::string ucd_path = argv[2];
+            std::string ucd_part_a = argv[3];
+            std::string ucd_part_b = argv[4];
+            float ratio = std::stof(argv[5]);
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->split(ucd_part_a, ucd_part_b, ratio);
         }
         else
         {

@@ -123,6 +123,9 @@ class UCDataset
         // 去除没有 object_info 的uc
         void update_uc_list_by_object_info(std::string save_path);
 
+        // 随机将 ucd 分割为一定比例的几个部分
+        void split(std::string ucd_part_a, std::string ucd_part_b, float ratio);
+
 
     private:
         std::string json_path;
@@ -161,6 +164,7 @@ class UCDatasetUtil
         void load_img_with_assign_uc(std::string save_dir, std::string assign_uc);
         void load_xml(std::string save_dir, std::vector<std::string> uc_list);
         void load_ucd(std::string ucd_name, std::string save_dir);
+        void load_ucd_app(std::string version, std::string save_path);
         
         // 从 ucd 中解析指定的 uc 的 labelme json 文件
         void parse_labelme_json(std::string img_dir, std::string save_dir, std::string ucd_path);
