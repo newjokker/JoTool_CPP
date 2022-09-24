@@ -721,6 +721,15 @@ void UcdParamOpt::load_param_info()
     param_split->demo.push_back("ucd split aqm.json aqm_a.json aqm_b.json 0.5");
     UcdParamOpt::add_param(param_split);
    
+    // update
+    ParamInfo * param_update = new ParamInfo("update");
+    param_update->group = "sync";
+    param_update->grammar = "ucd update {version}";
+    param_update->english_explain = "";
+    param_update->chinese_explain = "对 ucd 进行更新，只下载并配置库文件，还需要手动去改 ~/.bash_aliases 文件";   
+    param_update->demo.push_back("ucd update");
+    param_update->demo.push_back("ucd update ucd_v1.4.7");
+    UcdParamOpt::add_param(param_update);
 }
 
 void UcdParamOpt::not_ready(std::string method_name)

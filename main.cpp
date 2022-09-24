@@ -97,7 +97,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.4.7";
+    std::string app_version = "v1.5.1";
 
     // cache dir
     std::string cache_dir;
@@ -1672,11 +1672,6 @@ int main(int argc, char ** argv)
     else if(command_1 == "update")
     {
         // 将最新的下载包放在 80 服务器上，下载到本地，放到对应的目录下即可
-        // ucd zip 包下载到本地
-        // 解压缩
-        // 对应的文件复制到 /usr/lib 中，app 复制到 /home/ldq/Apps_jokker/ 文件夹下面
-        // 
-        
         std::string app_dir = "/home/ldq/Apps_jokker";
         if(! is_dir(app_dir))
         {
@@ -1703,6 +1698,12 @@ int main(int argc, char ** argv)
                 version = "latest";
             }
             ucd_util->load_ucd_app(version, save_path);
+
+            if(! is_file(save_path))
+            {
+                std::cout << "can't load file : " << save_path << std::endl;
+                return -1;
+            }
 
             // 解压缩
             std::system("unzip -n /home/ldq/Apps_jokker/ucd_app_temp.zip -d /home/ldq/Apps_jokker/ucd_app_temp");
