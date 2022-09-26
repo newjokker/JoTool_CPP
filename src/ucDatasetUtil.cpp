@@ -1209,6 +1209,7 @@ void UCDatasetUtil::upload_ucd(std::string ucd_path, std::string assign_ucd_name
     {
         httplib::MultipartFormDataItems items = {{"json_file", buffer_lf_img.str(), ucd_name_suffix, "application/octet-stream"},{"ucd_name", assign_ucd_name}};
         auto resSendFiles = cliSendFiles.Post("/ucd/upload", items);
+        // 这边返回 status 不为 200 也报错？        
         if(resSendFiles == nullptr)
         {
             std::cout << "upload failed !" << std::endl;

@@ -36,19 +36,11 @@ using namespace std;
 
 // todo json 读取大文件太慢，能不能只读取需要的部分，比如打印 info 信息，不需要后面的 xml_info 信息，是否可以不读取到内存里，不行的话就直接自己写一个解析 json 的代码，用做快速解析
 
-// 发布功能，快速部署到所有机器上
-
 // 下载某一些图片报错，可能是没有按照各个后缀依次寻找图片
 
 // 交互设计之类的全部抄 git 的
 
-// app for install 
-
-// 上传失败需要进行提示，很可能上传后直接就是个空的
-
 // 解析出来的 json 中存放的 jpg 图片是压缩过的，这样存放的数据能小一点
-
-// from_xml from_json 的时候，可以只用他们的名字，不解析他们的内容，这样能快非常多 from_file 
 
 // 我之前的 python acc 代码有问题，计算正确的个数的时候明显不对，需要修改
 
@@ -58,12 +50,15 @@ using namespace std;
 
 // 裁剪训练的图也是唯一的，也可以弄成缓存
 
-// print when error ()
 // 使用进度条，来显示当前的进度，而不是打印所有的信息，只有报错的时候才打印对应的信息
 
 // label_used 是无序的要记得这个
 
 // ucd help 1 , 第一种格式的打印， ucd help 2 第二种格式的打印，有些格式打印出来的要是中文
+
+// python 是不是要搞一套一样的接口的包，方便使用，
+
+// 查看对文件夹是否有操作权限，没有权限的话 save 等操作没有结果但是也不会报错
 
 
 int main(int argc, char ** argv)
@@ -79,10 +74,6 @@ int main(int argc, char ** argv)
         ucd_param_opt->print_all_fun();
         return -1;
     }
-
-    // time
-    clock_t start_time, end_time;
-    start_time = clock();    
 
     // server
     std::string host        = "192.168.3.111";
@@ -1108,9 +1099,7 @@ int main(int argc, char ** argv)
     {
         if (argc == 3)
         {
-            //
             std::string command = argv[2];
-
             if(ucd_param_opt->has_command(command))
             {
                 ucd_param_opt->print_command_info(command);
@@ -1123,6 +1112,11 @@ int main(int argc, char ** argv)
                 }
             }
             return -1;
+        }
+        else if(argc ==2)
+        {
+            // 打印中文的注释
+            ucd_param_opt->print_all_fun_chinese();
         }
         else
         {
@@ -1403,6 +1397,14 @@ int main(int argc, char ** argv)
         {
             ucd_param_opt->print_command_info(command_1);
         }
+    }
+    else if(command_1 == "shape_analysis")
+    {
+        // 对图像的大小进行分析和聚类，图像的大小有一定是有其对应的规律的
+        
+        // 输出的时候只选取其中的最多的集中的长宽进行输出
+        
+
     }
     else if(command_1 == "server_info")
     {
@@ -1754,9 +1756,6 @@ int main(int argc, char ** argv)
 
     delete ucd_util;
     delete ucd_param_opt;
-    end_time = clock();
-    std::cout << "---------------" << std::endl;
-    std::cout << "use time " << (double)(end_time-start_time)/CLOCKS_PER_SEC << " s" << std::endl;
 
 	return 1;
 }

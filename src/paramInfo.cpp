@@ -83,7 +83,7 @@ void ParamInfo::print_info()
 
     if(ParamInfo::demo.size() != 0)
     {
-        std::cout << "   [demo]" << ParamInfo::chinese_explain << std::endl;
+        std::cout << "   [demo]"  << std::endl;
         for(int i=0; i<ParamInfo::demo.size(); i++)
         {
             std::cout << "   " << ParamInfo::demo[i] << std::endl;
@@ -239,6 +239,38 @@ void UcdParamOpt::print_all_fun()
     }
     std::cout << "------------------------" << std::endl;
 }
+
+void UcdParamOpt::print_all_fun_chinese()
+{
+    // 计算模块属于的组，按照分组打印所有的帮助信息
+    std::map<std::string, std::set<std::string> > gropu_map; 
+    auto iter = UcdParamOpt::param_map.begin();
+    while(iter != UcdParamOpt::param_map.end())
+    {
+        gropu_map[iter->second.group].insert(iter->first);
+        iter ++ ;
+    }
+    // 按照分组打印所有命令
+    std::cout << "------------------------" << std::endl;
+    auto iter_group = gropu_map.begin();
+    while(iter_group != gropu_map.end())
+    {
+        std::cout << iter_group->first << std::endl;
+        auto iter_command = iter_group->second.begin();
+        while(iter_command != iter_group->second.end())
+        {
+            ParamInfo param_info = UcdParamOpt::get_param(iter_command->data());
+            std::cout << std::setw(20) << std::right << iter_command->data() << "," ;
+            std::cout << std::setw(4) << std::left << " " << param_info.chinese_explain << std::endl;
+            iter_command++;
+        }
+        iter_group++;
+    }
+    std::cout << "------------------------" << std::endl;
+}
+
+
+
 
 void UcdParamOpt::load_param_info()
 {
@@ -515,26 +547,34 @@ void UcdParamOpt::load_param_info()
     param_to_yolo->group = "convert";
     param_to_yolo->grammar = "ucd to_yolo ucd_path save_dir {label_list}";
     param_to_yolo->english_explain = "convert ucd to yolo train txt (format)";
-    param_to_yolo->chinese_explain = "";
+    param_to_yolo->chinese_explain = "将 ucd 转为 yolo txt 格式的数据";
     param_to_yolo->demo.push_back("ucd to_yolo fzc_test_1.json ./yolo_train_txt ");   
     param_to_yolo->demo.push_back("ucd to_yolo fzc_test_2.json ./yolo_train_txt Fnormal,fzc_broken");   
     UcdParamOpt::add_param(param_to_yolo);
 
-    // to_vit
-    ParamInfo * param_to_vit = new ParamInfo("to_vit");
-    param_to_vit->group = "convert";
-    param_to_vit->grammar = "";
-    param_to_vit->english_explain = "";
-    param_to_vit->chinese_explain = "";   
-    UcdParamOpt::add_param(param_to_vit);
+    // // to_vit
+    // ParamInfo * param_to_vit = new ParamInfo("to_vit");
+    // param_to_vit->group = "convert";
+    // param_to_vit->grammar = "";
+    // param_to_vit->english_explain = "";
+    // param_to_vit->chinese_explain = "";   
+    // UcdParamOpt::add_param(param_to_vit);
 
-    // to_csra
-    ParamInfo * param_to_csra = new ParamInfo("to_csra");
-    param_to_csra->group = "convert";
-    param_to_csra->grammar = "";
-    param_to_csra->english_explain = "";
-    param_to_csra->chinese_explain = "";   
-    UcdParamOpt::add_param(param_to_csra);
+    // // to_csra
+    // ParamInfo * param_to_csra = new ParamInfo("to_csra");
+    // param_to_csra->group = "convert";
+    // param_to_csra->grammar = "";
+    // param_to_csra->english_explain = "";
+    // param_to_csra->chinese_explain = "";   
+    // UcdParamOpt::add_param(param_to_csra);
+
+    // // to_swin
+    // ParamInfo * param_to_swin = new ParamInfo("to_swin");
+    // param_to_swin->group = "convert";
+    // param_to_swin->grammar = "";
+    // param_to_swin->english_explain = "";
+    // param_to_swin->chinese_explain = "转为 swintrnasform 训练需求的格式，具体实现的时候格式问张果容";   
+    // UcdParamOpt::add_param(param_to_swin);
 
     // acc
     ParamInfo * param_acc = new ParamInfo("acc");
@@ -599,7 +639,7 @@ void UcdParamOpt::load_param_info()
     param_move_uc->group = "sync";
     param_move_uc->grammar = "ucd move_uc file_dir save_dir";
     param_move_uc->english_explain = "move file with name in uc format";
-    param_move_uc->chinese_explain = "";   
+    param_move_uc->chinese_explain = "将文件件中所有符合 uc 命名的移动到指定文件夹中";   
     UcdParamOpt::add_param(param_move_uc);
 
     // move_not_uc
@@ -607,16 +647,8 @@ void UcdParamOpt::load_param_info()
     param_move_not_uc->group = "sync";
     param_move_not_uc->grammar = "ucd move_not_uc file_dir save_dir";
     param_move_not_uc->english_explain = "move file when filename not in uc format";
-    param_move_not_uc->chinese_explain = "";   
+    param_move_not_uc->chinese_explain = "将文件件中所有不符合 uc 命名的移动到指定文件夹中";   
     UcdParamOpt::add_param(param_move_not_uc);
-
-    // to_swin
-    ParamInfo * param_to_swin = new ParamInfo("to_swin");
-    param_to_swin->group = "convert";
-    param_to_swin->grammar = "";
-    param_to_swin->english_explain = "";
-    param_to_swin->chinese_explain = "转为 swintrnasform 训练需求的格式，具体实现的时候格式问张果容";   
-    UcdParamOpt::add_param(param_to_swin);
 
     // from_file
     ParamInfo * param_from_file = new ParamInfo("from_file");
@@ -655,7 +687,7 @@ void UcdParamOpt::load_param_info()
     param_filter_by_nms->group = "filter";
     param_filter_by_nms->grammar = "ucd filter_by_nms ucd_path save_ucd_path nms_th ignore_tag(true|false)";
     param_filter_by_nms->english_explain = "do nms ";
-    param_filter_by_nms->chinese_explain = "";   
+    param_filter_by_nms->chinese_explain = "对 obj 进行 nms 操作";   
     UcdParamOpt::add_param(param_filter_by_nms);
 
     // conf_analysis
@@ -663,7 +695,7 @@ void UcdParamOpt::load_param_info()
     param_conf_analysis->group = "filter";
     param_conf_analysis->grammar = "ucd conf_analysis ucd_path seg_count";
     param_conf_analysis->english_explain = "";
-    param_conf_analysis->chinese_explain = "";   
+    param_conf_analysis->chinese_explain = "置信度分析，分析 ucd 中存放的置信度信息";   
     UcdParamOpt::add_param(param_conf_analysis);
 
     // area_analysis
@@ -671,7 +703,7 @@ void UcdParamOpt::load_param_info()
     param_area_analysis->group = "filter";
     param_area_analysis->grammar = "ucd area_analysis ucd_path srg_count";
     param_area_analysis->english_explain = " ";
-    param_area_analysis->chinese_explain = "";   
+    param_area_analysis->chinese_explain = "面积分析，分析所有对象的面积分布";   
     UcdParamOpt::add_param(param_area_analysis);
     
     // get
