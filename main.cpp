@@ -1744,6 +1744,27 @@ int main(int argc, char ** argv)
             ucd_param_opt->print_command_info(command_1);
         }
     }
+    else if(command_1 == "absorb")
+    {
+        // 从其他 ucd 中吸收需要的内容 size_info, object_info
+        if(argc == 6)
+        {
+            std::string attr = argv[2];
+            std::string ucd_path = argv[3];
+            std::string meat_ucd_path = argv[4];
+            std::string save_path = argv[5];
+            // 
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->absorb(meat_ucd_path, save_path, attr);
+            delete ucd;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+            return -1;
+        }
+    }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {
         ucd_param_opt->print_similar_command_info(command_1);

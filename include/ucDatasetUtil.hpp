@@ -126,6 +126,8 @@ class UCDataset
         // 随机将 ucd 分割为一定比例的几个部分
         void split(std::string ucd_part_a, std::string ucd_part_b, float ratio);
 
+        // 从指定 ucd 中提取需要的内容
+        void absorb(std::string meat_ucd, std::string save_path, std::string need_attr);
 
     private:
         std::string json_path;

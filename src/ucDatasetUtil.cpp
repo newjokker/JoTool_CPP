@@ -943,6 +943,36 @@ void UCDataset::split(std::string ucd_part_a, std::string ucd_part_b, float rati
     delete ucd_b;
 }
 
+void UCDataset::absorb(std::string meat_ucd, std::string save_path, std::string need_attr)
+{
+    UCDataset* ucd = new UCDataset(meat_ucd);
+    ucd->parse_ucd(true);
+
+    for(int i=0; i<UCDataset::uc_list.size(); i++)
+    {
+        std::string uc = UCDataset::uc_list[i];
+        if(need_attr == "size_info")
+        {
+            if((UCDataset::size_info.count(uc) == 0) && (ucd->size_info.count(uc) > 0))
+            {
+                UCDataset::size_info[uc] = ucd->size_info[uc];
+            }
+        }
+        else if(need_attr == "object_info")
+        {
+            if((UCDataset::object_info.count(uc) == 0) && (ucd->object_info.count(uc) > 0))
+            {
+                UCDataset::object_info[uc] = ucd->object_info[uc];
+            }
+        }
+        else
+        {
+            std::cout << "attr_name not support, [size_info, object_info]";
+        }
+    }
+    ucd->save_to_ucd(save_path);
+    delete ucd;
+}
 
 // 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
