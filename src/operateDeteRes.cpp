@@ -17,6 +17,7 @@
 #include <math.h>
 #include <algorithm>
 #include "ucDatasetUtil.hpp"
+#include "include/tqdm.h"
 
 namespace jotools
 {
@@ -417,7 +418,7 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
 {
 
     // 没有置信度的话不好排列，这个比较恶心，当没有置信度的时候直接随机排列吧
-    // todo dete_res 中的对象，根据 conf 进行排列，从大到小\
+    // todo dete_res 中的对象，根据 conf 进行排列，从大到小
     // 增加函数 sort_alarm_by_conf
 
     // sort by conf 
@@ -599,8 +600,6 @@ void DeteAcc::cal_acc_rec(std::string ucd_customer, std::string ucd_standard, st
         throw "ucd path not exists";
     }
 
-    jotools::DeteAcc* acc = new DeteAcc();
-
     UCDataset* ucd_a = new UCDataset(ucd_customer);
     UCDataset* ucd_b = new UCDataset(ucd_standard);
     ucd_a->parse_ucd(true);
@@ -610,6 +609,9 @@ void DeteAcc::cal_acc_rec(std::string ucd_customer, std::string ucd_standard, st
 
     UCDataset* compare_res_ucd = new UCDataset();
 
+    tqdm bar;
+    int N = ucd_b->object_info.size();
+    int i =0;
     auto iter_b = ucd_b->object_info.begin();
     while(iter_b != ucd_b->object_info.end())
     {
@@ -619,11 +621,13 @@ void DeteAcc::cal_acc_rec(std::string ucd_customer, std::string ucd_standard, st
         ucd_b->get_dete_res_with_assign_uc(each_b, uc);
         ucd_a->get_dete_res_with_assign_uc(each_a, uc);
 
-        std::map<std::string, std::map<std::string, int> > each_compare_res = acc->compare_customer_and_standard(*each_a, *each_b, uc, compare_res_ucd);
+        std::map<std::string, std::map<std::string, int> > each_compare_res = DeteAcc::compare_customer_and_standard(*each_a, *each_b, uc, compare_res_ucd);
         compare_res = merge_compare_res(compare_res, each_compare_res);
+        bar.progress(i, N);
         iter_b ++;
-
+        i++;
     }
+    bar.finish();
 
     // print
     std::map<std::string, int> static_res;
@@ -664,8 +668,12 @@ void DeteAcc::cal_acc_rec(std::string ucd_customer, std::string ucd_standard, st
     std::cout << std::setw(10) << std::left << "recall" << "     " <<  (correct)/(correct +  miss + mistake) << std::endl;    
     std::cout << "----------------------------------------" << std::endl;
 
+    compare_res_ucd->size_info = ucd_b->size_info;
     compare_res_ucd->save_to_ucd(save_ucd_path);
 
+    delete ucd_a;
+    delete ucd_b;
+    delete compare_res_ucd;
 }
 
 }

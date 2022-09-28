@@ -1652,6 +1652,8 @@ void UCDatasetUtil::parse_labelme_json(std::string img_dir, std::string save_dir
     std::set<std::string> img_suffix {".jpg", ".JPG", ".png", ".PNG"};
     UCDataset *ucd = new UCDataset(ucd_path);
     ucd->parse_ucd(true);
+    tqdm bar;
+    int N = ucd->object_info.size();
     int index = 0;
     auto iter = ucd->object_info.begin();
     while(iter != ucd->object_info.end())
@@ -1677,9 +1679,11 @@ void UCDatasetUtil::parse_labelme_json(std::string img_dir, std::string save_dir
         {
             std::cout << "load img failed : " << img_path << std::endl;
         }
+        bar.progress(index, N);
         index += 1;
         iter ++;
     }
+    bar.finish();
     delete ucd;
 }
 
@@ -1703,10 +1707,12 @@ void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std
         throw "ucd_path not exists";
     }
 
+    tqdm bar;
     std::set<std::string> img_suffix {".jpg", ".JPG", ".png", ".PNG"};
     UCDataset *ucd = new UCDataset(ucd_path);
     ucd->parse_ucd(true);
     int index = 0;
+    int N = ucd->object_info.size();
     auto iter = ucd->object_info.begin();
     while(iter != ucd->object_info.end())
     {
@@ -1715,10 +1721,12 @@ void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std
         std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
         std::string xml_path = save_dir + "/" + uc + ".xml";
         ucd->save_to_voc_xml_with_assign_uc(xml_path, img_path, uc);
-        std::cout << index << ", parse xml : " << uc << std::endl;
+        // std::cout << index << ", parse xml : " << uc << std::endl;
+        bar.progress(index, N);
         index += 1;
         iter ++;
     }
+    bar.finish();
     delete ucd;
 }
 

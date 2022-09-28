@@ -32,8 +32,6 @@ using namespace std;
 
 // 完成 C++ 版本的 文件 服务，再部署到 docker 上面，这样在哪个服务器上都能方便进行启动
 
-// 积极发挥服务化的各项功能，比如提交合并的数据
-
 // todo json 读取大文件太慢，能不能只读取需要的部分，比如打印 info 信息，不需要后面的 xml_info 信息，是否可以不读取到内存里，不行的话就直接自己写一个解析 json 的代码，用做快速解析
 
 // 下载某一些图片报错，可能是没有按照各个后缀依次寻找图片
@@ -50,8 +48,6 @@ using namespace std;
 
 // 裁剪训练的图也是唯一的，也可以弄成缓存
 
-// 使用进度条，来显示当前的进度，而不是打印所有的信息，只有报错的时候才打印对应的信息
-
 // label_used 是无序的要记得这个
 
 // ucd help 1 , 第一种格式的打印， ucd help 2 第二种格式的打印，有些格式打印出来的要是中文
@@ -59,6 +55,9 @@ using namespace std;
 // python 是不是要搞一套一样的接口的包，方便使用，
 
 // 查看对文件夹是否有操作权限，没有权限的话 save 等操作没有结果但是也不会报错
+
+// 标准的质量控制，去掉那些重复的，可以反复跑训练集，得到结果，进行对比
+
 
 
 int main(int argc, char ** argv)
@@ -88,7 +87,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.5.1";
+    std::string app_version = "v1.5.2";
 
     // cache dir
     std::string cache_dir;
@@ -1716,9 +1715,11 @@ int main(int argc, char ** argv)
             std::system("rm -r /home/ldq/Apps_jokker/ucd_app_temp.zip");
             sleep(0.5);
             std::system("chmod 777 /home/ldq/Apps_jokker/* -R");
+            std::cout << "--------------------------------------" << std::endl;
             std::cout << "change ucd version by :" << std::endl;
             std::cout << "  vim ~/.bash_aliases" << std::endl;
             std::cout << "  source ~/.bash_aliases" << std::endl;
+            std::cout << "" << std::endl;
         }
         else
         {
