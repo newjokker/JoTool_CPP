@@ -78,7 +78,7 @@ void ParamInfo::print_info()
 {
     std::cout << ParamInfo::command << std::endl;
     std::cout << "   " << ParamInfo::grammar << std::endl;
-    std::cout << "   " << ParamInfo::english_explain << std::endl;
+    // std::cout << "   " << ParamInfo::english_explain << std::endl;
     std::cout << "   " << ParamInfo::chinese_explain << std::endl;
 
     if(ParamInfo::demo.size() != 0)
@@ -281,22 +281,27 @@ void UcdParamOpt::load_param_info()
     param_check->grammar = "ucd check";
     param_check->english_explain = "get all ucd official|customer from server";
     param_check->chinese_explain = "查看服务器中所有 ucd 信息，包括官方 ucd 和 自定义 ucd";
+    param_check->demo.push_back("ucd check              (查看所有云端的 ucd)");   
+    param_check->demo.push_back("ucd check | grep fzc   (查看所有云端中带有 fzc 关键字的 ucd)"); 
     UcdParamOpt::add_param(param_check);
     
-    // search
-    ParamInfo * param_search = new ParamInfo("search");
-    param_search->group = "sync";
-    param_search->grammar = "ucd search keyword";
-    param_search->english_explain = "get all ucd official|customer from server by keyword";
-    param_search->chinese_explain = "根据关键字查看服务器中所有 ucd 信息，包括官方 ucd 和 自定义 ucd";
-    UcdParamOpt::add_param(param_search);
+    // // search
+    // ParamInfo * param_search = new ParamInfo("search");
+    // param_search->group = "sync";
+    // param_search->grammar = "ucd search keyword";
+    // param_search->english_explain = "get all ucd official|customer from server by keyword";
+    // param_search->chinese_explain = "根据关键字查看服务器中所有 ucd 信息，包括官方 ucd 和 自定义 ucd";
+    // UcdParamOpt::add_param(param_search);
     
     // save
     ParamInfo * param_save = new ParamInfo("save");
     param_save->group = "sync";
     param_save->grammar = "ucd save ucd_path save_dir save_mode(image,xml) {need_count}";
     param_save->english_explain = "load img|xml from server";
-    param_save->chinese_explain = "从服务器下载 图片|标注 保存到指定文件夹";   
+    param_save->chinese_explain = "从服务器下载 图片|标注 保存到指定文件夹"; 
+    param_save->demo.push_back("ucd save test.json ./img 10     (将 test.json 中带的所有图片保存到 ./img 路径下)");  
+    param_save->demo.push_back("ucd save test.json ./img 01     (将 test.json 中带的所有xml保存到 ./img 路径下)");  
+    param_save->demo.push_back("ucd save test.json ./img 11     (将 test.json 中带的所有图片和xml保存到 ./img 路径下)");  
     UcdParamOpt::add_param(param_save);
     
     // save_cache
@@ -305,38 +310,35 @@ void UcdParamOpt::load_param_info()
     param_save_cache->grammar = "ucd save_cache ucd_path save_mode(image,xml)";
     param_save_cache->english_explain = "load img|xml from server";
     param_save_cache->chinese_explain = "从服务器下载 图片|标注 保存到 ucd 缓存文件夹";   
+    param_save_cache->demo.push_back("ucd save_cache test.json 10     (将 test.json 中带的所有图片保存到缓存文件夹)");  
+    param_save_cache->demo.push_back("ucd save_cache test.json 01     (将 test.json 中带的所有xml保存到缓存文件夹)");  
+    param_save_cache->demo.push_back("ucd save_cache test.json 11     (将 test.json 中带的所有图片和xml保存到缓存文件夹)");  
     UcdParamOpt::add_param(param_save_cache);
     
     // parse_xml
     ParamInfo * param_parse_xml = new ParamInfo("parse_xml");
-    param_parse_xml->group = "sync";
+    param_parse_xml->group = "convert";
     param_parse_xml->grammar = "ucd parse_xml json_path save_dir";
     param_parse_xml->english_explain = "parse xml from json";
-    param_parse_xml->chinese_explain = "从 ucd 中解析出 xml";   
+    param_parse_xml->chinese_explain = "从 ucd 中解析出 xml"; 
+    param_parse_xml->demo.push_back("ucd parse_xml test.json ./xml      (将 test.json中包含的xml数据解析到 ./xml 文件夹下)");  
     UcdParamOpt::add_param(param_parse_xml);
     
     // parse_json
     ParamInfo * param_parse_json = new ParamInfo("parse_json");
-    param_parse_json->group = "sync";
+    param_parse_json->group = "convert";
     param_parse_json->grammar = "ucd parse_xml json_path save_dir";
     param_parse_json->english_explain = "parse labelme_json from ucd";
     param_parse_json->chinese_explain = "从 ucd 中解析出 labelme_json";   
     UcdParamOpt::add_param(param_parse_json);
-    
-    // update_xml
-    ParamInfo * param_update_xml = new ParamInfo("update_xml");
-    param_update_xml->group = "sync";
-    param_update_xml->grammar = "ucd update_xml {ucd_path}";
-    param_update_xml->english_explain = "update cache xml";
-    param_update_xml->chinese_explain = "更新本地缓存中的 xml, 可以全部更新，或者指定更新某 ucd 中包含的 uc 的本地 xml 缓存";   
-    UcdParamOpt::add_param(param_update_xml);
     
     // show
     ParamInfo * param_show = new ParamInfo("show");
     param_show->group = "info";
     param_show->grammar = "ucd show {uc}";
     param_show->english_explain = "show for all url supported";
-    param_show->chinese_explain = "查看所有下载路径";   
+    param_show->chinese_explain = "查看所有下载路径";  
+    param_show->demo.push_back("ucd show Dae069p    (查看 Dae069p uc 对应的网络路径, 图片 url 地址, json url 地址等)"); 
     UcdParamOpt::add_param(param_show);
     
     // delete
@@ -344,7 +346,8 @@ void UcdParamOpt::load_param_info()
     param_delete->group = "sync";
     param_delete->grammar = "ucd show {uc}";
     param_delete->english_explain = "ucd delete ucd_name";
-    param_delete->chinese_explain = "删除在线数据集,无法删除官方数据集";   
+    param_delete->chinese_explain = "删除在线数据集,无法删除官方数据集";  
+    param_delete->demo.push_back("ucd delete del\\aqm_ps    (删除云上 del\\aqm_ps 地址的 ucd 数据集)");
     UcdParamOpt::add_param(param_delete);
     
     // load
@@ -353,6 +356,8 @@ void UcdParamOpt::load_param_info()
     param_load->grammar = "ucd load ucd_name save_path|save_dir";
     param_load->english_explain = "load ucd from server";
     param_load->chinese_explain = "下载在线数据集";   
+    param_load->demo.push_back("ucd load docker\\del\\recommend_base                        (将云端上地址为 docker\\del\\recommend_base 的ucd 保存到本地路径, 文件名中带有云上位置的文件夹等级信息)");
+    param_load->demo.push_back("ucd load docker\\del\\recommend_base recommend_base.json    (将云端上地址为 docker\\del\\recommend_base 的ucd 保存到本地的 recommend_base.json 路径)");
     UcdParamOpt::add_param(param_load);
     
     // upload
@@ -361,30 +366,34 @@ void UcdParamOpt::load_param_info()
     param_upload->grammar = "ucd upload ucd_path {ucd_name}";
     param_upload->english_explain = "upload ucd to server";
     param_upload->chinese_explain = "上传数据集到网络";   
+    param_upload->demo.push_back("ucd upload test.json del\\test        (将本地 test.json 数据集上传的云上 del\\test 位置)");
     UcdParamOpt::add_param(param_upload);
     
     // from_img
     ParamInfo * param_from_img = new ParamInfo("from_img");
-    param_from_img->group = "sync";
+    param_from_img->group = "convert";
     param_from_img->grammar = "ucd from_img img_dir ucd_save_path";
     param_from_img->english_explain = "get ucd from loacal data(img)";
-    param_from_img->chinese_explain = "(递归)本地文件生成数据集";   
+    param_from_img->chinese_explain = "(递归)本地文件生成数据集, 读取图片解析获得图片的长宽信息";   
+    param_from_img->demo.push_back("ucd from_img ./img test.json        (将 ./img 路径下的名字符合 uc 规则的图片生成 ucd)");
     UcdParamOpt::add_param(param_from_img);
     
     // from_xml
     ParamInfo * param_from_xml = new ParamInfo("from_xml");
-    param_from_xml->group = "sync";
+    param_from_xml->group = "convert";
     param_from_xml->grammar = "ucd from_xml xml_dir ucd_save_path";
     param_from_xml->english_explain = "get ucd from loacal data(img, xml)";
     param_from_xml->chinese_explain = "(递归)本地 voc_xml 文件生成 ucd, ucd中包含 dete_obj 信息";   
+    param_from_xml->demo.push_back("ucd from_xml ./xml test.json        (将 ./xml 路径下面的名字符合 uc 规则的所有 xml 制作成 ucd)");
     UcdParamOpt::add_param(param_from_xml);
     
     // from_json
     ParamInfo * param_from_json = new ParamInfo("from_json");
-    param_from_json->group = "sync";
+    param_from_json->group = "convert";
     param_from_json->grammar = "ucd from_json json_dir ucd_save_path";
     param_from_json->english_explain = "get ucd from loacal data(img, json)";
     param_from_json->chinese_explain = "(递归)本地 labelme_json 文件生成 ucd, ucd中包含 dete_obj 信息";   
+    param_from_json->demo.push_back("ucd from_json ./json test.json        (将 ./json 路径下面的名字符合 uc 规则的所有 json 制作成 ucd)");
     UcdParamOpt::add_param(param_from_json);
     
     // info
@@ -392,7 +401,8 @@ void UcdParamOpt::load_param_info()
     param_info->group = "info";
     param_info->grammar = "ucd info ucd_path";
     param_info->english_explain = "show ucd info";
-    param_info->chinese_explain = "查看数据集信息";   
+    param_info->chinese_explain = "查看数据集信息 (dataset_name, uc_count, model_name, model_version, add_time, update_time, describe, label_used, img_size_count)";   
+    param_info->demo.push_back("ucd info test.json                          (查看 test.json ucd 的各个信息)");
     UcdParamOpt::add_param(param_info);
     
     // meta
@@ -400,7 +410,9 @@ void UcdParamOpt::load_param_info()
     param_meta->group = "info";
     param_meta->grammar = "ucd meta {attr_name}";
     param_meta->english_explain = "show config info";
-    param_meta->chinese_explain = "查看配置信息, 可以指定配置的名字";   
+    param_meta->chinese_explain = "查看配置信息, 可以指定配置的名字(host, port, config_path, sql_host, sql_port, sql_user, sql_pwd, sql_db, cache_dir)";   
+    param_meta->demo.push_back("ucd meta                                    (查看 ucd 软件的所有 元信息)");
+    param_meta->demo.push_back("ucd meta cache_dir                          (查看 ucd 软件的缓存位置信息)");
     UcdParamOpt::add_param(param_meta);
     
     // set
@@ -437,7 +449,7 @@ void UcdParamOpt::load_param_info()
     
     // rename_img
     ParamInfo * param_rename_img = new ParamInfo("rename_img");
-    param_rename_img->group = "opt";
+    param_rename_img->group = "rename";
     param_rename_img->grammar = "ucd rename_img img_dir";
     param_rename_img->english_explain = "rename img by uc";
     param_rename_img->chinese_explain = "重命名数据集";   
@@ -445,7 +457,7 @@ void UcdParamOpt::load_param_info()
     
     // rename_img_xml
     ParamInfo * param_rename_img_xml = new ParamInfo("rename_img_xml");
-    param_rename_img_xml->group = "opt";
+    param_rename_img_xml->group = "rename";
     param_rename_img_xml->grammar = "ucd rename_img_xml img_dir xml_dir";
     param_rename_img_xml->english_explain = "rename img xml by uc";
     param_rename_img_xml->chinese_explain = "重命名数据集";   
@@ -453,7 +465,7 @@ void UcdParamOpt::load_param_info()
     
     // rename_img_json
     ParamInfo * param_rename_img_json = new ParamInfo("rename_img_json");
-    param_rename_img_json->group = "opt";
+    param_rename_img_json->group = "rename";
     param_rename_img_json->grammar = "ucd rename_img_json img_dir xml_dir";
     param_rename_img_json->english_explain = "rename img json by uc";
     param_rename_img_json->chinese_explain = "重命名 lableme json 数据集";   
@@ -461,7 +473,7 @@ void UcdParamOpt::load_param_info()
     
     // count_tags
     ParamInfo * param_count_tags = new ParamInfo("count_tags");
-    param_count_tags->group = "opt";
+    param_count_tags->group = "info";
     param_count_tags->grammar = "ucd count_tags xml_dir|ucd_path";
     param_count_tags->english_explain = "count tags";
     param_count_tags->chinese_explain = "统计标签个数";   
@@ -469,7 +481,7 @@ void UcdParamOpt::load_param_info()
     
     // count_files
     ParamInfo * param_count_files = new ParamInfo("count_files");
-    param_count_files->group = "opt";
+    param_count_files->group = "info";
     param_count_files->grammar = "ucd count_files file_dir recursive(true|1|True|false|0|False)";
     param_count_files->english_explain = "statistics file by suffix";
     param_count_files->chinese_explain = "统计文件夹中各后缀的文件数";   
@@ -491,21 +503,21 @@ void UcdParamOpt::load_param_info()
     param_crop_to_xml->chinese_explain = "截图生成xml";   
     UcdParamOpt::add_param(param_crop_to_xml);
 
-    // xml_check
-    ParamInfo * param_xml_check = new ParamInfo("xml_check");
-    param_xml_check->group = "check";
-    param_xml_check->grammar = "ucd xml_check xml_dir img_dir size_th remove_error(true|1|True|false|0|False)";
-    param_xml_check->english_explain = "check if xml is format";
-    param_xml_check->chinese_explain = "检查xml是否符合标准";   
-    UcdParamOpt::add_param(param_xml_check);
+    // // xml_check
+    // ParamInfo * param_xml_check = new ParamInfo("xml_check");
+    // param_xml_check->group = "check";
+    // param_xml_check->grammar = "ucd xml_check xml_dir img_dir size_th remove_error(true|1|True|false|0|False)";
+    // param_xml_check->english_explain = "check if xml is format";
+    // param_xml_check->chinese_explain = "检查xml是否符合标准";   
+    // UcdParamOpt::add_param(param_xml_check);
 
-    // format_xml
-    ParamInfo * param_format_xml = new ParamInfo("format_xml");
-    param_format_xml->group = "opt";
-    param_format_xml->grammar = "ucd format_xml xml_dir {img_dir}";
-    param_format_xml->english_explain = "format xml";
-    param_format_xml->chinese_explain = "将 xml 进行标准化";   
-    UcdParamOpt::add_param(param_format_xml);
+    // // format_xml
+    // ParamInfo * param_format_xml = new ParamInfo("format_xml");
+    // param_format_xml->group = "opt";
+    // param_format_xml->grammar = "ucd format_xml xml_dir {img_dir}";
+    // param_format_xml->english_explain = "format xml";
+    // param_format_xml->chinese_explain = "将 xml 进行标准化";   
+    // UcdParamOpt::add_param(param_format_xml);
 
     // say
     ParamInfo * param_say = new ParamInfo("say");
@@ -515,16 +527,16 @@ void UcdParamOpt::load_param_info()
     param_say->chinese_explain = "将汉字放大说点什么";   
     UcdParamOpt::add_param(param_say);
 
-    // filter
-    ParamInfo * param_filter = new ParamInfo("filter");
-    param_filter->group = "opt";
-    param_filter->grammar = "ucd filter ucd_path save_path {filter_labes}";
-    param_filter->english_explain = "filter ucd by labels";
-    param_filter->chinese_explain = "对 ucd 进行过滤，可以指定过滤的标签，如果不指定，按照 ucd 中的 used_label 中的内容进行过滤";
-    param_filter->demo = {
-        "ucd filter test.json save_json",
-        "ucd filter test.json save_json fzc_broken,Fnormal"};   
-    UcdParamOpt::add_param(param_filter);
+    // // filter
+    // ParamInfo * param_filter = new ParamInfo("filter");
+    // param_filter->group = "opt";
+    // param_filter->grammar = "ucd filter ucd_path save_path {filter_labes}";
+    // param_filter->english_explain = "filter ucd by labels";
+    // param_filter->chinese_explain = "对 ucd 进行过滤，可以指定过滤的标签，如果不指定，按照 ucd 中的 used_label 中的内容进行过滤";
+    // param_filter->demo = {
+    //     "ucd filter test.json save_json",
+    //     "ucd filter test.json save_json fzc_broken,Fnormal"};   
+    // UcdParamOpt::add_param(param_filter);
 
     // cache_info
     ParamInfo * param_cache_info = new ParamInfo("cache_info");
@@ -541,6 +553,14 @@ void UcdParamOpt::load_param_info()
     param_cache_clear->english_explain = "clear cache";
     param_cache_clear->chinese_explain = "清空缓存信息";   
     UcdParamOpt::add_param(param_cache_clear);
+    
+    // cache_clean
+    ParamInfo * param_cache_clean = new ParamInfo("cache_clean");
+    param_cache_clean->group = "cache";
+    param_cache_clean->grammar = "ucd cache_clear {ucd_path}";
+    param_cache_clean->english_explain = "clear cache";
+    param_cache_clean->chinese_explain = "清空缓存信息";   
+    UcdParamOpt::add_param(param_cache_clean);
 
     // to_yolo
     ParamInfo * param_to_yolo = new ParamInfo("to_yolo");
@@ -578,7 +598,7 @@ void UcdParamOpt::load_param_info()
 
     // acc
     ParamInfo * param_acc = new ParamInfo("acc");
-    param_acc->group = "opt";
+    param_acc->group = "analysis";
     param_acc->grammar = "ucd acc ucd_customer, ucd_standard compare_res_ucd_path";
     param_acc->english_explain = "get acc rec from two ucd";
     param_acc->chinese_explain = "两个 ucd 之间计算精准率和召回率";   
@@ -598,6 +618,8 @@ void UcdParamOpt::load_param_info()
     param_attr->grammar = "ucd attr ucd_path attr_name attr_value";
     param_attr->english_explain = "change attr in ucd";
     param_attr->chinese_explain = "修改ucd中使用 ucd info 能看到的属性";   
+    param_attr->demo.push_back("ucd attr test.json model_name test_model_name   (将 test.json 中的模型名更新为 test_model_name)");
+    param_attr->demo.push_back("ucd attr test.json label_used nc,kkx            (将 test.json 中的label_used 属性更新为 nc加上kkx)");
     UcdParamOpt::add_param(param_attr);
 
     // help
@@ -606,14 +628,16 @@ void UcdParamOpt::load_param_info()
     param_help->grammar = "ucd help command";
     param_help->english_explain = "print command info";
     param_help->chinese_explain = "打印指定 command 对应的信息";   
+    param_help->demo.push_back("ucd help(查看所有关键字的中文解释)");
+    param_help->demo.push_back("ucd help help(查看 help 关键字的使用方法)");
     UcdParamOpt::add_param(param_help);
 
     // uc_check
     ParamInfo * param_uc_check = new ParamInfo("uc_check");
-    param_uc_check->group = "check";
+    param_uc_check->group = "rename";
     param_uc_check->grammar = "ucd uc_check file_dir";
     param_uc_check->english_explain = "check if all file'name is uc";
-    param_uc_check->chinese_explain = "查看是否所有文件以 UC 格式进行命名的";   
+    param_uc_check->chinese_explain = "查看是否所有文件以 UC 格式进行命名的";
     UcdParamOpt::add_param(param_uc_check);
 
     // god blass me
@@ -636,7 +660,7 @@ void UcdParamOpt::load_param_info()
 
     // move_uc
     ParamInfo * param_move_uc = new ParamInfo("move_uc");
-    param_move_uc->group = "sync";
+    param_move_uc->group = "rename";
     param_move_uc->grammar = "ucd move_uc file_dir save_dir";
     param_move_uc->english_explain = "move file with name in uc format";
     param_move_uc->chinese_explain = "将文件件中所有符合 uc 命名的移动到指定文件夹中";   
@@ -644,7 +668,7 @@ void UcdParamOpt::load_param_info()
 
     // move_not_uc
     ParamInfo * param_move_not_uc = new ParamInfo("move_not_uc");
-    param_move_not_uc->group = "sync";
+    param_move_not_uc->group = "rename";
     param_move_not_uc->grammar = "ucd move_not_uc file_dir save_dir";
     param_move_not_uc->english_explain = "move file when filename not in uc format";
     param_move_not_uc->chinese_explain = "将文件件中所有不符合 uc 命名的移动到指定文件夹中";   
@@ -652,7 +676,7 @@ void UcdParamOpt::load_param_info()
 
     // from_file
     ParamInfo * param_from_file = new ParamInfo("from_file");
-    param_from_file->group = "sync";
+    param_from_file->group = "convert";
     param_from_file->grammar = "ucd from_file file_dir";
     param_from_file->english_explain = "";
     param_from_file->chinese_explain = "(递归)只获取指定文件夹下面文件的 uc 组织成一个 ucd, 不去解析具体文件中的内容 ";   
@@ -660,7 +684,7 @@ void UcdParamOpt::load_param_info()
 
     // uc_analysis
     ParamInfo * param_uc_analysis = new ParamInfo("uc_analysis");
-    param_uc_analysis->group = "info";
+    param_uc_analysis->group = "analysis";
     param_uc_analysis->grammar = "ucd uc_analysis ucd_path";
     param_uc_analysis->english_explain = "";
     param_uc_analysis->chinese_explain = "分析 uc 的组成，看前三位即可";   
@@ -692,7 +716,7 @@ void UcdParamOpt::load_param_info()
 
     // conf_analysis
     ParamInfo * param_conf_analysis = new ParamInfo("conf_analysis");
-    param_conf_analysis->group = "filter";
+    param_conf_analysis->group = "analysis";
     param_conf_analysis->grammar = "ucd conf_analysis ucd_path seg_count";
     param_conf_analysis->english_explain = "";
     param_conf_analysis->chinese_explain = "置信度分析，分析 ucd 中存放的置信度信息";   
@@ -700,7 +724,7 @@ void UcdParamOpt::load_param_info()
 
     // area_analysis
     ParamInfo * param_area_analysis = new ParamInfo("area_analysis");
-    param_area_analysis->group = "filter";
+    param_area_analysis->group = "analysis";
     param_area_analysis->grammar = "ucd area_analysis ucd_path srg_count";
     param_area_analysis->english_explain = " ";
     param_area_analysis->chinese_explain = "面积分析，分析所有对象的面积分布";   
@@ -717,7 +741,7 @@ void UcdParamOpt::load_param_info()
 
     // drop
     ParamInfo * param_drop = new ParamInfo("drop");
-    param_drop->group = "sync";
+    param_drop->group = "opt";
     param_drop->grammar = "ucd drop attr_name ucd_path save_ucd_path";
     param_drop->english_explain = "";
     param_drop->chinese_explain = "获取 ucd 中的信息 dataset_name, object_info, model_name, model_version, add_time, update_time, describe, label_used, uc_list]";   

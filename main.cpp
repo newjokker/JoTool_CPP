@@ -58,6 +58,8 @@ using namespace std;
 
 // 增加寻找有问题的 标签的信息
 
+// 完善注释和各个命令的位置
+
 
 int main(int argc, char ** argv)
 {
@@ -151,18 +153,6 @@ int main(int argc, char ** argv)
 
     // all command
     if(command_1 == "check")
-    {
-        if(argc == 2)
-        {
-            ucd_util->search_ucd();
-        }
-        else
-        {
-            ucd_param_opt->print_command_info("check");
-            return -1;
-        }
-    }
-    else if(command_1 == "search")
     {
         if(argc == 2)
         {
@@ -1059,6 +1049,7 @@ int main(int argc, char ** argv)
         // 屏幕闪烁一些标准的 gif 图
         // 比如 你真棒，我很忙，你走开，别烦我
     }
+    // opt
     else if(command_1 == "attr")
     {
         // 修改 ucd 文件的属性信息，因为对于比较大的 ucd 打开自己去修改非常麻烦
@@ -1236,23 +1227,6 @@ int main(int argc, char ** argv)
             }
             return -1;
         }   
-    }
-    else if(command_1 == "test")
-    {
-
-        UCDataset* ucd = new UCDataset("/home/ldq/ucd_dir/zgh.json");
-
-        ucd->parse_ucd();
-
-        for(int i=0; i<ucd->uc_list.size(); i++)
-        {
-        
-            ucd_util->load_img_with_assign_uc("/home/ldq/ucd_dir/del_img", ucd->uc_list[i]);
-
-        }
-
-        return 0;
-
     }
     else if(command_1 == "filter_by_tags")
     {
