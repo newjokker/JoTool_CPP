@@ -151,7 +151,7 @@ int main(int argc, char ** argv)
         throw "cache_dir not exists!";
     }
 
-    // all command
+    // sync
     if(command_1 == "check")
     {
         if(argc == 2)
@@ -667,6 +667,7 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
+    // rename
     else if(command_1 == "rename_img")
     {
         if(argc == 3)
@@ -1322,6 +1323,7 @@ int main(int argc, char ** argv)
             ucd_param_opt->print_command_info(command_1);
         }
     }
+    // analysis
     else if(command_1 == "uc_analysis")
     {
         if(argc == 3)
