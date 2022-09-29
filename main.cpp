@@ -58,7 +58,9 @@ using namespace std;
 
 // 标准的质量控制，去掉那些重复的，可以反复跑训练集，得到结果，进行对比
 
+// UCDatasetUtil::load_img_with_assign_uc 这个函数有问题需要进行解决？
 
+// 文件下载下来之后都是空的，看看是怎么回事
 
 int main(int argc, char ** argv)
 {
@@ -781,12 +783,6 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "cut_small_img")
     {
-        // 裁剪到一半会报错
-        // 会出现几张图大小为 0 是不是 cv 读图报错导致的？
-
-        ucd_param_opt->not_ready();
-        return -1;
-
         if (argc == 5)
         {
             std::string ucd_path = argv[2];
@@ -1775,7 +1771,7 @@ int main(int argc, char ** argv)
         ucd_param_opt->print_all_fun();
         return -1;
     }
-
+    
     delete ucd_util;
     delete ucd_param_opt;
 

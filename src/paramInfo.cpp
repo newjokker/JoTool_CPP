@@ -762,6 +762,18 @@ void UcdParamOpt::load_param_info()
     param_update->demo.push_back("ucd update");
     param_update->demo.push_back("ucd update ucd_v1.4.7");
     UcdParamOpt::add_param(param_update);
+
+    // absorb
+    ParamInfo * param_absorb = new ParamInfo("absorb");
+    param_absorb->group = "opt";
+    param_absorb->grammar = "ucd absorb ucd_path ucd_be_absorb_path ucd_save_path absorb_attr";
+    param_absorb->english_explain = "";
+    param_absorb->chinese_explain = "ucd 中空的数据从其他 ucd 中吸收而来, 只吸收 uc_list 中包含的 uc";   
+    param_absorb->demo.push_back("ucd absorb aqm.json all.json aqm_absorb.json object_info");
+    param_absorb->demo.push_back("ucd absorb aqm.json all.json aqm_absorb.json size_info");
+    param_absorb->demo.push_back("ucd absorb aqm.json all.json aqm_absorb.json *");
+    UcdParamOpt::add_param(param_absorb);
+
 }
 
 void UcdParamOpt::not_ready(std::string method_name)

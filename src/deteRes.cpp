@@ -515,8 +515,23 @@ std::map<std::string, int> DeteRes::count_tags()
 
 cv::Mat DeteRes::get_sub_img_by_dete_obj(DeteObj dete_obj, bool RGB)
 {
-    // todo 加上 RGB 的转换操作 
-    cv::Rect rect(dete_obj.x1, dete_obj.y1, dete_obj.x2-dete_obj.x1, dete_obj.y2-dete_obj.y1); 
+    // todo 加上 RGB 的转换操作
+
+    // todo 检查检测框的范围是否符合要求
+
+    // std::cout << dete_obj.x1 << ", " << dete_obj.y1 << ", " << dete_obj.x2-dete_obj.x1 << ", " << dete_obj.y2-dete_obj.y1 << std::endl;
+    // std::cout << dete_obj.x2 << ", " << dete_obj.y2 << std::endl;
+    // std::cout << DeteRes::height << std::endl; 
+    // std::cout << DeteRes::width << std::endl; 
+
+    int x1 = MAX(dete_obj.x1, 0);
+    int y1 = MAX(dete_obj.y1, 0);
+    int x2 = MIN(dete_obj.x2, DeteRes::width);
+    int y2 = MIN(dete_obj.y2, DeteRes::height);
+
+    // std::cout << x1 << ", " << y1 << ", " << x2-x1 << ", " << y2-y1 << std::endl;
+
+    cv::Rect rect(x1, y1, x2-x1, y2-y1); 
     cv::Mat ROI = DeteRes::img_ndarry(rect); 
     return ROI;
 }
@@ -533,12 +548,17 @@ void DeteRes::crop_dete_obj(std::string save_dir, bool split_by_tag, std::string
         save_name = get_file_name(DeteRes::img_path);
     }
 
+    if((DeteRes::width == 0) || (DeteRes::height == 0))
+    {
+        std::cout << "parse img failed, wight or hwight == 0, uc : " << save_name << std::endl;
+        return;
+    }
+
     std::string each_save_name;
     std::string tag_dir;
     cv::Mat roi;
     for(int i=0; i<DeteRes::size(); i++)
     {
-        roi = DeteRes::get_sub_img_by_dete_obj(DeteRes::alarms[i]);
         if(split_by_tag)
         {
             tag_dir = save_dir + "/" + DeteRes::alarms[i].tag;
@@ -552,7 +572,19 @@ void DeteRes::crop_dete_obj(std::string save_dir, bool split_by_tag, std::string
         {
             each_save_name = save_dir + "/" + save_name + "-+-" + DeteRes::alarms[i].get_name_str() + ".jpg"; 
         }
-        cv::imwrite(each_save_name, roi);
+        
+        if(! is_file(each_save_name))
+        {
+            try
+            {
+                roi = DeteRes::get_sub_img_by_dete_obj(DeteRes::alarms[i]);
+                cv::imwrite(each_save_name, roi);
+            }
+            catch(...)
+            {
+                std::cout << "crop_dete_obj error : " << each_save_name << std::endl;
+            }
+        }
     }
 }
 

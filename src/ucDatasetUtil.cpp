@@ -948,17 +948,19 @@ void UCDataset::absorb(std::string meat_ucd, std::string save_path, std::string 
     UCDataset* ucd = new UCDataset(meat_ucd);
     ucd->parse_ucd(true);
 
+    tqdm bar;
+    int N = UCDataset::uc_list.size();
     for(int i=0; i<UCDataset::uc_list.size(); i++)
     {
         std::string uc = UCDataset::uc_list[i];
-        if(need_attr == "size_info")
+        if((need_attr == "size_info") || (need_attr == "*"))
         {
             if((UCDataset::size_info.count(uc) == 0) && (ucd->size_info.count(uc) > 0))
             {
                 UCDataset::size_info[uc] = ucd->size_info[uc];
             }
         }
-        else if(need_attr == "object_info")
+        else if((need_attr == "object_info") || (need_attr == "*"))
         {
             if((UCDataset::object_info.count(uc) == 0) && (ucd->object_info.count(uc) > 0))
             {
@@ -968,8 +970,11 @@ void UCDataset::absorb(std::string meat_ucd, std::string save_path, std::string 
         else
         {
             std::cout << "attr_name not support, [size_info, object_info]";
+            throw "attr_name not support, [size_info, object_info]";
         }
+        bar.progress(i, N);
     }
+    bar.finish();
     ucd->save_to_ucd(save_path);
     delete ucd;
 }
@@ -1125,6 +1130,8 @@ void UCDatasetUtil::load_img(std::string save_dir, std::vector<std::string> uc_l
 
 void UCDatasetUtil::load_img_with_assign_uc(std::string save_dir, std::string uc)
 {
+
+    // todo 这个函数有问题，好像下载下来的数据都是空的
     if(! is_dir(save_dir))
     {
         std::cout << "save dir not exists : " << save_dir << std::endl;
@@ -1137,21 +1144,24 @@ void UCDatasetUtil::load_img_with_assign_uc(std::string save_dir, std::string uc
     std::string img_url = "/file/" + uc + ".jpg";
 
 
-    std::cout << "-------------" << std::endl;
-    std::cout << "save_dir : " << save_dir << std::endl;
-    std::cout << "uc : " << uc << std::endl;
-    std::cout << "img_url : " << img_url << std::endl;
-    std::cout << "save_img_path : " << save_img_path << std::endl;
-    std::cout << "img_cache_path : " << img_cache_path << std::endl;
-    std::cout << "-------------" << std::endl;
+    // std::cout << "-------------" << std::endl;
+    // std::cout << "save_dir : " << save_dir << std::endl;
+    // std::cout << "uc : " << uc << std::endl;
+    // std::cout << "img_url : " << img_url << std::endl;
+    // std::cout << "save_img_path : " << save_img_path << std::endl;
+    // std::cout << "img_cache_path : " << img_cache_path << std::endl;
+    // std::cout << "-------------" << std::endl;
 
-    if(is_file(img_cache_path))
+    if(! is_file(save_img_path))
     {
-        copy_file(img_cache_path, save_img_path);
-    }
-    else
-    {
-        UCDatasetUtil::load_file(img_url, save_img_path); 
+        if(is_file(img_cache_path))
+        {
+            copy_file(img_cache_path, save_img_path);
+        }
+        else
+        {
+            UCDatasetUtil::load_file(img_url, save_img_path); 
+        }
     }
 }
 
@@ -1308,15 +1318,19 @@ void UCDatasetUtil::get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_pa
     UCDataset* ucd = new UCDataset(ucd_path);
     std::string uc;
 
+    tqdm bar;
+    int N = xml_path_vector.size();
     for(int i=0; i<xml_path_vector.size(); i++)
     {
         uc = get_file_name(xml_path_vector[i]);
         if(is_uc(uc))
         {
-            std::cout << i << ", add labelme json : " << xml_path_vector[i] << std::endl;
+            // std::cout << i << ", add labelme json : " << xml_path_vector[i] << std::endl;
             ucd->add_voc_xml_info(uc, xml_path_vector[i]);
         }
+        bar.progress(i, N);
     }
+    bar.finish();
     ucd->save_to_ucd(ucd_path);
     delete ucd;
 }
@@ -1328,16 +1342,19 @@ void UCDatasetUtil::get_ucd_from_json_dir(std::string json_dir, std::string ucd_
 
     UCDataset* ucd = new UCDataset(ucd_path);
     std::string uc, json_path;
-
+    tqdm bar;
+    int N = json_path_vector.size();
     for(int i=0; i<json_path_vector.size(); i++)
     {
         uc = get_file_name(json_path_vector[i]);
         if(is_uc(uc))
         {
-            std::cout << i << ", add labelme json : " << json_path_vector[i] << std::endl;
+            // std::cout << i << ", add labelme json : " << json_path_vector[i] << std::endl;
             ucd->add_labelme_json_info(uc, json_path_vector[i]);
         }
+        bar.progress(i, N);
     }
+    bar.finish();
     ucd->save_to_ucd(ucd_path);
     delete ucd;
 }
@@ -1349,6 +1366,8 @@ void UCDatasetUtil::get_ucd_from_file_dir(std::string file_dir, std::string ucd_
     UCDataset* ucd = new UCDataset(ucd_path);
     std::string uc, json_path;
 
+    tqdm bar;
+    int N = json_path_vector.size();
     for(int i=0; i<json_path_vector.size(); i++)
     {
         uc = get_file_name(json_path_vector[i]);
@@ -1357,7 +1376,9 @@ void UCDatasetUtil::get_ucd_from_file_dir(std::string file_dir, std::string ucd_
             std::cout << i << ", add file : " << json_path_vector[i] << std::endl;
             ucd->uc_list.push_back(uc);
         }
+        bar.progress(i, N);
     }
+    bar.finish();
     ucd->save_to_ucd(ucd_path);
     delete ucd;
 }
@@ -1635,6 +1656,8 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
     UCDataset* ucd = new UCDataset(ucd_path);
     ucd->parse_ucd(true);
 
+    tqdm bar;
+    int N = ucd->object_info.size();
     int uc_index = 0;
     auto iter = ucd->object_info.begin();
     while(iter != ucd->object_info.end())
@@ -1643,19 +1666,23 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
         UCDatasetUtil::load_img_with_assign_uc(UCDatasetUtil::cache_img_dir, uc);
         std::set<std::string> img_suffix {".jpg", ".JPG", ".png", ".PNG"};
         std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
+        // std::string img_path = get_file_by_suffix_set("/home/ldq/ucd_dir/img", uc, img_suffix);
+
+        // std::cout << "img_path : " << img_path << std::endl; 
 
         if(img_path == "")
         {
             std::cout << "load uc img failed : " << uc << std::endl;
-            continue;
         }
         else
         {
             ucd->crop_dete_res_with_assign_uc(uc, img_path,  save_dir);
         }
         uc_index += 1;
+        bar.progress(uc_index, N);
         iter++;
     }
+    bar.finish();
     delete ucd;
 }
 
