@@ -1,6 +1,4 @@
 
-
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -10,8 +8,6 @@
 #include <iostream>
 #include <iomanip>
 #include "include/paramInfo.hpp"
-
-// using namespace std;
 
 
 
@@ -37,18 +33,6 @@ int min_edit_cost(std::string s1, std::string s2, int ic, int dc, int rc)
 ParamInfo::ParamInfo(std::string command)
 {
     ParamInfo::command = command;
-
-    // std::cout << "command is : " << command << std::endl;   
-
-    // if(command == "")
-    // {
-    //     std::cout << "command is empty" << std::endl;
-    //     throw "command is empty";
-    // }
-    // else
-    // {
-    //     ParamInfo::command = command;
-    // }
 }
 
 bool ParamInfo::is_similar(std::string other_command)
@@ -269,9 +253,6 @@ void UcdParamOpt::print_all_fun_chinese()
     std::cout << "------------------------" << std::endl;
 }
 
-
-
-
 void UcdParamOpt::load_param_info()
 {
 
@@ -284,14 +265,6 @@ void UcdParamOpt::load_param_info()
     param_check->demo.push_back("ucd check              (查看所有云端的 ucd)");   
     param_check->demo.push_back("ucd check | grep fzc   (查看所有云端中带有 fzc 关键字的 ucd)"); 
     UcdParamOpt::add_param(param_check);
-    
-    // // search
-    // ParamInfo * param_search = new ParamInfo("search");
-    // param_search->group = "sync";
-    // param_search->grammar = "ucd search keyword";
-    // param_search->english_explain = "get all ucd official|customer from server by keyword";
-    // param_search->chinese_explain = "根据关键字查看服务器中所有 ucd 信息，包括官方 ucd 和 自定义 ucd";
-    // UcdParamOpt::add_param(param_search);
     
     // save
     ParamInfo * param_save = new ParamInfo("save");

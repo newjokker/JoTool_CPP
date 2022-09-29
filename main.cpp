@@ -48,8 +48,6 @@ using namespace std;
 
 // label_used 是无序的要记得这个
 
-// ucd help 1 , 第一种格式的打印， ucd help 2 第二种格式的打印，有些格式打印出来的要是中文
-
 // python 是不是要搞一套一样的接口的包，方便使用，
 
 // 查看对文件夹是否有操作权限，没有权限的话 save 等操作没有结果但是也不会报错
@@ -57,8 +55,6 @@ using namespace std;
 // 标准的质量控制，去掉那些重复的，可以反复跑训练集，得到结果，进行对比
 
 // 增加寻找有问题的 标签的信息
-
-// 完善注释和各个命令的位置
 
 
 int main(int argc, char ** argv)
@@ -151,7 +147,7 @@ int main(int argc, char ** argv)
         throw "cache_dir not exists!";
     }
 
-    // sync
+    // key word
     if(command_1 == "check")
     {
         if(argc == 2)
@@ -667,7 +663,6 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
-    // rename
     else if(command_1 == "rename_img")
     {
         if(argc == 3)
@@ -1050,7 +1045,6 @@ int main(int argc, char ** argv)
         // 屏幕闪烁一些标准的 gif 图
         // 比如 你真棒，我很忙，你走开，别烦我
     }
-    // opt
     else if(command_1 == "attr")
     {
         // 修改 ucd 文件的属性信息，因为对于比较大的 ucd 打开自己去修改非常麻烦
@@ -1107,60 +1101,6 @@ int main(int argc, char ** argv)
             ucd_param_opt->print_command_info("help");
             return -1;
         }
-    }
-    else if(command_1 == "uc_check")
-    {
-        if(argc == 3)
-        {
-            std::string file_dir = argv[2];
-
-            if(! is_dir(file_dir))
-            {
-                std::cout << "file_dir not exists : " << file_dir << std::endl;
-                return -1;
-            }
-
-            std::vector<string> uc_vector;
-            std::set<std::string> file_suffix {".jpg", ".JPG", ".png", ".PNG", ".json", ".xml"}; 
-            std::vector<std::string> file_vector = get_all_file_path(file_dir, file_suffix);
-        
-            for(int i=0; i<file_vector.size(); i++)
-            {
-                std::string uc = get_file_name(file_vector[i]);
-                uc_vector.push_back(uc);
-            }
-
-            SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
-            std::map<std::string, bool> is_uc_map = sd_sql->check_uc_by_mysql(uc_vector);
-
-            int is_uc = 0;
-            int not_uc = 0;
-            auto iter = is_uc_map.begin();
-            while(iter != is_uc_map.end())
-            {
-                if(iter->second)
-                {
-                    is_uc += 1;
-                }
-                else
-                {
-                    not_uc += 1;
-                }
-                iter ++;
-            }
-
-            std::cout << "------------------------" << std::endl;
-            std::cout << "is  uc count : " << is_uc << std::endl;
-            std::cout << "not uc count : " << not_uc << std::endl;
-            std::cout << "check name format for (.jpg, .JPG, .png, .PNG. .xml, .json) : " << std::endl;
-            std::cout << "------------------------" << std::endl;
-            delete sd_sql;
-        }
-        else
-        {
-            ucd_param_opt->print_command_info("uc_check");
-            return -1;
-        }        
     }
     else if(command_1 == "move_uc" || command_1 == "move_not_uc")
     {
@@ -1323,7 +1263,6 @@ int main(int argc, char ** argv)
             ucd_param_opt->print_command_info(command_1);
         }
     }
-    // analysis
     else if(command_1 == "uc_analysis")
     {
         if(argc == 3)
