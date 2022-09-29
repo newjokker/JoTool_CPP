@@ -86,7 +86,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.5.2";
+    std::string app_version = "v1.5.3";
 
     // cache dir
     std::string cache_dir;
