@@ -768,10 +768,10 @@ void UcdParamOpt::load_param_info()
     param_absorb->group = "opt";
     param_absorb->grammar = "ucd absorb ucd_path ucd_be_absorb_path ucd_save_path absorb_attr";
     param_absorb->english_explain = "";
-    param_absorb->chinese_explain = "ucd 中空的数据从其他 ucd 中吸收而来, 只吸收 uc_list 中包含的 uc";   
+    param_absorb->chinese_explain = "ucd 中缺失的数据从其他 ucd 中吸收而来, 只吸收 uc_list 中包含的 uc";   
     param_absorb->demo.push_back("ucd absorb aqm.json all.json aqm_absorb.json object_info");
     param_absorb->demo.push_back("ucd absorb aqm.json all.json aqm_absorb.json size_info");
-    param_absorb->demo.push_back("ucd absorb aqm.json all.json aqm_absorb.json *");
+    param_absorb->demo.push_back("ucd absorb aqm.json all.json aqm_absorb.json all");
     UcdParamOpt::add_param(param_absorb);
 
 }

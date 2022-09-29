@@ -46,8 +46,6 @@ using namespace std;
 
 // add meachine learning , basic content,  
 
-// 裁剪训练的图也是唯一的，也可以弄成缓存
-
 // label_used 是无序的要记得这个
 
 // ucd help 1 , 第一种格式的打印， ucd help 2 第二种格式的打印，有些格式打印出来的要是中文
@@ -58,9 +56,8 @@ using namespace std;
 
 // 标准的质量控制，去掉那些重复的，可以反复跑训练集，得到结果，进行对比
 
-// UCDatasetUtil::load_img_with_assign_uc 这个函数有问题需要进行解决？
+// 增加寻找有问题的 标签的信息
 
-// 文件下载下来之后都是空的，看看是怎么回事
 
 int main(int argc, char ** argv)
 {
@@ -1745,10 +1742,10 @@ int main(int argc, char ** argv)
         // 从其他 ucd 中吸收需要的内容 size_info, object_info
         if(argc == 6)
         {
-            std::string attr = argv[2];
-            std::string ucd_path = argv[3];
-            std::string meat_ucd_path = argv[4];
-            std::string save_path = argv[5];
+            std::string ucd_path = argv[2];
+            std::string meat_ucd_path = argv[3];
+            std::string save_path = argv[4];
+            std::string attr = argv[5];
             // 
             UCDataset* ucd = new UCDataset(ucd_path);
             ucd->parse_ucd(true);
@@ -1760,6 +1757,28 @@ int main(int argc, char ** argv)
             ucd_param_opt->print_command_info(command_1);
             return -1;
         }
+    }
+    else if(command_1 == "buddha_bless")
+    {
+        std::cout << "               _ooOoo_                " << std::endl;
+        std::cout << "              o8888888o               " << std::endl;
+        std::cout << "              88' . '88               " << std::endl;
+        std::cout << "              (| -_- |)               " << std::endl;
+        std::cout << "              O\  =  /O               " << std::endl;
+        std::cout << "           ____/`---'\____            " << std::endl;
+        std::cout << "         .'  \|       |    `.         " << std::endl;
+        std::cout << "        /  \|||||  :  |||   |        " << std::endl;
+        std::cout << "       /  _||||| -:- |||||- |        " << std::endl;
+        std::cout << "       |   | \  -  / |   |            " << std::endl;
+        std::cout << "       | \_|  ''\---/''  |   |        " << std::endl;
+        std::cout << "       \  .-\__  `-`  ___/-. /        " << std::endl;
+        std::cout << "     ___`. .'  /--.--\  `. . __       " << std::endl;
+        std::cout << "  ."" '<  `.___\_<|>_/___.'  >'"".    " << std::endl;
+        std::cout << " | | :  `- \`.;`\ _ /`;.`/ - ` : | |  " << std::endl;
+        std::cout << " \  \ `-.   \_ __\ /__ _/   .-` /  /  " << std::endl;
+        std::cout << "===`-.____`-.___\_____/___.-`____.-'==" << std::endl;
+        std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << std::endl;
+        std::cout << "        Buddha Bless, No Bug !        " << std::endl;
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {

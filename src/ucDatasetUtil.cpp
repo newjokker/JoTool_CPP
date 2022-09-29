@@ -953,14 +953,14 @@ void UCDataset::absorb(std::string meat_ucd, std::string save_path, std::string 
     for(int i=0; i<UCDataset::uc_list.size(); i++)
     {
         std::string uc = UCDataset::uc_list[i];
-        if((need_attr == "size_info") || (need_attr == "*"))
+        if((need_attr == "size_info") || (need_attr == "all"))
         {
             if((UCDataset::size_info.count(uc) == 0) && (ucd->size_info.count(uc) > 0))
             {
                 UCDataset::size_info[uc] = ucd->size_info[uc];
             }
         }
-        else if((need_attr == "object_info") || (need_attr == "*"))
+        else if((need_attr == "object_info") || (need_attr == "all"))
         {
             if((UCDataset::object_info.count(uc) == 0) && (ucd->object_info.count(uc) > 0))
             {
@@ -975,7 +975,7 @@ void UCDataset::absorb(std::string meat_ucd, std::string save_path, std::string 
         bar.progress(i, N);
     }
     bar.finish();
-    ucd->save_to_ucd(save_path);
+    UCDataset::save_to_ucd(save_path);
     delete ucd;
 }
 
