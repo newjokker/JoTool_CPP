@@ -56,6 +56,13 @@ using namespace std;
 
 // 增加寻找有问题的 标签的信息
 
+// 数据组平时要维护的四个服务（1）检测服务 （2）数据集标注错误检查服务, cleanlab （3）数据集标注遗漏检查服务（4）数据集更新工具, ucd 实现
+
+// idea -> interface -> app -> language
+
+// 仿照数据库语言的解析方式和语法，搞一个 ucd 语言，简单一点的只是个 demo 就行
+
+
 
 int main(int argc, char ** argv)
 {
@@ -84,7 +91,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.5.3";
+    std::string app_version = "v1.5.4";
 
     // cache dir
     std::string cache_dir;
@@ -857,18 +864,6 @@ int main(int argc, char ** argv)
         {
             ucd_param_opt->print_command_info("say");
         }
-    }
-    else if(command_1 == "filter")
-    {
-        ucd_param_opt->not_ready(command_1);
-        return -1;
-
-        // 对 ucd 进行过滤
-        // used_label
-        // conf
-        // assign label list split by ,
-        // filter by uc 是否为 uc 名字对数据进行划分，是否为 uc 直接与数据库上核对
-        // 
     }
     else if(command_1 == "cache_info")
     {
@@ -1695,6 +1690,64 @@ int main(int argc, char ** argv)
         std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << std::endl;
         std::cout << "        Buddha Bless, No Bug !        " << std::endl;
     }
+    else if(command_1 == "devide")
+    {
+        if(argc == 5)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_path = argv[3];
+            int devide_count = std::stoi(argv[4]);
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->devide(save_path, devide_count);
+            delete ucd;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "exec")
+    {
+        // 执行命令脚本中的命令 
+
+        // command 中也能指定正常的 ucd 命令！！！场景就是使用 ucd 进行 批处理，批处理使用 bash 就够了，但是bash 中为什么用不了自定义的关键字 https://blog.csdn.net/qq_33709508/article/details/101822329
+
+        // 对标注进行增删改查，输入的是记录需要增删改查命令的 txt，或者一个 dir 里面存放着增删改查文件的截图
+        // 读取 change.ucd（ucd 是对 ucd 操作的命令的文件，仿照 sql 来做）语法为 ucd exec tets.json command.ucd, 对 test.json 这个 ucd 实现 command.ucd 中记录的命令
+        // ADD object_info 
+        // DELETE object 
+        // ADD size_info 
+        // ADD uc 
+        // DROP size_info uc 
+        // ALTER  
+        // .ucd 文件的名字也可以规范为 ucd_a -> ucd_b 这种形式的，也保存下来，多方便啊
+
+        if(argc == 5)
+        {
+            std::string ucd_path = argv[2];
+            std::string command_path = argv[3];
+            std::string save_path = argv[4];
+
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->exec(command_path, save_path);
+
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "to_exec")
+    {
+        // 将 ucd 转为 .ucd 格式的代码, 类似于 .sql 脚本能直接运行，
+    }
+    else if(command_1 == "run")
+    {
+        // 执行复杂的任务，结果不一定是 ucd，结果直接打印出来即可
+        // 设置常用的关键字, count, select, save, drop, filter 等，ucd 先解析命令字符串然后直接运行，类似于 python 那种的形式
+        // ucd run "count nc where uc[:2] == 'CA' and obj.area > 10"
+    }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {
         ucd_param_opt->print_similar_command_info(command_1);
@@ -1708,6 +1761,5 @@ int main(int argc, char ** argv)
     
     delete ucd_util;
     delete ucd_param_opt;
-
 	return 1;
 }

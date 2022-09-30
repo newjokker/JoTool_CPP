@@ -979,6 +979,207 @@ void UCDataset::absorb(std::string meat_ucd, std::string save_path, std::string 
     delete ucd;
 }
 
+void UCDataset::devide(std::string save_path, int devide_count)
+{
+    if(! (save_path.substr(save_path.size()-5) == ".json"))
+    {
+        std::cout << "save_path error, need like save_dir/save_name + .json" << std::endl;
+        // throw "save_path error, need like save_dir/save_name + .json";
+        return;
+    }
+
+    if(devide_count > UCDataset::uc_list.size())
+    {
+        std::cout << "devide_count >= uc_list.size !" << std::endl;
+        // throw "devide_count >= uc_list.size !";
+        return;
+    }
+
+    std::string save_dir = get_file_folder(save_path);
+    std::string save_name = get_file_name(save_path);
+    if(! is_dir(save_dir))
+    {
+        std::cout << "save_dir not exists, " << save_dir << std::endl;
+        // throw "save_dir not exists";    
+        return;   
+    }
+
+    std::vector<std::string> uc_list = UCDataset::uc_list;
+    std::random_shuffle(uc_list.begin(), uc_list.end());
+
+    // devide uc_list
+    std::map< int, std::vector<std::string> > uc_list_map;
+    int uc_size = uc_list.size();
+    for(int i=0; i<uc_list.size(); i++)
+    {
+        int index = i % devide_count;
+        uc_list_map[index].push_back(uc_list[i]);
+    }
+
+    tqdm bar;
+    int N = uc_list.size();
+
+    // devide other info 
+    int index = 0;
+    for(int i=0; i<devide_count; i++)
+    {
+        std::string save_path = save_dir + "/" + save_name + "_" + std::to_string(i) + ".json";
+        UCDataset* new_ucd      = new UCDataset(save_path);
+        new_ucd->dataset_name   = UCDataset::dataset_name;
+        new_ucd->model_version  = UCDataset::model_version;
+        new_ucd->model_name     = UCDataset::model_name;
+        new_ucd->describe       = UCDataset::describe;
+        new_ucd->add_time       = UCDataset::add_time;
+        new_ucd->update_time    = -1;
+        new_ucd->label_used     = UCDataset::label_used;
+
+        for(int j=0; j<uc_list_map[i].size(); j++)
+        {
+            std::string uc = uc_list_map[i][j];
+            new_ucd->uc_list.push_back(uc);
+            
+            if(UCDataset::size_info.count(uc) > 0)
+            {
+                new_ucd->size_info[uc] = UCDataset::size_info[uc];
+            }
+
+            if(UCDataset::object_info.count(uc) > 0)
+            {
+                new_ucd->object_info[uc] = UCDataset::object_info[uc];
+            }
+            bar.progress(index, N);
+            index += 1;
+        }
+        new_ucd->save_to_ucd(save_path);
+        delete new_ucd;
+    }
+    bar.finish();
+}
+
+static std::vector<std::string> command_token(std::string line)
+{
+    std::vector<std::string> res;
+
+    std::string w = "";
+    for(int i=0; i<line.size(); i++)
+    {
+        if(line[i] == ' ')
+        {
+            if(w == "")
+            {
+                continue;
+            }
+            else
+            {
+                res.push_back(w);
+                w = "";
+            }
+        }
+        else
+        {
+            w += line[i];
+        }
+    }
+
+
+    for(int i=0; i<res.size(); i++)
+    {
+        std::cout << res[i];
+        std::cout << " - ";
+    }
+    std::cout << std::endl;
+
+    return res;
+}
+
+void UCDataset::command_ADD(std::vector<std::string> tokens)
+{
+    // 
+}
+
+void UCDataset::command_DROP_UC(std::vector<std::string> tokens)
+{
+
+}
+
+void UCDataset::command_DROP_ALL(std::vector<std::string> tokens)
+{
+
+}
+
+void UCDataset::exec(std::string command_path, std::string save_path)
+{
+    // 
+
+    if(! is_file(command_path))
+    {
+        std::cout << "command_path not exists" << std::endl;
+        return;
+    }
+
+    // 读取每一行命令
+    // 去掉每一行开头 结尾 的空白
+    // 提取第一个关键字
+    // 分析所有命令，确定没有语法错误了之后再去一行行地去执行命令
+
+    std::ifstream infile; 
+    infile.open(command_path);   
+    assert(infile.is_open());
+
+    // ADD UC uc
+    // ADD SIZE_INFO uc width height
+    // ADD OBJECT_INFO uc shape_type label conf [(x1, y1), (x2, y2) ...] 
+    // SET MODEL_NAME 
+    // SET LABEL_USED
+    // SET MODEL_VERSION
+    // DROP UC uc
+    // DROP_UC SIZE_INFO uc
+    // DROP_UC OBJECT_INFO uc shape_type label conf [(x1, y1), (x2, y2) ...] 
+    // DROP_UC OBJECT_INFO uc (这边可以指定条件 label)
+    // DROP_ALL UC (这边增加正则匹配运算符吧，可操作性大一些)
+    // DROP_ALL SIZE_INFO
+    // DROP_ALL SIZE_INFO width > 100
+    // DROP_ALL SIZE_INFO height < 5000
+    // DROP_ALL OBJECT_INFO tag in nc,kkx
+    // DROP_ALL OBJECT_INFO tag not_in nc,kkx
+    // DROP_ALL OBJECT_INFO uc in uc_1,uc_2,uc_3,uc_4
+    // DROP_ALL OBJECT_INFO shape_type in Rentangle
+    // DROP_ALL OBJECT_INFO shape_type in Rentangle,Cricle
+
+
+
+    std::string line;
+    while(getline(infile, line))
+    {
+        std::vector<std::string> tokens = command_token(line);
+
+        if(tokens[0] == "ADD")
+        {
+            std::cout << "执行 ADD 方法" << std::endl;
+            UCDataset::command_ADD(tokens);
+        }
+        else if(tokens[0] == "DROP")
+        {
+            std::cout << "执行 DROP 方法" << std::endl;
+            UCDataset::command_DROP_UC(tokens);
+        }
+        else if(tokens[0] == "DROP_ALL")
+        {
+            std::cout << "执行 DROP_ALL 方法" << std::endl;
+            UCDataset::command_DROP_ALL(tokens);
+        }
+        else if(tokens[0] == "SET")
+        {
+            std::cout << "执行 SET 方法" << std::endl;
+        }
+        else
+        {
+            std::cout << "不存在的方法 : " << tokens[0] << std::endl;
+        }
+    }
+    infile.close(); 
+}
+
 // 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
 {

@@ -129,6 +129,18 @@ class UCDataset
         // 从指定 ucd 中提取需要的内容
         void absorb(std::string meat_ucd, std::string save_path, std::string need_attr);
 
+        // 将数据集随机平分为几部分
+        void devide(std::string save_path, int devide_count);
+
+        // exec command 中的子任务
+        void command_ADD(std::vector<std::string> tokens);
+        void command_DROP_UC(std::vector<std::string> tokens);
+        void command_DROP_ALL(std::vector<std::string> tokens);
+
+        // 执行 ucd command 脚本, 保存为新的 ucd 
+        void exec(std::string command_path, std::string save_path);
+
+
     private:
         std::string json_path;
 };

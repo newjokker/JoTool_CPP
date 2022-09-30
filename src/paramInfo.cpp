@@ -738,6 +738,16 @@ void UcdParamOpt::load_param_info()
     param_absorb->demo.push_back("ucd absorb aqm.json all.json aqm_absorb.json all              (使用 all.json 为 aqm.json 补充缺少的 size_info object_info 信息)");
     UcdParamOpt::add_param(param_absorb);
 
+    // devide
+    ParamInfo * param_devide = new ParamInfo("devide");
+    param_devide->group = "converse";
+    param_devide->grammar = "ucd devide ucd_path save_path devide_count";
+    param_devide->english_explain = "";
+    param_devide->chinese_explain = "将 ucd 随机平均地划分为指定的份数";   
+    param_devide->demo.push_back("ucd devide test.json devide.json 5                            (将 test.json 随机划分为五份, 保存路径形式 devide_1.json, devide_2.json ... )");
+    UcdParamOpt::add_param(param_devide);
+
+
 }
 
 void UcdParamOpt::not_ready(std::string method_name)
