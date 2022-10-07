@@ -27,7 +27,6 @@ using json = nlohmann::json;
 using namespace jotools;
 using namespace std;
 
-
 // nginx 负载均衡，可以在风火轮上部署，转到 111 和 209 服务器上
 
 // 完成 C++ 版本的 文件 服务，再部署到 docker 上面，这样在哪个服务器上都能方便进行启动
@@ -1730,6 +1729,8 @@ int main(int argc, char ** argv)
             std::string save_path = argv[4];
 
             UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            // not save 
             ucd->exec(command_path, save_path);
 
         }
@@ -1741,6 +1742,7 @@ int main(int argc, char ** argv)
     else if(command_1 == "to_exec")
     {
         // 将 ucd 转为 .ucd 格式的代码, 类似于 .sql 脚本能直接运行，
+
     }
     else if(command_1 == "run")
     {

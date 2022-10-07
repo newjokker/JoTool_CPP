@@ -1058,6 +1058,10 @@ void UCDataset::devide(std::string save_path, int devide_count)
 
 static std::vector<std::string> command_token(std::string line)
 {
+
+    // todo clean command first 
+    // format command second  
+
     std::vector<std::string> res;
 
     std::string w = "";
@@ -1075,12 +1079,19 @@ static std::vector<std::string> command_token(std::string line)
                 w = "";
             }
         }
+        else if(i == line.size()-1)
+        {
+            if(line[i] != ' ')
+            {
+                w += line[i];
+                res.push_back(w);
+            }
+        }
         else
         {
             w += line[i];
         }
     }
-
 
     for(int i=0; i<res.size(); i++)
     {
@@ -1092,9 +1103,96 @@ static std::vector<std::string> command_token(std::string line)
     return res;
 }
 
+static std::vector< std::vector< double > > get_points_from_str(std::string point_str)
+{
+    std::vector< std::vector< double > > points;
+    bool is_end = false;
+    bool is_start = true;
+    std::string one_point_str = "";
+    for(int i=1; i<point_str.size()-1; i++)
+    {
+
+        if(point_str[i] == '(')
+        {
+            is_start = true;
+            continue;
+        }
+        else if(point_str[i] == ')')
+        {
+            is_end = true;
+            is_start = false;
+        }
+        else if(point_str[i] == ',')
+        {
+            if(is_start)
+            {
+                one_point_str += point_str[i];
+                continue;
+            }
+        }
+        else
+        {
+            if(is_start)
+            {
+                one_point_str += point_str[i];
+            }
+            continue;
+        }
+
+        if(is_end)
+        {
+            std::vector< std::string > one_point = pystring::split(one_point_str, ",");
+            double x = std::stof(one_point[0]);
+            double y = std::stof(one_point[1]);
+            points.push_back({x, y});
+            one_point_str = "";
+            is_end = false;
+        }
+    }
+    return points;
+}
+
 void UCDataset::command_ADD(std::vector<std::string> tokens)
 {
     // 
+
+    std::string command = tokens[1];
+
+    if(command == "UC")
+    {
+        // needn-t format check, do it before 
+        std::string uc = tokens[2];
+        UCDataset::uc_list.push_back(uc);
+    }
+    else if(command == "SIZE_INFO")
+    {
+        std::string uc  = tokens[2];
+        int width       = std::stoi(tokens[3]);
+        int height      = std::stoi(tokens[4]);
+        UCDataset::size_info[uc] = {width, height};
+    }
+    else if(command == "OBJECT_INFO")
+    {
+        // uc shape_type label conf [(x1, y1), (x2, y2) ...] 
+        std::string uc          = tokens[2];
+        std::string shape_type  = tokens[3];
+        std::string label       = tokens[4];
+        float       conf        = std::stof(tokens[5]);
+        std::vector< std::vector< double > > points = get_points_from_str(tokens[6]);
+        //  
+        
+        LabelmeObjFactory label_factory;
+        LabelmeObj* obj = label_factory.CreateObj(shape_type);
+        obj->conf = conf;
+        obj->label = label;
+        obj->points = points;
+        UCDataset::object_info[uc].push_back(obj);
+    }
+    else
+    {
+        std::cout << command << " not support" << std::endl;
+        throw command + " not support";
+    }
 }
 
 void UCDataset::command_DROP_UC(std::vector<std::string> tokens)
@@ -1121,6 +1219,8 @@ void UCDataset::exec(std::string command_path, std::string save_path)
     // 去掉每一行开头 结尾 的空白
     // 提取第一个关键字
     // 分析所有命令，确定没有语法错误了之后再去一行行地去执行命令
+
+    // 
 
     std::ifstream infile; 
     infile.open(command_path);   
@@ -1151,9 +1251,17 @@ void UCDataset::exec(std::string command_path, std::string save_path)
     std::string line;
     while(getline(infile, line))
     {
+
+        std::cout << line << std::endl;
+
         std::vector<std::string> tokens = command_token(line);
 
-        if(tokens[0] == "ADD")
+
+        if(tokens.size() == 0)
+        {
+            continue;
+        }
+        else if(tokens[0] == "ADD")
         {
             std::cout << "执行 ADD 方法" << std::endl;
             UCDataset::command_ADD(tokens);
@@ -1178,6 +1286,9 @@ void UCDataset::exec(std::string command_path, std::string save_path)
         }
     }
     infile.close(); 
+
+    UCDataset::save_to_ucd(save_path);
+
 }
 
 // 

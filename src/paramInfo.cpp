@@ -747,6 +747,15 @@ void UcdParamOpt::load_param_info()
     param_devide->demo.push_back("ucd devide test.json devide.json 5                            (将 test.json 随机划分为五份, 保存路径形式 devide_1.json, devide_2.json ... )");
     UcdParamOpt::add_param(param_devide);
 
+    // uc_info
+    ParamInfo * param_uc_info = new ParamInfo("uc_info");
+    param_uc_info->group = "info";
+    param_uc_info->grammar = "ucd uc_info ucd_path uc";
+    param_uc_info->english_explain = "";
+    param_uc_info->chinese_explain = "";   
+    param_uc_info->demo.push_back("ucd uc_info test.json Dsm07qp                                ()");
+    UcdParamOpt::add_param(param_uc_info);
+
 
 }
 
