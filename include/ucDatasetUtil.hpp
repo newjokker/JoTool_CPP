@@ -63,6 +63,11 @@ class UCDataset
         // 指定 uc 中是否存在某个对象
         bool has_obj(std::string uc, LabelmeObj *obj);
         
+        void add_obj(std::string uc, LabelmeObj *obj);
+
+        // 删除 obj
+        void delete_obj(std::string uc, LabelmeObj *obj); 
+
         // 对 uc 进行切片
         std::vector<std::string> uc_slice(int start, int end);
         
@@ -134,11 +139,11 @@ class UCDataset
 
         // exec command 中的子任务
         void command_ADD(std::vector<std::string> tokens);
-        void command_DROP_UC(std::vector<std::string> tokens);
-        void command_DROP_ALL(std::vector<std::string> tokens);
+        void command_DROP(std::vector<std::string> tokens);
+        void command_SET(std::vector<std::string> tokens);
 
         // 执行 ucd command 脚本, 保存为新的 ucd 
-        void exec(std::string command_path, std::string save_path);
+        void exec(std::string command_path);
 
 
     private:

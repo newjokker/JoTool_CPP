@@ -292,6 +292,25 @@ bool UCDataset::has_obj(std::string uc, LabelmeObj *obj)
     return false;
 }
 
+void UCDataset::delete_obj(std::string uc, LabelmeObj *obj)
+{
+    for(int j=0; j<UCDataset::object_info[uc].size(); j++)
+    {
+        if(UCDataset::object_info[uc][j]->equal_to(obj))
+        {
+            UCDataset::object_info[uc].erase(UCDataset::object_info[uc].begin() + j);
+        }
+    }
+}
+
+void UCDataset::add_obj(std::string uc, LabelmeObj *obj)
+{
+    if(! UCDataset::has_obj(uc, obj))
+    {
+        UCDataset::object_info[uc].push_back(obj);
+    }
+}
+
 void UCDataset::add_voc_xml_info(std::string uc, std::string voc_xml_path)
 {
     // 增量解析 voc 标准的 xml 数据
@@ -1183,7 +1202,12 @@ static bool command_check(std::string command_path)
             // 识别为注释
             continue;
         }
-        else if((tokens[0] == "ADD") && (tokens[1] == "UC"))
+        else if(tokens.size() < 3)
+        {
+            std::cout << "line : " << index << ", format error : " << line << std::endl;
+            return false;
+        }
+        else if((tokens[0] == "ADD")    &&  (tokens[1] == "UC"))
         {
             if(tokens.size() != 3)
             {
@@ -1196,7 +1220,7 @@ static bool command_check(std::string command_path)
                 return false;
             }
         }
-        else if((tokens[0] == "ADD") && (tokens[1] == "SIZE_INFO"))
+        else if((tokens[0] == "ADD")    &&  (tokens[1] == "SIZE_INFO"))
         {
             if(tokens.size() != 5)
             {
@@ -1228,7 +1252,7 @@ static bool command_check(std::string command_path)
             }
 
         }
-        else if((tokens[0] == "ADD") && (tokens[1] == "OBJECT_INFO"))
+        else if((tokens[0] == "ADD")    &&  (tokens[1] == "OBJECT_INFO"))
         {
             if(tokens.size() != 7)
             {
@@ -1273,13 +1297,155 @@ static bool command_check(std::string command_path)
                 return false; 
             }
         }
+        else if((tokens[0] == "SET")    &&  (tokens[1] == "DATASET_NAME"))
+        {
+            if(tokens.size() != 3)
+            {
+                std::cout << "line : " << index << ", format error, SET DATASET_NAME dataset_name" << std::endl;
+                return false;
+            }
+        }
+        else if((tokens[0] == "SET")    &&  (tokens[1] == "MODEL_NAME"))
+        {
+            if(tokens.size() != 3)
+            {
+                std::cout << "line : " << index << ", format error, SET MODEL_NAME model_name" << std::endl;
+                return false;
+            }  
+        }
+        else if((tokens[0] == "SET")    &&  (tokens[1] == "MODEL_VERSION"))
+        {
+            if(tokens.size() != 3)
+            {
+                std::cout << "line : " << index << ", format error, SET MODERL_VERSION model_version" << std::endl;
+                return false;
+            } 
+        }
+        else if((tokens[0] == "SET")    &&  (tokens[1] == "DESCRIBE"))
+        {
+            if(tokens.size() < 3)
+            {
+                std::cout << "line : " << index << ", format error, SET DESCRIBE describ" << std::endl;
+                return false;
+            }  
+        }
+        else if((tokens[0] == "SET")    &&  (tokens[1] == "LABEL_USED"))
+        {
+            if(tokens.size() < 3)
+            {
+                std::cout << "line : " << index << ", format error, SET LABEL_USED label_used" << std::endl;
+                return false;
+            } 
+        }
+        else if((tokens[0] == "DROP")   &&  (tokens[1] == "UC"))
+        {
+            if(tokens.size() != 3)
+            {
+                std::cout << "line : " << index << ", format error, DROP UC uc" << std::endl;
+                return false;
+            }
+            else if(! is_uc(tokens[2]))
+            {
+                std::cout << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << std::endl;
+                return false;   
+            }
+        }
+        else if((tokens[0] == "DROP")   &&  (tokens[1] == "SIZE_INFO"))
+        {
+            if(tokens.size() != 3)
+            {
+                std::cout << "line : " << index << ", format error, DROP SIZE_INFO uc" << std::endl;
+                return false;
+            }   
+            else if(! is_uc(tokens[2]))
+            {
+                std::cout << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << std::endl;
+                return false;   
+            }
+        }
+        else if((tokens[0] == "DROP")   &&  (tokens[1] == "OBJECT_INFO"))
+        {
+            // 删除一个元素
+            if(tokens.size() != 7)
+            {
+                std::cout << "line : " << index << ", format error, DROP OBJECT_INFO test_uc shape_type tag conf points" << std::endl;
+                return false;
+            }   
+            else if(! is_uc(tokens[2]))
+            {
+                std::cout << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << std::endl;
+                return false;   
+            }
+            else if((tokens[3] != "rectangle") && (tokens[3] != "line") && (tokens[3] != "linestrip") && (tokens[3] != "circle") && (tokens[3] != "point") && (tokens[3] != "polygon"))
+            {
+                std::cout << "line : "<< index << ", format error, illeagal shape_type(point, line, linestrip, circle, rectangle, polygon) : " << tokens[2] << std::endl;
+                return false;       
+            }
+
+            // get conf
+            try
+            {
+                float conf = std::stof(tokens[5]);
+                if((conf < 0) || (conf > 1))
+                {
+                    std::cout << "line : " << index << ", format error, 0 < conf < 1 : " << tokens[5] << std::endl;
+                    return false;
+                }
+            }
+            catch(...)
+            {
+                std::cout << "line : " << index << ", format error, parse conf error : " << tokens[5] << std::endl;
+                return false;
+            }
+            
+            // get points 
+            try
+            {
+                std::vector< std::vector< double > > points = get_points_from_str(tokens[6]);
+            }
+            catch(...)
+            {
+                std::cout << "line : " << index << ", format error, parse points error : " << tokens[6] << std::endl;
+                return false; 
+            }
+        }
+        else if((tokens[0] == "DROP")   &&  (tokens[1] == "ALL") && (tokens[2] == "UC"))
+        {
+            if(tokens.size() != 3)
+            {
+                std::cout << "line : " << index << ", format error, DROP ALL UC" << std::endl;
+                return false;
+            }
+        }
+        else if((tokens[0] == "DROP")   &&  (tokens[1] == "ALL") && (tokens[2] == "SIZE_INFO"))
+        {
+            if(tokens.size() != 3)
+            {
+                std::cout << "line : " << index << ", format error, DROP ALL SIZE_INFO" << std::endl;
+                return false;
+            }        
+        }
+        else if((tokens[0] == "DROP")   &&  (tokens[1] == "ALL") && (tokens[2] == "OBJECT_INFO"))
+        {
+            // 删除 uc 对应的所有的 obj
+            if(tokens.size() != 4)
+            {
+                std::cout << "line : " << index <<  ", format error, DROP ALL OBJECT_INFO uc : " << line << std::endl;
+                return false;   
+            }
+            else if(! is_uc(tokens[3]))
+            {
+                std::cout << "line : "<< index << ", format error, illeagal uc : " << tokens[3] << std::endl;
+                return false;
+            }
+        }
         else
         {
             std::cout << "line : " << index << ", gramma not support : " << line << std::endl;
             return false;
         }
     }
-    infile.close(); 
+    infile.close();
     return true;
 }
 
@@ -1309,10 +1475,10 @@ void UCDataset::command_ADD(std::vector<std::string> tokens)
         //  
         LabelmeObjFactory label_factory;
         LabelmeObj* obj = label_factory.CreateObj(shape_type);
-        obj->conf = conf;
-        obj->label = label;
+        obj->conf   = conf;
+        obj->label  = label;
         obj->points = points;
-        UCDataset::object_info[uc].push_back(obj);
+        UCDataset::add_obj(uc, obj);
     }
     else
     {
@@ -1321,46 +1487,105 @@ void UCDataset::command_ADD(std::vector<std::string> tokens)
     }
 }
 
-void UCDataset::command_DROP_UC(std::vector<std::string> tokens)
+void UCDataset::command_DROP(std::vector<std::string> tokens)
 {
+    std::string command = tokens[1];
+    if(command == "ALL"      && tokens[2] == "UC")
+    {
+        std::string uc = tokens[2];
+        UCDataset::uc_list.clear();
+        UCDataset::size_info.clear();
+        UCDataset::object_info.clear();
+    }
+    else if(command == "ALL" && tokens[2] == "SIZE_INFO")
+    {
+        std::string uc = tokens[2];
+        UCDataset::size_info.clear();
+    }
+    else if(command == "ALL" && tokens[2] == "OBJECT_INFO")
+    {
+        std::string uc = tokens[2];
+        UCDataset::object_info.clear();
+    }
+    else if(command == "UC")
+    {
+        std::string uc = tokens[2];
+        // uc_list
+        for(int i=0; i<UCDataset::uc_list.size(); i++)
+        {
+            if(UCDataset::uc_list[i] == uc)
+            {
+                UCDataset::uc_list.erase(UCDataset::uc_list.begin() + i);
+                break;
+            }
+        }
+        UCDataset::size_info.erase(uc);
+        UCDataset::object_info.erase(uc);
+    }
+    else if(command == "SIZE_INFO")
+    {
+        std::string uc = tokens[2];
+        UCDataset::size_info.erase(uc);
+    }
+    else if(command == "OBJECT_INFO")
+    {
+        std::string uc          = tokens[2];
+        std::string shape_type  = tokens[3];
+        std::string label       = tokens[4];
+        float       conf        = std::stof(tokens[5]);
+        std::vector< std::vector< double > > points = get_points_from_str(tokens[6]);
+        
 
+        LabelmeObjFactory label_factory;
+        LabelmeObj* obj = label_factory.CreateObj(shape_type);
+        obj->conf = conf;
+        obj->label = label;
+        obj->points = points;
+        UCDataset::delete_obj(uc, obj);
+    }
 }
 
-void UCDataset::command_DROP_ALL(std::vector<std::string> tokens)
+void UCDataset::command_SET(std::vector<std::string> tokens)
 {
-
+    std::string command = tokens[1];
+    
+    if(command == "DATASET_NAME")
+    {
+        UCDataset::dataset_name = tokens[2];
+    }
+    else if(command == "MODEL_NAME")
+    {
+        UCDataset::model_name = tokens[2];
+    }
+    else if(command == "MODEL_VERSION")
+    {
+        UCDataset::model_version = tokens[2];
+    }
+    else if(command == "DESCRIBE")
+    {
+        UCDataset::describe.clear();
+        for(int i=2; i<tokens.size(); i++)
+        {
+            UCDataset::describe += " " + tokens[i];
+        }
+    }
+    else if(command == "LABEL_USED")
+    {
+        UCDataset::label_used.clear();
+        for(int i=2; i<tokens.size(); i++)
+        {
+            UCDataset::label_used.push_back(tokens[i]);
+        }
+    }
 }
 
-void UCDataset::exec(std::string command_path, std::string save_path)
+void UCDataset::exec(std::string command_path)
 {
-    // 
-
     if(! is_file(command_path))
     {
         std::cout << "command_path not exists" << std::endl;
         return;
     }
-
-    // ADD UC uc
-    // ADD SIZE_INFO uc width height
-    // ADD OBJECT_INFO uc shape_type label conf [(x1, y1), (x2, y2) ...] 
-    // SET MODEL_NAME 
-    // SET LABEL_USED
-    // SET MODEL_VERSION
-    // DROP UC uc
-    // DROP_UC SIZE_INFO uc
-    // DROP_UC OBJECT_INFO uc shape_type label conf [(x1, y1), (x2, y2) ...] 
-    // DROP_UC OBJECT_INFO uc (这边可以指定条件 label)
-    // DROP_ALL UC (这边增加正则匹配运算符吧，可操作性大一些)
-    // DROP_ALL SIZE_INFO
-    // DROP_ALL SIZE_INFO width > 100
-    // DROP_ALL SIZE_INFO height < 5000
-    // DROP_ALL OBJECT_INFO tag in nc,kkx
-    // DROP_ALL OBJECT_INFO tag not_in nc,kkx
-    // DROP_ALL OBJECT_INFO uc in uc_1,uc_2,uc_3,uc_4
-    // DROP_ALL OBJECT_INFO shape_type in Rentangle
-    // DROP_ALL OBJECT_INFO shape_type in Rentangle,Cricle
-
 
     bool check_res = command_check(command_path);
     
@@ -1369,7 +1594,6 @@ void UCDataset::exec(std::string command_path, std::string save_path)
         std::cout << "command format error " << std::endl;
         return;
     }
-    
 
     // exec 
     std::ifstream infile; 
@@ -1384,6 +1608,7 @@ void UCDataset::exec(std::string command_path, std::string save_path)
 
         if(tokens.size() == 0)
         {
+            // 跳过空行
             continue;
         }
         else if(tokens[0] == "ADD")
@@ -1392,7 +1617,7 @@ void UCDataset::exec(std::string command_path, std::string save_path)
         }
         else if(tokens[0] == "DROP")
         {
-            UCDataset::command_DROP_UC(tokens);
+            UCDataset::command_DROP(tokens);
         }
         else if(tokens[0] == "DROP_ALL")
         {
@@ -1400,7 +1625,7 @@ void UCDataset::exec(std::string command_path, std::string save_path)
         }
         else if(tokens[0] == "SET")
         {
-            // std::cout << "执行 SET 方法" << std::endl;
+            UCDataset::command_SET(tokens);
         }
         else if(pystring::startswith(tokens[0], "//"))
         {
@@ -1412,10 +1637,7 @@ void UCDataset::exec(std::string command_path, std::string save_path)
             std::cout << "不存在的方法 : " << tokens[0] << std::endl;
         }
     }
-    infile.close(); 
-
-    UCDataset::save_to_ucd(save_path);
-
+    infile.close();
 }
 
 // 

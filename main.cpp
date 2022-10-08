@@ -61,6 +61,8 @@ using namespace std;
 
 // 仿照数据库语言的解析方式和语法，搞一个 ucd 语言，简单一点的只是个 demo 就行
 
+// 将需要的功能进行服务化，
+// ucd 只是一个数据集处理的工具，不需要增加太多的功能
 
 
 int main(int argc, char ** argv)
@@ -1763,18 +1765,8 @@ int main(int argc, char ** argv)
     else if(command_1 == "exec")
     {
         // 执行命令脚本中的命令 
-
         // command 中也能指定正常的 ucd 命令！！！场景就是使用 ucd 进行 批处理，批处理使用 bash 就够了，但是bash 中为什么用不了自定义的关键字 https://blog.csdn.net/qq_33709508/article/details/101822329
-
-        // 对标注进行增删改查，输入的是记录需要增删改查命令的 txt，或者一个 dir 里面存放着增删改查文件的截图
-        // 读取 change.ucd（ucd 是对 ucd 操作的命令的文件，仿照 sql 来做）语法为 ucd exec tets.json command.ucd, 对 test.json 这个 ucd 实现 command.ucd 中记录的命令
-        // ADD object_info 
-        // DELETE object 
-        // ADD size_info 
-        // ADD uc 
-        // DROP size_info uc 
-        // ALTER  
-        // .ucd 文件的名字也可以规范为 ucd_a -> ucd_b 这种形式的，也保存下来，多方便啊
+        // todo 第一个参数是 command_path，第二个参数是 ucd_path，最后一个参数是 save_path 
 
         if(argc == 5)
         {
@@ -1784,9 +1776,8 @@ int main(int argc, char ** argv)
 
             UCDataset* ucd = new UCDataset(ucd_path);
             ucd->parse_ucd(true);
-            // not save 
-            ucd->exec(command_path, save_path);
-
+            ucd->exec(command_path);
+            ucd->save_to_ucd(save_path);
         }
         else
         {
