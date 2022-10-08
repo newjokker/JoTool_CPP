@@ -724,7 +724,7 @@ void UcdParamOpt::load_param_info()
     param_update->english_explain = "";
     param_update->chinese_explain = "对 ucd 进行更新，只下载并配置库文件，还需要手动去改 ~/.bash_aliases 文件";   
     param_update->demo.push_back("ucd update                                        (将 ucd 更新到最新版本)");
-    param_update->demo.push_back("ucd update ucd_v1.4.7                             (将 ucd 版本更新带 ucd_v1.2.7)");
+    param_update->demo.push_back("ucd update ucd_v1.4.7                             (将 ucd 版本更新带 ucd_v1.4.7)");
     UcdParamOpt::add_param(param_update);
 
     // absorb
@@ -740,7 +740,7 @@ void UcdParamOpt::load_param_info()
 
     // devide
     ParamInfo * param_devide = new ParamInfo("devide");
-    param_devide->group = "converse";
+    param_devide->group = "opt";
     param_devide->grammar = "ucd devide ucd_path save_path devide_count";
     param_devide->english_explain = "";
     param_devide->chinese_explain = "将 ucd 随机平均地划分为指定的份数";   
@@ -763,6 +763,22 @@ void UcdParamOpt::load_param_info()
     param_exec->english_explain = "";
     param_exec->chinese_explain = "执行 .ucd 命令文件";   
     param_exec->demo.push_back("ucd exec test.json test.ucd save_path.json                      (对 test.json 执行 test.ucd 命令文件，将结果保存在 save_path.json)");
+    param_exec->demo.push_back("----------- test.ucd --------------");
+    param_exec->demo.push_back("ADD  UC Dcp08jb");
+    param_exec->demo.push_back("ADD  SIZE_INFO Dcp08jb   123 456");
+    param_exec->demo.push_back("ADD  OBJECT_INFO Dcp08jb rectangle test_exec 0.5 [(10,10),(20,20)] ");
+    param_exec->demo.push_back("DROP ALL UC");
+    param_exec->demo.push_back("DROP ALL OBJECT_INFO");
+    param_exec->demo.push_back("DROP ALL SIZE_INFO");
+    param_exec->demo.push_back("DROP UC Dcp08jb");
+    param_exec->demo.push_back("DROP SIZE_INFO Dcp08jb");
+    param_exec->demo.push_back("DROP OBJECT_INFO Dcp08jb rectangle test_exec 0.5 [(10,10),(20,20)]");
+    param_exec->demo.push_back("SET  DATASET_NAME test_exec");
+    param_exec->demo.push_back("SET  MODEL_NAME test_exec_set");
+    param_exec->demo.push_back("SET  MODEL_VERSION v0.0.1");
+    param_exec->demo.push_back("SET  DESCRIBE just for test");
+    param_exec->demo.push_back("SET  LABEL_USED hello nc kkx fnc");
+    param_exec->demo.push_back("----------- test.ucd --------------");
     UcdParamOpt::add_param(param_exec);
 
 

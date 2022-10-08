@@ -64,6 +64,24 @@ using namespace std;
 // 将需要的功能进行服务化，
 // ucd 只是一个数据集处理的工具，不需要增加太多的功能
 
+// ucd 支持所有的检测接口 v1, v2, v3, v4, v5 
+
+// ucd 支持自定义的服务接口（1）检测服务 （2）数据检查服务，查看数据检查的进度，还有几个在等待的，还需要等待大概多长时间，检测到什么进度了等信息
+
+// 检测接口 uc 
+// 推荐接口 ucd_a ucd_b 
+// 存放的形式 
+
+// server 
+// 查看提供的检测服务
+// ucd dete_check (每一个服务做成一个 docker, 可以查看当前服务是否可用, 所有的服务做成 post uc get xml_file 的形式，可以直接保存，客户端那边不需要复杂的解析操作)
+// ucd dete prebase test.json save_dir (存在缓存文件的不进行检测)
+// ucd dete 
+// 检测过程使用进度条显示进度，默认是自动使用保存文件夹下面的路径
+// 
+
+
+
 
 int main(int argc, char ** argv)
 {
@@ -92,7 +110,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.5.5";
+    std::string app_version = "v1.5.7";
 
     // cache dir
     std::string cache_dir;
@@ -1355,14 +1373,6 @@ int main(int argc, char ** argv)
             ucd_param_opt->print_command_info(command_1);
         }
     }
-    else if(command_1 == "shape_analysis")
-    {
-        // 对图像的大小进行分析和聚类，图像的大小有一定是有其对应的规律的
-        
-        // 输出的时候只选取其中的最多的集中的长宽进行输出
-        
-
-    }
     else if(command_1 == "server_info")
     {
         // check if sshpass is installed, apt list --installed | grep sshpass/focal
@@ -1725,23 +1735,29 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "buddha_bless")
     {
+        std::string name = "you";
+        if(argc > 2)
+        {
+            name = argv[2];
+        }
+
         std::cout << "               _ooOoo_                " << std::endl;
         std::cout << "              o8888888o               " << std::endl;
         std::cout << "              88' . '88               " << std::endl;
         std::cout << "              (| -_- |)               " << std::endl;
-        std::cout << "              O\  =  /O               " << std::endl;
-        std::cout << "           ____/`---'\____            " << std::endl;
-        std::cout << "         .'  \|       |    `.         " << std::endl;
-        std::cout << "        /  \|||||  :  |||   |        " << std::endl;
+        std::cout << "              O\\  =  /O     blesse " << name << std::endl;
+        std::cout << "           ____/`---'\\____            " << std::endl;
+        std::cout << "         .'  \\|       |    `.         " << std::endl;
+        std::cout << "        /  \\|||||  :  |||   |        " << std::endl;
         std::cout << "       /  _||||| -:- |||||- |        " << std::endl;
-        std::cout << "       |   | \  -  / |   |            " << std::endl;
-        std::cout << "       | \_|  ''\---/''  |   |        " << std::endl;
-        std::cout << "       \  .-\__  `-`  ___/-. /        " << std::endl;
-        std::cout << "     ___`. .'  /--.--\  `. . __       " << std::endl;
-        std::cout << "  ."" '<  `.___\_<|>_/___.'  >'"".    " << std::endl;
-        std::cout << " | | :  `- \`.;`\ _ /`;.`/ - ` : | |  " << std::endl;
-        std::cout << " \  \ `-.   \_ __\ /__ _/   .-` /  /  " << std::endl;
-        std::cout << "===`-.____`-.___\_____/___.-`____.-'==" << std::endl;
+        std::cout << "       |   | \\  -  / |   |            " << std::endl;
+        std::cout << "       | \\_|  ''\---/''  |   |        " << std::endl;
+        std::cout << "       \\  .-\\__  `-`  ___/-. /        " << std::endl;
+        std::cout << "     ___`. .'  /--.--\\  `. . __       " << std::endl;
+        std::cout << "  ."" '<  `.___\\_<|>_/___.'  >'"".    " << std::endl;
+        std::cout << " | | :  `- \\`.;`\\ _ /`;.`/ - ` : | |  " << std::endl;
+        std::cout << " \\  \\ `-.   \_ __\\ /__ _/   .-` /  /  " << std::endl;
+        std::cout << "===`-.____`-.___\\_____/___.-`____.-'==" << std::endl;
         std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << std::endl;
         std::cout << "        Buddha Bless, No Bug !        " << std::endl;
     }
@@ -1794,6 +1810,18 @@ int main(int argc, char ** argv)
         // 执行复杂的任务，结果不一定是 ucd，结果直接打印出来即可
         // 设置常用的关键字, count, select, save, drop, filter 等，ucd 先解析命令字符串然后直接运行，类似于 python 那种的形式
         // ucd run "count nc where uc[:2] == 'CA' and obj.area > 10"
+    }
+    else if(command_1 == "dete_check")
+    {
+        // 检查提供多少检测服务
+    }
+    else if(command_1 == "dete_info")
+    {
+        // 查看指定的检测服务的具体信息，由 docker 提供
+    }
+    else if(command_1 == "dete")
+    {
+        // 进行检测服务，使用进度条标识进度，在检测文件夹中的文件默认，不进行检测
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {

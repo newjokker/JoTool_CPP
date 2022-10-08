@@ -70,8 +70,6 @@ void UCDataset::parse_ucd(bool parse_shape_info)
         throw "json path not exists";
     }
 
-    // todo 原始数据的清空
-
     std::ifstream jsfile(UCDataset::json_path);
     json data = json::parse(jsfile); 
 
@@ -94,7 +92,6 @@ void UCDataset::parse_ucd(bool parse_shape_info)
     if(label_used != nullptr){ UCDataset::label_used = label_used; }
     if(uc_list != nullptr){ UCDataset::uc_list = uc_list; }
     if(size_info != nullptr){ UCDataset::size_info = size_info; }
-
     UCDataset::unique();
 
     // parse shape_info
@@ -105,18 +102,21 @@ void UCDataset::parse_ucd(bool parse_shape_info)
 
         if(shapes_info != nullptr)
         {
+            tqdm bar;
+            int N = shapes_info.size();
+            int index = 0;
             auto iter = shapes_info.begin();
             while(iter != shapes_info.end())
             {
+                index += 1;
+                bar.progress(index, N);
                 std::string uc = iter.key();
                 for(int i=0; i<iter.value().size(); i++)
                 {
                     std::string shape_type = iter.value()[i]["shape_type"];
                     std::string label = iter.value()[i]["label"];
                     std::vector< std::vector<double> > points = iter.value()[i]["points"];
-
                     auto conf = iter.value()[i]["conf"];
-
                     LabelmeObj* obj = obj_factory.CreateObj(shape_type);
                     obj->label = label;
                     obj->points = points;
@@ -134,6 +134,7 @@ void UCDataset::parse_ucd(bool parse_shape_info)
                 }
                 iter++;
             }
+            bar.finish();
         }
     }
 }
@@ -199,7 +200,7 @@ void UCDataset::unique()
 
 std::map<std::string, std::map<std::string, int> > UCDataset::count_tags()
 {
-    // 
+    // 统计速度太快了，不用进度条
     if(! is_file(UCDataset::json_path))
     {
         std::cout << "json path not exists : " << UCDataset::json_path << std::endl;
@@ -207,7 +208,6 @@ std::map<std::string, std::map<std::string, int> > UCDataset::count_tags()
     }
     // count_tags
     std::map<std::string, std::map<std::string, int> > count_map;
-    UCDataset::parse_ucd(true);
 
     std::string each_tag;
     auto iter = UCDataset::object_info.begin();
@@ -2113,11 +2113,11 @@ void UCDatasetUtil::count_ucd_tags(std::string ucd_path)
     {
         std::cout << "ucd path not exists : " << ucd_path << std::endl;
     }
-
     int tag_count = 0;
     int dete_obj_count=0; 
     UCDataset* ucd = new UCDataset(ucd_path);
     // count_tags 函数中会自动 解析一遍 json 
+    ucd->parse_ucd(true);
     std::map<std::string, std::map<std::string, int> > count_map = ucd->count_tags();
 
     // print statistics res
@@ -2129,7 +2129,7 @@ void UCDatasetUtil::count_ucd_tags(std::string ucd_path)
         while(iter != iter_count->second.end())
         {
             dete_obj_count += iter->second;
-            std::cout << std::setw(15) << std::left << "[" + iter_count->first + "]" << std::setw(15) << std::left << iter->first  << " : " << iter->second << std::endl;
+            std::cout << std::setw(15) << std::left << "[" + iter_count->first + "]" << std::setw(20) << std::left << iter->first  << " : " << iter->second << std::endl;
             tag_count += 1;
             iter++;
         }
