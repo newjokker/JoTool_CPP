@@ -29,6 +29,14 @@ using namespace jotools;
 
 // 自己写的服务，上传下载大文件出错的问题，
 
+static bool is_uc(std::string uc)
+{
+    if(uc.size() != 7){ return false; }
+    if(((int)uc[0] < (int)'C') || ((int)uc[0] > int('K'))) { return false; }
+    if(((int)uc[1] < (int)'a') || ((int)uc[1] > int('z'))) { return false; }
+    if(((int)uc[2] < (int)'a') || ((int)uc[2] > int('z'))) { return false; }
+    return true;
+}
 
 UCDataset::UCDataset(std::string json_path)
 {
@@ -1152,12 +1160,132 @@ static std::vector< std::vector< double > > get_points_from_str(std::string poin
     return points;
 }
 
+static bool command_check(std::string command_path)
+{
+    // exec 
+    std::ifstream infile; 
+    infile.open(command_path);   
+    assert(infile.is_open());
+
+    std::string line;
+    int index = 0;
+    while(getline(infile, line))
+    {
+        index += 1;
+        std::vector<std::string> tokens = command_token(line);
+
+        if(tokens.size() == 0)
+        {
+            continue;
+        }
+        else if(pystring::startswith(tokens[0], "//"))
+        {
+            // 识别为注释
+            continue;
+        }
+        else if((tokens[0] == "ADD") && (tokens[1] == "UC"))
+        {
+            if(tokens.size() != 3)
+            {
+                std::cout << "line : " << index <<  ", format error, ADD UC test_uc : " << line << std::endl;
+                return false;
+            }
+            else if(! is_uc(tokens[2]))
+            {
+                std::cout << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << std::endl;
+                return false;
+            }
+        }
+        else if((tokens[0] == "ADD") && (tokens[1] == "SIZE_INFO"))
+        {
+            if(tokens.size() != 5)
+            {
+                std::cout << "line : " << index << ", format error, ADD SIZE_INFO test_uc width height: " << line << std::endl;
+                return false;                
+            }
+            else if(! is_uc(tokens[2]))
+            {
+                std::cout << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << std::endl;
+                return false;                
+            }
+
+            // width, height
+            try
+            {
+                int width = std::stoi(tokens[3]);
+                int height = std::stoi(tokens[4]);
+
+                if((width < 2) || (height < 2))
+                {
+                    std::cout << "line : " << index << "width or height too small : " << width << ", " << height << std::endl;
+                    return false;
+                }
+            }
+            catch(...)
+            {
+                std::cout << "line : " << index << ", format error, parse width,height error : " << tokens[3] << ", " << tokens[4] << std::endl;
+                return false;
+            }
+
+        }
+        else if((tokens[0] == "ADD") && (tokens[1] == "OBJECT_INFO"))
+        {
+            if(tokens.size() != 7)
+            {
+                std::cout << "line : " << index << ", format error, ADD OBJECT_INFO test_uc shape_type tag conf points : " << line << std::endl;
+                return false;              
+            }
+            else if(! is_uc(tokens[2]))
+            {
+                std::cout << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << std::endl;
+                return false;                     
+            }
+            else if((tokens[3] != "rectangle") && (tokens[3] != "line") && (tokens[3] != "linestrip") && (tokens[3] != "circle") && (tokens[3] != "point") && (tokens[3] != "polygon"))
+            {
+                std::cout << "line : "<< index << ", format error, illeagal shape_type(point, line, linestrip, circle, rectangle, polygon) : " << tokens[2] << std::endl;
+                return false;       
+            }
+
+            // get conf
+            try
+            {
+                float conf = std::stof(tokens[5]);
+                if((conf < 0) || (conf > 1))
+                {
+                    std::cout << "line : " << index << ", format error, 0 < conf < 1 : " << tokens[5] << std::endl;
+                    return false;
+                }
+            }
+            catch(...)
+            {
+                std::cout << "line : " << index << ", format error, parse conf error : " << tokens[5] << std::endl;
+                return false;
+            }
+            
+            // get points 
+            try
+            {
+                std::vector< std::vector< double > > points = get_points_from_str(tokens[6]);
+            }
+            catch(...)
+            {
+                std::cout << "line : " << index << ", format error, parse points error : " << tokens[6] << std::endl;
+                return false; 
+            }
+        }
+        else
+        {
+            std::cout << "line : " << index << ", gramma not support : " << line << std::endl;
+            return false;
+        }
+    }
+    infile.close(); 
+    return true;
+}
+
 void UCDataset::command_ADD(std::vector<std::string> tokens)
 {
-    // 
-
     std::string command = tokens[1];
-
     if(command == "UC")
     {
         // needn-t format check, do it before 
@@ -1173,14 +1301,12 @@ void UCDataset::command_ADD(std::vector<std::string> tokens)
     }
     else if(command == "OBJECT_INFO")
     {
-        // uc shape_type label conf [(x1, y1), (x2, y2) ...] 
         std::string uc          = tokens[2];
         std::string shape_type  = tokens[3];
         std::string label       = tokens[4];
         float       conf        = std::stof(tokens[5]);
         std::vector< std::vector< double > > points = get_points_from_str(tokens[6]);
         //  
-        
         LabelmeObjFactory label_factory;
         LabelmeObj* obj = label_factory.CreateObj(shape_type);
         obj->conf = conf;
@@ -1215,17 +1341,6 @@ void UCDataset::exec(std::string command_path, std::string save_path)
         return;
     }
 
-    // 读取每一行命令
-    // 去掉每一行开头 结尾 的空白
-    // 提取第一个关键字
-    // 分析所有命令，确定没有语法错误了之后再去一行行地去执行命令
-
-    // 
-
-    std::ifstream infile; 
-    infile.open(command_path);   
-    assert(infile.is_open());
-
     // ADD UC uc
     // ADD SIZE_INFO uc width height
     // ADD OBJECT_INFO uc shape_type label conf [(x1, y1), (x2, y2) ...] 
@@ -1247,15 +1362,25 @@ void UCDataset::exec(std::string command_path, std::string save_path)
     // DROP_ALL OBJECT_INFO shape_type in Rentangle,Cricle
 
 
+    bool check_res = command_check(command_path);
+    
+    if(check_res == false)
+    {
+        std::cout << "command format error " << std::endl;
+        return;
+    }
+    
+
+    // exec 
+    std::ifstream infile; 
+    infile.open(command_path);   
+    assert(infile.is_open());
 
     std::string line;
     while(getline(infile, line))
     {
-
         std::cout << line << std::endl;
-
         std::vector<std::string> tokens = command_token(line);
-
 
         if(tokens.size() == 0)
         {
@@ -1263,22 +1388,24 @@ void UCDataset::exec(std::string command_path, std::string save_path)
         }
         else if(tokens[0] == "ADD")
         {
-            std::cout << "执行 ADD 方法" << std::endl;
             UCDataset::command_ADD(tokens);
         }
         else if(tokens[0] == "DROP")
         {
-            std::cout << "执行 DROP 方法" << std::endl;
             UCDataset::command_DROP_UC(tokens);
         }
         else if(tokens[0] == "DROP_ALL")
         {
-            std::cout << "执行 DROP_ALL 方法" << std::endl;
-            UCDataset::command_DROP_ALL(tokens);
+            // UCDataset::command_DROP_ALL(tokens);
         }
         else if(tokens[0] == "SET")
         {
-            std::cout << "执行 SET 方法" << std::endl;
+            // std::cout << "执行 SET 方法" << std::endl;
+        }
+        else if(pystring::startswith(tokens[0], "//"))
+        {
+            // 注释
+            continue;
         }
         else
         {
@@ -1578,15 +1705,6 @@ void UCDatasetUtil::upload_ucd(std::string ucd_path, std::string assign_ucd_name
             throw "upload failed !";
         }
     }
-}
-
-static bool is_uc(std::string uc)
-{
-    if(uc.size() != 7){ return false; }
-    if(((int)uc[0] < (int)'C') || ((int)uc[0] > int('K'))) { return false; }
-    if(((int)uc[1] < (int)'a') || ((int)uc[1] > int('z'))) { return false; }
-    if(((int)uc[2] < (int)'a') || ((int)uc[2] > int('z'))) { return false; }
-    return true;
 }
 
 void UCDatasetUtil::get_ucd_from_img_dir(std::string img_dir, std::string ucd_path)

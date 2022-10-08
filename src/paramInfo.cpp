@@ -753,8 +753,17 @@ void UcdParamOpt::load_param_info()
     param_uc_info->grammar = "ucd uc_info ucd_path uc";
     param_uc_info->english_explain = "";
     param_uc_info->chinese_explain = "";   
-    param_uc_info->demo.push_back("ucd uc_info test.json Dsm07qp                                ()");
+    param_uc_info->demo.push_back("ucd uc_info test.json Dsm07qp                                (将 Dsm07qp 相关的信息打印出来)");
     UcdParamOpt::add_param(param_uc_info);
+
+    // exec
+    ParamInfo * param_exec = new ParamInfo("exec");
+    param_exec->group = "exec";
+    param_exec->grammar = "ucd exec ucd_path command_path(.ucd) save_path";
+    param_exec->english_explain = "";
+    param_exec->chinese_explain = "执行 .ucd 命令文件";   
+    param_exec->demo.push_back("ucd exec test.json test.ucd save_path.json                      (对 test.json 执行 test.ucd 命令文件，将结果保存在 save_path.json)");
+    UcdParamOpt::add_param(param_exec);
 
 
 }
