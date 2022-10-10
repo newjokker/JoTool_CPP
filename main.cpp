@@ -22,6 +22,7 @@
 #include <nlohmann/json.hpp>
 #include "include/lablelmeObj.hpp"
 #include "include/tqdm.h"
+#include <regex>
 
 using json = nlohmann::json;
 using namespace jotools;
@@ -1745,7 +1746,7 @@ int main(int argc, char ** argv)
         std::cout << "              o8888888o               " << std::endl;
         std::cout << "              88' . '88               " << std::endl;
         std::cout << "              (| -_- |)               " << std::endl;
-        std::cout << "              O\\  =  /O     blesse " << name << std::endl;
+        std::cout << "              O\\  =  /O     bless " << name << std::endl;
         std::cout << "           ____/`---'\\____            " << std::endl;
         std::cout << "         .'  \\|       |    `.         " << std::endl;
         std::cout << "        /  \\|||||  :  |||   |        " << std::endl;
@@ -1812,16 +1813,24 @@ int main(int argc, char ** argv)
         // ucd run "count nc where uc[:2] == 'CA' and obj.area > 10"
     }
     else if(command_1 == "dete_check")
-    {
-        // 检查提供多少检测服务
+    { 
+        // 仿照 check 函数，使用服务提供检测服务
+        // 所以只能是一个服务提供这个信息，使用这个在这个服务中填写对应的信息
+        // 
     }
     else if(command_1 == "dete_info")
     {
-        // 查看指定的检测服务的具体信息，由 docker 提供
+        // 查看指定的检测服务的具体信息，由 docker 提供，docker 完善 info 接口
     }
     else if(command_1 == "dete")
     {
         // 进行检测服务，使用进度条标识进度，在检测文件夹中的文件默认，不进行检测
+    }
+    else if(command_1 == "fake_uc")
+    {
+        // 给数据以假的 uc 用于方便工作，比如 ucd 用在其他环境的时候只能使用 未入库的数据之类的，要考虑到多个不同的文件不同的命名之类的问题，就是将一个文件夹中的所有文件的名字按照 0-N 的方式全部进行替换，不管是什么样的后缀
+        // 只处理一个文件夹的数据，不扩展开来，fake 能通过 is_uc 但是无法通过  uc_check
+        // 
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {
