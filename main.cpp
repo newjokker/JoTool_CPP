@@ -111,7 +111,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.5.7";
+    std::string app_version = "v1.5.8";
 
     // cache dir
     std::string cache_dir;
@@ -1440,6 +1440,12 @@ int main(int argc, char ** argv)
             }
             else if(attr_name == "label_used")
             {
+                if(ucd->label_used.size() == 0)
+                {
+                    std::cout << " " << std::endl;
+                    return -1;
+                }
+
                 for(int i=0; i<ucd->label_used.size()-1; i++)
                 {
                     std::cout << ucd->label_used[i] << ",";
@@ -1820,15 +1826,8 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "fake_uc")
     {
-        // 给数据以假的 uc 用于方便工作，比如 ucd 用在其他环境的时候只能使用 未入库的数据之类的，要考虑到多个不同的文件不同的命名之类的问题，就是将一个文件夹中的所有文件的名字按照 0-N 的方式全部进行替换，不管是什么样的后缀
-        // 只处理一个文件夹的数据，不扩展开来，fake 能通过 is_uc 但是无法通过  uc_check
-        // 
-
         // FUC 开始的数据默认为 fake uc
         // 将文件名和 Fuc 进行映射，注意的是文件不能超过 9999 个，最多这么多的 fack uc 使用
-
-        // 文件名字典， 文件名: Fuc
-        // 
 
         if(argc == 3)
         {

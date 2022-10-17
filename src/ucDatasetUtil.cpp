@@ -2746,7 +2746,8 @@ void UCDatasetUtil::set_fack_uc(std::string fake_folder)
         return;
     }
 
-    std::vector<std::string> file_path_vector = get_all_file_path(fake_folder);
+    std::set<std::string> suffix = {".jpg", ".png", ".JPG", ".PNG", ".json", ".xml"};
+    std::vector<std::string> file_path_vector = get_all_file_path(fake_folder, suffix);
     std::map< std::string, std::string > fack_dict;
     std::vector<std::string> uc_c = {"0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
 
