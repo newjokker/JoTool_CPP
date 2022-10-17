@@ -410,10 +410,10 @@ void UcdParamOpt::load_param_info()
     // minus
     ParamInfo * param_minus = new ParamInfo("minus");
     param_minus->group = "opt";
-    param_minus->grammar = "ucd minus save_path ucd_path1 ucd_path2";
+    param_minus->grammar = "ucd minus ucd_path1 ucd_path2 save_path";
     param_minus->english_explain = "do minus operation between two ucd";
     param_minus->chinese_explain = "减操作数据集，目前不操作 object_info 信息";   
-    param_minus->demo.push_back("ucd minus res.json test1.json test2.json       (将 test1.josn - test2.json 得到 res.json)");
+    param_minus->demo.push_back("ucd minus test1.json test2.json res.json       (将 test1.josn - test2.json 得到 res.json)");
     UcdParamOpt::add_param(param_minus);
     
     // diff

@@ -31,7 +31,9 @@ using namespace jotools;
 
 static bool is_uc(std::string uc)
 {
+
     if(uc.size() != 7){ return false; }
+
     if(((int)uc[0] < (int)'C') || ((int)uc[0] > int('K'))) { return false; }
     if(((int)uc[1] < (int)'a') || ((int)uc[1] > int('z'))) { return false; }
     if(((int)uc[2] < (int)'a') || ((int)uc[2] > int('z'))) { return false; }
@@ -2025,7 +2027,7 @@ void UCDatasetUtil::get_ucd_from_file_dir(std::string file_dir, std::string ucd_
         uc = get_file_name(json_path_vector[i]);
         if(is_uc(uc))
         {
-            std::cout << i << ", add file : " << json_path_vector[i] << std::endl;
+            // std::cout << i << ", add file : " << json_path_vector[i] << std::endl;
             ucd->uc_list.push_back(uc);
         }
         bar.progress(i, N);
@@ -2735,3 +2737,72 @@ void UCDatasetUtil::cache_clean()
     std::cout << "remove file count : " << remove_count << std::endl;
 }
 
+void UCDatasetUtil::set_fack_uc(std::string fake_folder)
+{
+
+    if(! is_dir(fake_folder))
+    {
+        std::cout << "fake foler not exists : " << fake_folder << std::endl;
+        return;
+    }
+
+    std::vector<std::string> file_path_vector = get_all_file_path(fake_folder);
+    std::map< std::string, std::string > fack_dict;
+    std::vector<std::string> uc_c = {"0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
+
+    int index = 0;
+    for(int i=0; i<file_path_vector.size(); i++)
+    {
+        std::string fake_uc = "";
+        std::string file_name = get_file_name(file_path_vector[i]);
+        
+        if(fack_dict.count(file_name) > 0)
+        {
+            continue;
+        }
+        
+        index += 1;
+        std::string index_str = std::to_string(index);
+
+        std::cout << index_str << std::endl;
+
+        if(index_str.size() == 1)
+        {
+            fake_uc = "Fuc000" + index_str;
+        }
+        else if(index_str.size() == 2)
+        {
+            fake_uc = "Fuc00" + index_str;
+        }
+        else if(index_str.size() == 3)
+        {
+            fake_uc = "Fuc0" + index_str;
+        }
+        else if(index_str.size() == 4)
+        {
+            fake_uc = "Fuc" + index_str;
+        }
+        else
+        {
+            std::cout << "Fake uc count must less then 10000 : " << index_str << std::endl;
+            return;
+        }
+        fack_dict[file_name] = fake_uc;
+        
+        std::cout << fake_uc << std::endl;
+
+    }
+
+    for(int i=0; i<file_path_vector.size(); i++)
+    {
+        std::string file_name = get_file_name(file_path_vector[i]);
+        std::string fake_uc = fack_dict[file_name];
+        std::string suffix = get_file_suffix(file_path_vector[i]);
+
+        std::string new_file_path = fake_folder + "/" + fake_uc + suffix; 
+
+        std::cout << file_path_vector[i] << " -> " << new_file_path << std::endl;
+
+        rename(file_path_vector[i].c_str(), new_file_path.c_str());
+    }
+}

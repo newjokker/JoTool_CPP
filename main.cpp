@@ -555,9 +555,9 @@ int main(int argc, char ** argv)
 
         if(argc == 5)
         {
-            std::string ucd_save_path = argv[2];
-            std::string ucd_path_1 = argv[3];
-            std::string ucd_path_2 = argv[4];
+            std::string ucd_path_1 = argv[2];
+            std::string ucd_path_2 = argv[3];
+            std::string ucd_save_path = argv[4];
             ucd_util->ucd_minus(ucd_save_path, ucd_path_1, ucd_path_2);
         }
         else
@@ -1051,14 +1051,6 @@ int main(int argc, char ** argv)
         {
             ucd_param_opt->print_command_info(command_1);
         }
-    }
-    else if(command_1 == "gif")
-    {
-        ucd_param_opt->not_ready(command_1);
-        return -1;
-
-        // 屏幕闪烁一些标准的 gif 图
-        // 比如 你真棒，我很忙，你走开，别烦我
     }
     else if(command_1 == "attr")
     {
@@ -1831,6 +1823,22 @@ int main(int argc, char ** argv)
         // 给数据以假的 uc 用于方便工作，比如 ucd 用在其他环境的时候只能使用 未入库的数据之类的，要考虑到多个不同的文件不同的命名之类的问题，就是将一个文件夹中的所有文件的名字按照 0-N 的方式全部进行替换，不管是什么样的后缀
         // 只处理一个文件夹的数据，不扩展开来，fake 能通过 is_uc 但是无法通过  uc_check
         // 
+
+        // FUC 开始的数据默认为 fake uc
+        // 将文件名和 Fuc 进行映射，注意的是文件不能超过 9999 个，最多这么多的 fack uc 使用
+
+        // 文件名字典， 文件名: Fuc
+        // 
+
+        if(argc == 3)
+        {
+            std::string fake_folder = argv[2];
+            ucd_util->set_fack_uc(fake_folder);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {

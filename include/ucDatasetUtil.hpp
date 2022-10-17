@@ -255,6 +255,9 @@ class UCDatasetUtil
         // 缓存文件清洗
         void cache_clean();
 
+        // 将文件赋予假的uc，FakeUC
+        void set_fack_uc(std::string folder_path);
+
     private:
         
         // 下载云上的数据
