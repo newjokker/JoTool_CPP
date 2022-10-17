@@ -2077,17 +2077,33 @@ void UCDatasetUtil::ucd_diff(std::string ucd_path_1, std::string ucd_path_2)
 void UCDatasetUtil::ucd_minus(std::string save_path, std::string ucd_path_1, std::string ucd_path_2)
 {
     UCDataset* ucd1 = new UCDataset(ucd_path_1);
-    ucd1->parse_ucd();
+    ucd1->parse_ucd(true);
     UCDataset* ucd2 = new UCDataset(ucd_path_2);
-    ucd2->parse_ucd();
+    ucd2->parse_ucd(true);
     UCDataset* ucd_res = new UCDataset(save_path);
     std::vector<std::string> uc_difference;
     // set_intersection
     std::set<std::string> uc_set1(ucd1->uc_list.begin(), ucd1->uc_list.end());
     std::set<std::string> uc_set2(ucd2->uc_list.begin(), ucd2->uc_list.end());
     std::set_difference(uc_set1.begin(), uc_set1.end(), uc_set2.begin(), uc_set2.end(), std::inserter(uc_difference, uc_difference.begin()));
-    // save
+    // 
     ucd_res->uc_list = uc_difference;
+    // 
+    for(int i=0; i<uc_difference.size(); i++)
+    {
+        std::string uc = uc_difference[i];
+
+        if(ucd1->object_info.count(uc) > 0)
+        {
+            ucd_res->object_info[uc] = ucd1->object_info[uc];
+        }
+
+        if(ucd1->size_info.count(uc) > 0)
+        {
+            ucd_res->size_info[uc] = ucd1->size_info[uc];
+        }
+    }
+    //
     ucd_res->save_to_ucd(save_path);
     // delete
     delete ucd1;

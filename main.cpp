@@ -550,8 +550,8 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "minus")
     {
-        ucd_param_opt->not_ready("minus");
-        return -1;
+        // ucd_param_opt->not_ready("minus");
+        // return -1;
 
         if(argc == 5)
         {
