@@ -1642,6 +1642,70 @@ void UCDataset::exec(std::string command_path)
     infile.close();
 }
 
+void UCDataset::filter_by_tags(std::set<std::string> tags)
+{
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        std::vector<LabelmeObj*> objs;
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            LabelmeObj* obj = iter->second[i];
+            if(tags.count(obj->label) > 0)
+            {
+                objs.push_back(obj);
+            }
+        }
+        iter->second = objs;
+        if(objs.size() == 0)
+        {
+            UCDataset::size_info.erase(iter->first);
+        }
+        iter++;
+    }
+}
+
+void UCDataset::drop_tags(std::set<std::string> tags)
+{
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        std::vector<LabelmeObj*> objs;
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            LabelmeObj* obj = iter->second[i];
+            if(tags.count(obj->label) == 0)
+            {
+                objs.push_back(obj);
+                // delete obj;
+            }
+        }
+        iter->second = objs;
+        if(objs.size() == 0)
+        {
+            UCDataset::size_info.erase(iter->first);
+        }
+        iter++;
+    }
+}
+
+void UCDataset::update_tags(std::map< std::string, std::string > tag_map)
+{
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            LabelmeObj* obj = iter->second[i];
+            if(tag_map.count(obj->label) > 0)
+            {
+                obj->label = tag_map[obj->label];
+            }
+        }
+        iter++;
+    }
+}
+
 // 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
 {

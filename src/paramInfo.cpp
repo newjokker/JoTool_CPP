@@ -633,15 +633,6 @@ void UcdParamOpt::load_param_info()
     param_filter_by_conf->demo.push_back("ucd filter_by_conf test.json res.json 0.5 (以 0.5 为阈值对 test.json 中的所有 obj 对象进行过滤)");  
     UcdParamOpt::add_param(param_filter_by_conf);
 
-    // filter_by_tags
-    ParamInfo * param_filter_by_tags = new ParamInfo("filter_by_tags");
-    param_filter_by_tags->group = "filter";
-    param_filter_by_tags->grammar = "ucd filter_by_conf ucd_path save_ucd_path tag1,tag2,tag3";
-    param_filter_by_tags->english_explain = "";
-    param_filter_by_tags->chinese_explain = "对 ucd 指定标签过滤";
-    param_filter_by_tags->demo.push_back("ucd filter_by_tags test.json res.json nc,kkx (过滤去掉 test.json 中的标签不是 nc, kkx 的 obj 对象)");     
-    UcdParamOpt::add_param(param_filter_by_tags);
-
     // filter_by_nms
     ParamInfo * param_filter_by_nms = new ParamInfo("filter_by_nms");
     param_filter_by_nms->group = "filter";
@@ -752,7 +743,7 @@ void UcdParamOpt::load_param_info()
     param_uc_info->group = "info";
     param_uc_info->grammar = "ucd uc_info ucd_path uc";
     param_uc_info->english_explain = "";
-    param_uc_info->chinese_explain = "";   
+    param_uc_info->chinese_explain = "查看执行 uc 的对应信息";   
     param_uc_info->demo.push_back("ucd uc_info test.json Dsm07qp                                (将 Dsm07qp 相关的信息打印出来)");
     UcdParamOpt::add_param(param_uc_info);
 
@@ -781,6 +772,41 @@ void UcdParamOpt::load_param_info()
     param_exec->demo.push_back("----------- test.ucd --------------");
     UcdParamOpt::add_param(param_exec);
 
+    // fake_uc
+    ParamInfo * param_fake_uc = new ParamInfo("fake_uc");
+    param_fake_uc->group = "sync";
+    param_fake_uc->grammar = "ucd fake_uc img_folder";
+    param_fake_uc->english_explain = "";
+    param_fake_uc->chinese_explain = "在离线的情况下将执执行文件夹下面的 文件赋予 假的 uc (Fuc001 开始), 只针对 .jpg .JPG .png .PNG .xml .json 文件";   
+    param_fake_uc->demo.push_back("ucd fake_uc img_folder                                (将 img_folder 下面的文件重命名为假的 uc)");
+    UcdParamOpt::add_param(param_fake_uc);
+
+    // update_tags
+    ParamInfo * param_update_tags = new ParamInfo("update_tags");
+    param_update_tags->group = "opt";
+    param_update_tags->grammar = "ucd update_tags ucd_path save_path old_tag:new_tag old_tag:new_tag ...";
+    param_update_tags->english_explain = "";
+    param_update_tags->chinese_explain = "更新 ucd 中的标签";   
+    param_update_tags->demo.push_back("ucd update_tags aqm.json res.json anquanmao:aqm cebiandai:cbd human:person      (将 aqm.json 中的 tag 进行更新)");
+    UcdParamOpt::add_param(param_update_tags);
+
+    // update_tags
+    ParamInfo * param_filter_by_tags = new ParamInfo("filter_by_tags");
+    param_filter_by_tags->group = "filter";
+    param_filter_by_tags->grammar = "ucd filter_by_tags ucd_path save_path tag1 tag2 ...";
+    param_filter_by_tags->english_explain = "";
+    param_filter_by_tags->chinese_explain = "数据集中只保留指定标签";   
+    param_filter_by_tags->demo.push_back("ucd filter_by_tags aqm.json res.json aqm cbd person                   (将 aqm.json 只保留 aqm cbd person 三个标签)");
+    UcdParamOpt::add_param(param_filter_by_tags);
+
+    // drop_tags
+    ParamInfo * param_drop_tags = new ParamInfo("drop_tags");
+    param_drop_tags->group = "filter";
+    param_drop_tags->grammar = "ucd drop_tags ucd_path save_path tag1 tag2 ...";
+    param_drop_tags->english_explain = "";
+    param_drop_tags->chinese_explain = "数据集中删除指定标签";   
+    param_drop_tags->demo.push_back("ucd filter_by_tags aqm.json res.json aqm cbd person                   (将 aqm.json 只保留 aqm cbd person 三个标签)");
+    UcdParamOpt::add_param(param_drop_tags);
 
 }
 

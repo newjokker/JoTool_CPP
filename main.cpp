@@ -111,7 +111,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.5.8";
+    std::string app_version = "v1.5.9";
 
     // cache dir
     std::string cache_dir;
@@ -1230,13 +1230,6 @@ int main(int argc, char ** argv)
             return -1;
         }   
     }
-    else if(command_1 == "filter_by_tags")
-    {
-        // 根据标签进行过滤
-        ucd_param_opt->not_ready(command_1);
-        return -1;
-
-    }
     else if(command_1 == "filter_by_nms")
     {
         if(argc == 6)
@@ -1833,6 +1826,83 @@ int main(int argc, char ** argv)
         {
             std::string fake_folder = argv[2];
             ucd_util->set_fack_uc(fake_folder);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "update_tags")
+    {
+        // old_tag:new_tag
+        if(argc > 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_path = argv[3];
+            std::map<std::string, std::string> tag_map;
+            for(int i=4; i<argc; i++)
+            {
+                std:;string tag_info = argv[i];
+                std::vector<std::string> split_res = pystring::split(tag_info, ":");
+
+                if(split_res.size() != 2)
+                {
+                    std::cout << "update format error, need old_tag:new_tag" << std::endl;
+                    throw "update format error, need old_tag:new_tag";
+                }
+                else
+                {
+                    tag_map[split_res[0]] = split_res[1];
+                } 
+            }
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->update_tags(tag_map);
+            ucd->save_to_ucd(save_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "filter_by_tags")
+    {
+        if(argc > 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_path = argv[3];
+            std::set<std::string> tags;
+            for(int i=4; i<argc; i++)
+            {
+                std::string each_tag = argv[i];
+                tags.insert(each_tag);
+            }
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->filter_by_tags(tags);
+            ucd->save_to_ucd(save_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "drop_tags")
+    {
+        if(argc > 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_path = argv[3];
+            std::set<std::string> tags;
+            for(int i=4; i<argc; i++)
+            {
+                std::string each_tag = argv[i];
+                tags.insert(each_tag);
+            }
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->drop_tags(tags);
+            ucd->save_to_ucd(save_path);
         }
         else
         {

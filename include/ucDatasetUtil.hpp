@@ -145,6 +145,14 @@ class UCDataset
         // 执行 ucd command 脚本, 保存为新的 ucd 
         void exec(std::string command_path);
 
+        // 过滤标签
+        void filter_by_tags(std::set<std::string> tags);
+
+        // 抛弃标签
+        void drop_tags(std::set<std::string> tags);
+
+        // 更新标签
+        void update_tags(std::map< std::string, std::string > tag_map);
 
     private:
         std::string json_path;
