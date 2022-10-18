@@ -83,7 +83,6 @@ using namespace std;
 
 
 
-
 int main(int argc, char ** argv)
 {
 
@@ -1406,7 +1405,7 @@ int main(int argc, char ** argv)
             std::string ucd_path = argv[3];
 
             UCDataset* ucd = new UCDataset(ucd_path);
-            ucd->parse_ucd();
+            ucd->parse_ucd(true);
             if(attr_name == "dataset_name")
             {
                 std::cout << ucd->dataset_name << std::endl;
@@ -1430,6 +1429,29 @@ int main(int argc, char ** argv)
             else if(attr_name == "describe")
             {
                 std::cout << ucd->describe << std::endl;     
+            }
+            else if(attr_name == "tags")
+            {
+                // 不按照标签类型进行划分，只根据标签的名字
+                auto iter = ucd->object_info.begin();
+                std::set<std::string> tags;
+                while(iter != ucd->object_info.end())
+                {
+                    for(int i=0; i<iter->second.size(); i++)
+                    {
+                        LabelmeObj* obj = iter->second[i]; 
+                        tags.insert(obj->label);
+                    }
+                    iter++;
+                }
+                // 
+                auto iter_tag = tags.begin();
+                while(iter_tag != tags.end())
+                {
+                    std::cout << iter_tag->data() << ",";
+                    iter_tag++;
+                }
+                std::cout << std::endl;
             }
             else if(attr_name == "label_used")
             {
@@ -1463,7 +1485,7 @@ int main(int argc, char ** argv)
             }
             else
             {
-                std::cout << "attr_name not in [dataset_name, uc_count, label_used_count, model_name, model_version, add_time, update_time, describe, label_used, uc_list]" << std::endl;     
+                std::cout << "attr_name not in [tags, dataset_name, uc_count, label_used_count, model_name, model_version, add_time, update_time, describe, label_used, uc_list]" << std::endl;     
             }
             return -1;
         }
