@@ -82,6 +82,12 @@ using namespace std;
 // 
 
 
+// draw_res 画出截图， 用什么颜色，用多粗的线，在哪里写上标签这些都需要说明和完善
+
+// 报错直接将报错信息设置为红色，不要再去引发错误了，看着舒服一点
+
+// 将进度条中的五颜六色的条纹给去掉
+
 
 int main(int argc, char ** argv)
 {
@@ -110,7 +116,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.5.9";
+    std::string app_version = "v1.6.0";
 
     // cache dir
     std::string cache_dir;
@@ -173,8 +179,41 @@ int main(int argc, char ** argv)
         throw "cache_dir not exists!";
     }
 
+    // 文件夹权限检查
+    
+    // 判断缓存文件夹是否有读取权限
+    if(access(ucd_util->cache_img_dir.c_str(), 4) != 0)
+    {
+        std::cout << "\033[33mWARNING : cache_img folder don't have read access \033[0m: " << ucd_util->cache_img_dir << std::endl;
+    }
+    else if(access(ucd_util->cache_img_dir.c_str(), 2) != 0)
+    {
+        std::cout << "\033[33mWARNING : cache_img folder don't have write access \033[0m: " << ucd_util->cache_img_dir << std::endl;
+    }
+
     // key word
-    if(command_1 == "check")
+    if(command_1 == "zen")
+    {
+        // ucd 之禅
+        // 统一带来流畅与快速
+        // 统一在一起慢慢进步
+        // 统一才能走的远，各自为政走得快，但会走歪
+        // idea -> interface -> app -> language，止与一个有永远达不到的目标
+        // 工具成为身体的一部分，因为有了手，
+        // 数据集有了 ucd 就像孔子编写了十翼给易经插上了翅膀
+        // 
+        std::cout << "-------ucd-------"   << std::endl;
+        std::cout << "* 统一 操作接口"      << std::endl;
+        std::cout << "* 简化 数据集操作"    << std::endl;
+        std::cout << "* 促进 信息流动"      << std::endl;
+        std::cout << "* 减轻 缓存压力"      << std::endl;
+        std::cout << "-----------------"   << std::endl;
+        std::cout << "* 简单的功能不要多次实现"         << std::endl;
+        std::cout << "* 复杂的功能大家要错错一样的"     << std::endl;
+        std::cout << "* 麻烦的功能只恶心编写者一个人"   << std::endl;
+        std::cout << "-----------------"   << std::endl;
+    }
+    else if(command_1 == "check")
     {
         if(argc == 2)
         {
@@ -247,6 +286,20 @@ int main(int argc, char ** argv)
                 throw "save_dir not exists";
              }
 
+            // 判断对文件是否有写入权限
+            if(access(save_dir.c_str(), 2) != 0)
+            {
+                std::cout << "\033[31mdon't have write access :\033[0m " << save_dir << std::endl;
+                throw "don't have write access";
+            }
+
+            // 判断缓存文件夹是否有读取权限
+            if(access(ucd_util->cache_img_dir.c_str(), 4) != 0)
+            {
+                std::cout << "\033[31mdon't have read access :\033[0m " << ucd_util->cache_img_dir << std::endl;
+                throw "don't have write access";
+            }
+
             if(save_mode.size() != 2)
             {
                 std::cout << "save_mode illeagal, need save_mode such as 11 | 10  " << save_dir << std::endl;
@@ -300,6 +353,13 @@ int main(int argc, char ** argv)
     else if(command_1 == "save_cache")
     {
         // 保存到缓存中，xml 和 img 都有对应的缓存
+
+        // 判断对文件是否有写入权限
+        if(access(ucd_util->cache_img_dir.c_str(), 2) == -1)
+        {
+            std::cout << "don't have write access : " << ucd_util->cache_img_dir << std::endl;
+            throw "don't have write access";
+        }
 
         if(argc == 4)
         {

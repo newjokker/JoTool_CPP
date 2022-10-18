@@ -32,7 +32,8 @@ class tqdm {
         bool in_screen = (system("test $STY") == 0);
         bool in_tmux = (system("test $TMUX") == 0);
         bool is_tty = isatty(1);
-        bool use_colors = true;
+        // bool use_colors = true;
+        bool use_colors = false;
         bool color_transition = true;
         int width = 40;
 

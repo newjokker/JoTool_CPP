@@ -808,6 +808,16 @@ void UcdParamOpt::load_param_info()
     param_drop_tags->demo.push_back("ucd filter_by_tags aqm.json res.json aqm cbd person                   (将 aqm.json 只保留 aqm cbd person 三个标签)");
     UcdParamOpt::add_param(param_drop_tags);
 
+    // zen
+    ParamInfo * param_zen = new ParamInfo("zen");
+    param_zen->group = "fun";
+    param_zen->grammar = "ucd zen";
+    param_zen->english_explain = "";
+    param_zen->chinese_explain = "ucd 的目的和宗旨";   
+    param_zen->demo.push_back("ucd zen                                                                (查看 ucd 的目的)");
+    UcdParamOpt::add_param(param_zen);
+
+
 }
 
 void UcdParamOpt::not_ready(std::string method_name)
