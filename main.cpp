@@ -184,6 +184,7 @@ int main(int argc, char ** argv)
     // 判断缓存文件夹是否有读取权限
     if(access(ucd_util->cache_img_dir.c_str(), 4) != 0)
     {
+        // \033[33m 红色 \033[0m 去除格式
         std::cout << "\033[33mWARNING : cache_img folder don't have read access \033[0m: " << ucd_util->cache_img_dir << std::endl;
     }
     else if(access(ucd_util->cache_img_dir.c_str(), 2) != 0)
