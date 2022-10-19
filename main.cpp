@@ -28,6 +28,11 @@ using json = nlohmann::json;
 using namespace jotools;
 using namespace std;
 
+#define ERROR_COLOR         "\x1b[35m"
+#define WARNNING_COLOR      "\033[33m"
+#define STOP_COLOR          "\033[0m"
+
+
 // nginx 负载均衡，可以在风火轮上部署，转到 111 和 209 服务器上
 
 // 完成 C++ 版本的 文件 服务，再部署到 docker 上面，这样在哪个服务器上都能方便进行启动
@@ -86,7 +91,7 @@ using namespace std;
 
 // 报错直接将报错信息设置为红色，不要再去引发错误了，看着舒服一点
 
-// 将进度条中的五颜六色的条纹给去掉
+// 使用颜色来处理各种输出
 
 
 int main(int argc, char ** argv)
@@ -185,11 +190,11 @@ int main(int argc, char ** argv)
     if(access(ucd_util->cache_img_dir.c_str(), 4) != 0)
     {
         // \033[33m 红色 \033[0m 去除格式
-        std::cout << "\033[33mWARNING : cache_img folder don't have read access \033[0m: " << ucd_util->cache_img_dir << std::endl;
+        std::cout << WARNNING_COLOR << "WARNING : cache_img folder don't have read access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
     }
     else if(access(ucd_util->cache_img_dir.c_str(), 2) != 0)
     {
-        std::cout << "\033[33mWARNING : cache_img folder don't have write access \033[0m: " << ucd_util->cache_img_dir << std::endl;
+        std::cout << WARNNING_COLOR << "\033[33mWARNING : cache_img folder don't have write access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
     }
 
     // key word

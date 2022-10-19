@@ -663,7 +663,7 @@ void UcdParamOpt::load_param_info()
     
     // get
     ParamInfo * param_get = new ParamInfo("get");
-    param_get->group = "sync";
+    param_get->group = "info";
     param_get->grammar = "ucd get attr_name ucd_path";
     param_get->english_explain = "";
     param_get->chinese_explain = "获取 ucd 中的信息，[dataset_name, uc_count, label_used_count, model_name, model_version, add_time, update_time, describe, label_used, uc_list]";   
@@ -681,7 +681,7 @@ void UcdParamOpt::load_param_info()
     
     // has_uc
     ParamInfo * param_has_uc = new ParamInfo("has_uc");
-    param_has_uc->group = "sync";
+    param_has_uc->group = "info";
     param_has_uc->grammar = "ucd has_uc ucd_path assign_uc";
     param_has_uc->english_explain = "";
     param_has_uc->chinese_explain = "判断指定的 uc 是否在 ucd 的 uc_list 中";   

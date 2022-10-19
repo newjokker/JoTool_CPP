@@ -24,6 +24,11 @@
 using json = nlohmann::json;
 using namespace jotools;
 
+#define ERROR_COLOR         "\x1b[35m"
+#define WARNNING_COLOR      "\033[33m"
+#define STOP_COLOR          "\033[0m"
+
+
 
 // CPP 写服务端 refer : https://blog.csdn.net/canlynetsky/article/details/119083255
 
@@ -1012,7 +1017,7 @@ void UCDataset::devide(std::string save_path, int devide_count)
 {
     if(! (save_path.substr(save_path.size()-5) == ".json"))
     {
-        std::cout << "save_path error, need like save_dir/save_name + .json" << std::endl;
+        std::cout << ERROR_COLOR << "save_path error, need save_path like save_dir/save_name + .json" << STOP_COLOR << std::endl;
         // throw "save_path error, need like save_dir/save_name + .json";
         return;
     }
@@ -1206,19 +1211,19 @@ static bool command_check(std::string command_path)
         }
         else if(tokens.size() < 3)
         {
-            std::cout << "line : " << index << ", format error : " << line << std::endl;
+            std::cout << ERROR_COLOR << "line : " << index << ", format error : " << line << STOP_COLOR << std::endl;
             return false;
         }
         else if((tokens[0] == "ADD")    &&  (tokens[1] == "UC"))
         {
             if(tokens.size() != 3)
             {
-                std::cout << "line : " << index <<  ", format error, ADD UC test_uc : " << line << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index <<  ", format error, ADD UC test_uc : " << line << STOP_COLOR << std::endl;
                 return false;
             }
             else if(! is_uc(tokens[2]))
             {
-                std::cout << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << std::endl;
+                std::cout << ERROR_COLOR << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << STOP_COLOR << std::endl;
                 return false;
             }
         }
@@ -1226,12 +1231,12 @@ static bool command_check(std::string command_path)
         {
             if(tokens.size() != 5)
             {
-                std::cout << "line : " << index << ", format error, ADD SIZE_INFO test_uc width height: " << line << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, ADD SIZE_INFO test_uc width height: " << line << STOP_COLOR << std::endl;
                 return false;                
             }
             else if(! is_uc(tokens[2]))
             {
-                std::cout << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << std::endl;
+                std::cout << ERROR_COLOR << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << STOP_COLOR << std::endl;
                 return false;                
             }
 
@@ -1249,7 +1254,7 @@ static bool command_check(std::string command_path)
             }
             catch(...)
             {
-                std::cout << "line : " << index << ", format error, parse width,height error : " << tokens[3] << ", " << tokens[4] << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, parse width,height error : " << tokens[3] << ", " << tokens[4] << STOP_COLOR << std::endl;
                 return false;
             }
 
@@ -1258,17 +1263,17 @@ static bool command_check(std::string command_path)
         {
             if(tokens.size() != 7)
             {
-                std::cout << "line : " << index << ", format error, ADD OBJECT_INFO test_uc shape_type tag conf points : " << line << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, ADD OBJECT_INFO test_uc shape_type tag conf points : " << line << STOP_COLOR << std::endl;
                 return false;              
             }
             else if(! is_uc(tokens[2]))
             {
-                std::cout << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << std::endl;
+                std::cout << ERROR_COLOR << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << STOP_COLOR << std::endl;
                 return false;                     
             }
             else if((tokens[3] != "rectangle") && (tokens[3] != "line") && (tokens[3] != "linestrip") && (tokens[3] != "circle") && (tokens[3] != "point") && (tokens[3] != "polygon"))
             {
-                std::cout << "line : "<< index << ", format error, illeagal shape_type(point, line, linestrip, circle, rectangle, polygon) : " << tokens[2] << std::endl;
+                std::cout << ERROR_COLOR << "line : "<< index << ", format error, illeagal shape_type(point, line, linestrip, circle, rectangle, polygon) : " << tokens[2] << STOP_COLOR << std::endl;
                 return false;       
             }
 
@@ -1278,13 +1283,13 @@ static bool command_check(std::string command_path)
                 float conf = std::stof(tokens[5]);
                 if((conf < 0) || (conf > 1))
                 {
-                    std::cout << "line : " << index << ", format error, 0 < conf < 1 : " << tokens[5] << std::endl;
+                    std::cout << ERROR_COLOR << "line : " << index << ", format error, 0 < conf < 1 : " << tokens[5] << STOP_COLOR << std::endl;
                     return false;
                 }
             }
             catch(...)
             {
-                std::cout << "line : " << index << ", format error, parse conf error : " << tokens[5] << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, parse conf error : " << tokens[5] << STOP_COLOR << std::endl;
                 return false;
             }
             
@@ -1295,7 +1300,7 @@ static bool command_check(std::string command_path)
             }
             catch(...)
             {
-                std::cout << "line : " << index << ", format error, parse points error : " << tokens[6] << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, parse points error : " << tokens[6] << STOP_COLOR << std::endl;
                 return false; 
             }
         }
@@ -1303,7 +1308,7 @@ static bool command_check(std::string command_path)
         {
             if(tokens.size() != 3)
             {
-                std::cout << "line : " << index << ", format error, SET DATASET_NAME dataset_name" << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, SET DATASET_NAME dataset_name" << STOP_COLOR << std::endl;
                 return false;
             }
         }
@@ -1311,7 +1316,7 @@ static bool command_check(std::string command_path)
         {
             if(tokens.size() != 3)
             {
-                std::cout << "line : " << index << ", format error, SET MODEL_NAME model_name" << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, SET MODEL_NAME model_name" << STOP_COLOR << std::endl;
                 return false;
             }  
         }
@@ -1319,7 +1324,7 @@ static bool command_check(std::string command_path)
         {
             if(tokens.size() != 3)
             {
-                std::cout << "line : " << index << ", format error, SET MODERL_VERSION model_version" << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, SET MODERL_VERSION model_version" << STOP_COLOR << std::endl;
                 return false;
             } 
         }
@@ -1327,7 +1332,7 @@ static bool command_check(std::string command_path)
         {
             if(tokens.size() < 3)
             {
-                std::cout << "line : " << index << ", format error, SET DESCRIBE describ" << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, SET DESCRIBE describ" << STOP_COLOR << std::endl;
                 return false;
             }  
         }
@@ -1335,7 +1340,7 @@ static bool command_check(std::string command_path)
         {
             if(tokens.size() < 3)
             {
-                std::cout << "line : " << index << ", format error, SET LABEL_USED label_used" << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, SET LABEL_USED label_used" << STOP_COLOR << std::endl;
                 return false;
             } 
         }
@@ -1343,12 +1348,12 @@ static bool command_check(std::string command_path)
         {
             if(tokens.size() != 3)
             {
-                std::cout << "line : " << index << ", format error, DROP UC uc" << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, DROP UC uc" << STOP_COLOR << std::endl;
                 return false;
             }
             else if(! is_uc(tokens[2]))
             {
-                std::cout << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << std::endl;
+                std::cout << ERROR_COLOR << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << STOP_COLOR << std::endl;
                 return false;   
             }
         }
@@ -1356,12 +1361,12 @@ static bool command_check(std::string command_path)
         {
             if(tokens.size() != 3)
             {
-                std::cout << "line : " << index << ", format error, DROP SIZE_INFO uc" << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, DROP SIZE_INFO uc" << STOP_COLOR << std::endl;
                 return false;
             }   
             else if(! is_uc(tokens[2]))
             {
-                std::cout << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << std::endl;
+                std::cout << ERROR_COLOR << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << STOP_COLOR << std::endl;
                 return false;   
             }
         }
@@ -1370,17 +1375,17 @@ static bool command_check(std::string command_path)
             // 删除一个元素
             if(tokens.size() != 7)
             {
-                std::cout << "line : " << index << ", format error, DROP OBJECT_INFO test_uc shape_type tag conf points" << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, DROP OBJECT_INFO test_uc shape_type tag conf points" << STOP_COLOR << std::endl;
                 return false;
             }   
             else if(! is_uc(tokens[2]))
             {
-                std::cout << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << std::endl;
+                std::cout << ERROR_COLOR << "line : "<< index << ", format error, illeagal uc : " << tokens[2] << STOP_COLOR << std::endl;
                 return false;   
             }
             else if((tokens[3] != "rectangle") && (tokens[3] != "line") && (tokens[3] != "linestrip") && (tokens[3] != "circle") && (tokens[3] != "point") && (tokens[3] != "polygon"))
             {
-                std::cout << "line : "<< index << ", format error, illeagal shape_type(point, line, linestrip, circle, rectangle, polygon) : " << tokens[2] << std::endl;
+                std::cout << ERROR_COLOR << "line : "<< index << ", format error, illeagal shape_type(point, line, linestrip, circle, rectangle, polygon) : " << tokens[2] << STOP_COLOR << std::endl;
                 return false;       
             }
 
@@ -1390,13 +1395,13 @@ static bool command_check(std::string command_path)
                 float conf = std::stof(tokens[5]);
                 if((conf < 0) || (conf > 1))
                 {
-                    std::cout << "line : " << index << ", format error, 0 < conf < 1 : " << tokens[5] << std::endl;
+                    std::cout << ERROR_COLOR << "line : " << index << ", format error, 0 < conf < 1 : " << tokens[5] << STOP_COLOR << std::endl;
                     return false;
                 }
             }
             catch(...)
             {
-                std::cout << "line : " << index << ", format error, parse conf error : " << tokens[5] << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, parse conf error : " << tokens[5] << STOP_COLOR << std::endl;
                 return false;
             }
             
@@ -1407,7 +1412,7 @@ static bool command_check(std::string command_path)
             }
             catch(...)
             {
-                std::cout << "line : " << index << ", format error, parse points error : " << tokens[6] << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, parse points error : " << tokens[6] << STOP_COLOR << std::endl;
                 return false; 
             }
         }
@@ -1415,7 +1420,7 @@ static bool command_check(std::string command_path)
         {
             if(tokens.size() != 3)
             {
-                std::cout << "line : " << index << ", format error, DROP ALL UC" << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, DROP ALL UC" << STOP_COLOR << std::endl;
                 return false;
             }
         }
@@ -1423,7 +1428,7 @@ static bool command_check(std::string command_path)
         {
             if(tokens.size() != 3)
             {
-                std::cout << "line : " << index << ", format error, DROP ALL SIZE_INFO" << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index << ", format error, DROP ALL SIZE_INFO" << STOP_COLOR << std::endl;
                 return false;
             }        
         }
@@ -1432,18 +1437,18 @@ static bool command_check(std::string command_path)
             // 删除 uc 对应的所有的 obj
             if(tokens.size() != 4)
             {
-                std::cout << "line : " << index <<  ", format error, DROP ALL OBJECT_INFO uc : " << line << std::endl;
+                std::cout << ERROR_COLOR << "line : " << index <<  ", format error, DROP ALL OBJECT_INFO uc : " << line << STOP_COLOR << std::endl;
                 return false;   
             }
             else if(! is_uc(tokens[3]))
             {
-                std::cout << "line : "<< index << ", format error, illeagal uc : " << tokens[3] << std::endl;
+                std::cout << ERROR_COLOR << "line : "<< index << ", format error, illeagal uc : " << tokens[3] << STOP_COLOR << std::endl;
                 return false;
             }
         }
         else
         {
-            std::cout << "line : " << index << ", gramma not support : " << line << std::endl;
+            std::cout << ERROR_COLOR << "line : " << index << ", gramma not support : " << line << STOP_COLOR << std::endl;
             return false;
         }
     }
@@ -1484,7 +1489,7 @@ void UCDataset::command_ADD(std::vector<std::string> tokens)
     }
     else
     {
-        std::cout << command << " not support" << std::endl;
+        std::cout << ERROR_COLOR << command << " not support" << STOP_COLOR << std::endl;
         throw command + " not support";
     }
 }
@@ -1593,7 +1598,7 @@ void UCDataset::exec(std::string command_path)
     
     if(check_res == false)
     {
-        std::cout << "command format error " << std::endl;
+        std::cout << ERROR_COLOR << "command format error " << STOP_COLOR << std::endl;
         return;
     }
 
@@ -1636,7 +1641,7 @@ void UCDataset::exec(std::string command_path)
         }
         else
         {
-            std::cout << "不存在的方法 : " << tokens[0] << std::endl;
+            std::cout << ERROR_COLOR << "不存在的方法 : " << tokens[0] << STOP_COLOR << std::endl;
         }
     }
     infile.close();
@@ -1740,7 +1745,7 @@ void UCDatasetUtil::save_img_xml_json(std::string save_dir, bool need_img, bool 
 {
     if(! is_dir(save_dir))
     {
-        std::cout << "save dir not exists : " << save_dir << std::endl;
+        std::cout << ERROR_COLOR << "save dir not exists : " << save_dir << STOP_COLOR << std::endl;
         throw "save dir not exists";
     }
     // 
@@ -1802,7 +1807,7 @@ void UCDatasetUtil::load_file(std::string url, std::string save_path, int index)
 
         if(res == nullptr)
         {
-            std::cout << "connect error : " << url << std::endl;
+            std::cout << ERROR_COLOR << "connect error : " << url << STOP_COLOR << std::endl;
             return;
         }
 
@@ -1815,8 +1820,8 @@ void UCDatasetUtil::load_file(std::string url, std::string save_path, int index)
         }
         else
         {
-            std::cout << "load error : " << url << std::endl;
-            std::cout << "error info : " << res->body << std::endl;
+            std::cout << ERROR_COLOR << "load error : " << url << STOP_COLOR << std::endl;
+            std::cout << ERROR_COLOR << "error info : " << res->body << STOP_COLOR << std::endl;
         }
     }
 }
@@ -1825,7 +1830,7 @@ void UCDatasetUtil::load_img(std::string save_dir, std::vector<std::string> uc_l
 {
     if(! is_dir(save_dir))
     {
-        std::cout << "save dir not exists : " << save_dir << std::endl;
+        std::cout << ERROR_COLOR << "save dir not exists : " << save_dir << STOP_COLOR << std::endl;
         throw "save dir not exists";
     }
 
@@ -1861,7 +1866,7 @@ void UCDatasetUtil::load_img_with_assign_uc(std::string save_dir, std::string uc
     // todo 这个函数有问题，好像下载下来的数据都是空的
     if(! is_dir(save_dir))
     {
-        std::cout << "save dir not exists : " << save_dir << std::endl;
+        std::cout << ERROR_COLOR << "save dir not exists : " << save_dir << STOP_COLOR << std::endl;
         throw "save dir not exists";
     }
 
@@ -1896,7 +1901,7 @@ void UCDatasetUtil::load_xml(std::string save_dir, std::vector<std::string> uc_l
 {
     if(! is_dir(save_dir))
     {
-        std::cout << "save dir not exists : " << save_dir << std::endl;
+        std::cout << ERROR_COLOR << "save dir not exists : " << save_dir << STOP_COLOR << std::endl;
         throw "save dir not exists";
     }
 
@@ -1947,7 +1952,7 @@ void UCDatasetUtil::search_ucd()
     }
     else
     {
-        std::cout << "connect error : " << check_url << std::endl;
+        std::cout << ERROR_COLOR << "connect error : " << check_url << STOP_COLOR << std::endl;
     }
 }
 
@@ -1957,7 +1962,7 @@ void UCDatasetUtil::delete_ucd(std::string std_name)
     auto res = cli.Delete("/ucd/delete/" + std_name + ".json");
     if(res == nullptr)
     {
-        std::cout << "delete failed !" << std::endl;
+        std::cout << ERROR_COLOR << "delete failed !" << STOP_COLOR << std::endl;
         throw "delete failed !";
     }
 }
@@ -1979,7 +1984,7 @@ void UCDatasetUtil::upload_ucd(std::string ucd_path, std::string assign_ucd_name
         // 这边返回 status 不为 200 也报错？        
         if(resSendFiles == nullptr)
         {
-            std::cout << "upload failed !" << std::endl;
+            std::cout << ERROR_COLOR << "upload failed !" << STOP_COLOR << std::endl;
             throw "upload failed !";
         }
     }
@@ -1989,7 +1994,7 @@ void UCDatasetUtil::upload_ucd(std::string ucd_path, std::string assign_ucd_name
         auto resSendFiles = cliSendFiles.Post("/ucd/upload", items);
         if(resSendFiles == nullptr)
         {
-            std::cout << "upload failed !" << std::endl;
+            std::cout << ERROR_COLOR << "upload failed !" << STOP_COLOR << std::endl;
             throw "upload failed !";
         }
     }
@@ -2105,7 +2110,7 @@ void UCDatasetUtil::merge_ucds(std::string save_path, std::vector<std::string> u
 {
     if(ucd_path_vector.size() < 2)
     {
-        std::cout << "ucd path vector count < 2" << std::endl;
+        std::cout << ERROR_COLOR << "ucd path vector count < 2" << STOP_COLOR << std::endl;
         throw "ucd path vector count < 2";
     }
 
@@ -2193,7 +2198,7 @@ void UCDatasetUtil::count_ucd_tags(std::string ucd_path)
 {
     if(! UCDatasetUtil::is_ucd_path(ucd_path))
     {
-        std::cout << "ucd path not exists : " << ucd_path << std::endl;
+        std::cout << ERROR_COLOR << "ucd path not exists : " << ucd_path << STOP_COLOR << std::endl;
     }
     int tag_count = 0;
     int dete_obj_count=0; 
@@ -2323,7 +2328,7 @@ void UCDatasetUtil::print_words(std::string name, int width, int height)
     std::string save_dir = UCDatasetUtil::cache_dir + "/" + "word";
     if(! is_dir(save_dir))
     {
-        std::cout << "word folder not exists : " << save_dir << std::endl;
+        std::cout << ERROR_COLOR << "word folder not exists : " << save_dir << STOP_COLOR << std::endl;
         return;
     }
 
@@ -2342,7 +2347,7 @@ void UCDatasetUtil::print_words(std::string name, int width, int height)
         }
         else
         {
-            std::cout << "* 未找到字符 : " << words[i] << "，目前仅支持中文"<< std::endl;
+            std::cout << ERROR_COLOR << "* 未找到字符 : " << words[i] << "，目前仅支持中文"<< STOP_COLOR << std::endl;
             throw "未找到字符 : " + words[i] ;
         }
     }
@@ -2375,14 +2380,14 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
     // 
     if(! is_dir(save_dir))
     {
-        std::cout << "save dir not exists : " << save_dir << std::endl;
+        std::cout << ERROR_COLOR << "save dir not exists : " << save_dir << STOP_COLOR << std::endl;
         throw "save dir not exists";
         return;
     }
 
     if(! UCDatasetUtil::is_ucd_path(ucd_path))
     {
-        std::cout << "ucd_path not exists : " << ucd_path << std::endl;
+        std::cout << ERROR_COLOR << "ucd_path not exists : " << ucd_path << STOP_COLOR << std::endl;
         throw "ucd_path not exists";
         return;
     }
@@ -2406,7 +2411,7 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
 
         if(img_path == "")
         {
-            std::cout << "load uc img failed : " << uc << std::endl;
+            std::cout << ERROR_COLOR << "load uc img failed : " << uc << STOP_COLOR << std::endl;
         }
         else
         {
@@ -2424,19 +2429,19 @@ void UCDatasetUtil::parse_labelme_json(std::string img_dir, std::string save_dir
 {
     if(! is_dir(img_dir))
     {
-        std::cout << "img_dir not exists : " << img_dir << std::endl;
+        std::cout << ERROR_COLOR << "img_dir not exists : " << img_dir << STOP_COLOR << std::endl;
         throw "img_dir not exists";
     }
 
     if(! is_dir(save_dir))
     {
-        std::cout << "save_dir not exists : " << save_dir << std::endl;
+        std::cout << ERROR_COLOR << "save_dir not exists : " << save_dir << STOP_COLOR << std::endl;
         throw "save_dir not exists";
     }
 
     if(! is_file(ucd_path))
     {
-        std::cout << "ucd_path not exists : " << ucd_path << std::endl;
+        std::cout << ERROR_COLOR << "ucd_path not exists : " << ucd_path << STOP_COLOR << std::endl;
         throw "ucd_path not exists";
     }
 
@@ -2458,7 +2463,7 @@ void UCDatasetUtil::parse_labelme_json(std::string img_dir, std::string save_dir
             std::string json_path = save_dir + "/" + uc + ".json";
             if(is_file(json_path))
             {
-                std::cout << index << ", json exists, ignore : " << json_path << std::endl;
+                std::cout << ERROR_COLOR << index << ", json exists, ignore : " << json_path << STOP_COLOR << std::endl;
             }
             else
             {
@@ -2468,7 +2473,7 @@ void UCDatasetUtil::parse_labelme_json(std::string img_dir, std::string save_dir
         }
         else
         {
-            std::cout << "load img failed : " << img_path << std::endl;
+            std::cout << ERROR_COLOR << "load img failed : " << img_path << STOP_COLOR << std::endl;
         }
         bar.progress(index, N);
         index += 1;
@@ -2482,19 +2487,19 @@ void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std
 {
     if(! is_dir(img_dir))
     {
-        std::cout << "img_dir not exists : " << img_dir << std::endl;
+        std::cout << ERROR_COLOR << "img_dir not exists : " << img_dir << STOP_COLOR << std::endl;
         throw "img_dir not exists";
     }
 
     if(! is_dir(save_dir))
     {
-        std::cout << "save_dir not exists : " << save_dir << std::endl;
+        std::cout << ERROR_COLOR << "save_dir not exists : " << save_dir << STOP_COLOR << std::endl;
         throw "save_dir not exists";
     }
 
     if(! is_file(ucd_path))
     {
-        std::cout << "ucd_path not exists : " << ucd_path << std::endl;
+        std::cout << ERROR_COLOR << "ucd_path not exists : " << ucd_path << STOP_COLOR << std::endl;
         throw "ucd_path not exists";
     }
 
@@ -2525,19 +2530,19 @@ void UCDatasetUtil::parse_yolo_train_data(std::string img_dir, std::string save_
 {
     if(! is_dir(img_dir))
     {
-        std::cout << "img_dir not exists : " << img_dir << std::endl;
+        std::cout << ERROR_COLOR << "img_dir not exists : " << img_dir << STOP_COLOR << std::endl;
         throw "img_dir not exists";
     }
 
     if(! is_dir(save_dir))
     {
-        std::cout << "save_dir not exists : " << save_dir << std::endl;
+        std::cout << ERROR_COLOR << "save_dir not exists : " << save_dir << STOP_COLOR << std::endl;
         throw "save_dir not exists";
     }
 
     if(! is_file(ucd_path))
     {
-        std::cout << "ucd_path not exists : " << ucd_path << std::endl;
+        std::cout << ERROR_COLOR << "ucd_path not exists : " << ucd_path << STOP_COLOR << std::endl;
         throw "ucd_path not exists";
     }
 
@@ -2549,7 +2554,7 @@ void UCDatasetUtil::parse_yolo_train_data(std::string img_dir, std::string save_
     {
         if(ucd->label_used.size() == 0)
         {
-            std::cout << "label used list is empty, do complete it !" << std::endl;
+            std::cout << ERROR_COLOR << "label used list is empty, do complete it !" << STOP_COLOR << std::endl;
             throw "label list is empty and label used list is empty, do complete it";
         }
         else
@@ -2578,7 +2583,7 @@ void UCDatasetUtil::uc_analysis(std::string ucd_path)
 {
     if(! is_ucd_path(ucd_path))
     {
-        std::cout << "error ucd_path : " << ucd_path << std::endl;
+        std::cout << ERROR_COLOR << "error ucd_path : " << ucd_path << STOP_COLOR << std::endl;
         throw "error ucd_path";
     }
 
@@ -2648,7 +2653,7 @@ void UCDatasetUtil::conf_analysis(std::string ucd_path, int seg_count)
 
     if(conf_vector.size() < 10)
     {
-        std::cout << "数据量太小，没必要分析，自己打开文件去看吧" << std::endl;
+        std::cout << ERROR_COLOR << "数据量太小，没必要分析，自己打开文件去看吧" << STOP_COLOR << std::endl;
         return; 
     }
 
@@ -2726,7 +2731,7 @@ void UCDatasetUtil::area_analysis(std::string ucd_path, int seg_count)
 
     if(area_vector.size() < seg_count)
     {
-        std::cout << "数据量太小，没必要分析，自己打开文件去看吧" << std::endl;
+        std::cout << ERROR_COLOR << "数据量太小，没必要分析，自己打开文件去看吧" << STOP_COLOR << std::endl;
         return; 
     }
 
@@ -2806,7 +2811,7 @@ void UCDatasetUtil::set_fack_uc(std::string fake_folder)
 
     if(! is_dir(fake_folder))
     {
-        std::cout << "fake foler not exists : " << fake_folder << std::endl;
+        std::cout << ERROR_COLOR << "fake foler not exists : " << fake_folder << STOP_COLOR << std::endl;
         return;
     }
 
