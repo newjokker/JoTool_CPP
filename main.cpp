@@ -86,12 +86,8 @@ using namespace std;
 // 检测过程使用进度条显示进度，默认是自动使用保存文件夹下面的路径
 // 
 
-
 // draw_res 画出截图， 用什么颜色，用多粗的线，在哪里写上标签这些都需要说明和完善
 
-// 报错直接将报错信息设置为红色，不要再去引发错误了，看着舒服一点
-
-// 使用颜色来处理各种输出
 
 
 int main(int argc, char ** argv)
@@ -147,25 +143,25 @@ int main(int argc, char ** argv)
     if(is_file(config_path))
     {
         xini_file_t xini_file(config_path);
-        host = (const std::string &)xini_file["server"]["host"];
-        port = (const int &)xini_file["server"]["port"];
-        sql_host = (const std::string &)xini_file["sql"]["host"];
-        sql_port = (const int &)xini_file["sql"]["port"];
-        sql_user = (const std::string &)xini_file["sql"]["user"];
-        sql_pwd = (const std::string &)xini_file["sql"]["pwd"];
-        sql_db = (const std::string &)xini_file["sql"]["db"];
-        cache_dir = (const std::string &)xini_file["cache"]["dir"];
+        host        = (const std::string &)xini_file["server"]["host"];
+        port        = (const int &)xini_file["server"]["port"];
+        sql_host    = (const std::string &)xini_file["sql"]["host"];
+        sql_port    = (const int &)xini_file["sql"]["port"];
+        sql_user    = (const std::string &)xini_file["sql"]["user"];
+        sql_pwd     = (const std::string &)xini_file["sql"]["pwd"];
+        sql_db      = (const std::string &)xini_file["sql"]["db"];
+        cache_dir   = (const std::string &)xini_file["cache"]["dir"];
     }
     else
     {
         xini_file_t xini_write(config_path);
-        xini_write["server"]["host"] = host;
-        xini_write["server"]["port"] = port;
-        xini_write["sql"]["host"] = sql_host;
-        xini_write["sql"]["port"] = sql_host;
-        xini_write["sql"]["user"] = sql_user;
-        xini_write["sql"]["pwd"] = sql_pwd;
-        xini_write["sql"]["db"] = sql_db;
+        xini_write["server"]["host"]    = host;
+        xini_write["server"]["port"]    = port;
+        xini_write["sql"]["host"]       = sql_host;
+        xini_write["sql"]["port"]       = sql_host;
+        xini_write["sql"]["user"]       = sql_user;
+        xini_write["sql"]["pwd"]        = sql_pwd;
+        xini_write["sql"]["db"]         = sql_db;
         xini_write.dump(config_path);   
     }
     
@@ -176,25 +172,22 @@ int main(int argc, char ** argv)
     // must set ucd_cache 
     if((! is_dir(cache_dir)) && (command_1 != "set"))
     {
-        std::cout << "cache_dir not exists, edit ucdconfig.ini cache/cache_dir : " << std::endl;
+        std::cout << WARNNING_COLOR << "cache_dir not exists, edit ucdconfig.ini cache/cache_dir : " << STOP_COLOR << std::endl;
         std::cout << "ucdconfig path : " << config_path << std::endl;
         std::cout << "-----------------------------------------------------------" << std::endl;
         std::cout << "set cache_dir with 'ucd set cache_dir {cache_dir}' " << std::endl;
         std::cout << "-----------------------------------------------------------" << std::endl;
-        throw "cache_dir not exists!";
+        // throw "cache_dir not exists!";
     }
 
-    // 文件夹权限检查
-    
-    // 判断缓存文件夹是否有读取权限
+    // 文件夹权限检查    
     if(access(ucd_util->cache_img_dir.c_str(), 4) != 0)
     {
-        // \033[33m 红色 \033[0m 去除格式
         std::cout << WARNNING_COLOR << "WARNING : cache_img folder don't have read access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
     }
     else if(access(ucd_util->cache_img_dir.c_str(), 2) != 0)
     {
-        std::cout << WARNNING_COLOR << "\033[33mWARNING : cache_img folder don't have write access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
+        std::cout << WARNNING_COLOR << "WARNING : cache_img folder don't have write access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
     }
 
     // key word
@@ -295,20 +288,20 @@ int main(int argc, char ** argv)
             // 判断对文件是否有写入权限
             if(access(save_dir.c_str(), 2) != 0)
             {
-                std::cout << "\033[31mdon't have write access :\033[0m " << save_dir << std::endl;
+                std::cout << ERROR_COLOR << "[31mdon't have write access : " << save_dir << STOP_COLOR << std::endl;
                 throw "don't have write access";
             }
 
             // 判断缓存文件夹是否有读取权限
             if(access(ucd_util->cache_img_dir.c_str(), 4) != 0)
             {
-                std::cout << "\033[31mdon't have read access :\033[0m " << ucd_util->cache_img_dir << std::endl;
+                std::cout << ERROR_COLOR << "don't have read access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
                 throw "don't have write access";
             }
 
             if(save_mode.size() != 2)
             {
-                std::cout << "save_mode illeagal, need save_mode such as 11 | 10  " << save_dir << std::endl;
+                std::cout << ERROR_COLOR << "save_mode illeagal, need save_mode such as 11 | 10  " << save_dir << STOP_COLOR << std::endl;
                 throw "save_mode illeagal";
             }
 
@@ -1996,6 +1989,15 @@ int main(int argc, char ** argv)
         {
             ucd_param_opt->print_command_info(command_1);
         }
+    }
+    else if(command_1 == "draw_res")
+    {
+        // 画图，可以指定
+        // 全部使用统一随机颜色
+        // 字符的大小和线框的粗细参考 deteRes(python 版本)的实现方式
+        ucd_param_opt->not_ready();
+        return -1;
+
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {

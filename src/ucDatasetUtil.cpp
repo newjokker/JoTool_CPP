@@ -1905,6 +1905,8 @@ void UCDatasetUtil::load_xml(std::string save_dir, std::vector<std::string> uc_l
         throw "save dir not exists";
     }
 
+    tqdm bar;
+    int N = uc_list.size();
     for(int i=0; i<uc_list.size(); i++)
     {
         std::string xml_url = "/file/" + uc_list[i] + ".xml";
@@ -1913,11 +1915,13 @@ void UCDatasetUtil::load_xml(std::string save_dir, std::vector<std::string> uc_l
         {
             UCDatasetUtil::load_file(xml_url, save_xml_path, i); 
         }
-        else
-        {
-            std::cout << i <<  ", file exists : " << save_xml_path << std::endl;
-        }
+        // else
+        // {
+        //     std::cout << i <<  ", file exists : " << save_xml_path << std::endl;
+        // }
+        bar.progress(i, N);
     }
+    bar.finish();
 }
 
 void UCDatasetUtil::load_ucd(std::string ucd_name, std::string save_path)
