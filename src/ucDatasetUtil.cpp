@@ -1711,6 +1711,20 @@ void UCDataset::update_tags(std::map< std::string, std::string > tag_map)
     }
 }
 
+void UCDataset::drop_empty_uc()
+{
+    std::vector< std::string > uc_list;
+    for(int i=0; i<UCDataset::uc_list.size(); i++)
+    {
+        std::string uc = UCDataset::uc_list[i];
+        if(UCDataset::object_info[uc].size() > 0)
+        {
+            uc_list.push_back(uc);
+        }
+    }
+    UCDataset::uc_list = uc_list;
+}
+
 // 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
 {

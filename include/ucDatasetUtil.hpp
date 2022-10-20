@@ -154,6 +154,9 @@ class UCDataset
         // 更新标签
         void update_tags(std::map< std::string, std::string > tag_map);
 
+        // 舍弃没有 obj 的 uc
+        void drop_empty_uc();
+
     private:
         std::string json_path;
 };

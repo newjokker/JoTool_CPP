@@ -90,10 +90,6 @@ using namespace std;
 
 // drop_empty_uc 当这个 uc 没有对应的 obj 时候删除这个 uc  
 
-// rename 时候已经是 uc 的就先不用管了，直接忽略
-
-// cache_clean 可以指定文件夹，不指定的就使用的是指定的文件夹
-
 
 int main(int argc, char ** argv)
 {
@@ -2008,6 +2004,23 @@ int main(int argc, char ** argv)
         ucd_param_opt->not_ready();
         return -1;
 
+    }
+    else if(command_1 == "drop_empty_uc")
+    {
+        // 当 uc 中不包含 obj 时，删除这个空的 uc
+        if(argc == 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_path = argv[3];
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->drop_empty_uc();
+            ucd->save_to_ucd(save_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {
