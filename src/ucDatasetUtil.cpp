@@ -2782,16 +2782,16 @@ void UCDatasetUtil::area_analysis(std::string ucd_path, int seg_count)
     delete ucd;
 }
 
-void UCDatasetUtil::cache_clean()
+void UCDatasetUtil::cache_clean(std::string clean_folder)
 {
-    if(! is_dir(UCDatasetUtil::cache_img_dir))
+    if(! is_dir(clean_folder))
     {
         std::cout << "ucd path not exists" << std::endl;
     }
 
     // 清空全部缓存
     std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
-    std::vector<std::string> all_img_path_vector = get_all_file_path(UCDatasetUtil::cache_img_dir, suffix);
+    std::vector<std::string> all_img_path_vector = get_all_file_path(clean_folder, suffix);
 
     tqdm bar;
     int N = all_img_path_vector.size();

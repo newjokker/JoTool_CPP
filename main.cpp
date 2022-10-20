@@ -88,6 +88,11 @@ using namespace std;
 
 // draw_res 画出截图， 用什么颜色，用多粗的线，在哪里写上标签这些都需要说明和完善
 
+// drop_empty_uc 当这个 uc 没有对应的 obj 时候删除这个 uc  
+
+// rename 时候已经是 uc 的就先不用管了，直接忽略
+
+// cache_clean 可以指定文件夹，不指定的就使用的是指定的文件夹
 
 
 int main(int argc, char ** argv)
@@ -1054,7 +1059,12 @@ int main(int argc, char ** argv)
         // 删除图片缓存中大小为 0 的空图片
         if(argc == 2)
         {
-            ucd_util->cache_clean();
+            ucd_util->cache_clean(ucd_util->cache_img_dir);
+        }
+        else if(argc == 3)
+        {
+            std::string clean_dir = argv[2];
+            ucd_util->cache_clean(clean_dir);
         }
         else
         {

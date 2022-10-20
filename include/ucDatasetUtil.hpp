@@ -261,7 +261,7 @@ class UCDatasetUtil
         void area_analysis(std::string ucd_path, int seg_count);
 
         // 缓存文件清洗
-        void cache_clean();
+        void cache_clean(std::string clean_folder);
 
         // 将文件赋予假的uc，FakeUC
         void set_fack_uc(std::string folder_path);

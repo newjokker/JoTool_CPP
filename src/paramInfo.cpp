@@ -524,10 +524,11 @@ void UcdParamOpt::load_param_info()
     // cache_clean
     ParamInfo * param_cache_clean = new ParamInfo("cache_clean");
     param_cache_clean->group = "cache";
-    param_cache_clean->grammar = "ucd cache_clear {ucd_path}";
+    param_cache_clean->grammar = "ucd cache_clean {img_folder}";
     param_cache_clean->english_explain = "clear cache";
     param_cache_clean->chinese_explain = "清洗缓存数据中大小为 0 的图片(有问题的图片)";   
-    param_cache_clean->demo.push_back("ucd cache_clean                              (将缓存中错误的图片全部删除(大小为 0 的图片)))");
+    param_cache_clean->demo.push_back("ucd cache_clean                              (将缓存中(cache_dir/img_cache)错误的图片全部删除(大小为 0 的图片)))");
+    param_cache_clean->demo.push_back("ucd cache_clean img_dir                      (将 img_dir 文件夹中错误的图片全部删除(大小为 0 的图片)))");
     UcdParamOpt::add_param(param_cache_clean);
 
     // to_yolo

@@ -11,6 +11,8 @@
 #include "include/saturn_database_sql.hpp"
 #include "include/md5.hpp"
 #include "include/fileOperateUtil.hpp"
+#include "include/tqdm.h"
+
 
 static bool is_uc(std::string uc)
 {
@@ -86,13 +88,22 @@ void SaturnDatabaseSQL::rename_img_dir(std::string img_dir, int buffer_img_size)
     std::string md5_str;
     std::map<std::string, std::string> img_path_md5_map;
 
+    tqdm bar;
+    int N = img_path_vector.size();
+
     for(int i=0; i<img_path_vector.size(); i++)
     {
-        md5_str = get_file_md5(img_path_vector[i]);
-        md5_vector.push_back(md5_str);
-        std::cout << i << ", " << "get md5 : " << img_path_vector[i] << ", " << md5_str << std::endl;
-        img_path_md5_map[img_path_vector[i]] = md5_str;
+        std::string img_name = get_file_name(img_path_vector[i]);
+        if(! is_uc(img_name))
+        {
+            md5_str = get_file_md5(img_path_vector[i]);
+            md5_vector.push_back(md5_str);
+            // std::cout << i << ", " << "get md5 : " << img_path_vector[i] << ", " << md5_str << std::endl;
+            img_path_md5_map[img_path_vector[i]] = md5_str;
+            bar.progress(i, N);
+        }
     }
+    bar.finish();
 
     // get uc by md5
     std::map<std::string, std::string> md5_uc_map = SaturnDatabaseSQL::get_md5_uc_map_from_md5_vector(md5_vector);
@@ -135,6 +146,10 @@ void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_
     std::map<std::string, std::string> img_path_md5_map;
     std::string img_path, xml_path, img_name, img_suffix;
     std::string new_img_path, new_xml_path;
+
+    tqdm bar;
+    int N = img_path_vector.size();
+
     // 
     for(int i=0; i<img_path_vector.size(); i++)
     {
@@ -147,15 +162,17 @@ void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_
             {
                 md5_str = get_file_md5(img_path_vector[i]);
                 md5_vector.push_back(md5_str);
-                std::cout << i << ", " << "get md5 : " << img_path_vector[i] << ", " << md5_str << std::endl;
+                // std::cout << i << ", " << "get md5 : " << img_path_vector[i] << ", " << md5_str << std::endl;
                 img_path_md5_map[img_path_vector[i]] = md5_str;
             }
             else
             {
                 std::cout << "can't find xml_path : " << xml_path << std::endl;
             }
+            bar.progress(i, N);
         }
     }
+    bar.finish();
 
     // get uc by md5
     std::map<std::string, std::string> md5_uc_map = SaturnDatabaseSQL::get_md5_uc_map_from_md5_vector(md5_vector);
@@ -198,6 +215,10 @@ void SaturnDatabaseSQL::rename_img_json_dir(std::string img_dir, std::string jso
     std::map<std::string, std::string> img_path_md5_map;
     std::string img_path, xml_path, img_name, img_suffix;
     std::string new_img_path, new_xml_path;
+
+    tqdm bar;
+    int N = img_path_vector.size();
+
     // 
     for(int i=0; i<img_path_vector.size(); i++)
     {
@@ -218,7 +239,9 @@ void SaturnDatabaseSQL::rename_img_json_dir(std::string img_dir, std::string jso
                 std::cout << "can't find xml_path : " << xml_path << std::endl;
             }
         }
+        bar.progress(i, N);
     }
+    bar.finish();
 
     // get uc by md5
     std::map<std::string, std::string> md5_uc_map = SaturnDatabaseSQL::get_md5_uc_map_from_md5_vector(md5_vector);
