@@ -820,7 +820,7 @@ void UcdParamOpt::load_param_info()
 
     // drop_empty_uc
     ParamInfo * param_drop_empty_uc = new ParamInfo("drop_empty_uc");
-    param_drop_empty_uc->group = "fun";
+    param_drop_empty_uc->group = "filter";
     param_drop_empty_uc->grammar = "ucd zen";
     param_drop_empty_uc->english_explain = "";
     param_drop_empty_uc->chinese_explain = "删除没有 obj 元素的 uc";   

@@ -88,7 +88,25 @@ using namespace std;
 
 // draw_res 画出截图， 用什么颜色，用多粗的线，在哪里写上标签这些都需要说明和完善
 
-// drop_empty_uc 当这个 uc 没有对应的 obj 时候删除这个 uc  
+// filter_by_tags_like 使用相似的原则对标签进行过滤，一次性只能匹配一条原则
+
+// acc 中 mistake 和 miss 可以针对一个目标 所有算召回率需要注意 miss + correct 就是全部目标的量了
+
+// draw  count_tags cut_small_img 都要能针对一个 uc 进行处理
+
+// 检测服务函数要的，docker 和 ucd 之间的交互要使用新的方式，（1）写一个 docker 管理器，管理当前电脑上的 docker 服务（2）docker 不使用的时候不要占据太多的资源，可以一直在后台启动
+
+// ucd 作为内部检测服务的标注检测接口，快速部署，灵活变动，最高的速度，共用缓存（ucd_cache）
+
+// ucd dete ucd_path host port save_dir（（1）dete 作为标准接受接口，（2）一张图一个返回，返回的是标准的 xml 文件，（3）能实时看检测的效果（4）保存历史结果，对于历史上检测过的信息直接返回（5）正在检测时，阻止其他服务连接）
+
+// ucd dete 一次发一个 uc 过去，返回一个 xml 文件回来
+
+// 如何能减少内存的使用，obj 多了之后，内存就爆了
+
+// 使用 ucd 直接启动 docker，就直接使用武汉那个接口，指定输入检测文件夹换为指定输入 ucd 即可，不用 ucd 直接启动 docker，直接用 ucd 打印启动的命令即可，记不住的是 docker 启动命令
+
+// 
 
 
 int main(int argc, char ** argv)
@@ -1900,10 +1918,6 @@ int main(int argc, char ** argv)
     {
         // 查看指定的检测服务的具体信息，由 docker 提供，docker 完善 info 接口
     }
-    else if(command_1 == "dete")
-    {
-        // 进行检测服务，使用进度条标识进度，在检测文件夹中的文件默认，不进行检测
-    }
     else if(command_1 == "fake_uc")
     {
         // FUC 开始的数据默认为 fake uc
@@ -2004,6 +2018,9 @@ int main(int argc, char ** argv)
         ucd_param_opt->not_ready();
         return -1;
 
+
+
+
     }
     else if(command_1 == "drop_empty_uc")
     {
@@ -2021,6 +2038,12 @@ int main(int argc, char ** argv)
         {
             ucd_param_opt->print_command_info(command_1);
         }
+    }
+    else if(command_1 == "dete")
+    {
+        // 将标准 docker 服务的启动方式打印出来即可
+        // docker info : md5, name, version
+        // docker run --gpus device=0 -v /home/input_dir:/usr/input_dir -v /home/output_dir:/usr/output_dir -d dete_server:v0.0.1 
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {
