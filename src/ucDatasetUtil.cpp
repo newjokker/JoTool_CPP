@@ -561,6 +561,7 @@ void UCDataset::save_to_voc_xml_with_assign_uc(std::string save_path, std::strin
         {
             width = size_info[0];
             height = size_info[1];
+            depth = 3;
         }
     }
 
@@ -1734,9 +1735,10 @@ UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
     UCDatasetUtil::cache_dir = cache_dir;
     if(is_dir(cache_dir))
     {
-        UCDatasetUtil::cache_img_dir = UCDatasetUtil::cache_dir + "/" + "img_cache";
-        UCDatasetUtil::cache_xml_dir = UCDatasetUtil::cache_dir + "/" + "xml_cache";
-        UCDatasetUtil::cache_crop_dir = UCDatasetUtil::cache_dir + "/" + "crop_cache";
+        UCDatasetUtil::cache_img_dir    = UCDatasetUtil::cache_dir + "/" + "img_cache";
+        UCDatasetUtil::cache_xml_dir    = UCDatasetUtil::cache_dir + "/" + "xml_cache";
+        UCDatasetUtil::cache_crop_dir   = UCDatasetUtil::cache_dir + "/" + "crop_cache";
+        UCDatasetUtil::color_file       = UCDatasetUtil::cache_dir + "/" + "color.txt";
 
         if(! is_dir(UCDatasetUtil::cache_img_dir))
         {
@@ -1751,6 +1753,15 @@ UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
         if(! is_dir(UCDatasetUtil::cache_crop_dir))
         {
             create_folder(UCDatasetUtil::cache_crop_dir);
+        }
+
+        if(! is_file(UCDatasetUtil::color_file))
+        {
+            // 创建这个文件，里面加上一个颜色 demo
+            std::ofstream OutFile(UCDatasetUtil::color_file); 
+            OutFile << "# 默认颜色, test_color, (R,G,B)" << std::endl;
+            OutFile << "default,0,255,0" << std::endl;
+            OutFile.close();
         }
     }
 }
@@ -2894,3 +2905,88 @@ void UCDatasetUtil::set_fack_uc(std::string fake_folder)
         rename(file_path_vector[i].c_str(), new_file_path.c_str());
     }
 }
+
+void UCDatasetUtil::draw_res(std::string ucd_path, std::string save_dir, std::vector<std::string> uc_list)
+{
+
+    if(! is_file(ucd_path))
+    {
+        std::cout << ERROR_COLOR << "ucd path not exist : " << ucd_path << STOP_COLOR << std::endl;
+        return;
+    }
+
+    if(! is_dir(save_dir))
+    {
+        std::cout << ERROR_COLOR << "save_dir not exist : " << save_dir << STOP_COLOR << std::endl;
+        return;
+    }
+    else if(access(save_dir.c_str(), 2) != 0)
+    {
+        std::cout << ERROR_COLOR << "save_dir don't have write access : " << save_dir << STOP_COLOR << std::endl;
+    }
+
+    UCDataset * ucd = new UCDataset(ucd_path);
+    ucd->parse_ucd(true);
+
+    // 标签和颜色之间的对应关系，还可以设置默认的颜色和随机的颜色
+    // 维护一个 color_dict 文件
+    std::map< std::string, Color > color_map;
+
+    if(is_file(UCDatasetUtil::color_file))
+    {
+        std::ifstream read_file;
+        read_file.open(UCDatasetUtil::color_file);
+        assert(read_file.is_open());
+
+        // 过滤掉开头为 # 的行
+        std::string line;
+        while(getline(read_file, line))
+        {
+            if(line.size() == 0)
+            {
+                continue;
+            }
+            else if(line[0] == '#')
+            {
+                continue;
+            }
+            else
+            {   
+                Color each_color;
+                std::string tag;
+                std::vector<std::string> split_res = pystring::split(line, ",");
+                tag = split_res[0];
+                each_color.r    = std::stoi(split_res[1]); 
+                each_color.g    = std::stoi(split_res[2]); 
+                each_color.b    = std::stoi(split_res[3]);
+                color_map[tag]  = each_color; 
+            }
+        }
+        read_file.close();
+    }
+
+    if(uc_list.size() == 0)
+    {
+        uc_list = ucd->uc_list;
+    }
+
+    tqdm bar;
+    int N = uc_list.size();
+
+    for(int i=0; i<uc_list.size(); i++)
+    {
+        std::string uc = ucd->uc_list[i];
+        UCDatasetUtil::load_img_with_assign_uc(UCDatasetUtil::cache_img_dir, uc);
+        DeteRes* dete_res = new DeteRes();
+        ucd->get_dete_res_with_assign_uc(dete_res, uc);
+        std::string img_path = UCDatasetUtil::cache_img_dir + "/" + uc + ".jpg";
+        dete_res->parse_img_info(img_path);
+        std::string save_path = save_dir + "/" + uc + ".jpg";
+        dete_res->draw_dete_res(save_path, color_map);
+        bar.progress(i, N);
+        delete dete_res;
+    }
+    bar.finish();
+    delete ucd;
+}
+

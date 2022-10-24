@@ -75,7 +75,7 @@ class DeteRes
         cv::Mat get_img_array(bool RGB);
         void add_dete_obj(DeteObj dete_obj);
         void add_dete_obj(int x1, int y1, int x2, int y2, float conf, std::string tag);
-        void draw_dete_res(std::string save_path, std::string assign_img, std::map<std::string, Color> color_dirt);
+        void draw_dete_res(std::string save_path, std::map<std::string, Color> color_dirt);
         
         // 根据置信度对 dete_obj 进行排序
         void sort_by_conf(bool reverse=false);

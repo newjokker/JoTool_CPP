@@ -170,6 +170,10 @@ class UCDatasetUtil
         std::string cache_img_dir;
         std::string cache_xml_dir;
         std::string cache_crop_dir;
+        std::string color_file;
+
+        // 颜色映射字典
+        std::map< std::string, Color > color_map;
         
         // ucd json_path
         std::string json_path;
@@ -268,6 +272,10 @@ class UCDatasetUtil
 
         // 将文件赋予假的uc，FakeUC
         void set_fack_uc(std::string folder_path);
+
+        // 对检测结果进行画图
+        void draw_res(std::string ucd_path, std::string save_dir, std::vector<std::string> uc_list);
+
 
     private:
         

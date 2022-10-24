@@ -11,6 +11,7 @@
 #include "../include/tinyxml2.h"
 #include "../include/fileOperateUtil.hpp"
 
+
 namespace jotools
 {
 
@@ -707,6 +708,54 @@ void DeteRes::do_nms(float threshold, bool ignore_tag)
 
 }
 
+void DeteRes::draw_dete_res(std::string save_path, std::map<std::string, Color> color_map)
+{
+    // 计算划线的粗细
+    // 计算字型的大小
+    int line_thickness = 0.001 * std::max(DeteRes::width, DeteRes::height);
+    line_thickness = std::max(line_thickness, 1);
+    int font_thickness = std::max(line_thickness-2, 1);
+    double font_size = line_thickness / 3.0;
+    
 
+    cv::Scalar color;
+    cv::Mat img; 
+    DeteRes::img_ndarry.copyTo(img);
+
+    for(int i=0; i<DeteRes::alarms.size(); i++)
+    {
+
+        DeteObj dete_obj = DeteRes::alarms[i];
+
+        if(color_map.count(dete_obj.tag) == 0)
+        {
+            // 默认颜色
+            if(color_map.count("default") == 0)
+            {
+                // 无任何预设的情况下，颜色是绿色的
+                color = {0, 255, 0};
+            }
+            else
+            {
+                // 选择指定的默认颜色
+                Color each_color = color_map["default"];
+                color = {each_color.b, each_color.g, each_color.r};
+            }
+        }
+        else
+        {
+            Color each_color = color_map[dete_obj.tag];
+            color = {each_color.b, each_color.g, each_color.r};
+        }
+
+        cv::Rect rect(dete_obj.x1, dete_obj.y1, dete_obj.x2 - dete_obj.x1, dete_obj.y2 - dete_obj.y1);
+        cv::rectangle(img, rect, color, line_thickness, cv::LINE_8, 0);
+        cv::Point point(dete_obj.x1 -3, dete_obj.y1 -3);
+        cv::putText(img, dete_obj.tag, point, font_thickness, font_size, color, cv::LINE_4);
+    }
+
+    cv::imwrite(save_path, img);
+
+}
 
 }

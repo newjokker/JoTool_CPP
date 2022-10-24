@@ -106,7 +106,6 @@ using namespace std;
 
 // 使用 ucd 直接启动 docker，就直接使用武汉那个接口，指定输入检测文件夹换为指定输入 ucd 即可，不用 ucd 直接启动 docker，直接用 ucd 打印启动的命令即可，记不住的是 docker 启动命令
 
-// 
 
 
 int main(int argc, char ** argv)
@@ -136,7 +135,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.6.0";
+    std::string app_version = "v1.6.1";
 
     // cache dir
     std::string cache_dir;
@@ -891,8 +890,8 @@ int main(int argc, char ** argv)
     else if(command_1 == "crop_to_xml")
     {
 
-        ucd_param_opt->not_ready(command_1);
-        return -1;
+        // ucd_param_opt->not_ready(command_1);
+        // return -1;
 
         if (argc== 4)
         {
@@ -2010,17 +2009,29 @@ int main(int argc, char ** argv)
             ucd_param_opt->print_command_info(command_1);
         }
     }
-    else if(command_1 == "draw_res")
+    else if(command_1 == "draw")
     {
-        // 画图，可以指定
-        // 全部使用统一随机颜色
-        // 字符的大小和线框的粗细参考 deteRes(python 版本)的实现方式
-        ucd_param_opt->not_ready();
-        return -1;
+        // 画图，不指定颜色的全部使用默认颜色，默认和指定颜色在 ucd_cache/color.txt
 
+        std::string ucd_path;
+        std::string save_dir;
+        std::vector<std::string> uc_list = {};
 
-
-
+        if(argc >= 4)
+        {
+            ucd_path = argv[2];
+            save_dir = argv[3];
+            
+            for(int i=4; i<argc; i++)
+            {
+                uc_list.push_back(argv[i]);
+            }
+            ucd_util->draw_res(ucd_path, save_dir, uc_list);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
     else if(command_1 == "drop_empty_uc")
     {

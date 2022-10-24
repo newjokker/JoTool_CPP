@@ -828,6 +828,16 @@ void UcdParamOpt::load_param_info()
     UcdParamOpt::add_param(param_drop_empty_uc);
 
 
+    // draw
+    ParamInfo * param_draw = new ParamInfo("draw");
+    param_draw->group = "opt";
+    param_draw->grammar = "ucd draw ucd_path save_dir {uc} {uc} {uc} ...";
+    param_draw->english_explain = "";
+    param_draw->chinese_explain = "将 uc 中的 obj 画出来，可以在配置文件中指定各个标签的颜色";   
+    param_draw->demo.push_back("ucd draw test.json ./draw                                       (将 test.json 中的所有 uc 中的 obj 画出并保存在 ./draw 文件夹下)");
+    param_draw->demo.push_back("ucd draw test.json ./draw  Dem1iwe Dem1iwk Dem1iwy              (将 test.json 中的 Dem1iwe Dem1iwk Dem1iwy 三个 uc 画出并保存在 ./draw 文件夹下)");
+    UcdParamOpt::add_param(param_draw);
+
 }
 
 void UcdParamOpt::not_ready(std::string method_name)
