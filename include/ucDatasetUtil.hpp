@@ -157,6 +157,9 @@ class UCDataset
         // 舍弃没有 obj 的 uc
         void drop_empty_uc();
 
+        // 拿到不重复的标签
+        std::set<std::string> get_tags();
+
     private:
         std::string json_path;
 };
@@ -275,6 +278,9 @@ class UCDatasetUtil
 
         // 对检测结果进行画图
         void draw_res(std::string ucd_path, std::string save_dir, std::vector<std::string> uc_list);
+
+        // 随机给不同的标签分配不同的颜色
+        void get_random_color_map(std::string ucd_path);
 
 
     private:

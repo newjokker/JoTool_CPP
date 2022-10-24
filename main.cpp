@@ -86,8 +86,6 @@ using namespace std;
 // 检测过程使用进度条显示进度，默认是自动使用保存文件夹下面的路径
 // 
 
-// draw_res 画出截图， 用什么颜色，用多粗的线，在哪里写上标签这些都需要说明和完善
-
 // filter_by_tags_like 使用相似的原则对标签进行过滤，一次性只能匹配一条原则
 
 // acc 中 mistake 和 miss 可以针对一个目标 所有算召回率需要注意 miss + correct 就是全部目标的量了
@@ -106,6 +104,7 @@ using namespace std;
 
 // 使用 ucd 直接启动 docker，就直接使用武汉那个接口，指定输入检测文件夹换为指定输入 ucd 即可，不用 ucd 直接启动 docker，直接用 ucd 打印启动的命令即可，记不住的是 docker 启动命令
 
+// draw 颜色和线条粗细，处理一下
 
 
 int main(int argc, char ** argv)
@@ -135,7 +134,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.6.1";
+    std::string app_version = "v1.6.2";
 
     // cache dir
     std::string cache_dir;
@@ -1442,42 +1441,28 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "server_info")
     {
-        // check if sshpass is installed, apt list --installed | grep sshpass/focal
-        // c++ run bash 
-        // use sshpass -p txkj ssh txkj@192.168.3.101 "nvidia-smi"
-        // ucd server_info 221 101 
-        // drive | gpu type | free space (gpu)
 
-        // std::system("sshpass -p txkj ssh txkj@192.168.3.101 nvidia-smi"); // 执行 UNIX 命令 "ls -l >test.txt"
-        // std::cout << "200 : ";
-        
-        std::system("echo -n '221 : '  && nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
-        
-        std::system("echo -n '200 : '  && sshpass -p txkj2020 ssh txkj@192.168.3.200 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
-        
-        std::system("echo -n '155 : '  && sshpass -p ldq ssh ldq@192.168.3.155 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
-        
-        std::system("echo -n '21  : '  && sshpass -p ldq ssh ldq@192.168.3.21 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
-        
-        std::system("echo -n '101 : '  && sshpass -p txkj ssh txkj@192.168.3.101 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
-        
-        std::system("echo -n '132 : '  && sshpass -p txkj ssh txkj@192.168.3.101 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
-        
-        
-        // std::system("sshpass -p txkj2020 ssh txkj@192.168.3.200 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
-        
-        
-        // std::cout << std::ifstream("test.txt").rdbuf();
-        // std::system("sudo su ; ucd | grep filter"); // 执行 UNIX 命令 "ls -l >test.txt"
-        // std::system("mkdir /home/jokker/test");
-
-
-        // nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}', 查看驱动版本
-        // 
-
-
+        ucd_param_opt->not_ready();
         return -1;
 
+        // // check if sshpass is installed, apt list --installed | grep sshpass/focal
+        // // c++ run bash 
+        // // use sshpass -p txkj ssh txkj@192.168.3.101 "nvidia-smi"
+        // // ucd server_info 221 101 
+        // // drive | gpu type | free space (gpu)
+
+        // std::system("echo -n '221 : '  && nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
+        
+        // std::system("echo -n '200 : '  && sshpass -p txkj2020 ssh txkj@192.168.3.200 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
+        
+        // std::system("echo -n '155 : '  && sshpass -p ldq ssh ldq@192.168.3.155 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
+        
+        // std::system("echo -n '21  : '  && sshpass -p ldq ssh ldq@192.168.3.21 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
+        
+        // std::system("echo -n '101 : '  && sshpass -p txkj ssh txkj@192.168.3.101 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
+        
+        // std::system("echo -n '132 : '  && sshpass -p txkj ssh txkj@192.168.3.101 nvidia-smi | sed -n 3p | awk '{print $4, $5, $6}'"); // 执行 UNIX 命令 "ls -l >test.txt"
+        
     }
     else if(command_1 == "get")
     {
@@ -1514,19 +1499,7 @@ int main(int argc, char ** argv)
             }
             else if(attr_name == "tags")
             {
-                // 不按照标签类型进行划分，只根据标签的名字
-                auto iter = ucd->object_info.begin();
-                std::set<std::string> tags;
-                while(iter != ucd->object_info.end())
-                {
-                    for(int i=0; i<iter->second.size(); i++)
-                    {
-                        LabelmeObj* obj = iter->second[i]; 
-                        tags.insert(obj->label);
-                    }
-                    iter++;
-                }
-                // 
+                std::set<std::string> tags = ucd->get_tags();
                 auto iter_tag = tags.begin();
                 while(iter_tag != tags.end())
                 {
@@ -1711,23 +1684,6 @@ int main(int argc, char ** argv)
             ucd->parse_ucd(true);
             ucd->get_sub_ucd(count, is_random, save_path);
             return -1;
-        }
-        else
-        {
-            ucd_param_opt->print_command_info(command_1);
-        }
-    }
-    else if(command_1 == "update_uc_by_obj")
-    {
-        // 去除没有 obj_info 信息的 uc
-        if(argc == 4)
-        {
-            std::string ucd_path = argv[2];
-            std::string save_path = argv[3];
-
-            UCDataset* ucd = new UCDataset(ucd_path);
-            ucd->parse_ucd(true);
-            ucd->update_uc_list_by_object_info(save_path);
         }
         else
         {
@@ -2033,21 +1989,13 @@ int main(int argc, char ** argv)
             ucd_param_opt->print_command_info(command_1);
         }
     }
-    else if(command_1 == "drop_empty_uc")
+    else if(command_1 == "random_color")
     {
-        // 当 uc 中不包含 obj 时，删除这个空的 uc
-        if(argc == 4)
+        // 将 ucd 中包含的 tag 设置随机颜色
+        if(argc == 3)
         {
             std::string ucd_path = argv[2];
-            std::string save_path = argv[3];
-            UCDataset* ucd = new UCDataset(ucd_path);
-            ucd->parse_ucd(true);
-            ucd->drop_empty_uc();
-            ucd->save_to_ucd(save_path);
-        }
-        else
-        {
-            ucd_param_opt->print_command_info(command_1);
+            ucd_util->get_random_color_map(ucd_path);
         }
     }
     else if(command_1 == "dete")

@@ -755,7 +755,6 @@ void DeteRes::draw_dete_res(std::string save_path, std::map<std::string, Color> 
     }
 
     cv::imwrite(save_path, img);
-
 }
 
 }

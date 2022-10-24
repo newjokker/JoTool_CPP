@@ -20,6 +20,7 @@
 #include "include/easyexif.h"
 #include "include/imageinfo.hpp"
 #include "include/tqdm.h"
+#include <cstdlib>
 
 using json = nlohmann::json;
 using namespace jotools;
@@ -44,6 +45,71 @@ static bool is_uc(std::string uc)
     if(((int)uc[2] < (int)'a') || ((int)uc[2] > int('z'))) { return false; }
     return true;
 }
+
+static std::map< std::string, Color > read_color_map(std::string color_file_path)
+{
+    if(! is_file(color_file_path))
+    {
+        std::cout << ERROR_COLOR << "color file path not exists : " << color_file_path << STOP_COLOR << std::endl;
+        throw "color file path not exists";
+    }
+
+    std::ifstream read_file;
+    read_file.open(color_file_path);
+    assert(read_file.is_open());
+    std::map< std::string, Color > color_map;
+
+    // 过滤掉开头为 # 的行
+    std::string line;
+    while(getline(read_file, line))
+    {
+        line = pystring::strip(line);
+        if(line.size() == 0)
+        {
+            continue;
+        }
+        else if(line[0] == '#')
+        {
+            continue;
+        }
+        else
+        {   
+            Color each_color;
+            std::string tag;
+            std::vector<std::string> split_res = pystring::split(line, ",");
+            tag = split_res[0];
+            each_color.r    = std::stoi(split_res[1]); 
+            each_color.g    = std::stoi(split_res[2]); 
+            each_color.b    = std::stoi(split_res[3]);
+            color_map[tag]  = each_color; 
+        }
+    }
+    read_file.close();
+    return color_map;
+}
+
+static void write_color_map(std::map< std::string, Color > color_map, std::string color_file_path)
+{
+    std::ofstream OutFile(color_file_path); 
+    if(color_map.count("default") > 0)
+    {
+        Color color = color_map["default"];
+        OutFile << "default" << "," << color.r << "," << color.g << "," << color.b << std::endl;
+        OutFile << std::endl;
+    }
+
+    auto iter = color_map.begin();
+    while(iter != color_map.end())
+    {
+        if(iter->first != "default")
+        {
+            OutFile << iter->first << "," << iter->second.r << "," << iter->second.g << "," << iter->second.b << std::endl;
+        }
+        iter++;
+    }
+    OutFile.close();
+}
+
 
 UCDataset::UCDataset(std::string json_path)
 {
@@ -898,22 +964,6 @@ void UCDataset::get_sub_ucd(int sub_count, bool is_random, std::string save_path
     new_ucd->save_to_ucd(save_path);
 }
 
-void UCDataset::update_uc_list_by_object_info(std::string save_path)
-{
-    std::vector<std::string> uc_list;
-    auto iter = UCDataset::object_info.begin();
-    while(iter != UCDataset::object_info.end())
-    {
-        if(iter->second.size() > 0)
-        {
-            uc_list.push_back(iter->first);
-        }
-        iter++;
-    }
-    UCDataset::uc_list = uc_list;
-    UCDataset::save_to_ucd(save_path);
-}
-
 void UCDataset::split(std::string ucd_part_a, std::string ucd_part_b, float ratio)
 {
     
@@ -1724,6 +1774,22 @@ void UCDataset::drop_empty_uc()
         }
     }
     UCDataset::uc_list = uc_list;
+}
+
+std::set<std::string> UCDataset::get_tags()
+{
+    auto iter = UCDataset::object_info.begin();
+    std::set<std::string> tags;
+    while(iter != UCDataset::object_info.end())
+    {
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            LabelmeObj* obj = iter->second[i]; 
+            tags.insert(obj->label);
+        }
+        iter++;
+    }
+    return tags;
 }
 
 // 
@@ -2934,36 +3000,10 @@ void UCDatasetUtil::draw_res(std::string ucd_path, std::string save_dir, std::ve
 
     if(is_file(UCDatasetUtil::color_file))
     {
-        std::ifstream read_file;
-        read_file.open(UCDatasetUtil::color_file);
-        assert(read_file.is_open());
-
-        // 过滤掉开头为 # 的行
-        std::string line;
-        while(getline(read_file, line))
-        {
-            if(line.size() == 0)
-            {
-                continue;
-            }
-            else if(line[0] == '#')
-            {
-                continue;
-            }
-            else
-            {   
-                Color each_color;
-                std::string tag;
-                std::vector<std::string> split_res = pystring::split(line, ",");
-                tag = split_res[0];
-                each_color.r    = std::stoi(split_res[1]); 
-                each_color.g    = std::stoi(split_res[2]); 
-                each_color.b    = std::stoi(split_res[3]);
-                color_map[tag]  = each_color; 
-            }
-        }
-        read_file.close();
+        color_map = read_color_map(UCDatasetUtil::color_file);
     }
+
+    std::cout << WARNNING_COLOR << "you can assign tag color by edit color.txt : " << color_file << STOP_COLOR << std::endl;
 
     if(uc_list.size() == 0)
     {
@@ -2990,3 +3030,35 @@ void UCDatasetUtil::draw_res(std::string ucd_path, std::string save_dir, std::ve
     delete ucd;
 }
 
+
+void UCDatasetUtil::get_random_color_map(std::string ucd_path)
+{
+
+    UCDataset* ucd = new UCDataset(ucd_path);
+    ucd->parse_ucd(true);
+    
+    std::map< std::string, Color > color_map;
+    if(is_file(UCDatasetUtil::color_file))
+    {
+        color_map = read_color_map(UCDatasetUtil::color_file);
+    }
+
+    // random color for 
+    std::set<std::string> tags = ucd->get_tags();
+    auto iter_tag = tags.begin();
+    while(iter_tag != tags.end())
+    {
+        if(color_map.count(iter_tag->data()) == 0)
+        {
+            Color color;
+            color.r = std::rand() % 255;
+            color.g = std::rand() % 255;
+            color.b = std::rand() % 255;
+            color_map[iter_tag->data()] = color;
+        }
+        iter_tag++;
+    }
+    // save color 
+    write_color_map(color_map, UCDatasetUtil::color_file);
+
+}
