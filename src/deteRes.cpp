@@ -713,9 +713,10 @@ void DeteRes::draw_dete_res(std::string save_path, std::map<std::string, Color> 
     // 计算划线的粗细
     // 计算字型的大小
     int line_thickness = 0.001 * std::max(DeteRes::width, DeteRes::height);
-    line_thickness = std::max(line_thickness, 1);
+    // line_thickness = std::max(line_thickness, 1);
+    line_thickness = 2;
     int font_thickness = std::max(line_thickness-2, 1);
-    double font_size = line_thickness / 3.0;
+    double font_size = line_thickness / 2.0;
     
 
     cv::Scalar color;
@@ -747,11 +748,16 @@ void DeteRes::draw_dete_res(std::string save_path, std::map<std::string, Color> 
             Color each_color = color_map[dete_obj.tag];
             color = {each_color.b, each_color.g, each_color.r};
         }
-
+        // 
+        std::string tag_conf = dete_obj.tag + ":" + std::to_string(int(dete_obj.conf * 100)) + "%";
+        cv::Size s_size = cv::getTextSize(tag_conf, 0, font_size, font_thickness, 0);
+        cv::Size t_size = cv::getTextSize(dete_obj.tag, 0, font_size, font_thickness, 0);
+        //
         cv::Rect rect(dete_obj.x1, dete_obj.y1, dete_obj.x2 - dete_obj.x1, dete_obj.y2 - dete_obj.y1);
         cv::rectangle(img, rect, color, line_thickness, cv::LINE_8, 0);
-        cv::Point point(dete_obj.x1 -3, dete_obj.y1 -3);
-        cv::putText(img, dete_obj.tag, point, font_thickness, font_size, color, cv::LINE_4);
+        cv::rectangle(img, {dete_obj.x1 -2 , dete_obj.y1}, {dete_obj.x1 + s_size.width, dete_obj.y1 - s_size.height -8}, color, -1);
+        cv::Point point(dete_obj.x1 -3 , dete_obj.y1 -5 );
+        cv::putText(img, tag_conf, point, 0, font_size, {0, 0, 0}, cv::FONT_HERSHEY_SIMPLEX);
     }
 
     cv::imwrite(save_path, img);

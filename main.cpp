@@ -104,8 +104,6 @@ using namespace std;
 
 // 使用 ucd 直接启动 docker，就直接使用武汉那个接口，指定输入检测文件夹换为指定输入 ucd 即可，不用 ucd 直接启动 docker，直接用 ucd 打印启动的命令即可，记不住的是 docker 启动命令
 
-// draw 颜色和线条粗细，处理一下
-
 
 int main(int argc, char ** argv)
 {

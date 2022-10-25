@@ -3022,7 +3022,12 @@ void UCDatasetUtil::draw_res(std::string ucd_path, std::string save_dir, std::ve
         std::string img_path = UCDatasetUtil::cache_img_dir + "/" + uc + ".jpg";
         dete_res->parse_img_info(img_path);
         std::string save_path = save_dir + "/" + uc + ".jpg";
-        dete_res->draw_dete_res(save_path, color_map);
+
+        if(! is_file(save_path))
+        {
+            dete_res->draw_dete_res(save_path, color_map);
+        }
+        
         bar.progress(i, N);
         delete dete_res;
     }
