@@ -100,6 +100,8 @@ using namespace std;
 
 // 使用 ucd 直接启动 docker，就直接使用武汉那个接口，指定输入检测文件夹换为指定输入 ucd 即可，不用 ucd 直接启动 docker，直接用 ucd 打印启动的命令即可，记不住的是 docker 启动命令
 
+// 增加全文匹配额功能，对指定的关键字进行查找
+
 
 int main(int argc, char ** argv)
 {
@@ -192,11 +194,11 @@ int main(int argc, char ** argv)
     }
 
     // 文件夹权限检查    
-    if(access(ucd_util->cache_img_dir.c_str(), 4) != 0)
+    if(! is_read_dir(ucd_util->cache_img_dir))
     {
         std::cout << WARNNING_COLOR << "WARNING : cache_img folder don't have read access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
     }
-    else if(access(ucd_util->cache_img_dir.c_str(), 2) != 0)
+    else if(! is_write_dir(ucd_util->cache_img_dir))
     {
         std::cout << WARNNING_COLOR << "WARNING : cache_img folder don't have write access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
     }
@@ -609,6 +611,30 @@ int main(int argc, char ** argv)
                 std::string each_ucd_path = argv[i+3];
                 ucd_path_vector.push_back(each_ucd_path);
             }
+            ucd_util->merge_ucds(save_path, ucd_path_vector);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info("merge");
+            return -1;
+        }
+    }
+    else if(command_1 == "merge_all")
+    {
+        // 将一个文件夹下面的 .json 文件全部 merge 到一起
+        if(argc == 4)
+        {
+            std::string save_path   = argv[2];
+            std::string ucd_dir     = argv[3];
+            std::vector<std::string> ucd_path_vector;
+
+            if(! is_read_dir(ucd_dir))
+            {
+                std::cout << ERROR_COLOR << "ucd folder don't have access : read : " << ucd_dir << STOP_COLOR << std::endl;
+                return 0;
+            }
+
+            ucd_path_vector = get_all_file_path(ucd_dir, {".json"});
             ucd_util->merge_ucds(save_path, ucd_path_vector);
         }
         else
@@ -1957,6 +1983,23 @@ int main(int argc, char ** argv)
             ucd_param_opt->print_command_info(command_1);
         }
     }
+    else if(command_1 == "drop_empty_uc")
+    {
+        // 当 uc 中不包含 obj 时，删除这个空的 uc
+        if(argc == 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_path = argv[3];
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->drop_empty_uc();
+            ucd->save_to_ucd(save_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
     else if(command_1 == "random_color")
     {
         // 将 ucd 中包含的 tag 设置随机颜色
@@ -1971,6 +2014,10 @@ int main(int argc, char ** argv)
         // 将标准 docker 服务的启动方式打印出来即可
         // docker info : md5, name, version
         // docker run --gpus device=0 -v /home/input_dir:/usr/input_dir -v /home/output_dir:/usr/output_dir -d dete_server:v0.0.1 
+    }
+    else if(command_1 == "book")
+    {
+
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {

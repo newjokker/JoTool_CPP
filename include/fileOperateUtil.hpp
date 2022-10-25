@@ -25,6 +25,12 @@ struct FilePath
 bool is_file(std::string);
 bool is_dir(std::string);
 
+// 文件是否能存在，同时可读取
+bool is_read_dir(std::string);
+
+// 文件是否存在，同时可写入
+bool is_write_dir(std::string);
+
 std::string get_file_folder(std::string);
 std::string get_file_suffix(std::string);
 std::string get_file_name(std::string);

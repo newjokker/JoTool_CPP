@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include "../include/fileOperateUtil.hpp"
 
 
@@ -24,6 +25,34 @@ bool is_dir(std::string filefodler)
 {
     struct stat   buffer;
     return (stat (filefodler.c_str(), &buffer) == 0 && S_ISDIR(buffer.st_mode));
+}
+
+bool is_read_dir(std::string folder_path)
+{
+    if(! is_dir(folder_path))
+    {
+        return false;
+    }
+
+    if(access(folder_path.c_str(), 4) != 0)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool is_write_dir(std::string folder_path)
+{
+    if(! is_dir(folder_path))
+    {
+        return false;
+    }
+  
+    if(access(folder_path.c_str(), 2) != 0)
+    {
+        return false;
+    }
+    return true;
 }
 
 std::string get_file_folder(std::string file_path)

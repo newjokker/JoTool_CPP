@@ -821,7 +821,7 @@ void UcdParamOpt::load_param_info()
     // drop_empty_uc
     ParamInfo * param_drop_empty_uc = new ParamInfo("drop_empty_uc");
     param_drop_empty_uc->group = "filter";
-    param_drop_empty_uc->grammar = "ucd zen";
+    param_drop_empty_uc->grammar = "ucd drop_empty_uc ucd_path save_path";
     param_drop_empty_uc->english_explain = "";
     param_drop_empty_uc->chinese_explain = "删除没有 obj 元素的 uc";   
     param_drop_empty_uc->demo.push_back("ucd drop_empty_uc test.json test.json                          (从 test.json 中删除没有 obj 元素的 uc)");
@@ -845,6 +845,15 @@ void UcdParamOpt::load_param_info()
     param_random_color->chinese_explain = "对 ucd 中的标签赋予随机的颜色，在配置文件中已有颜色的标签，颜色不变";   
     param_random_color->demo.push_back("ucd random_color test.json                                       (将 test.json 中的标签赋予随机的颜色)");
     UcdParamOpt::add_param(param_random_color);
+    
+    // random color
+    ParamInfo * param_merge_all = new ParamInfo("merge_all");
+    param_merge_all->group = "opt";
+    param_merge_all->grammar = "ucd merge_all res.json ucd_dir";
+    param_merge_all->english_explain = "";
+    param_merge_all->chinese_explain = "将一个文件夹中的所有 ucd 进行合并";   
+    param_merge_all->demo.push_back("ucd merge_all res.json ucd_dir                                       (将 ucd_dir 中的所有 ucd 文件进行合并生成 res.json)");
+    UcdParamOpt::add_param(param_merge_all);
 
 }
 

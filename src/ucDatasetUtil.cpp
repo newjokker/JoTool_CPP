@@ -2212,6 +2212,7 @@ void UCDatasetUtil::merge_ucds(std::string save_path, std::vector<std::string> u
     UCDataset* ucd = new UCDataset(save_path);
     for(int i=0; i<ucd_path_vector.size(); i++)
     {
+        std::cout << "  * merge -> " << ucd_path_vector[i] << std::endl;
         ucd->add_ucd_info(ucd_path_vector[i]);
     }
     ucd->save_to_ucd(save_path);
