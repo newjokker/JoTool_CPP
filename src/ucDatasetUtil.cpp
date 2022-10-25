@@ -3004,6 +3004,7 @@ void UCDatasetUtil::draw_res(std::string ucd_path, std::string save_dir, std::ve
     }
 
     std::cout << WARNNING_COLOR << "you can assign tag color by edit color.txt : " << color_file << STOP_COLOR << std::endl;
+    std::cout << WARNNING_COLOR << "you can assign tag random color : ucd random_color ucd_path" << STOP_COLOR << std::endl;
 
     if(uc_list.size() == 0)
     {
@@ -3027,14 +3028,13 @@ void UCDatasetUtil::draw_res(std::string ucd_path, std::string save_dir, std::ve
         {
             dete_res->draw_dete_res(save_path, color_map);
         }
-        
+
         bar.progress(i, N);
         delete dete_res;
     }
     bar.finish();
     delete ucd;
 }
-
 
 void UCDatasetUtil::get_random_color_map(std::string ucd_path)
 {
@@ -3066,4 +3066,5 @@ void UCDatasetUtil::get_random_color_map(std::string ucd_path)
     // save color 
     write_color_map(color_map, UCDatasetUtil::color_file);
 
+    std::cout << WARNNING_COLOR << "color file : " << UCDatasetUtil::color_file << STOP_COLOR << std::endl;
 }

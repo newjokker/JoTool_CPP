@@ -12,6 +12,11 @@
 #include "../include/fileOperateUtil.hpp"
 
 
+#define ERROR_COLOR         "\x1b[35m"
+#define WARNNING_COLOR      "\033[33m"
+#define STOP_COLOR          "\033[0m"
+
+
 namespace jotools
 {
 
@@ -163,7 +168,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
         // todo 判断文件路径是否存在
         if(is_file(xml_path) == false)
         {
-            std::cout << "xml path not exists : " << xml_path << std::endl;
+            std::cout << ERROR_COLOR << "xml path not exists : " << xml_path << STOP_COLOR << std::endl;
             throw "parse xml error, xml path not exists, " + xml_path;           
         }
 
@@ -173,8 +178,8 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
 
         if(root == NULL)
         {
-            std::cout << "parse xml error, lose height, " + xml_path << std::endl;
-            throw "parse xml error, lose height, " + xml_path;           
+            std::cout << ERROR_COLOR << "parse xml error, lose root, " + xml_path << STOP_COLOR << std::endl;
+            throw "parse xml error, lose root, " + xml_path;           
         }
 
         tinyxml2::XMLElement* objects = root->FirstChildElement("object");
@@ -190,19 +195,19 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
             }
             else
             {
-                std::cout << "parse xml error, lose height, " + xml_path << std::endl;
+                std::cout << ERROR_COLOR << "parse xml error, lose height, " + xml_path << STOP_COLOR << std::endl;
                 throw "parse xml error, lose height, " + xml_path;
             }
 
             // width
             auto width = img_size->FirstChildElement("width");
-            if(height)
+            if(width)
             {
                 DeteRes::width = std::stoi(width->GetText());
             }
             else
             {
-                std::cout << "parse xml error, lose width, " + xml_path << std::endl;
+                std::cout << ERROR_COLOR << "parse xml error, lose width, " + xml_path << STOP_COLOR << std::endl;
                 throw "parse xml error, lose width, " + xml_path;
             }
 
@@ -214,7 +219,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
             }
             else
             {
-                std::cout << "parse xml error, lose depth, " + xml_path << std::endl;
+                std::cout << ERROR_COLOR << "parse xml error, lose depth, " + xml_path << STOP_COLOR << std::endl;
                 throw "parse xml error, lose depth, " + xml_path;
             }
         }
@@ -236,7 +241,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
         }
         else
         {
-            std::cout << "parse xml error, lose folder, " + xml_path << std::endl;
+            std::cout << ERROR_COLOR << "parse xml error, lose folder, " + xml_path << STOP_COLOR << std::endl;
             throw "parse xml error, lose folder, " + xml_path;
         }
 
@@ -256,7 +261,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
         }
         else
         {
-            std::cout << "parse xml error, lose path, " + xml_path << std::endl;
+            std::cout << ERROR_COLOR << "parse xml error, lose path, " + xml_path << STOP_COLOR << std::endl;
             throw "parse xml error, lose path, " + xml_path;
         }
 
@@ -276,7 +281,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
         }
         else
         {
-            std::cout << "parse xml error, lose filename, " + xml_path << std::endl;
+            std::cout << ERROR_COLOR << "parse xml error, lose filename, " + xml_path << STOP_COLOR << std::endl;
             throw "parse xml error, lose filename, " + xml_path;          
         }
 
@@ -294,7 +299,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
                 }
                 else
                 {
-                    std::cout << "parse xml error, lose tag, " + xml_path << std::endl;
+                    std::cout << ERROR_COLOR << "parse xml error, lose tag, " + xml_path << STOP_COLOR << std::endl;
                     throw "parse xml error, lose tag, " + xml_path;
                 }
 
@@ -321,7 +326,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
                     }
                     else
                     {
-                        std::cout << "parse xml error, lose xmin, " + xml_path << std::endl;
+                        std::cout << ERROR_COLOR << "parse xml error, lose xmin, " + xml_path << STOP_COLOR << std::endl;
                         throw "parse xml error, lose xmin" + xml_path;
                     }
                     // ymin
@@ -332,7 +337,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
                     }
                     else
                     {
-                        std::cout << "parse xml error, lose ymin, " + xml_path << std::endl;
+                        std::cout << ERROR_COLOR << "parse xml error, lose ymin, " + xml_path << STOP_COLOR << std::endl;
                         throw "parse xml error, lose ymin" + xml_path;
                     }
                     // xmax
@@ -343,7 +348,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
                     }
                     else
                     {
-                        std::cout << "parse xml error, lose xmax, " + xml_path << std::endl;
+                        std::cout << ERROR_COLOR << "parse xml error, lose xmax, " + xml_path << STOP_COLOR << std::endl;
                         throw "parse xml error, lose xmax" + xml_path;
                     }
                     // ymax
@@ -354,7 +359,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
                     }
                     else
                     {
-                        std::cout << "parse xml error, lose ymax, " + xml_path << std::endl;
+                        std::cout << ERROR_COLOR << "parse xml error, lose ymax, " + xml_path << STOP_COLOR << std::endl;
                         throw "parse xml error, lose ymax" + xml_path;
                     }
 
@@ -362,8 +367,8 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
                 }
                 else
                 {
-                    std::cout << "parse xml error, lose bndbox, " + xml_path << std::endl;
-                    throw "parse xml error, lose bndbox" + xml_path;
+                    std::cout << ERROR_COLOR << "parse xml error, lose bndbox, " + xml_path << STOP_COLOR << std::endl;
+                    // throw "parse xml error, lose bndbox" + xml_path;
                 }
                 objects = objects->NextSiblingElement();
                 delete obj_info;
@@ -374,7 +379,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
     }
     catch(std::exception &e)
     {
-        std::cout << e.what() << std::endl;
+        std::cout << ERROR_COLOR << e.what() << STOP_COLOR << std::endl;
         throw "parse xml error, " + xml_path;
         return false;
     }

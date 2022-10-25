@@ -827,7 +827,6 @@ void UcdParamOpt::load_param_info()
     param_drop_empty_uc->demo.push_back("ucd drop_empty_uc test.json test.json                          (从 test.json 中删除没有 obj 元素的 uc)");
     UcdParamOpt::add_param(param_drop_empty_uc);
 
-
     // draw
     ParamInfo * param_draw = new ParamInfo("draw");
     param_draw->group = "opt";
@@ -837,6 +836,15 @@ void UcdParamOpt::load_param_info()
     param_draw->demo.push_back("ucd draw test.json ./draw                                       (将 test.json 中的所有 uc 中的 obj 画出并保存在 ./draw 文件夹下)");
     param_draw->demo.push_back("ucd draw test.json ./draw  Dem1iwe Dem1iwk Dem1iwy              (将 test.json 中的 Dem1iwe Dem1iwk Dem1iwy 三个 uc 画出并保存在 ./draw 文件夹下)");
     UcdParamOpt::add_param(param_draw);
+    
+    // random color
+    ParamInfo * param_random_color = new ParamInfo("random_color");
+    param_random_color->group = "opt";
+    param_random_color->grammar = "ucd random_color ucd_path";
+    param_random_color->english_explain = "";
+    param_random_color->chinese_explain = "对 ucd 中的标签赋予随机的颜色，在配置文件中已有颜色的标签，颜色不变";   
+    param_random_color->demo.push_back("ucd random_color test.json                                       (将 test.json 中的标签赋予随机的颜色)");
+    UcdParamOpt::add_param(param_random_color);
 
 }
 

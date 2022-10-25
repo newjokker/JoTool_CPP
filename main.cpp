@@ -39,7 +39,7 @@ using namespace std;
 
 // todo json 读取大文件太慢，能不能只读取需要的部分，比如打印 info 信息，不需要后面的 xml_info 信息，是否可以不读取到内存里，不行的话就直接自己写一个解析 json 的代码，用做快速解析
 
-// 下载某一些图片报错，可能是没有按照各个后缀依次寻找图片
+// 下载某一些图片报错，库中就没对应的图片，是先 rename 后入库导致的
 
 // 交互设计之类的全部抄 git 的
 
@@ -52,10 +52,6 @@ using namespace std;
 // add meachine learning , basic content,  
 
 // label_used 是无序的要记得这个
-
-// python 是不是要搞一套一样的接口的包，方便使用，
-
-// 查看对文件夹是否有操作权限，没有权限的话 save 等操作没有结果但是也不会报错
 
 // 标准的质量控制，去掉那些重复的，可以反复跑训练集，得到结果，进行对比
 
@@ -1363,32 +1359,6 @@ int main(int argc, char ** argv)
             ucd->filter_by_conf(conf_th);
             ucd->save_to_ucd(ucd_save_path);
             delete ucd; 
-        }
-        else
-        {
-            ucd_param_opt->print_command_info(command_1);
-        }
-    }
-    else if(command_1 == "img_url")
-    {
-
-        ucd_param_opt->not_ready(command_1);
-        return -1;
-
-        if(argc == 4)
-        {
-            std::string ucd_path = argv[2];
-            std::string save_txt_path = argv[3];
-            
-            UCDataset* ucd = new UCDataset(ucd_path);
-            ucd->parse_ucd();
-
-            for(int i=0; i<ucd->uc_list.size(); i++)
-            {
-                std::cout << "http://" + ucd_util->host + ":" + std::to_string(ucd_util->port) + "/file/" + ucd->uc_list[i] + ".jpg" << std::endl;
-            }
-
-            // todo 保存为  txt
         }
         else
         {
