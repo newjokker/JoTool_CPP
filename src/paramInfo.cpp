@@ -509,6 +509,17 @@ void UcdParamOpt::load_param_info()
     param_cache_info->chinese_explain = "查看当前服务器的缓存信息";   
     param_cache_info->demo.push_back("ucd cache_info                                (查看缓存文件夹下面有多少文件)");
     param_cache_info->demo.push_back("ucd cache_info test.json                      (查看缓存文件夹下面有多少文件)");
+    param_cache_info->demo.push_back("----------------------------------------");
+    param_cache_info->demo.push_back("server    : cache_dir");
+    param_cache_info->demo.push_back("221       : /home/disk3/ucd_cache");
+    param_cache_info->demo.push_back("101       : /home/suanfa-6/ucd_cache");
+    param_cache_info->demo.push_back("202       : /home/suanfa-2/ucd_cache");
+    param_cache_info->demo.push_back("21        : /home/suanfa-2/ucd_cache");
+    param_cache_info->demo.push_back("246       : /home/ucd_cache/");
+    param_cache_info->demo.push_back("34        : /home/ucd_cache");
+    param_cache_info->demo.push_back("107       : /home/ucd_cache/");
+    param_cache_info->demo.push_back("33        : /home/data/ucd_cache");
+    param_cache_info->demo.push_back("----------------------------------------");
     UcdParamOpt::add_param(param_cache_info);
     
     // cache_clear

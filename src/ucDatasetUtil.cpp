@@ -3057,9 +3057,10 @@ void UCDatasetUtil::get_random_color_map(std::string ucd_path)
         if(color_map.count(iter_tag->data()) == 0)
         {
             Color color;
-            color.r = std::rand() % 255;
-            color.g = std::rand() % 255;
-            color.b = std::rand() % 255;
+            // rgb 最小值是 20 防止颜色太黑，看不清楚
+            color.r = std::rand() % 200 + 55;
+            color.g = std::rand() % 200 + 55;
+            color.b = std::rand() % 200 + 55;
             color_map[iter_tag->data()] = color;
         }
         iter_tag++;
@@ -3069,3 +3070,4 @@ void UCDatasetUtil::get_random_color_map(std::string ucd_path)
 
     std::cout << WARNNING_COLOR << "color file : " << UCDatasetUtil::color_file << STOP_COLOR << std::endl;
 }
+

@@ -102,6 +102,17 @@ using namespace std;
 
 // 增加全文匹配额功能，对指定的关键字进行查找
 
+// color_map 直接打印出来是什么颜色
+
+// foretell, 选择很多句子，随机打印其中的一句，或许 有帮助呢
+// 占卜，将周易 64卦象随机地输出，输出对应的爻辞之类的，
+
+// 定时任务 + 一次检测一个 文件夹 ucd + 检测结果也是 ucd Die_prebase_0_5_0, 这样的话只要分析一下 uc_analysis 就知道要下载哪些 ucd 进行 absorb
+
+// 下载一个文件夹中的内容 ucd load_dir 能快速将 ucd 全部下载到本地，方便后续的处理
+
+// ucd load 一次下载多个文件，先执行一下 ucd check 匹配得到需要下载的文件夹，对应的文件，将文件路径一个个下载到本地，每一个文件都要显示是否下载成功
+
 
 int main(int argc, char ** argv)
 {
@@ -130,7 +141,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.6.2";
+    std::string app_version = "v1.6.3";
 
     // cache dir
     std::string cache_dir;
@@ -264,6 +275,13 @@ int main(int argc, char ** argv)
             return -1;
         }
         ucd_util->load_ucd(ucd_name, ucd_save_path);
+    }
+    else if(command_1 == "load_dir")
+    {
+        // 下载一整个文件夹的 ucd
+        // ucd chcek 要有返回结果，对返回结果进行文件夹匹配
+        // 这个还时直接去 80 服务器里面拷贝比较好
+
     }
     else if(command_1 == "delete")
     {
@@ -429,6 +447,13 @@ int main(int argc, char ** argv)
         {
             ucd_param_opt->print_command_info("save_cache");
         }
+    }
+    else if(command_1 == "save_model_res")
+    {
+        // 下载指定模型库中的数据
+        // 最后要打印出有多少结果是没有被下载的，也就是没有跑出结果的。
+
+        // ucd save_model_res model_name ucd_path save_path
 
     }
     else if(command_1 == "upload")
