@@ -35,6 +35,8 @@ std::string get_file_folder(std::string);
 std::string get_file_suffix(std::string);
 std::string get_file_name(std::string);
 std::string get_file_name_suffix(std::string);
+std::string get_folder_name(std::string);
+
 
 std::vector<std::string> get_all_file_path(std::string);
 std::vector<std::string> get_all_file_path(std::string, std::set<std::string>);

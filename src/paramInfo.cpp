@@ -455,7 +455,7 @@ void UcdParamOpt::load_param_info()
     // count_tags
     ParamInfo * param_count_tags = new ParamInfo("count_tags");
     param_count_tags->group = "info";
-    param_count_tags->grammar = "ucd count_tags xml_dir|ucd_path";
+    param_count_tags->grammar = "ucd count_tags ucd_path";
     param_count_tags->english_explain = "count tags";
     param_count_tags->chinese_explain = "统计标签个数";
     param_count_tags->demo.push_back("ucd count_tags test.json                      (统计 test.json 中的各个标签的个数)");   

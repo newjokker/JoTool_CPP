@@ -92,6 +92,13 @@ std::string get_file_name(std::string file_path)
     return file_name;
 }
 
+std::string get_folder_name(std::string folder_path)
+{
+    // 获取文件夹的文件名
+    std::string folder_name = folder_path.substr(folder_path.find_last_of('/') + 1, folder_path.size());
+    return folder_name;
+}
+
 std::vector<std::string> get_all_file_path(std::string path)
 {
     std::vector<std::string> filenames;

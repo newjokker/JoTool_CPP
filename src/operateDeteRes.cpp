@@ -104,25 +104,17 @@ void cut_small_img(std::string img_dir, std::string xml_dir, std::string save_di
 
 void get_xml_from_crop_img(std::string crop_dir, std::string save_xml_dir)
 {
-    // 遍历得到小文件夹
-    // 遍历每一个小文件夹下载的 jpg 和 png 图片，拿到图片名中的信息（原始文件名 + 位置信息）
-    // 根据已有的信息生成 xml 
-
-
-    // get crop info 
-
     std::map<std::string, std::vector<std::string>> xml_info_map;
     std::vector<std::string> folder_path_list = get_all_folder_path(crop_dir);
+    DeteObj obj;
 
     for(int i=0; i<folder_path_list.size(); i++)
     {
         std::vector<std::string> file_path_vector = get_all_file_path(folder_path_list[i]);
 
-        std::set<std::string> suffixs;
-        suffixs.insert(".jpg");
-        suffixs.insert(".JPG");
-        suffixs.insert(".png");
-        suffixs.insert(".PNG");
+        std::set<std::string> suffixs {".jpg", ".png", ".JPG", ".PNG"};
+        
+        std::string folder_name = get_folder_name(folder_path_list[i]);
 
         std::vector<std::string> img_path_vector = filter_by_suffix(file_path_vector, suffixs);
 
@@ -131,12 +123,17 @@ void get_xml_from_crop_img(std::string crop_dir, std::string save_xml_dir)
             std::string file_name = get_file_name(img_path_vector[j]);
             std::vector<std::string> loc_str_list = pystring::split(file_name, "-+-");
             std::string loc_str = loc_str_list[loc_str_list.size()-1];
-            std::string region_name = file_name.substr(0, pystring::rfind(file_name, "-+-"));
-            xml_info_map[region_name].push_back(loc_str);
-        }
-        // std::cout << "-----------------------" << std::endl;
-    }
 
+            // 替换 loc_str 中的 tag 信息
+            obj.load_from_name_str(loc_str);
+            obj.tag = folder_name;
+            loc_str = obj.get_name_str();
+
+            std::string uc = file_name.substr(0, pystring::rfind(file_name, "-+-"));
+            xml_info_map[uc].push_back(loc_str);
+            // std::cout << uc << ", " << folder_name << ", " << loc_str << std::endl;
+        }
+    }
 
     // get xml
     auto iter = xml_info_map.begin();
@@ -147,6 +144,8 @@ void get_xml_from_crop_img(std::string crop_dir, std::string save_xml_dir)
         {
             DeteObj* dete_obj = new DeteObj();
             dete_obj->load_from_name_str(iter->second[i]);
+            // 这边修改名字
+
             dete_res->add_dete_obj(*dete_obj);
             delete dete_obj;
             // std::cout << iter->first << " : " << iter->second.size() << std::endl;
@@ -405,7 +404,6 @@ float dete_obj_iou(DeteObj a, DeteObj b)
 
     return rect_iou(x1, y1, h1, w1, x2, y2, h2, w2);
 }
-
 
 //
 

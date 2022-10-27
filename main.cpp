@@ -109,9 +109,10 @@ using namespace std;
 
 // 定时任务 + 一次检测一个 文件夹 ucd + 检测结果也是 ucd Die_prebase_0_5_0, 这样的话只要分析一下 uc_analysis 就知道要下载哪些 ucd 进行 absorb
 
-// 下载一个文件夹中的内容 ucd load_dir 能快速将 ucd 全部下载到本地，方便后续的处理
 
-// ucd load 一次下载多个文件，先执行一下 ucd check 匹配得到需要下载的文件夹，对应的文件，将文件路径一个个下载到本地，每一个文件都要显示是否下载成功
+// crop_to_xml 是错的，需要进行处理，（crop 小图规范不一致，）
+
+// 验证一下 cut_small_img 的结果结构和 py 写的是不是一样的
 
 
 int main(int argc, char ** argv)

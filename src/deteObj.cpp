@@ -49,7 +49,8 @@ int DeteObj::get_area()
 std::string DeteObj::get_name_str()
 {
     std::ostringstream oss;
-    oss << "[" << DeteObj::x1 << "," << DeteObj::y1 << "," << DeteObj::x2 << "," << DeteObj::y2 << "," << DeteObj::conf << "," << DeteObj::tag << "]";
+    // 最后一个是 id 是历史遗留下来的问题，设置为默认值 -1 即可
+    oss << "[" << DeteObj::x1 << "," << DeteObj::y1 << "," << DeteObj::x2 << "," << DeteObj::y2 << ","  << "'" << DeteObj::tag << "'" << "," << DeteObj::conf << "," << "-1" << "]";
     return oss.str();
 }
 
@@ -62,8 +63,8 @@ void DeteObj::load_from_name_str(std::string name_str)
     DeteObj::y1 = std::stoi(obj_info[1]);
     DeteObj::x2 = std::stoi(obj_info[2]);
     DeteObj::y2 = std::stoi(obj_info[3]);
-    DeteObj::conf = std::stof(obj_info[4]);
-    DeteObj::tag = obj_info[5];
+    DeteObj::conf = std::stof(obj_info[5]);
+    DeteObj::tag = pystring::slice(obj_info[4], 1, -1) ;
 }
 
 bool DeteObj::operator==(const DeteObj other)
