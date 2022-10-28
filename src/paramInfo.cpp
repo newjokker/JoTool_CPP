@@ -487,7 +487,8 @@ void UcdParamOpt::load_param_info()
     param_crop_to_xml->grammar = "ucd crop_to_xml crop_dir, save_dir";
     param_crop_to_xml->english_explain = "cut img to xml";
     param_crop_to_xml->chinese_explain = "截图生成xml";   
-    param_crop_to_xml->demo.push_back("ucd crop_to_xml ./crop ./xml                 (将 ./crop 文件夹中的小图映射回 xml 保存在 ./xml 文件夹)");
+    param_crop_to_xml->demo.push_back("ucd crop_to_xml ./crop ./xml                 (将 ./crop 文件夹中的小图文件夹映射回 xml 保存在 ./xml 文件夹)");
+    param_crop_to_xml->demo.push_back("* atention, crop 文件夹下面要有小图文件夹，每个文件夹的名字是里面小图的真实标签");
     UcdParamOpt::add_param(param_crop_to_xml);
 
     // say
@@ -508,17 +509,18 @@ void UcdParamOpt::load_param_info()
     param_cache_info->english_explain = "viewing cache info";
     param_cache_info->chinese_explain = "查看当前服务器的缓存信息";   
     param_cache_info->demo.push_back("ucd cache_info                                (查看缓存文件夹下面有多少文件)");
-    param_cache_info->demo.push_back("ucd cache_info test.json                      (查看缓存文件夹下面有多少文件)");
+    param_cache_info->demo.push_back("ucd cache_info test.json                      (查看缓存文件夹下面包含 test.json 中多少比例的文件)");
     param_cache_info->demo.push_back("----------------------------------------");
-    param_cache_info->demo.push_back("server    : cache_dir");
-    param_cache_info->demo.push_back("221       : /home/disk3/ucd_cache");
-    param_cache_info->demo.push_back("101       : /home/suanfa-6/ucd_cache");
-    param_cache_info->demo.push_back("202       : /home/suanfa-2/ucd_cache");
-    param_cache_info->demo.push_back("21        : /home/suanfa-2/ucd_cache");
-    param_cache_info->demo.push_back("246       : /home/ucd_cache/");
-    param_cache_info->demo.push_back("34        : /home/ucd_cache");
-    param_cache_info->demo.push_back("107       : /home/ucd_cache/");
-    param_cache_info->demo.push_back("33        : /home/data/ucd_cache");
+    param_cache_info->demo.push_back("server  :     cache_dir");
+    param_cache_info->demo.push_back("----------------------------------------");
+    param_cache_info->demo.push_back("221     :     /home/disk3/ucd_cache");
+    param_cache_info->demo.push_back("101     :     /home/suanfa-6/ucd_cache");
+    param_cache_info->demo.push_back("202     :     /home/suanfa-2/ucd_cache");
+    param_cache_info->demo.push_back("21      :     /home/suanfa-2/ucd_cache");
+    param_cache_info->demo.push_back("246     :     /home/ucd_cache/");
+    param_cache_info->demo.push_back("34      :     /home/ucd_cache");
+    param_cache_info->demo.push_back("107     :     /home/ucd_cache/");
+    param_cache_info->demo.push_back("33      :     /home/data/ucd_cache");
     param_cache_info->demo.push_back("----------------------------------------");
     UcdParamOpt::add_param(param_cache_info);
     
@@ -799,7 +801,7 @@ void UcdParamOpt::load_param_info()
     param_update_tags->grammar = "ucd update_tags ucd_path save_path old_tag:new_tag old_tag:new_tag ...";
     param_update_tags->english_explain = "";
     param_update_tags->chinese_explain = "更新 ucd 中的标签";   
-    param_update_tags->demo.push_back("ucd update_tags aqm.json res.json anquanmao:aqm cebiandai:cbd human:person      (将 aqm.json 中的 tag 进行更新)");
+    param_update_tags->demo.push_back("ucd update_tags aqm.json res.json anquanmao:aqm cebiandai:cbd       (将 aqm.json 中的 anquanmao 改为 aqm cebiandai 改为 cbd 进行更新)");
     UcdParamOpt::add_param(param_update_tags);
 
     // update_tags

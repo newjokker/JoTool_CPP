@@ -106,6 +106,7 @@ using namespace std;
 
 // foretell, 选择很多句子，随机打印其中的一句，或许 有帮助呢
 // 占卜，将周易 64卦象随机地输出，输出对应的爻辞之类的，
+// 随机输入一段字符串，计算字符串的 md5 返回对应的 64 卦的内容
 
 // 定时任务 + 一次检测一个 文件夹 ucd + 检测结果也是 ucd Die_prebase_0_5_0, 这样的话只要分析一下 uc_analysis 就知道要下载哪些 ucd 进行 absorb
 
@@ -113,6 +114,11 @@ using namespace std;
 // crop_to_xml 是错的，需要进行处理，（crop 小图规范不一致，）
 
 // 验证一下 cut_small_img 的结果结构和 py 写的是不是一样的
+
+// 读取头文件和读取矩阵的方式判断长宽，看看结果是不是一致，手机拍的很多图片结果有问题
+
+// 处理超级大的 xml 集合生成 ucd 
+// 可以根据前两位将 ucd 分为多个小的 ucd, 后缀可以用 .subjson 这样的方式，暗示有其他的合并数据集，
 
 
 int main(int argc, char ** argv)
@@ -142,7 +148,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.6.3";
+    std::string app_version = "v1.6.4";
 
     // cache dir
     std::string cache_dir;
@@ -2043,7 +2049,12 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "book")
     {
-
+        // i_ching 
+        // 
+    }
+    else if(command_1 == "foretell")
+    {
+        // 预言
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {
