@@ -119,6 +119,18 @@ using namespace std;
 
 // 处理超级大的 xml 集合生成 ucd 
 // 可以根据前两位将 ucd 分为多个小的 ucd, 后缀可以用 .subjson 这样的方式，暗示有其他的合并数据集，
+// 可以参考 bandizip 压缩为多个分卷的方式，test.json test.j01 test.j02 test.j03 类似这样的设置多个分卷，
+// 需要同时提供数据集操作函数 move delete copy list 最基本的函数，方便有多个分卷的数据集的查看和操作
+    // ucd list ./  只打印数据集信息，也用星号对应标记是否有 obi szi uci 三个文件，只有包含 uci 和 其他的文件的时候才能称作一个完整的文件
+    // uci 用不用分区来设置？和对应的 szi obi 分成区块的个数是一致的？
+    // test.u01, test.s01, test.o01 分别代表了第一个分卷
+
+// 尝试将数据集中的 uc_list size_info object_info 放到不同的文件中去，这样的话就可以迅速读取需要的数据，而不用将无用的数据一并读取了
+    // test.size_info + test.uc_json    ==> test.uci
+    // test.object_info                 ==> test.obi
+
+
+
 
 
 int main(int argc, char ** argv)
