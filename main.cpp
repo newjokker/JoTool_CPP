@@ -124,6 +124,7 @@ using namespace std;
     // ucd list ./  只打印数据集信息，也用星号对应标记是否有 obi szi uci 三个文件，只有包含 uci 和 其他的文件的时候才能称作一个完整的文件
     // uci 用不用分区来设置？和对应的 szi obi 分成区块的个数是一致的？
     // test.u01, test.s01, test.o01 分别代表了第一个分卷
+    // 每个分卷的大小是固定的 uc + size_info * 2 + obj_info * obj_count, 数量为 20000 的时候作为一个分卷 
 
 // 尝试将数据集中的 uc_list size_info object_info 放到不同的文件中去，这样的话就可以迅速读取需要的数据，而不用将无用的数据一并读取了
     // test.size_info + test.uc_json    ==> test.uci
