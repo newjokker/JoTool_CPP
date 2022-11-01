@@ -110,7 +110,6 @@ static void write_color_map(std::map< std::string, Color > color_map, std::strin
     OutFile.close();
 }
 
-
 UCDataset::UCDataset(std::string json_path)
 {
     UCDataset::dataset_name = "";
@@ -123,17 +122,15 @@ UCDataset::UCDataset(std::string json_path)
     UCDataset::json_path = json_path;
 }
 
-// UCDataset::~UCDataset()
-// {
-//     auto iter = UCDataset::object_info.begin();
-//     while(iter != UCDataset::object_info.end())
-//     {
-//         for(int i=0; i<UCDataset::object_info.size(); i++)
-//         {
-//             delete iter->second[i];
-//         }
-//     }
-// }
+UCDataset::~UCDataset()
+{
+    // 删除 obj 信息
+    UCDataset::clear_obj_info();
+    // 
+    UCDataset::object_info.clear();
+    UCDataset::size_info.clear();
+    UCDataset::uc_list.clear();
+}
 
 void UCDataset::parse_ucd(bool parse_shape_info)
 {
@@ -415,8 +412,17 @@ void UCDataset::add_voc_xml_info(std::string uc, std::string voc_xml_path)
             std::cout << "repeated obj : " << uc << ", " << obj->label << std::endl; 
         }
     }
+
+    // // 尝试彻底删除数据
+    // for(int i=0; i<UCDataset::object_info[uc].size(); i++)
+    // {
+    //     delete UCDataset::object_info[uc][i];
+    //     // std::cout << UCDataset::object_info[uc][i]->label << std::endl;
+    // }
+
     // uc_list 
     UCDataset::uc_list.push_back(uc);
+    delete dete_res;
 }
 
 void UCDataset::add_labelme_json_info(std::string uc, std::string labelme_json_path)
@@ -1792,6 +1798,77 @@ std::set<std::string> UCDataset::get_tags()
     return tags;
 }
 
+void UCDataset::save_to_huge_ucd(std::string save_dir, std::string save_name, int volume_index)
+{
+    //  uci 和 obi 两个文件进行保存
+
+    nlohmann::json uci_info = {
+        {"dataset_name", UCDataset::dataset_name},
+        {"model_name", UCDataset::model_name},
+        {"model_version", UCDataset::model_version},
+        {"add_time", UCDataset::add_time},
+        {"update_time", UCDataset::update_time},
+        {"describe", UCDataset::describe},
+        {"label_used", UCDataset::label_used},
+        {"uc_list", UCDataset::uc_list},
+        {"shapes", {}},
+        {"size_info", UCDataset::size_info}
+    };
+
+    std::map<std::string, std::vector<nlohmann::json> > shapes_info;
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        std::vector<LabelmeObj*> obj_vector = iter->second; 
+
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            nlohmann::json each_obj;
+            each_obj["shape_type"] = obj_vector[i]->shape_type;
+            each_obj["label"] = obj_vector[i]->label;
+            each_obj["points"] = obj_vector[i]->points;
+            each_obj["conf"] = obj_vector[i]->conf;
+            shapes_info[iter->first].push_back(each_obj);
+        }
+        iter++;
+    }  
+    
+    std::string uci_path, obi_path;
+    
+    if(volume_index == 0)
+    {
+        uci_path = save_dir + "/" + save_name + ".uci";
+        obi_path = save_dir + "/" + save_name + ".obi";
+    }
+    else
+    {
+        uci_path = save_dir + "/" + save_name + ".u" + std::to_string(volume_index);
+        obi_path = save_dir + "/" + save_name + ".o" + std::to_string(volume_index);
+    }
+    
+    std::ofstream o1(uci_path);
+    o1 << std::setw(4) << uci_info << std::endl;
+
+    nlohmann::json obi_info = {};
+    obi_info["shapes"] = shapes_info;
+    std::ofstream o2(obi_path);
+    o2 << std::setw(4) << obi_info << std::endl;
+
+}
+
+void UCDataset::clear_obj_info()
+{
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            delete iter->second[i];
+        }
+        iter++;
+    }
+}
+
 // 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
 {
@@ -2150,6 +2227,69 @@ void UCDatasetUtil::get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_pa
     }
     bar.finish();
     ucd->save_to_ucd(ucd_path);
+    delete ucd;
+}
+
+void UCDatasetUtil::get_ucd_from_huge_xml_dir(std::string xml_dir, std::string save_dir, std::string ucd_name)
+{
+    std::set<std::string> suffix {".xml"};
+    std::vector<std::string> xml_path_vector = get_all_file_path_recursive(xml_dir, suffix);
+    UCDataset* ucd = new UCDataset();
+    std::string uc;
+
+    tqdm bar;
+    int N = xml_path_vector.size();
+
+    int volume_count    = 0;
+    int info_count      = 0;
+    int not_uc_count    = 0;
+    for(int i=0; i<xml_path_vector.size(); i++)
+    {
+        info_count += 1;
+        uc = get_file_name(xml_path_vector[i]);
+        if(is_uc(uc))
+        {
+            ucd->add_voc_xml_info(uc, xml_path_vector[i]);
+            
+            if(ucd->object_info.count(uc) > 0)
+            {
+                info_count += ucd->object_info[uc].size() * 4;
+            }
+
+            if(ucd->size_info.count(uc) > 0)
+            {
+                info_count += ucd->size_info[uc].size() * 2;
+            }
+        }
+        else
+        {
+            not_uc_count += 1;
+        }
+        bar.progress(i, N);
+
+        // 保存一个分卷的数据
+        if(info_count > 3 * 1000 * 1000)
+        {
+            ucd->save_to_huge_ucd(save_dir, ucd_name, volume_count);
+            volume_count += 1;
+            info_count = 0;
+
+            // empty ucd
+            ucd->clear_obj_info();
+            ucd->object_info.clear();
+            ucd->size_info.clear();
+            ucd->uc_list.clear();
+        }
+    }
+
+
+    // 处理剩下的数据
+    if(info_count > 0)
+    {
+        ucd->save_to_huge_ucd(save_dir, ucd_name, volume_count);
+    }
+
+    bar.finish();
     delete ucd;
 }
 
@@ -3071,3 +3211,55 @@ void UCDatasetUtil::get_random_color_map(std::string ucd_path)
     std::cout << WARNNING_COLOR << "color file : " << UCDatasetUtil::color_file << STOP_COLOR << std::endl;
 }
 
+void UCDatasetUtil::list_ucd(std::string folder_path)
+{
+
+    if(! is_read_dir(folder_path))
+    {
+        std::cout << ERROR_COLOR << "folder is not readable : " << folder_path << std::endl;
+        return;
+    }
+
+    std::vector<std::string> file_path = get_all_file_path(folder_path);
+    std::set<std::string> suffix {".uci"};
+    std::vector<std::string> ucd_path = filter_by_suffix(file_path, suffix);
+    std::map< std::string,  std::map<std::string, int> > ucd_info;
+
+    for(int i=0; i<ucd_path.size(); i++)
+    {
+        std::string ucd_name = get_file_name(ucd_path[i]);
+        ucd_info[ucd_name]["uci_count"] = 1;
+        ucd_info[ucd_name]["obi_count"] = 1;
+        int index = 1;
+        while(true)
+        {
+            std::string volume_uci_path = folder_path + "/" + ucd_name + ".u" + std::to_string(index);
+            std::string volume_obi_path = folder_path + "/" + ucd_name + ".o" + std::to_string(index);
+            if(is_file(volume_uci_path))
+            {
+                index += 1;
+                ucd_info[ucd_name]["uci_count"] += 1;
+                if(is_file(volume_obi_path))
+                {
+                    ucd_info[ucd_name]["obi_count"] += 1;
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    //
+
+    std::cout << "-----------------------------------------------------" << std::endl;
+    std::cout << std::left << std::setfill(' ') << std::setw(20) << "uci_name"  << std::left << std::setfill(' ') << std::setw(15) << "uci_count" << std::left << std::setfill(' ') << std::setw(15) << std::left << "obi_count" << std::endl;
+    std::cout << "-----------------------------------------------------" << std::endl;
+    auto iter_1 = ucd_info.begin();
+    while(iter_1 != ucd_info.end())
+    {
+        std::cout << std::left << std::setfill(' ') << std::setw(20) << iter_1->first << std::left << std::setfill(' ') << std::setw(15)  << iter_1->second["uci_count"]  << std::left << std::setfill(' ') << std::setw(15) << iter_1->second["obi_count"] << std::endl;
+        iter_1++;
+    }
+    std::cout << "-----------------------------------------------------" << std::endl;
+}

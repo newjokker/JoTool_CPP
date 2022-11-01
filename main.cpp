@@ -131,7 +131,11 @@ using namespace std;
     // test.object_info                 ==> test.obi
 
 
+// ucd tar, ucd untar 将一个数据集打包到有一起方便用 ucd 之外的工具进行操作
 
+// from_xml 要记录被排除的 非 uc 有多少个，很多次拿没有命名的 数据生成 ucd 都是空的
+
+// 写一个规则打印的函数，每次都要查询烦得要死，还不如自己实现一个
 
 
 int main(int argc, char ** argv)
@@ -161,7 +165,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v1.6.4";
+    std::string app_version = "v2.0.1";
 
     // cache dir
     std::string cache_dir;
@@ -536,6 +540,23 @@ int main(int argc, char ** argv)
         else
         {
             ucd_param_opt->print_command_info("from_xml");
+            return -1;
+        }
+    }
+    else if(command_1 == "from_huge_xml")
+    {
+        // 从非常大量的 xml 中生成 ucd 文件
+
+        if(argc == 5)
+        {
+            std::string xml_dir = argv[2];
+            std::string save_dir = argv[3];
+            std::string save_name = argv[4];
+            ucd_util->get_ucd_from_huge_xml_dir(xml_dir, save_dir, save_name);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
             return -1;
         }
     }
@@ -2068,6 +2089,20 @@ int main(int argc, char ** argv)
     else if(command_1 == "foretell")
     {
         // 预言
+    }
+    else if(command_1 == "list")
+    {
+        // 列出指定文件夹中数据集的信息，分卷个数，名字，是否有 obi, uci 信息
+
+        if(argc == 3)
+        {
+            std::string folder_path = argv[2];
+            ucd_util->list_ucd(folder_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {

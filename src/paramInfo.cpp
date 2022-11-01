@@ -360,6 +360,15 @@ void UcdParamOpt::load_param_info()
     param_from_xml->demo.push_back("ucd from_xml ./xml test.json        (将 ./xml 路径下面的名字符合 uc 规则的所有 xml 制作成 ucd)");
     UcdParamOpt::add_param(param_from_xml);
     
+    // from_huge_xml
+    ParamInfo * param_from_huge_xml = new ParamInfo("from_huge_xml");
+    param_from_huge_xml->group = "convert";
+    param_from_huge_xml->grammar = "ucd param_from_huge_xml xml_dir save_dir save_name";
+    param_from_huge_xml->english_explain = "get ucd from loacal data(img, xml)";
+    param_from_huge_xml->chinese_explain = "(递归)本地 voc_xml 文件生成 ucd, ucd中包含 dete_obj 信息";   
+    param_from_huge_xml->demo.push_back("ucd param_from_huge_xml ./xml ./save_dir save_name        (将 ./xml 路径下面的名字符合 uc 规则的所有 xml 制作成 ucd)");
+    UcdParamOpt::add_param(param_from_huge_xml);
+    
     // from_json
     ParamInfo * param_from_json = new ParamInfo("from_json");
     param_from_json->group = "convert";

@@ -46,7 +46,7 @@ class UCDataset
         // 构造函数
         UCDataset(std::string ucd_path="");
         
-        // ~UCDataset();
+        ~UCDataset();
         
         // 解析 ucd 数据
         void parse_ucd(bool parse_xml_info=false);
@@ -95,6 +95,9 @@ class UCDataset
         // 保存为 ucd（斜框矩形如何进行保存）
         void save_to_ucd(std::string save_path);
         
+        // 分卷保存为 ucd
+        void save_to_huge_ucd(std::string save_dir, std::string ucd_name, int volume_index);
+
         // 保存一个 xml 文件
         void save_to_voc_xml_with_assign_uc(std::string save_path, std::string img_path, std::string assign_uc);
 
@@ -159,6 +162,9 @@ class UCDataset
 
         // 拿到不重复的标签
         std::set<std::string> get_tags();
+
+        // 清空数据，释放内存
+        void clear_obj_info();
 
     private:
         std::string json_path;
@@ -230,6 +236,9 @@ class UCDatasetUtil
         // 将 xml 信息 保存在 ucd 中
         void get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_path);
         
+        // 从大量的 xml 中获取 ucd 数据集
+        void get_ucd_from_huge_xml_dir(std::string xml_dir, std::string save_dir, std::string ucd_name);
+
         // 将 labelme json 信息保存到 ucd 中
         void get_ucd_from_json_dir(std::string json_dir, std::string ucd_path);
         
@@ -282,6 +291,8 @@ class UCDatasetUtil
         // 随机给不同的标签分配不同的颜色
         void get_random_color_map(std::string ucd_path);
 
+        // 打印出文件夹中的 ucd 的信息
+        void list_ucd(std::string folder_path);
 
     private:
         

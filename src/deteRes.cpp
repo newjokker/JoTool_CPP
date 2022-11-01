@@ -219,8 +219,9 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
             }
             else
             {
-                std::cout << ERROR_COLOR << "parse xml error, lose depth, " + xml_path << STOP_COLOR << std::endl;
-                throw "parse xml error, lose depth, " + xml_path;
+                std::cout << WARNNING_COLOR << "parse xml error, lose depth, " + xml_path << STOP_COLOR << std::endl;
+                // throw "parse xml error, lose depth, " + xml_path;
+                DeteRes::depth = -1;
             }
         }
 
@@ -241,8 +242,9 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
         }
         else
         {
-            std::cout << ERROR_COLOR << "parse xml error, lose folder, " + xml_path << STOP_COLOR << std::endl;
-            throw "parse xml error, lose folder, " + xml_path;
+            std::cout << WARNNING_COLOR << "parse xml error, lose folder, " + xml_path << STOP_COLOR << std::endl;
+            // throw "parse xml error, lose folder, " + xml_path;
+            DeteRes::folder = "";
         }
 
         // path
@@ -261,8 +263,9 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
         }
         else
         {
-            std::cout << ERROR_COLOR << "parse xml error, lose path, " + xml_path << STOP_COLOR << std::endl;
-            throw "parse xml error, lose path, " + xml_path;
+            std::cout << WARNNING_COLOR << "parse xml error, lose path, " + xml_path << STOP_COLOR << std::endl;
+            // throw "parse xml error, lose path, " + xml_path;
+            DeteRes::img_path = "";
         }
 
         // filename
@@ -281,8 +284,9 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
         }
         else
         {
-            std::cout << ERROR_COLOR << "parse xml error, lose filename, " + xml_path << STOP_COLOR << std::endl;
-            throw "parse xml error, lose filename, " + xml_path;          
+            std::cout << WARNNING_COLOR << "parse xml error, lose filename, " + xml_path << STOP_COLOR << std::endl;
+            // throw "parse xml error, lose filename, " + xml_path; 
+            DeteRes::file_name = "";         
         }
 
         // object info
