@@ -698,7 +698,7 @@ void UcdParamOpt::load_param_info()
     param_drop->group = "opt";
     param_drop->grammar = "ucd drop attr_name ucd_path save_ucd_path";
     param_drop->english_explain = "";
-    param_drop->chinese_explain = "获取 ucd 中的信息 dataset_name, object_info, model_name, model_version, add_time, update_time, describe, label_used, uc_list]";   
+    param_drop->chinese_explain = "获取 ucd 中的信息 dataset_name, object_info, size_info, model_name, model_version, add_time, update_time, describe, label_used, uc_list]";   
     param_drop->demo.push_back("ucd drop object_info aqm.json aqm_drop_object_info.json     (将 aqm.json 中的 object_info 信息给抹去，保存为 aqm_drop_object_info.json)");
     UcdParamOpt::add_param(param_drop);
     

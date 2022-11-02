@@ -110,11 +110,6 @@ using namespace std;
 
 // 定时任务 + 一次检测一个 文件夹 ucd + 检测结果也是 ucd Die_prebase_0_5_0, 这样的话只要分析一下 uc_analysis 就知道要下载哪些 ucd 进行 absorb
 
-
-// crop_to_xml 是错的，需要进行处理，（crop 小图规范不一致，）
-
-// 验证一下 cut_small_img 的结果结构和 py 写的是不是一样的
-
 // 读取头文件和读取矩阵的方式判断长宽，看看结果是不是一致，手机拍的很多图片结果有问题
 
 // 处理超级大的 xml 集合生成 ucd 
@@ -1681,9 +1676,13 @@ int main(int argc, char ** argv)
             {
                 ucd->object_info = {};
             }
+            else if(attr_name == "size_info")
+            {
+                ucd->size_info = {};
+            }
             else
             {
-                std::cout << "attr_name not in [dataset_name, object_info, model_name, model_version, add_time, update_time, describe, label_used, uc_list]" << std::endl;     
+                std::cout << "attr_name not in [dataset_name, object_info, size_info, model_name, model_version, add_time, update_time, describe, label_used, uc_list]" << std::endl;     
             }
             ucd->save_to_ucd(save_ucd_path);
             return -1;
@@ -2103,6 +2102,64 @@ int main(int argc, char ** argv)
         {
             ucd_param_opt->print_command_info(command_1);
         }
+    }
+    else if(command_1 == "test_info")
+    {
+        UCDataset* ucd = new UCDataset();
+        ucd->load_uci("/home/ldq/ucd_dir/test_huge_data/save_ucd/test2.uci");
+
+        int img_size_count = 0;
+        int uc_count = 0;
+
+        for(int i=0; i<ucd->volume_count; i++)
+        {
+            ucd->parse_volume(i, false);
+            img_size_count += ucd->size_info.size();
+            uc_count += ucd->uc_list.size();
+        }
+
+        std::cout << "dataset_name      : " << ucd->dataset_name << std::endl;
+        std::cout << "uc_count          : " << uc_count << std::endl;
+        std::cout << "model_name        : " << ucd->model_name << std::endl;
+        std::cout << "model_version     : " << ucd->model_version << std::endl;
+        std::cout << "add_time          : " << ucd->add_time << std::endl;
+        std::cout << "update_time       : " << ucd->update_time << std::endl;
+        std::cout << "describe          : " << ucd->describe << std::endl;
+        std::cout << "label_used        : " << ucd->label_used.size() <<std::endl;
+        std::cout << "img_size_count    : " << img_size_count <<std::endl;
+        // std::cout << "obi_info_count    : " << ucd->object_info.size() <<std::endl;
+
+    }
+    else if(command_1 == "test_count_tags")
+    {
+        std::string uci_path = argv[2];
+        UCDataset* ucd = new UCDataset();
+        ucd->load_uci(uci_path);
+
+        std::map<std::string, std::map<std::string, int> > count_map = ucd->count_volume_tags();
+        int tag_count = 0;
+        int dete_obj_count=0; 
+        // print statistics res
+        auto iter_count = count_map.begin();
+        std::cout << "---------------------------------------------" << std::endl;
+        while(iter_count != count_map.end())
+        {
+            auto iter = iter_count->second.begin();
+            while(iter != iter_count->second.end())
+            {
+                dete_obj_count += iter->second;
+                std::cout << std::setw(15) << std::left << "[" + iter_count->first + "]" << std::setw(20) << std::left << iter->first  << " : " << iter->second << std::endl;
+                tag_count += 1;
+                iter++;
+            }
+            iter_count ++;
+        }
+        std::cout << "---------------------------" << std::endl;
+        std::cout << "number of uc  : " << ucd->uc_list.size() << std::endl;
+        std::cout << "number of tag : " << tag_count << std::endl;
+        std::cout << "number of obj : " << dete_obj_count << std::endl;
+        std::cout << "---------------------------------------------" << std::endl;
+
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {

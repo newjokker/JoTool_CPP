@@ -26,10 +26,13 @@ namespace jotools
 std::map<std::string, int> count_tags(std::string floder_path)
 {
     std::map<std::string, int> count_res;
-    std::vector<std::string> file_names = get_all_file_path(floder_path);
+    std::vector<std::string> file_names = get_all_file_path_recursive(floder_path);
     std::set<std::string> suffixs;
     suffixs.insert(".xml");
     std::vector<std::string> file_name_xml = filter_by_suffix(file_names, suffixs);
+
+    tqdm bar;
+    int N = file_name_xml.size();
 
     // 
     for(int i; i<file_name_xml.size(); i++)
@@ -51,23 +54,28 @@ std::map<std::string, int> count_tags(std::string floder_path)
             }
             iter++;
         }
+        bar.progress(i, N);
         delete dete_res;
     }
+    bar.finish();
     // print res
-    std::cout << "-------------------------------" << std::endl;
+    std::cout << "------------------------------------------" << std::endl;
+    std::cout << std::left << std::setfill(' ') << std::setw(25) << "tags" << " :    " << "count" << std::left << std::setfill(' ') << std::setw(25) << std::endl;
+    std::cout << "------------------------------------------" << std::endl;
     int tags_numb = 0; 
     std::map<std::string, int>::iterator iter;
     iter = count_res.begin();
     while(iter != count_res.end()) 
     {
-        std::cout << iter->first << " : " << iter->second << std::endl;
+        std::cout << std::left << std::setfill(' ') << std::setw(25) << iter->first << " :    " << iter->second << std::left << std::setfill(' ') << std::setw(25) << std::endl;
         tags_numb += iter->second;
         iter++;
     }
     // extra info
-    std::cout << "number of xml has obj : " << file_name_xml.size() << std::endl;
-    std::cout << "number of tag         : " << tags_numb << std::endl;
-    std::cout << "-------------------------------" << std::endl;
+    std::cout << "------------------------------------------" << std::endl;
+    std::cout << "number of xml has obj     :    " << file_name_xml.size() << std::endl;
+    std::cout << "number of tag             :    " << tags_numb << std::endl;
+    std::cout << "------------------------------------------" << std::endl;
     return count_res;
 }
 

@@ -120,6 +120,7 @@ UCDataset::UCDataset(std::string json_path)
     UCDataset::update_time = -1;
     UCDataset::describe = "";
     UCDataset::json_path = json_path;
+    UCDataset::volume_count = 0;
 }
 
 UCDataset::~UCDataset()
@@ -279,7 +280,7 @@ std::map<std::string, std::map<std::string, int> > UCDataset::count_tags()
     // count_tags
     std::map<std::string, std::map<std::string, int> > count_map;
 
-    std::string each_tag;
+    // std::string each_tag;
     auto iter = UCDataset::object_info.begin();
     while(iter != UCDataset::object_info.end())
     {
@@ -298,6 +299,45 @@ std::map<std::string, std::map<std::string, int> > UCDataset::count_tags()
         }
         iter++;
     }
+    return count_map;
+}
+
+std::map<std::string, std::map<std::string, int> > UCDataset::count_volume_tags()
+{
+    std::string uci_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".uci";
+    UCDataset::load_uci(uci_path);
+
+    // count_tags
+    std::map<std::string, std::map<std::string, int> > count_map;
+
+    tqdm bar;
+    int N = UCDataset::volume_count;
+    
+    for(int i=0; i<UCDataset::volume_count; i++)
+    {
+        bar.progress(i, N);
+        UCDataset::parse_volume(i, true);
+        
+        auto iter = UCDataset::object_info.begin();
+        while(iter != UCDataset::object_info.end())
+        {
+            for(int i=0; i<iter->second.size(); i++)
+            {
+                std::string each_tag = iter->second[i]->label;
+                std::string each_shape_type = iter->second[i]->shape_type;
+                if(count_map[each_shape_type].count(each_tag) == 0)
+                {
+                    count_map[each_shape_type][each_tag] = 1;
+                }
+                else
+                {
+                    count_map[each_shape_type][each_tag] += 1;
+                }
+            }
+            iter++;
+        }
+    }
+    bar.finish();
     return count_map;
 }
 
@@ -1867,7 +1907,156 @@ void UCDataset::clear_obj_info()
         }
         iter++;
     }
+    UCDataset::object_info.clear();
 }
+
+void UCDataset::load_uci(std::string uci_path)
+{
+    if(! is_file(uci_path))
+    {
+        std::cout << ERROR_COLOR << "uci path not exists : " << uci_path << STOP_COLOR << std::endl;
+        return;
+    }
+
+    UCDataset::volumn_dir = get_file_folder(uci_path);
+    UCDataset::volume_name = get_file_name(uci_path);
+    UCDataset::volume_count = 1;
+
+    int index = 0;
+    while(true)
+    {
+        index += 1;
+        std::string volume_uci_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".u" + std::to_string(index);
+        if(is_file(volume_uci_path))
+        {
+            UCDataset::volume_count += 1;
+        }
+        else
+        {
+            break;
+        }
+    }
+}
+
+void UCDataset::parse_volume(int volumn_index, bool parse_obi)
+{
+
+    // 数据清空
+    UCDataset::uc_list.clear();
+    UCDataset::size_info.clear();
+
+    std::string uci_path;
+    if(volumn_index == 0)
+    {
+        uci_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".uci";
+        if(! is_file(uci_path))
+        {
+            std::cout << ERROR_COLOR<< "uci path not exists : " << uci_path << STOP_COLOR << std::endl;
+            return;
+        }
+
+        std::ifstream jsfile(uci_path);
+        json data = json::parse(jsfile); 
+
+        auto dataset_name   = data["dataset_name"];
+        auto model_name     = data["model_name"];
+        auto model_version  = data["model_version"];
+        auto add_time       = data["add_time"];
+        auto update_time    = data["update_time"];
+        auto describe       = data["describe"];
+        auto label_used     = data["label_used"];
+        auto uc_list        = data["uc_list"];
+        auto size_info      = data["size_info"];
+
+        if(dataset_name     != nullptr) { UCDataset::dataset_name = dataset_name; }
+        if(model_name       != nullptr) { UCDataset::model_name = model_name; }
+        if(model_version    != nullptr) { UCDataset::model_version = model_version; }
+        if(add_time         != nullptr) { UCDataset::add_time = add_time; }
+        if(update_time      != nullptr) { UCDataset::update_time = update_time; }
+        if(describe         != nullptr) { UCDataset::describe = describe; }
+        if(label_used       != nullptr) { UCDataset::label_used = label_used; }
+        if(uc_list          != nullptr) { UCDataset::uc_list = uc_list; }
+        if(size_info        != nullptr) { UCDataset::size_info = size_info; }
+        UCDataset::unique();
+    }
+    else
+    {
+        uci_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".u" + std::to_string(volumn_index);
+        std::ifstream jsfile(uci_path);
+        json data = json::parse(jsfile); 
+        
+        auto uc_list = data["uc_list"];
+        auto size_info = data["size_info"];
+        
+        if(uc_list          != nullptr) { UCDataset::uc_list = uc_list; }
+        if(size_info        != nullptr) { UCDataset::size_info = size_info; }
+        UCDataset::unique();
+    }
+
+    // 先清空 obj 信息
+    UCDataset::clear_obj_info();
+
+    if(parse_obi)
+    {
+        std::string obi_path;
+        if(volumn_index == 0)
+        {
+            obi_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".obi";
+        }
+        else
+        {
+            obi_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".o" + std::to_string(volumn_index);
+        }
+
+        if(! is_file(obi_path))
+        {
+            std::cout << "obi path not exists : " << obi_path << std::endl;
+            return;
+        }
+
+        std::ifstream jsfile(obi_path);
+        json data = json::parse(jsfile); 
+
+        auto shapes_info = data["shapes"];
+        LabelmeObjFactory obj_factory;
+
+        if(shapes_info != nullptr)
+        {
+            int N = shapes_info.size();
+            int index = 0;
+            auto iter = shapes_info.begin();
+            while(iter != shapes_info.end())
+            {
+                index += 1;
+                std::string uc = iter.key();
+                for(int i=0; i<iter.value().size(); i++)
+                {
+                    std::string shape_type = iter.value()[i]["shape_type"];
+                    std::string label = iter.value()[i]["label"];
+                    std::vector< std::vector<double> > points = iter.value()[i]["points"];
+                    auto conf = iter.value()[i]["conf"];
+                    LabelmeObj* obj = obj_factory.CreateObj(shape_type);
+                    obj->label = label;
+                    obj->points = points;
+
+                    if(conf == nullptr)
+                    {
+                        obj->conf = -1;                      
+                    }
+                    else
+                    {
+                        obj->conf = conf;
+                    }
+
+                    UCDataset::object_info[uc].push_back(obj);
+                }
+                iter++;
+            }
+        }
+    }
+}
+
+
 
 // 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)

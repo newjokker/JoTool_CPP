@@ -34,6 +34,15 @@ class UCDataset
         // size_info {uc: [width, height]}
         std::map<std::string, std::vector<int> > size_info;
 
+        // 分卷个数
+        int volume_count;
+
+        // 分卷文件夹
+        std::string volumn_dir;
+
+        // 分卷名称
+        std::string volume_name;
+
         // ucd 新建的时间
         double add_time;
         
@@ -51,6 +60,12 @@ class UCDataset
         // 解析 ucd 数据
         void parse_ucd(bool parse_xml_info=false);
         
+        // 装载 ucd 将读取 uci 的 volume 信息
+        void load_uci(std::string uci_path);
+
+        // 解析某一个分卷 volume，解析一个分卷的时候需要对旧的分卷进行清空的？
+        void parse_volume(int volumn_index, bool parse_obi=false);
+
         // 打印 json 数据
         void print_ucd_info();
         
@@ -74,6 +89,9 @@ class UCDataset
         // 统计标签个数
         std::map<std::string, std::map<std::string, int> > count_tags();
         
+        // 分卷统计标签的个数
+        std::map<std::string, std::map<std::string, int> > count_volume_tags();
+
         // 修改属性
         void change_attar(std::string attr_name, std::string attr_value);
 
