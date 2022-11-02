@@ -54,6 +54,9 @@ class UcdParamOpt
         // 是否有对应的 command 
         bool has_command(std::string command);
         
+        // 是否存在对应的组
+        bool has_group(std::string group);
+
         // 是否有相似的 command
         bool has_simliar_command(std::string);
         
@@ -69,7 +72,8 @@ class UcdParamOpt
         // 打印 command 对应的元素的信息
         void print_command_info(std::string command);
         void print_command_info(std::vector<std::string> command_vector);
-        
+        void print_group_info(std::string group);
+
         // 根据方法所属的类打印所有的方法
         void print_all_fun();
         void print_all_fun_chinese();

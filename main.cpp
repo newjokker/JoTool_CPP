@@ -298,13 +298,6 @@ int main(int argc, char ** argv)
         }
         ucd_util->load_ucd(ucd_name, ucd_save_path);
     }
-    else if(command_1 == "load_dir")
-    {
-        // 下载一整个文件夹的 ucd
-        // ucd chcek 要有返回结果，对返回结果进行文件夹匹配
-        // 这个还时直接去 80 服务器里面拷贝比较好
-
-    }
     else if(command_1 == "delete")
     {
         if(argc != 3)
@@ -1266,6 +1259,10 @@ int main(int argc, char ** argv)
             {
                 ucd_param_opt->print_command_info(command);
             }
+            else if(ucd_param_opt->has_group(command))
+            {
+                ucd_param_opt->print_group_info(command);
+            }
             else
             {
                 if(ucd_param_opt->has_simliar_command(command_1))
@@ -1277,7 +1274,6 @@ int main(int argc, char ** argv)
         }
         else if(argc ==2)
         {
-            // 打印中文的注释
             ucd_param_opt->print_all_fun_chinese();
         }
         else

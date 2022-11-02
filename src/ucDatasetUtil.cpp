@@ -252,21 +252,25 @@ void UCDataset::print_ucd_info()
 void UCDataset::print_volume_info()
 {
     // UCDataset* ucd = new UCDataset();
-    UCDataset::load_uci(UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".uci");
+    // UCDataset::load_uci(UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".uci");
 
+    tqdm bar;
+    int N = UCDataset::volume_count;
     int img_size_count = 0;
     int uc_count = 0;
 
     for(int i=0; i<UCDataset::volume_count; i++)
     {
+        bar.progress(i, N);
         UCDataset::parse_volume(i, false);
         img_size_count += UCDataset::size_info.size();
         uc_count += UCDataset::uc_list.size();
     }
+    bar.finish();
 
     std::cout << "--------------------------------" << std::endl;
     std::cout << "dataset_name      : " << UCDataset::dataset_name << std::endl;
-    std::cout << "uc_count          : " << UCDataset::uc_list.size() << std::endl;
+    std::cout << "uc_count          : " << uc_count << std::endl;
     std::cout << "model_name        : " << UCDataset::model_name << std::endl;
     std::cout << "model_version     : " << UCDataset::model_version << std::endl;
     std::cout << "add_time          : " << UCDataset::add_time << std::endl;
@@ -3655,9 +3659,6 @@ void UCDatasetUtil::copy_uci(std::string uci_path, std::string save_path)
         std::string obi_suffix = get_file_suffix(obi_path);
         std::string save_uci_path = save_dir + "/" + save_name + uci_suffix; 
         std::string save_obi_path = save_dir + "/" + save_name + obi_suffix; 
-
-        std::cout << uci_path << std::endl;
-        std::cout << save_uci_path << std::endl;
 
         if(is_file(uci_path))
         {

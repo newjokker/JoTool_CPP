@@ -103,6 +103,20 @@ bool UcdParamOpt::has_command(std::string command)
     }
 }
 
+bool UcdParamOpt::has_group(std::string group)
+{
+    auto iter = UcdParamOpt::param_map.begin();
+    while(iter != UcdParamOpt::param_map.end())
+    {
+        if(iter->second.group == group)
+        {
+            return true;
+        }
+        iter++;
+    }
+    return false;
+}
+
 bool UcdParamOpt::has_simliar_command(std::string command)
 {
     std::vector<std::string> similar_command_vector = UcdParamOpt::find_similar_command(command);
@@ -181,6 +195,26 @@ void UcdParamOpt::print_command_info(std::string command)
     ParamInfo param_info = UcdParamOpt::get_param(command);
     param_info.print_info();
     std::cout << "------------------------" << std::endl;
+}
+
+void UcdParamOpt::print_group_info(std::string group)
+{
+    std::cout << "--------------------------------------------------------------------------" << std::endl;
+    std::cout << "                                " << group << std::endl;
+    std::cout << "--------------------------------------------------------------------------" << std::endl;
+    std::cout << std::endl;
+    auto iter = UcdParamOpt::param_map.begin();
+    while(iter != UcdParamOpt::param_map.end())
+    {
+        if(iter->second.group == group)
+        {
+            std::cout << std::setw(15) << std::left << iter->second.command << " " ;
+            std::cout << std::setw(4) << std::left << " " << iter->second.grammar << std::endl;
+            std::cout << std::endl;
+        }
+        iter++;
+    }
+    std::cout << "--------------------------------------------------------------------------" << std::endl;
 }
 
 void UcdParamOpt::print_command_info(std::vector<std::string> command_vector)
@@ -381,10 +415,11 @@ void UcdParamOpt::load_param_info()
     // info
     ParamInfo * param_info = new ParamInfo("info");
     param_info->group = "info";
-    param_info->grammar = "ucd info ucd_path";
+    param_info->grammar = "ucd info ucd_path | uci_path";
     param_info->english_explain = "show ucd info";
     param_info->chinese_explain = "查看数据集信息 (dataset_name, uc_count, model_name, model_version, add_time, update_time, describe, label_used, img_size_count)";   
     param_info->demo.push_back("ucd info test.json                          (查看 test.json ucd 的各个信息)");
+    param_info->demo.push_back("ucd info test.uci                           (查看 test.uci 的各个信息)");
     UcdParamOpt::add_param(param_info);
     
     // meta
@@ -464,10 +499,11 @@ void UcdParamOpt::load_param_info()
     // count_tags
     ParamInfo * param_count_tags = new ParamInfo("count_tags");
     param_count_tags->group = "info";
-    param_count_tags->grammar = "ucd count_tags ucd_path";
+    param_count_tags->grammar = "ucd count_tags ucd_path | uci_path";
     param_count_tags->english_explain = "count tags";
     param_count_tags->chinese_explain = "统计标签个数";
     param_count_tags->demo.push_back("ucd count_tags test.json                      (统计 test.json 中的各个标签的个数)");   
+    param_count_tags->demo.push_back("ucd count_tags test.uci                       (统计 test.uci 中的各个标签的个数)");   
     UcdParamOpt::add_param(param_count_tags);
     
     // count_files
@@ -585,12 +621,13 @@ void UcdParamOpt::load_param_info()
     // help
     ParamInfo * param_help = new ParamInfo("help");
     param_help->group = "info";
-    param_help->grammar = "ucd help command";
+    param_help->grammar = "ucd help command | group";
     param_help->english_explain = "print command info";
     param_help->chinese_explain = "打印指定 command 对应的信息";   
     param_help->demo.push_back("ucd help                                        (查看所有关键字的中文解释)");
     param_help->demo.push_back("ucd help help                                   (查看 help 关键字的使用方法)");
     param_help->demo.push_back("ucd help acc                                    (查看 acc 关键字的使用方法)");
+    param_help->demo.push_back("ucd help opt                                    (查看 opt 组中的所有关键字)");
     UcdParamOpt::add_param(param_help);
 
     // uc_check
@@ -876,6 +913,43 @@ void UcdParamOpt::load_param_info()
     param_merge_all->chinese_explain = "将一个文件夹中的所有 ucd 进行合并";   
     param_merge_all->demo.push_back("ucd merge_all res.json ucd_dir                                       (将 ucd_dir 中的所有 ucd 文件进行合并生成 res.json)");
     UcdParamOpt::add_param(param_merge_all);
+    
+    // ls
+    ParamInfo * param_ls = new ParamInfo("ls");
+    param_ls->group = "opt_uci";
+    param_ls->grammar = "ucd ls folder_dir";
+    param_ls->english_explain = "";
+    param_ls->chinese_explain = "查看指定文件夹下的 uci 数据集情况";   
+    param_ls->demo.push_back("ucd ls ./uci_dir                                       (查看 ./uci_dir 文件夹下面有多少 .uci 数据集，以及数据集信息)");
+    UcdParamOpt::add_param(param_ls);
+    
+    // mv
+    ParamInfo * param_mv = new ParamInfo("mv");
+    param_mv->group = "opt_uci";
+    param_mv->grammar = "ucd mv uci_path save_path";
+    param_mv->english_explain = "";
+    param_mv->chinese_explain = "将 uci 数据集移动到指定位置";   
+    param_mv->demo.push_back("ucd mv ./uci_dir/test.uci  ./res/res.uci                      (查看 ./uci_dir/test.uci 移动到 ./res/res.uci 位置)");
+    UcdParamOpt::add_param(param_mv);
+
+    // cp
+    ParamInfo * param_cp = new ParamInfo("cp");
+    param_cp->group = "opt_uci";
+    param_cp->grammar = "ucd cp uci_path save_path";
+    param_cp->english_explain = "";
+    param_cp->chinese_explain = "将 uci 数据集移动到指定位置";   
+    param_cp->demo.push_back("ucd cp ./uci_dir/test.uci  ./res/res.uci                      (查看 ./uci_dir/test.uci 拷贝到 ./res/res.uci 位置)");
+    UcdParamOpt::add_param(param_cp);
+
+    // rm
+    ParamInfo * param_rm = new ParamInfo("rm");
+    param_rm->group = "opt_uci";
+    param_rm->grammar = "ucd rm uci_path";
+    param_rm->english_explain = "";
+    param_rm->chinese_explain = "删除 uci 数据集";   
+    param_rm->demo.push_back("ucd rm ./uci_dir/test.uci                                     (删除 ./uci_dir/test.uci 和其对应的卷文件)");
+    UcdParamOpt::add_param(param_rm);
+
 
 }
 
