@@ -132,6 +132,9 @@ using namespace std;
 
 // 写一个规则打印的函数，每次都要查询烦得要死，还不如自己实现一个
 
+// 先同时支持 .json 数据 和 .uci 数据，后期等实际使用后的结果再去分开
+
+
 
 int main(int argc, char ** argv)
 {
@@ -213,7 +216,7 @@ int main(int argc, char ** argv)
     std::string command_1 = argv[1];
 
     // must set ucd_cache 
-    if((! is_dir(cache_dir)) && (command_1 != "set"))
+    if((! is_dir(cache_dir)) && (command_1 != "set") && (command_1 != "help")) 
     {
         std::cout << WARNNING_COLOR << "cache_dir not exists, edit ucdconfig.ini cache/cache_dir : " << STOP_COLOR << std::endl;
         std::cout << "ucdconfig path : " << config_path << std::endl;
@@ -501,7 +504,17 @@ int main(int argc, char ** argv)
         {
             std::string ucd_path = argv[2];
             UCDataset * ucd = new UCDataset(ucd_path);
-            ucd->print_ucd_info();
+
+            if(ucd_util->is_ucd_path(ucd_path))
+            {
+                ucd->parse_ucd();
+                ucd->print_ucd_info();
+            }
+            else if(ucd_util->is_uci_path(ucd_path))
+            {
+                ucd->load_uci(ucd_path);
+                ucd->print_volume_info();
+            }
             delete ucd;
         }
         else
@@ -542,12 +555,11 @@ int main(int argc, char ** argv)
     {
         // 从非常大量的 xml 中生成 ucd 文件
 
-        if(argc == 5)
+        if(argc == 4)
         {
             std::string xml_dir = argv[2];
-            std::string save_dir = argv[3];
-            std::string save_name = argv[4];
-            ucd_util->get_ucd_from_huge_xml_dir(xml_dir, save_dir, save_name);
+            std::string save_path = argv[3];
+            ucd_util->get_ucd_from_huge_xml_dir(xml_dir, save_path);
         }
         else
         {
@@ -910,6 +922,10 @@ int main(int argc, char ** argv)
             if(ucd_util->is_ucd_path(xml_dir))
             {
                 ucd_util->count_ucd_tags(xml_dir);
+            }
+            else if(ucd_util->is_uci_path(xml_dir))
+            {
+                ucd_util->count_volume_tags(xml_dir);
             }
             else if(is_dir(xml_dir))
             {
@@ -2089,77 +2105,55 @@ int main(int argc, char ** argv)
     {
         // 预言
     }
-    else if(command_1 == "list")
+    else if(command_1 == "ls")
     {
-        // 列出指定文件夹中数据集的信息，分卷个数，名字，是否有 obi, uci 信息
-
         if(argc == 3)
         {
             std::string folder_path = argv[2];
-            ucd_util->list_ucd(folder_path);
+            ucd_util->list_uci(folder_path);
         }
         else
         {
             ucd_param_opt->print_command_info(command_1);
         }
     }
-    else if(command_1 == "test_info")
+    else if(command_1 == "rm")
     {
-        UCDataset* ucd = new UCDataset();
-        ucd->load_uci("/home/ldq/ucd_dir/test_huge_data/save_ucd/test2.uci");
-
-        int img_size_count = 0;
-        int uc_count = 0;
-
-        for(int i=0; i<ucd->volume_count; i++)
+        if(argc == 3)
         {
-            ucd->parse_volume(i, false);
-            img_size_count += ucd->size_info.size();
-            uc_count += ucd->uc_list.size();
+            std::string uci_path = argv[2];
+            ucd_util->delete_uci(uci_path);
         }
-
-        std::cout << "dataset_name      : " << ucd->dataset_name << std::endl;
-        std::cout << "uc_count          : " << uc_count << std::endl;
-        std::cout << "model_name        : " << ucd->model_name << std::endl;
-        std::cout << "model_version     : " << ucd->model_version << std::endl;
-        std::cout << "add_time          : " << ucd->add_time << std::endl;
-        std::cout << "update_time       : " << ucd->update_time << std::endl;
-        std::cout << "describe          : " << ucd->describe << std::endl;
-        std::cout << "label_used        : " << ucd->label_used.size() <<std::endl;
-        std::cout << "img_size_count    : " << img_size_count <<std::endl;
-        // std::cout << "obi_info_count    : " << ucd->object_info.size() <<std::endl;
-
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
-    else if(command_1 == "test_count_tags")
+    else if(command_1 == "cp")
     {
-        std::string uci_path = argv[2];
-        UCDataset* ucd = new UCDataset();
-        ucd->load_uci(uci_path);
-
-        std::map<std::string, std::map<std::string, int> > count_map = ucd->count_volume_tags();
-        int tag_count = 0;
-        int dete_obj_count=0; 
-        // print statistics res
-        auto iter_count = count_map.begin();
-        std::cout << "---------------------------------------------" << std::endl;
-        while(iter_count != count_map.end())
+        if(argc == 4)
         {
-            auto iter = iter_count->second.begin();
-            while(iter != iter_count->second.end())
-            {
-                dete_obj_count += iter->second;
-                std::cout << std::setw(15) << std::left << "[" + iter_count->first + "]" << std::setw(20) << std::left << iter->first  << " : " << iter->second << std::endl;
-                tag_count += 1;
-                iter++;
-            }
-            iter_count ++;
+            std::string uci_path = argv[2];
+            std::string save_path = argv[3];
+            ucd_util->copy_uci(uci_path, save_path);
         }
-        std::cout << "---------------------------" << std::endl;
-        std::cout << "number of uc  : " << ucd->uc_list.size() << std::endl;
-        std::cout << "number of tag : " << tag_count << std::endl;
-        std::cout << "number of obj : " << dete_obj_count << std::endl;
-        std::cout << "---------------------------------------------" << std::endl;
-
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "mv")
+    {
+        if(argc == 4)
+        {
+            std::string uci_path = argv[2];
+            std::string save_path = argv[3];
+            ucd_util->move_uci(uci_path, save_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {

@@ -215,7 +215,6 @@ void UCDataset::print_ucd_info()
     // print statistics res
     if(is_file(UCDataset::json_path))
     {
-        UCDataset::parse_ucd();
         // json 属性
         std::cout << "--------------------------------" << std::endl;
         std::cout << "dataset_name      : " << UCDataset::dataset_name << std::endl;
@@ -247,6 +246,51 @@ void UCDataset::print_ucd_info()
         std::cout << "ucd_path not exists : " << UCDataset::json_path << std::endl;
         return;
     }
+    std::cout << "--------------------------------" << std::endl;
+}
+
+void UCDataset::print_volume_info()
+{
+    // UCDataset* ucd = new UCDataset();
+    UCDataset::load_uci(UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".uci");
+
+    int img_size_count = 0;
+    int uc_count = 0;
+
+    for(int i=0; i<UCDataset::volume_count; i++)
+    {
+        UCDataset::parse_volume(i, false);
+        img_size_count += UCDataset::size_info.size();
+        uc_count += UCDataset::uc_list.size();
+    }
+
+    std::cout << "--------------------------------" << std::endl;
+    std::cout << "dataset_name      : " << UCDataset::dataset_name << std::endl;
+    std::cout << "uc_count          : " << UCDataset::uc_list.size() << std::endl;
+    std::cout << "model_name        : " << UCDataset::model_name << std::endl;
+    std::cout << "model_version     : " << UCDataset::model_version << std::endl;
+    std::cout << "add_time          : " << UCDataset::add_time << std::endl;
+    std::cout << "update_time       : " << UCDataset::update_time << std::endl;
+    std::cout << "describe          : " << UCDataset::describe << std::endl;
+    std::cout << "label_used        : " << UCDataset::label_used.size() <<std::endl;
+    std::cout << "img_size_count    : " << img_size_count <<std::endl;
+
+    // label used
+    if(UCDataset::label_used.size() > 0)
+    {
+        std::cout << "  ";
+        for(int i=0; i<UCDataset::label_used.size(); i++)
+        {
+            std::cout << UCDataset::label_used[i];
+            if(i != UCDataset::label_used.size()-1)
+            {
+                std::cout << ",";
+            }
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "--------------------------------" << std::endl;
+    std::cout << "volume count      : " << UCDataset::volume_count << std::endl;
     std::cout << "--------------------------------" << std::endl;
 }
 
@@ -1926,7 +1970,7 @@ void UCDataset::load_uci(std::string uci_path)
     while(true)
     {
         index += 1;
-        std::string volume_uci_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".u" + std::to_string(index);
+        std::string volume_uci_path = get_uci_path(index);
         if(is_file(volume_uci_path))
         {
             UCDataset::volume_count += 1;
@@ -1940,7 +1984,6 @@ void UCDataset::load_uci(std::string uci_path)
 
 void UCDataset::parse_volume(int volumn_index, bool parse_obi)
 {
-
     // 数据清空
     UCDataset::uc_list.clear();
     UCDataset::size_info.clear();
@@ -1948,7 +1991,7 @@ void UCDataset::parse_volume(int volumn_index, bool parse_obi)
     std::string uci_path;
     if(volumn_index == 0)
     {
-        uci_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".uci";
+        uci_path = UCDataset::get_uci_path(0);
         if(! is_file(uci_path))
         {
             std::cout << ERROR_COLOR<< "uci path not exists : " << uci_path << STOP_COLOR << std::endl;
@@ -1981,7 +2024,7 @@ void UCDataset::parse_volume(int volumn_index, bool parse_obi)
     }
     else
     {
-        uci_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".u" + std::to_string(volumn_index);
+        uci_path = get_uci_path(volumn_index);
         std::ifstream jsfile(uci_path);
         json data = json::parse(jsfile); 
         
@@ -1999,14 +2042,7 @@ void UCDataset::parse_volume(int volumn_index, bool parse_obi)
     if(parse_obi)
     {
         std::string obi_path;
-        if(volumn_index == 0)
-        {
-            obi_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".obi";
-        }
-        else
-        {
-            obi_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".o" + std::to_string(volumn_index);
-        }
+        obi_path = get_obi_path(volumn_index);
 
         if(! is_file(obi_path))
         {
@@ -2056,6 +2092,43 @@ void UCDataset::parse_volume(int volumn_index, bool parse_obi)
     }
 }
 
+std::string UCDataset::get_uci_path(int index)
+{
+    if(UCDataset::volume_name == "" | UCDataset::volumn_dir == "" | UCDataset::volume_count == 0)
+    {
+        std::cout << ERROR_COLOR << "volume_name volume_dir is empty" << STOP_COLOR << std::endl;
+    }
+
+    std::string uci_path;
+    if(index == 0)
+    {
+        uci_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".uci";
+    }
+    else
+    {
+        uci_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".u" + std::to_string(index);
+    }
+    return uci_path;
+}
+
+std::string UCDataset::get_obi_path(int index)
+{
+    if(UCDataset::volume_name == "" | UCDataset::volumn_dir == "" | UCDataset::volume_count == 0)
+    {
+        std::cout << ERROR_COLOR << "volume_name volume_dir is empty" << STOP_COLOR << std::endl;
+    }
+
+    std::string uci_path;
+    if(index == 0)
+    {
+        uci_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".obi";
+    }
+    else
+    {
+        uci_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".o" + std::to_string(index);
+    }
+    return uci_path;
+}
 
 
 // 
@@ -2419,8 +2492,23 @@ void UCDatasetUtil::get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_pa
     delete ucd;
 }
 
-void UCDatasetUtil::get_ucd_from_huge_xml_dir(std::string xml_dir, std::string save_dir, std::string ucd_name)
+void UCDatasetUtil::get_ucd_from_huge_xml_dir(std::string xml_dir, std::string save_path)
 {
+    std::string save_dir = get_file_folder(save_path);
+    std::string save_name = get_file_name(save_path);
+
+    if(! is_write_dir(save_dir))
+    {
+        std::cout << ERROR_COLOR << "save dir is not writeable : " << save_dir << STOP_COLOR << std::endl;
+        return;
+    }
+
+    if(! pystring::endswith(save_path, ".uci"))
+    {
+        std::cout << ERROR_COLOR << "save_path not end with .uci : " << STOP_COLOR << save_path << std::endl;
+        return;
+    }
+
     std::set<std::string> suffix {".xml"};
     std::vector<std::string> xml_path_vector = get_all_file_path_recursive(xml_dir, suffix);
     UCDataset* ucd = new UCDataset();
@@ -2459,7 +2547,7 @@ void UCDatasetUtil::get_ucd_from_huge_xml_dir(std::string xml_dir, std::string s
         // 保存一个分卷的数据
         if(info_count > 3 * 1000 * 1000)
         {
-            ucd->save_to_huge_ucd(save_dir, ucd_name, volume_count);
+            ucd->save_to_huge_ucd(save_dir, save_name, volume_count);
             volume_count += 1;
             info_count = 0;
 
@@ -2475,7 +2563,7 @@ void UCDatasetUtil::get_ucd_from_huge_xml_dir(std::string xml_dir, std::string s
     // 处理剩下的数据
     if(info_count > 0)
     {
-        ucd->save_to_huge_ucd(save_dir, ucd_name, volume_count);
+        ucd->save_to_huge_ucd(save_dir, save_name, volume_count);
     }
 
     bar.finish();
@@ -2619,11 +2707,24 @@ bool UCDatasetUtil::is_ucd_path(std::string ucd_path)
     }
 }
 
+bool UCDatasetUtil::is_uci_path(std::string uci_path)
+{
+    if((! is_file(uci_path)) || (uci_path.substr(uci_path.size()-4, 4) != ".uci"))
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
 void UCDatasetUtil::count_ucd_tags(std::string ucd_path)
 {
     if(! UCDatasetUtil::is_ucd_path(ucd_path))
     {
         std::cout << ERROR_COLOR << "ucd path not exists : " << ucd_path << STOP_COLOR << std::endl;
+        return;
     }
     int tag_count = 0;
     int dete_obj_count=0; 
@@ -2648,6 +2749,43 @@ void UCDatasetUtil::count_ucd_tags(std::string ucd_path)
         iter_count ++;
     }
     std::cout << "---------------------------" << std::endl;
+    std::cout << "number of uc  : " << ucd->uc_list.size() << std::endl;
+    std::cout << "number of tag : " << tag_count << std::endl;
+    std::cout << "number of obj : " << dete_obj_count << std::endl;
+    std::cout << "---------------------------------------------" << std::endl;
+    delete ucd;
+}
+
+void UCDatasetUtil::count_volume_tags(std::string uci_path)
+{
+    if(! UCDatasetUtil::is_uci_path(uci_path))
+    {
+        std::cout << ERROR_COLOR << "uci path not exists or ios not uci path: " << uci_path << STOP_COLOR << std::endl;
+        return;
+    }
+
+    UCDataset* ucd = new UCDataset();
+    ucd->load_uci(uci_path);
+
+    std::map<std::string, std::map<std::string, int> > count_map = ucd->count_volume_tags();
+    int tag_count = 0;
+    int dete_obj_count=0; 
+    // print statistics res
+    auto iter_count = count_map.begin();
+    std::cout << "---------------------------------------------" << std::endl;
+    while(iter_count != count_map.end())
+    {
+        auto iter = iter_count->second.begin();
+        while(iter != iter_count->second.end())
+        {
+            dete_obj_count += iter->second;
+            std::cout << std::setw(15) << std::left << "[" + iter_count->first + "]" << std::setw(20) << std::left << iter->first  << " : " << iter->second << std::endl;
+            tag_count += 1;
+            iter++;
+        }
+        iter_count ++;
+    }
+    std::cout << "---------------------------------------------" << std::endl;
     std::cout << "number of uc  : " << ucd->uc_list.size() << std::endl;
     std::cout << "number of tag : " << tag_count << std::endl;
     std::cout << "number of obj : " << dete_obj_count << std::endl;
@@ -3400,12 +3538,12 @@ void UCDatasetUtil::get_random_color_map(std::string ucd_path)
     std::cout << WARNNING_COLOR << "color file : " << UCDatasetUtil::color_file << STOP_COLOR << std::endl;
 }
 
-void UCDatasetUtil::list_ucd(std::string folder_path)
+void UCDatasetUtil::list_uci(std::string folder_path)
 {
 
     if(! is_read_dir(folder_path))
     {
-        std::cout << ERROR_COLOR << "folder is not readable : " << folder_path << std::endl;
+        std::cout << ERROR_COLOR << "folder is not readable : " << folder_path << STOP_COLOR << std::endl;
         return;
     }
 
@@ -3452,3 +3590,131 @@ void UCDatasetUtil::list_ucd(std::string folder_path)
     }
     std::cout << "-----------------------------------------------------" << std::endl;
 }
+
+void UCDatasetUtil::delete_uci(std::string uci_path)
+{
+    // 找到 uci 对应的所有分卷，直接删除
+
+    if(! UCDatasetUtil::is_uci_path(uci_path))
+    {
+        std::cout << ERROR_COLOR << "not uci path : " << uci_path << STOP_COLOR << std::endl;
+        return;
+    }
+
+    UCDataset* ucd = new UCDataset();
+    ucd->load_uci(uci_path);
+
+    for(int i=0; i<ucd->volume_count; i++)
+    {
+        std::string uci_path = ucd->get_uci_path(i);
+        std::string obi_path = ucd->get_obi_path(i);
+
+        if(is_file(uci_path))
+        {
+            remove(uci_path.c_str());
+        }
+        if(is_file(obi_path))
+        {
+            remove(obi_path.c_str());
+        }
+    }
+    delete ucd;
+}
+
+void UCDatasetUtil::copy_uci(std::string uci_path, std::string save_path)
+{
+    if(! UCDatasetUtil::is_uci_path(uci_path))
+    {
+        std::cout << ERROR_COLOR << "not uci path : " << uci_path << STOP_COLOR << std::endl;
+        return;
+    }
+
+    std::string save_dir = get_file_folder(save_path);
+    std::string save_name = get_file_name(save_path);
+
+    if(! is_write_dir(save_dir))
+    {
+        std::cout << ERROR_COLOR << "save_dir is not writeable : " << STOP_COLOR << save_dir << std::endl;
+        return;
+    }
+
+    if(! pystring::endswith(save_path, ".uci"))
+    {
+        std::cout << ERROR_COLOR << "save_path not end with .uci : " << STOP_COLOR << save_path << std::endl;
+        return;
+    }
+
+    UCDataset* ucd = new UCDataset();
+    ucd->load_uci(uci_path);
+
+    for(int i=0; i<ucd->volume_count; i++)
+    {
+        std::string uci_path = ucd->get_uci_path(i);
+        std::string obi_path = ucd->get_obi_path(i);
+        std::string uci_suffix = get_file_suffix(uci_path);
+        std::string obi_suffix = get_file_suffix(obi_path);
+        std::string save_uci_path = save_dir + "/" + save_name + uci_suffix; 
+        std::string save_obi_path = save_dir + "/" + save_name + obi_suffix; 
+
+        std::cout << uci_path << std::endl;
+        std::cout << save_uci_path << std::endl;
+
+        if(is_file(uci_path))
+        {
+            copy_file(uci_path, save_uci_path);
+        }
+        if(is_file(obi_path))
+        {
+            copy_file(obi_path, save_obi_path);
+        }
+    }
+    delete ucd;
+}
+
+void UCDatasetUtil::move_uci(std::string uci_path, std::string save_path)
+{
+    if(! UCDatasetUtil::is_uci_path(uci_path))
+    {
+        std::cout << ERROR_COLOR << "not uci path : " << uci_path << STOP_COLOR << std::endl;
+        return;
+    }
+
+    std::string save_dir = get_file_folder(save_path);
+    std::string save_name = get_file_name(save_path);
+
+    if(! is_write_dir(save_dir))
+    {
+        std::cout << ERROR_COLOR << "save_dir is not writeable : " << STOP_COLOR << save_dir << std::endl;
+        return;
+    }
+
+    if(! pystring::endswith(save_path, ".uci"))
+    {
+        std::cout << ERROR_COLOR << "save_path not end with .uci : " << STOP_COLOR << save_path << std::endl;
+        return;
+    }
+
+    UCDataset* ucd = new UCDataset();
+    ucd->load_uci(uci_path);
+
+    for(int i=0; i<ucd->volume_count; i++)
+    {
+        std::string uci_path = ucd->get_uci_path(i);
+        std::string obi_path = ucd->get_obi_path(i);
+        std::string uci_suffix = get_file_suffix(uci_path);
+        std::string obi_suffix = get_file_suffix(obi_path);
+        std::string save_uci_path = save_dir + "/" + save_name + uci_suffix; 
+        std::string save_obi_path = save_dir + "/" + save_name + obi_suffix; 
+
+        if(is_file(uci_path))
+        {
+            rename(uci_path.c_str(), save_uci_path.c_str());
+        }
+        if(is_file(obi_path))
+        {
+            rename(obi_path.c_str(), save_obi_path.c_str());
+        }
+    }
+    delete ucd;
+}
+

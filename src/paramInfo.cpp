@@ -363,10 +363,10 @@ void UcdParamOpt::load_param_info()
     // from_huge_xml
     ParamInfo * param_from_huge_xml = new ParamInfo("from_huge_xml");
     param_from_huge_xml->group = "convert";
-    param_from_huge_xml->grammar = "ucd param_from_huge_xml xml_dir save_dir save_name";
+    param_from_huge_xml->grammar = "ucd from_huge_xml xml_dir save_path";
     param_from_huge_xml->english_explain = "get ucd from loacal data(img, xml)";
-    param_from_huge_xml->chinese_explain = "(递归)本地 voc_xml 文件生成 ucd, ucd中包含 dete_obj 信息";   
-    param_from_huge_xml->demo.push_back("ucd param_from_huge_xml ./xml ./save_dir save_name        (将 ./xml 路径下面的名字符合 uc 规则的所有 xml 制作成 ucd)");
+    param_from_huge_xml->chinese_explain = "(递归)本地 voc_xml 文件生成 ucd, ucd 中包含 dete_obj 信息";   
+    param_from_huge_xml->demo.push_back("ucd from_huge_xml ./xml ./res.uci        (将 ./xml 路径下面的名字符合 uc 规则的所有 xml 制作成 uci 文件)");
     UcdParamOpt::add_param(param_from_huge_xml);
     
     // from_json
@@ -527,7 +527,7 @@ void UcdParamOpt::load_param_info()
     param_cache_info->demo.push_back("202     :     /home/suanfa-2/ucd_cache");
     param_cache_info->demo.push_back("21      :     /home/suanfa-2/ucd_cache");
     param_cache_info->demo.push_back("246     :     /home/ucd_cache/");
-    param_cache_info->demo.push_back("34      :     /home/ucd_cache");
+    param_cache_info->demo.push_back("34      :     /home/data/ucd_cache");
     param_cache_info->demo.push_back("107     :     /home/ucd_cache/");
     param_cache_info->demo.push_back("33      :     /home/data/ucd_cache");
     param_cache_info->demo.push_back("----------------------------------------");

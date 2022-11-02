@@ -69,6 +69,9 @@ class UCDataset
         // 打印 json 数据
         void print_ucd_info();
         
+        // 打印分卷信息
+        void print_volume_info();
+
         // 打印指定 uc 对应的信息
         void print_assign_uc_info(std::string uc);
         
@@ -184,6 +187,10 @@ class UCDataset
         // 清空数据，释放内存
         void clear_obj_info();
 
+        // 获取分卷路径, 0 是初始分卷
+        std::string get_uci_path(int index);
+        std::string get_obi_path(int index);
+
     private:
         std::string json_path;
 };
@@ -242,6 +249,9 @@ class UCDatasetUtil
         // 是不是 ucd path （1）是不是合法文件 （2）是否为 .json 结尾的文件
         bool is_ucd_path(std::string ucd_path);
         
+        // 是不是 uci path
+        bool is_uci_path(std::string uci_path);
+
         // 删除库中的 ucd
         void delete_ucd(std::string ucd_name);
         
@@ -255,7 +265,7 @@ class UCDatasetUtil
         void get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_path);
         
         // 从大量的 xml 中获取 ucd 数据集
-        void get_ucd_from_huge_xml_dir(std::string xml_dir, std::string save_dir, std::string ucd_name);
+        void get_ucd_from_huge_xml_dir(std::string xml_dir, std::string save_path);
 
         // 将 labelme json 信息保存到 ucd 中
         void get_ucd_from_json_dir(std::string json_dir, std::string ucd_path);
@@ -275,6 +285,9 @@ class UCDatasetUtil
         // 统计标签的个数
         void count_ucd_tags(std::string ucd_path);
         
+        // 统计分卷数据的个数
+        void count_volume_tags(std::string uci_path);
+
         // 清空缓存
         void cache_clear();
         void cache_clear(std::string ucd_path);
@@ -310,7 +323,17 @@ class UCDatasetUtil
         void get_random_color_map(std::string ucd_path);
 
         // 打印出文件夹中的 ucd 的信息
-        void list_ucd(std::string folder_path);
+        void list_uci(std::string folder_path);
+
+        // 删除指定的 uci 文件信息，包含所有的分卷
+        void delete_uci(std::string uci_path);
+
+        // 复制 uci
+        void copy_uci(std::string src, std::string dst);
+
+        // 移动 uci
+        void move_uci(std::string src, std::string dst);
+
 
     private:
         
