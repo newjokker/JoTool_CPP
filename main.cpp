@@ -121,7 +121,13 @@ using namespace std;
 
 // ls， 读取所有卷文件大小，因为可以指定每一卷文件的大小
 
-// count_tags 里面的 uc 个数是错的，需要进行处理。
+// 增加 tar 关键字 将 uci 分卷文件进行打包，方便 uci 文件的传播
+
+// 操作完了最好能显示做了什么操作，有什么影响
+
+// 超大数据集可以直接存储为存文本数据，这样可以一行一行读取，前面是头文件，就是数据的 uc 信息，以及不同的 uc 信息在多少行，这样的话只要遍历一下头文件就能快速拿到 data 数据，这样更加合理
+
+// 
 
 
 int main(int argc, char ** argv)
@@ -2163,6 +2169,9 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "uci_to_json")
     {
+        ucd_param_opt->not_ready("minus");
+        return -1;
+
         if(argc == 4)
         {
             std::string json_path   = argv[2];

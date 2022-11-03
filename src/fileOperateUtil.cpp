@@ -27,6 +27,35 @@ bool is_dir(std::string filefodler)
     return (stat (filefodler.c_str(), &buffer) == 0 && S_ISDIR(buffer.st_mode));
 }
 
+bool is_read_file(std::string file_path)
+{
+    if(! is_file(file_path))
+    {
+        return false;
+    }
+
+    if(access(file_path.c_str(), 4) != 0)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool is_write_file(std::string file_path)
+{
+    if(! is_file(file_path))
+    {
+        return false;
+    }
+  
+    if(access(file_path.c_str(), 2) != 0)
+    {
+        return false;
+    }
+    return true;
+}
+
+
 bool is_read_dir(std::string folder_path)
 {
     if(! is_dir(folder_path))

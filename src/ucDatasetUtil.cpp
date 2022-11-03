@@ -145,15 +145,15 @@ void UCDataset::parse_ucd(bool parse_shape_info)
     std::ifstream jsfile(UCDataset::json_path);
     json data = json::parse(jsfile); 
 
-    auto dataset_name = data["dataset_name"];
-    auto model_name = data["model_name"];
-    auto model_version = data["model_version"];
-    auto add_time = data["add_time"];
-    auto update_time = data["update_time"];
-    auto describe = data["describe"];
-    auto label_used = data["label_used"];
-    auto uc_list = data["uc_list"];
-    auto size_info = data["size_info"];
+    auto dataset_name   = data["dataset_name"];
+    auto model_name     = data["model_name"];
+    auto model_version  = data["model_version"];
+    auto add_time       = data["add_time"];
+    auto update_time    = data["update_time"];
+    auto describe       = data["describe"];
+    auto label_used     = data["label_used"];
+    auto uc_list        = data["uc_list"];
+    auto size_info      = data["size_info"];
 
     if(dataset_name != nullptr){ UCDataset::dataset_name = dataset_name; }
     if(model_name != nullptr){ UCDataset::model_name = model_name; }
@@ -2143,11 +2143,8 @@ void UCDataset::to_uci(std::string uci_path, int volume_size)
     int info_count          = 0;
     UCDataset* each_ucd     = new UCDataset();
 
-    tqdm bar;
-    int N = UCDataset::uc_list.size();
     for(int i=0; i<UCDataset::uc_list.size(); i++)
     {
-        bar.progress(i, N);
         std::string uc = UCDataset::uc_list[i];
         // uc
         info_count += 1;
@@ -2168,6 +2165,7 @@ void UCDataset::to_uci(std::string uci_path, int volume_size)
         if(info_count > (volume_size * 1000 * 100))
         {
             each_ucd->save_to_huge_ucd(save_dir, save_name, volume_count);
+            std::cout << "save volume : " << std::to_string(volume_count) << std::endl;
             volume_count   += 1;
             info_count      = 0;
             // clear each_ucd 
@@ -2177,11 +2175,11 @@ void UCDataset::to_uci(std::string uci_path, int volume_size)
             each_ucd->size_info.clear();
         }
     }
-    bar.finish();
     // the rest
     if(info_count > 0)
     {
         each_ucd->save_to_huge_ucd(save_dir, save_name, volume_count);
+        std::cout << "save volume : " << std::to_string(volume_count) << std::endl;
     }
     delete each_ucd;
 }
@@ -2333,7 +2331,14 @@ void UCDatasetUtil::load_img(std::string save_dir, std::vector<std::string> uc_l
             std::string img_cache_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc_list[i], suffix);
             if(is_file(img_cache_path))
             {
-                copy_file(img_cache_path, save_img_path);
+                if(is_read_file(img_cache_path))
+                {
+                    copy_file(img_cache_path, save_img_path);
+                }
+                else
+                {
+                    std::cout << WARNNING_COLOR << "img path dont have read access : " << img_cache_path << STOP_COLOR << std::endl;
+                }
             }
             else
             {
@@ -3807,5 +3812,16 @@ void UCDatasetUtil::json_to_uci(std::string json_path, std::string uci_path, int
 
 void UCDatasetUtil::uci_to_json(std::string uci_path, std::string json_path)
 {
-    
+
 }
+
+
+
+
+
+
+
+
+
+
+
