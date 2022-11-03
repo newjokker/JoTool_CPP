@@ -397,10 +397,11 @@ void UcdParamOpt::load_param_info()
     // from_huge_xml
     ParamInfo * param_from_huge_xml = new ParamInfo("from_huge_xml");
     param_from_huge_xml->group = "convert";
-    param_from_huge_xml->grammar = "ucd from_huge_xml xml_dir save_path";
+    param_from_huge_xml->grammar = "ucd from_huge_xml xml_dir save_path {volume_size}";
     param_from_huge_xml->english_explain = "get ucd from loacal data(img, xml)";
     param_from_huge_xml->chinese_explain = "(递归)本地 voc_xml 文件生成 ucd, ucd 中包含 dete_obj 信息";   
-    param_from_huge_xml->demo.push_back("ucd from_huge_xml ./xml ./res.uci        (将 ./xml 路径下面的名字符合 uc 规则的所有 xml 制作成 uci 文件)");
+    param_from_huge_xml->demo.push_back("ucd from_huge_xml ./xml ./res.uci          (将 ./xml 路径下面的名字符合 uc 规则的所有 xml 制作成 uci 文件)");
+    param_from_huge_xml->demo.push_back("ucd from_huge_xml ./xml ./res.uci  30      (将 ./xml 路径下面的名字符合 uc 规则的所有 xml 制作成 uci 文件, 卷大小为 30, 一卷数据大约 280M)");
     UcdParamOpt::add_param(param_from_huge_xml);
     
     // from_json
@@ -950,7 +951,24 @@ void UcdParamOpt::load_param_info()
     param_rm->demo.push_back("ucd rm ./uci_dir/test.uci                                     (删除 ./uci_dir/test.uci 和其对应的卷文件)");
     UcdParamOpt::add_param(param_rm);
 
+    // json_to_uci
+    ParamInfo * param_json_to_uci = new ParamInfo("json_to_uci");
+    param_json_to_uci->group = "convert";
+    param_json_to_uci->grammar = "ucd json_to_uci json_path uci_path {volume_size}";
+    param_json_to_uci->english_explain = "";
+    param_json_to_uci->chinese_explain = "将 ucd 从 .json 格式转为 .uci 格式";   
+    param_json_to_uci->demo.push_back("ucd json_to_uci test.json test.uci                   (将 test.json 文件转为 test.uci 分卷文件)");
+    param_json_to_uci->demo.push_back("ucd json_to_uci test.json test.uci   30              (将 test.json 文件转为 test.uci 分卷文件，指定每一卷大小为 30 大概 280M)");
+    UcdParamOpt::add_param(param_json_to_uci);
 
+    // uci_to_json
+    ParamInfo * param_uci_to_json = new ParamInfo("uci_to_json");
+    param_uci_to_json->group = "convert";
+    param_uci_to_json->grammar = "ucd uci_to_json uci_path json_path";
+    param_uci_to_json->english_explain = "";
+    param_uci_to_json->chinese_explain = "将 ucd 从 .uci 格式转为 .json 格式";   
+    param_uci_to_json->demo.push_back("ucd json_to_uci test.uci test.json                   (将 test.uci 文件转为 test.json 分卷文件)");
+    UcdParamOpt::add_param(param_uci_to_json);
 }
 
 void UcdParamOpt::not_ready(std::string method_name)

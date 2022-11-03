@@ -55,7 +55,7 @@ class UCDataset
         // 构造函数
         UCDataset(std::string ucd_path="");
         
-        ~UCDataset();
+        // ~UCDataset();
         
         // 解析 ucd 数据
         void parse_ucd(bool parse_xml_info=false);
@@ -191,6 +191,12 @@ class UCDataset
         std::string get_uci_path(int index);
         std::string get_obi_path(int index);
 
+        // 保存为 json 数据
+        void to_json(std::string json_path);
+
+        // 保存为 uci 数据
+        void to_uci(std::string uci_path, int volume_size=30);
+
     private:
         std::string json_path;
 };
@@ -265,7 +271,7 @@ class UCDatasetUtil
         void get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_path);
         
         // 从大量的 xml 中获取 ucd 数据集
-        void get_ucd_from_huge_xml_dir(std::string xml_dir, std::string save_path);
+        void get_ucd_from_huge_xml_dir(std::string xml_dir, std::string save_path, int volume_size=30);
 
         // 将 labelme json 信息保存到 ucd 中
         void get_ucd_from_json_dir(std::string json_dir, std::string ucd_path);
@@ -333,6 +339,12 @@ class UCDatasetUtil
 
         // 移动 uci
         void move_uci(std::string src, std::string dst);
+
+        // 将 json 保存的 ucd 换成 uci 保存的 ucd
+        void json_to_uci(std::string json_path, std::string uci_path, int volume_size=30);
+
+        // 将 uci 保存的 ucd 换乘 json 保存的 ucd 
+        void uci_to_json(std::string uci_path, std::string json_path);
 
 
     private:

@@ -123,15 +123,16 @@ UCDataset::UCDataset(std::string json_path)
     UCDataset::volume_count = 0;
 }
 
-UCDataset::~UCDataset()
-{
-    // 删除 obj 信息
-    UCDataset::clear_obj_info();
-    // 
-    UCDataset::object_info.clear();
-    UCDataset::size_info.clear();
-    UCDataset::uc_list.clear();
-}
+// UCDataset::~UCDataset()
+// 使用析构函数之后 delete ucd 会报错，不知道原因
+// {
+//     // 删除 obj 信息
+//     UCDataset::clear_obj_info();
+//     // 
+//     UCDataset::object_info.clear();
+//     UCDataset::size_info.clear();
+//     UCDataset::uc_list.clear();
+// }
 
 void UCDataset::parse_ucd(bool parse_shape_info)
 {
@@ -2134,6 +2135,56 @@ std::string UCDataset::get_obi_path(int index)
     return uci_path;
 }
 
+void UCDataset::to_uci(std::string uci_path, int volume_size)
+{
+    std::string save_dir    = get_file_folder(uci_path);
+    std::string save_name   = get_file_name(uci_path);
+    int volume_count        = 0;
+    int info_count          = 0;
+    UCDataset* each_ucd     = new UCDataset();
+
+    tqdm bar;
+    int N = UCDataset::uc_list.size();
+    for(int i=0; i<UCDataset::uc_list.size(); i++)
+    {
+        bar.progress(i, N);
+        std::string uc = UCDataset::uc_list[i];
+        // uc
+        info_count += 1;
+        each_ucd->uc_list.push_back(uc);
+        // size info
+        if(UCDataset::size_info.count(uc) > 0)
+        {
+            info_count += 2;
+            each_ucd->size_info[uc] = UCDataset::size_info[uc];
+        }
+        // obj_info
+        if(UCDataset::object_info.count(uc) > 0)
+        {
+            info_count += UCDataset::object_info[uc].size() * 4;
+            each_ucd->object_info[uc] = UCDataset::object_info[uc];
+        }
+        // save uci
+        if(info_count > (volume_size * 1000 * 100))
+        {
+            each_ucd->save_to_huge_ucd(save_dir, save_name, volume_count);
+            volume_count   += 1;
+            info_count      = 0;
+            // clear each_ucd 
+            each_ucd->clear_obj_info();
+            each_ucd->object_info.clear();
+            each_ucd->uc_list.clear();
+            each_ucd->size_info.clear();
+        }
+    }
+    bar.finish();
+    // the rest
+    if(info_count > 0)
+    {
+        each_ucd->save_to_huge_ucd(save_dir, save_name, volume_count);
+    }
+    delete each_ucd;
+}
 
 // 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
@@ -2478,7 +2529,8 @@ void UCDatasetUtil::get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_pa
     std::vector<std::string> xml_path_vector = get_all_file_path_recursive(xml_dir, suffix);
     UCDataset* ucd = new UCDataset(ucd_path);
     std::string uc;
-
+    int is_uc_count  = 0; 
+    int not_uc_count = 0;
     tqdm bar;
     int N = xml_path_vector.size();
     for(int i=0; i<xml_path_vector.size(); i++)
@@ -2486,17 +2538,26 @@ void UCDatasetUtil::get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_pa
         uc = get_file_name(xml_path_vector[i]);
         if(is_uc(uc))
         {
-            // std::cout << i << ", add labelme json : " << xml_path_vector[i] << std::endl;
             ucd->add_voc_xml_info(uc, xml_path_vector[i]);
+            is_uc_count += 1;
+        }
+        else
+        {
+            not_uc_count += 1;
         }
         bar.progress(i, N);
     }
     bar.finish();
     ucd->save_to_ucd(ucd_path);
+
+    // print
+    std::cout << "is  uc count : " << is_uc_count << std::endl;
+    std::cout << "not uc count : " << not_uc_count << std::endl;
+
     delete ucd;
 }
 
-void UCDatasetUtil::get_ucd_from_huge_xml_dir(std::string xml_dir, std::string save_path)
+void UCDatasetUtil::get_ucd_from_huge_xml_dir(std::string xml_dir, std::string save_path, int volume_size)
 {
     std::string save_dir = get_file_folder(save_path);
     std::string save_name = get_file_name(save_path);
@@ -2523,7 +2584,9 @@ void UCDatasetUtil::get_ucd_from_huge_xml_dir(std::string xml_dir, std::string s
 
     int volume_count    = 0;
     int info_count      = 0;
+    int is_uc_count     = 0; 
     int not_uc_count    = 0;
+    
     for(int i=0; i<xml_path_vector.size(); i++)
     {
         info_count += 1;
@@ -2531,7 +2594,8 @@ void UCDatasetUtil::get_ucd_from_huge_xml_dir(std::string xml_dir, std::string s
         if(is_uc(uc))
         {
             ucd->add_voc_xml_info(uc, xml_path_vector[i]);
-            
+            is_uc_count += 1;
+
             if(ucd->object_info.count(uc) > 0)
             {
                 info_count += ucd->object_info[uc].size() * 4;
@@ -2549,7 +2613,7 @@ void UCDatasetUtil::get_ucd_from_huge_xml_dir(std::string xml_dir, std::string s
         bar.progress(i, N);
 
         // 保存一个分卷的数据
-        if(info_count > 3 * 1000 * 1000)
+        if(info_count > (volume_size * 1000 * 100))
         {
             ucd->save_to_huge_ucd(save_dir, save_name, volume_count);
             volume_count += 1;
@@ -2563,14 +2627,17 @@ void UCDatasetUtil::get_ucd_from_huge_xml_dir(std::string xml_dir, std::string s
         }
     }
 
-
-    // 处理剩下的数据
+    // the rest
     if(info_count > 0)
     {
         ucd->save_to_huge_ucd(save_dir, save_name, volume_count);
     }
-
     bar.finish();
+    
+    // print 
+    std::cout << "is  uc count : " << is_uc_count << std::endl;
+    std::cout << "not uc count : " << not_uc_count << std::endl;
+    
     delete ucd;
 }
 
@@ -2790,7 +2857,6 @@ void UCDatasetUtil::count_volume_tags(std::string uci_path)
         iter_count ++;
     }
     std::cout << "---------------------------------------------" << std::endl;
-    std::cout << "number of uc  : " << ucd->uc_list.size() << std::endl;
     std::cout << "number of tag : " << tag_count << std::endl;
     std::cout << "number of obj : " << dete_obj_count << std::endl;
     std::cout << "---------------------------------------------" << std::endl;
@@ -3719,3 +3785,27 @@ void UCDatasetUtil::move_uci(std::string uci_path, std::string save_path)
     delete ucd;
 }
 
+void UCDatasetUtil::json_to_uci(std::string json_path, std::string uci_path, int volume_size)
+{
+    if(! UCDatasetUtil::is_ucd_path(json_path))
+    {
+        std::cout << ERROR_COLOR << "json path is not legal : " << json_path << STOP_COLOR << std::endl;
+        return;
+    }
+ 
+    if(! pystring::endswith(uci_path, ".uci"))
+    {
+        std::cout << ERROR_COLOR << "uci path is not legal : " << uci_path << STOP_COLOR << std::endl;
+        return;
+    }
+
+    UCDataset* ucd = new UCDataset(json_path);
+    ucd->parse_ucd(true);
+    ucd->to_uci(uci_path, volume_size);
+    delete ucd;
+}
+
+void UCDatasetUtil::uci_to_json(std::string uci_path, std::string json_path)
+{
+    
+}

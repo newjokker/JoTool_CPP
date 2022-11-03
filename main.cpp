@@ -110,30 +110,18 @@ using namespace std;
 
 // 定时任务 + 一次检测一个 文件夹 ucd + 检测结果也是 ucd Die_prebase_0_5_0, 这样的话只要分析一下 uc_analysis 就知道要下载哪些 ucd 进行 absorb
 
-// 读取头文件和读取矩阵的方式判断长宽，看看结果是不是一致，手机拍的很多图片结果有问题
-
-// 处理超级大的 xml 集合生成 ucd 
-// 可以根据前两位将 ucd 分为多个小的 ucd, 后缀可以用 .subjson 这样的方式，暗示有其他的合并数据集，
-// 可以参考 bandizip 压缩为多个分卷的方式，test.json test.j01 test.j02 test.j03 类似这样的设置多个分卷，
-// 需要同时提供数据集操作函数 move delete copy list 最基本的函数，方便有多个分卷的数据集的查看和操作
-    // ucd list ./  只打印数据集信息，也用星号对应标记是否有 obi szi uci 三个文件，只有包含 uci 和 其他的文件的时候才能称作一个完整的文件
-    // uci 用不用分区来设置？和对应的 szi obi 分成区块的个数是一致的？
-    // test.u01, test.s01, test.o01 分别代表了第一个分卷
-    // 每个分卷的大小是固定的 uc + size_info * 2 + obj_info * obj_count, 数量为 20000 的时候作为一个分卷 
-
-// 尝试将数据集中的 uc_list size_info object_info 放到不同的文件中去，这样的话就可以迅速读取需要的数据，而不用将无用的数据一并读取了
-    // test.size_info + test.uc_json    ==> test.uci
-    // test.object_info                 ==> test.obi
-
-
 // ucd tar, ucd untar 将一个数据集打包到有一起方便用 ucd 之外的工具进行操作
-
-// from_xml 要记录被排除的 非 uc 有多少个，很多次拿没有命名的 数据生成 ucd 都是空的
 
 // 写一个规则打印的函数，每次都要查询烦得要死，还不如自己实现一个
 
 // 先同时支持 .json 数据 和 .uci 数据，后期等实际使用后的结果再去分开
 
+// json_to_uci 可以指定每一卷的大小，from_huge_xml 也要能指定每一卷的大小
+// uci_to_json  不做内存大小限制，内存不够的话直接就报错了
+
+// ls， 读取所有卷文件大小，因为可以指定每一卷文件的大小
+
+// count_tags 里面的 uc 个数是错的，需要进行处理。
 
 
 int main(int argc, char ** argv)
@@ -163,7 +151,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v2.0.1";
+    std::string app_version = "v2.0.3";
 
     // cache dir
     std::string cache_dir;
@@ -546,13 +534,18 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "from_huge_xml")
     {
-        // 从非常大量的 xml 中生成 ucd 文件
-
-        if(argc == 4)
+        if(argc == 4 or argc == 5)
         {
             std::string xml_dir = argv[2];
             std::string save_path = argv[3];
-            ucd_util->get_ucd_from_huge_xml_dir(xml_dir, save_path);
+            int volume_size = 30;                   // 30 大概 280M
+
+            if(argc == 5)
+            {
+                std::string volume_size_str = argv[4];
+                volume_size = std::stoi(volume_size_str);
+            }
+            ucd_util->get_ucd_from_huge_xml_dir(xml_dir, save_path, volume_size);
         }
         else
         {
@@ -996,10 +989,8 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "xml_check")
     {
-
         ucd_param_opt->not_ready(command_1);
         return -1;
-
 
         if ((argc == 6))
         {
@@ -2145,6 +2136,38 @@ int main(int argc, char ** argv)
             std::string uci_path = argv[2];
             std::string save_path = argv[3];
             ucd_util->move_uci(uci_path, save_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "json_to_uci")
+    {
+        if(argc == 4 || argc == 5)
+        {
+            std::string json_path   = argv[2];
+            std::string uci_path    = argv[3];
+            int volume_size         = 30;
+            if(argc == 5)
+            {
+                std::string volume_size_str = argv[4];
+                volume_size = std::stoi(volume_size_str);
+            }
+            ucd_util->json_to_uci(json_path, uci_path, volume_size);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "uci_to_json")
+    {
+        if(argc == 4)
+        {
+            std::string json_path   = argv[2];
+            std::string uci_path    = argv[3];
+            // ucd_util->uci_to_json(uci_path, json_path);
         }
         else
         {
