@@ -55,7 +55,6 @@ bool is_write_file(std::string file_path)
     return true;
 }
 
-
 bool is_read_dir(std::string folder_path)
 {
     if(! is_dir(folder_path))
@@ -345,3 +344,7 @@ int get_file_size(std::string file_path)
     int size=statbuf.st_size;  
     return size;  
 }
+
+
+
+

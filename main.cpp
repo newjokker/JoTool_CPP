@@ -157,7 +157,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v2.0.3";
+    std::string app_version = "v2.0.4";
 
     // cache dir
     std::string cache_dir;
@@ -728,6 +728,21 @@ int main(int argc, char ** argv)
         {
             ucd_param_opt->print_command_info("minus");
             return -1;
+        }
+    }
+    else if(command_1 == "interset")
+    {
+        // 交集
+        if(argc == 5)
+        {
+            std::string ucd_path_a  = argv[4];
+            std::string ucd_path_b  = argv[3];
+            std::string save_path   = argv[2];
+            ucd_util->interset_ucds(save_path, ucd_path_a, ucd_path_b);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
         }
     }
     else if(command_1 == "meta")

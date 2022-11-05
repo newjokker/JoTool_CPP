@@ -286,6 +286,9 @@ class UCDatasetUtil
         // 将多个 ucd 进行合并
         void merge_ucds(std::string save_path, std::vector<std::string> ucd_path_vector);
         
+        // 求两个 ucd 的交集
+        void interset_ucds(std::string save_path, std::string ucd_path_a, std::string ucd_path_b);
+
         // 查看两个 ucd 之间的差异
         void ucd_diff(std::string ucd_path_1, std::string ucd_path_2);
         

@@ -366,7 +366,7 @@ std::map<std::string, std::map<std::string, int> > UCDataset::count_volume_tags(
     for(int i=0; i<UCDataset::volume_count; i++)
     {
         bar.progress(i, N);
-        UCDataset::parse_volume(i, true);
+        UCDataset::parse_volume(i, false, true);
         
         auto iter = UCDataset::object_info.begin();
         while(iter != UCDataset::object_info.end())
@@ -3890,7 +3890,23 @@ void UCDatasetUtil::uci_to_json(std::string uci_path, std::string json_path)
 
 }
 
+void UCDatasetUtil::interset_ucds(std::string save_path, std::string ucd_path_a, std::string ucd_path_b)
+{
+    UCDataset* ucd_a = new UCDataset(ucd_path_a);
+    UCDataset* ucd_b = new UCDataset(ucd_path_b);
+    UCDataset* ucd_res = new UCDataset(save_path);
 
+    ucd_a->parse_ucd(false);
+    ucd_b->parse_ucd(false);
+
+    std::vector<std::string> uc_intersection;
+    std::set<std::string> uc_set1(ucd_a->uc_list.begin(), ucd_a->uc_list.end());
+    std::set<std::string> uc_set2(ucd_b->uc_list.begin(), ucd_b->uc_list.end());
+    std::set_intersection(uc_set1.begin(), uc_set1.end(), uc_set2.begin(), uc_set2.end(), std::inserter(uc_intersection, uc_intersection.begin()));
+
+    ucd_res->uc_list = uc_intersection;
+    ucd_res->save_to_ucd(save_path);
+}
 
 
 
