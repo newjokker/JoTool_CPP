@@ -502,6 +502,10 @@ int main(int argc, char ** argv)
                 ucd->load_uci(ucd_path);
                 ucd->print_volume_info();
             }
+            else
+            {
+                std::cout << ERROR_COLOR << "illegal uci path : " << ucd_path << STOP_COLOR << std::endl;
+            }
             delete ucd;
         }
         else
@@ -2182,6 +2186,10 @@ int main(int argc, char ** argv)
         {
             ucd_param_opt->print_command_info(command_1);
         }
+    }
+    else if(command_1 == "obi_to_obi")
+    {
+        // 重新划分分卷大小
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {

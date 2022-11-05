@@ -37,6 +37,9 @@ class UCDataset
         // 分卷个数
         int volume_count;
 
+        // 分卷大小 
+        int volume_size;
+
         // 分卷文件夹
         std::string volumn_dir;
 
@@ -64,7 +67,7 @@ class UCDataset
         void load_uci(std::string uci_path);
 
         // 解析某一个分卷 volume，解析一个分卷的时候需要对旧的分卷进行清空的？
-        void parse_volume(int volumn_index, bool parse_obi=false);
+        void parse_volume(int volumn_index, bool parse_szi=false, bool parse_obi=false);
 
         // 打印 json 数据
         void print_ucd_info();
@@ -190,6 +193,7 @@ class UCDataset
         // 获取分卷路径, 0 是初始分卷
         std::string get_uci_path(int index);
         std::string get_obi_path(int index);
+        std::string get_szi_path(int index);
 
         // 保存为 json 数据
         void to_json(std::string json_path);

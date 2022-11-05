@@ -112,15 +112,15 @@ static void write_color_map(std::map< std::string, Color > color_map, std::strin
 
 UCDataset::UCDataset(std::string json_path)
 {
-    UCDataset::dataset_name = "";
-    UCDataset::model_name = "";
-    UCDataset::model_version = "";
-    std::vector<std::string> label_used;
-    UCDataset::add_time = -1;
-    UCDataset::update_time = -1;
-    UCDataset::describe = "";
-    UCDataset::json_path = json_path;
-    UCDataset::volume_count = 0;
+    UCDataset::dataset_name     = "";
+    UCDataset::model_name       = "";
+    UCDataset::model_version    = "";
+    UCDataset::add_time         = -1;
+    UCDataset::update_time      = -1;
+    UCDataset::describe         = "";
+    UCDataset::json_path        = json_path;
+    UCDataset::volume_count     = 0;
+    UCDataset::volume_size      = -1;
 }
 
 // UCDataset::~UCDataset()
@@ -278,7 +278,7 @@ void UCDataset::print_volume_info()
     std::cout << "update_time       : " << UCDataset::update_time << std::endl;
     std::cout << "describe          : " << UCDataset::describe << std::endl;
     std::cout << "label_used        : " << UCDataset::label_used.size() <<std::endl;
-    std::cout << "img_size_count    : " << img_size_count <<std::endl;
+    // std::cout << "img_size_count    : " << img_size_count <<std::endl;
 
     // label used
     if(UCDataset::label_used.size() > 0)
@@ -295,6 +295,7 @@ void UCDataset::print_volume_info()
         std::cout << std::endl;
     }
     std::cout << "--------------------------------" << std::endl;
+    std::cout << "volume_size       : " << UCDataset::volume_size <<std::endl;
     std::cout << "volume count      : " << UCDataset::volume_count << std::endl;
     std::cout << "--------------------------------" << std::endl;
 }
@@ -1892,16 +1893,17 @@ void UCDataset::save_to_huge_ucd(std::string save_dir, std::string save_name, in
     //  uci 和 obi 两个文件进行保存
 
     nlohmann::json uci_info = {
-        {"dataset_name", UCDataset::dataset_name},
-        {"model_name", UCDataset::model_name},
-        {"model_version", UCDataset::model_version},
-        {"add_time", UCDataset::add_time},
-        {"update_time", UCDataset::update_time},
-        {"describe", UCDataset::describe},
-        {"label_used", UCDataset::label_used},
-        {"uc_list", UCDataset::uc_list},
-        {"shapes", {}},
-        {"size_info", UCDataset::size_info}
+        {"dataset_name",    UCDataset::dataset_name},
+        {"model_name",      UCDataset::model_name},
+        {"model_version",   UCDataset::model_version},
+        {"add_time",        UCDataset::add_time},
+        {"update_time",     UCDataset::update_time},
+        {"describe",        UCDataset::describe},
+        {"label_used",      UCDataset::label_used},
+        {"uc_list",         UCDataset::uc_list},
+        {"volume_size",     UCDataset::volume_size},
+        // {"size_info",       UCDataset::size_info},
+        // {"shapes",          {}},
     };
 
     std::map<std::string, std::vector<nlohmann::json> > shapes_info;
@@ -1909,39 +1911,47 @@ void UCDataset::save_to_huge_ucd(std::string save_dir, std::string save_name, in
     while(iter != UCDataset::object_info.end())
     {
         std::vector<LabelmeObj*> obj_vector = iter->second; 
-
         for(int i=0; i<iter->second.size(); i++)
         {
             nlohmann::json each_obj;
-            each_obj["shape_type"] = obj_vector[i]->shape_type;
-            each_obj["label"] = obj_vector[i]->label;
-            each_obj["points"] = obj_vector[i]->points;
-            each_obj["conf"] = obj_vector[i]->conf;
+            each_obj["shape_type"]  = obj_vector[i]->shape_type;
+            each_obj["label"]       = obj_vector[i]->label;
+            each_obj["points"]      = obj_vector[i]->points;
+            each_obj["conf"]        = obj_vector[i]->conf;
             shapes_info[iter->first].push_back(each_obj);
         }
         iter++;
     }  
     
-    std::string uci_path, obi_path;
-    
+    std::string uci_path, obi_path, szi_path;
     if(volume_index == 0)
     {
         uci_path = save_dir + "/" + save_name + ".uci";
         obi_path = save_dir + "/" + save_name + ".obi";
+        szi_path = save_dir + "/" + save_name + ".szi";
     }
     else
     {
         uci_path = save_dir + "/" + save_name + ".u" + std::to_string(volume_index);
         obi_path = save_dir + "/" + save_name + ".o" + std::to_string(volume_index);
+        szi_path = save_dir + "/" + save_name + ".s" + std::to_string(volume_index);
     }
     
+    // uci_info
     std::ofstream o1(uci_path);
     o1 << std::setw(4) << uci_info << std::endl;
-
+    
+    // obi_info
     nlohmann::json obi_info = {};
     obi_info["shapes"] = shapes_info;
     std::ofstream o2(obi_path);
     o2 << std::setw(4) << obi_info << std::endl;
+
+    // szi_info
+    nlohmann::json size_info = {};
+    size_info["size_info"] = UCDataset::size_info;
+    std::ofstream o3(szi_path);
+    o3 << std::setw(4) << size_info << std::endl;
 
 }
 
@@ -1987,7 +1997,7 @@ void UCDataset::load_uci(std::string uci_path)
     }
 }
 
-void UCDataset::parse_volume(int volumn_index, bool parse_obi)
+void UCDataset::parse_volume(int volumn_index, bool parse_szi, bool parse_obi)
 {
     // 数据清空
     UCDataset::uc_list.clear();
@@ -2014,7 +2024,7 @@ void UCDataset::parse_volume(int volumn_index, bool parse_obi)
         auto describe       = data["describe"];
         auto label_used     = data["label_used"];
         auto uc_list        = data["uc_list"];
-        auto size_info      = data["size_info"];
+        auto volume_size    = data["volume_size"];
 
         if(dataset_name     != nullptr) { UCDataset::dataset_name = dataset_name; }
         if(model_name       != nullptr) { UCDataset::model_name = model_name; }
@@ -2024,7 +2034,7 @@ void UCDataset::parse_volume(int volumn_index, bool parse_obi)
         if(describe         != nullptr) { UCDataset::describe = describe; }
         if(label_used       != nullptr) { UCDataset::label_used = label_used; }
         if(uc_list          != nullptr) { UCDataset::uc_list = uc_list; }
-        if(size_info        != nullptr) { UCDataset::size_info = size_info; }
+        if(volume_size      != nullptr) { UCDataset::volume_size = volume_size; }
         UCDataset::unique();
     }
     else
@@ -2034,15 +2044,25 @@ void UCDataset::parse_volume(int volumn_index, bool parse_obi)
         json data = json::parse(jsfile); 
         
         auto uc_list = data["uc_list"];
-        auto size_info = data["size_info"];
         
         if(uc_list          != nullptr) { UCDataset::uc_list = uc_list; }
-        if(size_info        != nullptr) { UCDataset::size_info = size_info; }
         UCDataset::unique();
     }
 
     // 先清空 obj 信息
     UCDataset::clear_obj_info();
+
+    if(parse_szi)
+    {
+        std::string szi_path;
+        szi_path = get_szi_path(volumn_index);
+
+        std::ifstream jsfile(szi_path);
+        json data = json::parse(jsfile); 
+
+        auto size_info      = data["size_info"];
+        if(size_info        != nullptr) { UCDataset::size_info = size_info; }
+    }
 
     if(parse_obi)
     {
@@ -2135,6 +2155,25 @@ std::string UCDataset::get_obi_path(int index)
     return uci_path;
 }
 
+std::string UCDataset::get_szi_path(int index)
+{
+    if(UCDataset::volume_name == "" | UCDataset::volumn_dir == "" | UCDataset::volume_count == 0)
+    {
+        std::cout << ERROR_COLOR << "volume_name volume_dir is empty" << STOP_COLOR << std::endl;
+    }
+
+    std::string uci_path;
+    if(index == 0)
+    {
+        uci_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".szi";
+    }
+    else
+    {
+        uci_path = UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".s" + std::to_string(index);
+    }
+    return uci_path;
+}
+
 void UCDataset::to_uci(std::string uci_path, int volume_size)
 {
     std::string save_dir    = get_file_folder(uci_path);
@@ -2142,6 +2181,7 @@ void UCDataset::to_uci(std::string uci_path, int volume_size)
     int volume_count        = 0;
     int info_count          = 0;
     UCDataset* each_ucd     = new UCDataset();
+    each_ucd->volume_size   = volume_size;
 
     for(int i=0; i<UCDataset::uc_list.size(); i++)
     {
@@ -2564,8 +2604,9 @@ void UCDatasetUtil::get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_pa
 
 void UCDatasetUtil::get_ucd_from_huge_xml_dir(std::string xml_dir, std::string save_path, int volume_size)
 {
-    std::string save_dir = get_file_folder(save_path);
-    std::string save_name = get_file_name(save_path);
+    std::string save_dir    = get_file_folder(save_path);
+    std::string save_name   = get_file_name(save_path);
+    // UCDataset::volume_size  = volume_size;
 
     if(! is_write_dir(save_dir))
     {
@@ -2582,6 +2623,7 @@ void UCDatasetUtil::get_ucd_from_huge_xml_dir(std::string xml_dir, std::string s
     std::set<std::string> suffix {".xml"};
     std::vector<std::string> xml_path_vector = get_all_file_path_recursive(xml_dir, suffix);
     UCDataset* ucd = new UCDataset();
+    ucd->volume_size = volume_size;
     std::string uc;
 
     tqdm bar;
@@ -2785,7 +2827,7 @@ bool UCDatasetUtil::is_ucd_path(std::string ucd_path)
 
 bool UCDatasetUtil::is_uci_path(std::string uci_path)
 {
-    if((! is_file(uci_path)) || (uci_path.substr(uci_path.size()-4, 4) != ".uci"))
+    if(((! is_file(uci_path))) || (uci_path.substr(uci_path.size()-4, 4) != ".uci"))
     {
         return false;
     }
@@ -2914,7 +2956,7 @@ void UCDatasetUtil::cache_clear(std::string ucd_path)
         if(is_file(img_path))
         {
             remove(img_path.c_str());
-            std::cout << i << " , remove : " << img_path << std::endl;
+            // std::cout << i << " , remove : " << img_path << std::endl;
         }
         bar.progress(i, N);
     }
@@ -3622,21 +3664,31 @@ void UCDatasetUtil::list_uci(std::string folder_path)
         return;
     }
 
-    std::vector<std::string> file_path = get_all_file_path(folder_path);
+    std::vector<std::string> file_path  = get_all_file_path(folder_path);
     std::set<std::string> suffix {".uci"};
-    std::vector<std::string> ucd_path = filter_by_suffix(file_path, suffix);
+    std::vector<std::string> ucd_path   = filter_by_suffix(file_path, suffix);
     std::map< std::string,  std::map<std::string, int> > ucd_info;
 
     for(int i=0; i<ucd_path.size(); i++)
     {
         std::string ucd_name = get_file_name(ucd_path[i]);
-        ucd_info[ucd_name]["uci_count"] = 1;
-        ucd_info[ucd_name]["obi_count"] = 1;
+        ucd_info[ucd_name]["uci_count"]     = 1;
+        ucd_info[ucd_name]["obi_count"]     = 1;
+        ucd_info[ucd_name]["szi_count"]     = 1;
+        ucd_info[ucd_name]["volume_size"]   = -1;
+        
+        // 读取 uci 文件
+        UCDataset* ucd = new UCDataset();
+        ucd->load_uci(ucd_path[i]);
+        ucd->parse_volume(0, false, false);
+        ucd_info[ucd_name]["volume_size"] = ucd->volume_size;
+
         int index = 1;
         while(true)
         {
             std::string volume_uci_path = folder_path + "/" + ucd_name + ".u" + std::to_string(index);
             std::string volume_obi_path = folder_path + "/" + ucd_name + ".o" + std::to_string(index);
+            std::string volume_szi_path = folder_path + "/" + ucd_name + ".s" + std::to_string(index);
             if(is_file(volume_uci_path))
             {
                 index += 1;
@@ -3644,6 +3696,10 @@ void UCDatasetUtil::list_uci(std::string folder_path)
                 if(is_file(volume_obi_path))
                 {
                     ucd_info[ucd_name]["obi_count"] += 1;
+                }
+                if(is_file(volume_szi_path))
+                {
+                    ucd_info[ucd_name]["szi_count"] += 1;
                 }
             }
             else
@@ -3654,16 +3710,16 @@ void UCDatasetUtil::list_uci(std::string folder_path)
     }
     //
 
-    std::cout << "-----------------------------------------------------" << std::endl;
-    std::cout << std::left << std::setfill(' ') << std::setw(20) << "uci_name"  << std::left << std::setfill(' ') << std::setw(15) << "uci_count" << std::left << std::setfill(' ') << std::setw(15) << std::left << "obi_count" << std::endl;
-    std::cout << "-----------------------------------------------------" << std::endl;
+    std::cout << "-------------------------------------------------------------------" << std::endl;
+    std::cout << std::left << std::setfill(' ') << std::setw(20) << "uci_name"  << std::left << std::setfill(' ') << std::setw(15) << "uci_count" << std::left << std::setfill(' ') << std::setw(15) << std::left << "obi_count" << std::left << std::setfill(' ') << std::setw(15) << std::left << "volume_size" << std::endl;
+    std::cout << "-------------------------------------------------------------------" << std::endl;
     auto iter_1 = ucd_info.begin();
     while(iter_1 != ucd_info.end())
     {
-        std::cout << std::left << std::setfill(' ') << std::setw(20) << iter_1->first << std::left << std::setfill(' ') << std::setw(15)  << iter_1->second["uci_count"]  << std::left << std::setfill(' ') << std::setw(15) << iter_1->second["obi_count"] << std::endl;
+        std::cout << std::left << std::setfill(' ') << std::setw(20) << iter_1->first << std::left << std::setfill(' ') << std::setw(15)  << iter_1->second["uci_count"]  << std::left << std::setfill(' ') << std::setw(15) << iter_1->second["obi_count"] << std::left << std::setfill(' ') << std::setw(15) << iter_1->second["volume_size"] << std::endl;
         iter_1++;
     }
-    std::cout << "-----------------------------------------------------" << std::endl;
+    std::cout << "-------------------------------------------------------------------" << std::endl;
 }
 
 void UCDatasetUtil::delete_uci(std::string uci_path)
@@ -3683,6 +3739,7 @@ void UCDatasetUtil::delete_uci(std::string uci_path)
     {
         std::string uci_path = ucd->get_uci_path(i);
         std::string obi_path = ucd->get_obi_path(i);
+        std::string szi_path = ucd->get_szi_path(i);
 
         if(is_file(uci_path))
         {
@@ -3691,6 +3748,10 @@ void UCDatasetUtil::delete_uci(std::string uci_path)
         if(is_file(obi_path))
         {
             remove(obi_path.c_str());
+        }
+        if(is_file(szi_path))
+        {
+            remove(szi_path.c_str());
         }
     }
     delete ucd;
@@ -3726,10 +3787,13 @@ void UCDatasetUtil::copy_uci(std::string uci_path, std::string save_path)
     {
         std::string uci_path = ucd->get_uci_path(i);
         std::string obi_path = ucd->get_obi_path(i);
+        std::string szi_path = ucd->get_szi_path(i);
         std::string uci_suffix = get_file_suffix(uci_path);
         std::string obi_suffix = get_file_suffix(obi_path);
+        std::string szi_suffix = get_file_suffix(szi_path);
         std::string save_uci_path = save_dir + "/" + save_name + uci_suffix; 
         std::string save_obi_path = save_dir + "/" + save_name + obi_suffix; 
+        std::string save_szi_path = save_dir + "/" + save_name + szi_suffix; 
 
         if(is_file(uci_path))
         {
@@ -3738,6 +3802,10 @@ void UCDatasetUtil::copy_uci(std::string uci_path, std::string save_path)
         if(is_file(obi_path))
         {
             copy_file(obi_path, save_obi_path);
+        }
+        if(is_file(szi_path))
+        {
+            copy_file(szi_path, save_szi_path);
         }
     }
     delete ucd;
@@ -3773,10 +3841,13 @@ void UCDatasetUtil::move_uci(std::string uci_path, std::string save_path)
     {
         std::string uci_path = ucd->get_uci_path(i);
         std::string obi_path = ucd->get_obi_path(i);
+        std::string szi_path = ucd->get_szi_path(i);
         std::string uci_suffix = get_file_suffix(uci_path);
         std::string obi_suffix = get_file_suffix(obi_path);
+        std::string szi_suffix = get_file_suffix(szi_path);
         std::string save_uci_path = save_dir + "/" + save_name + uci_suffix; 
         std::string save_obi_path = save_dir + "/" + save_name + obi_suffix; 
+        std::string save_szi_path = save_dir + "/" + save_name + szi_suffix; 
 
         if(is_file(uci_path))
         {
@@ -3785,6 +3856,10 @@ void UCDatasetUtil::move_uci(std::string uci_path, std::string save_path)
         if(is_file(obi_path))
         {
             rename(obi_path.c_str(), save_obi_path.c_str());
+        }
+        if(is_file(szi_path))
+        {
+            rename(szi_path.c_str(), save_szi_path.c_str());
         }
     }
     delete ucd;
