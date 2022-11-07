@@ -127,8 +127,6 @@ using namespace std;
 
 // 超大数据集可以直接存储为存文本数据，这样可以一行一行读取，前面是头文件，就是数据的 uc 信息，以及不同的 uc 信息在多少行，这样的话只要遍历一下头文件就能快速拿到 data 数据，这样更加合理
 
-// 
-
 
 int main(int argc, char ** argv)
 {
@@ -157,7 +155,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v2.0.4";
+    std::string app_version = "v2.1.1";
 
     // cache dir
     std::string cache_dir;
@@ -591,6 +589,21 @@ int main(int argc, char ** argv)
             return -1;       
         }
     }
+    else if(command_1 == "from_dete_server")
+    {
+        // 检测结果是固定格式的
+        if(argc == 5)
+        {
+            std::string server_dir  = argv[2];
+            std::string ucd_path    = argv[3];
+            std::string save_path   = argv[4];
+            ucd_util->get_ucd_from_dete_server(server_dir, ucd_path, save_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
     else if(command_1 == "parse_xml")
     {
         if(argc == 4)
@@ -611,6 +624,26 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
+    else if(command_1 == "parse_volume_xml")
+    {
+        if(argc == 4)
+        {
+            std::string uci_path = argv[2];
+            std::string save_dir = argv[3];
+
+            if(! is_read_file(uci_path))
+            {
+                std::cout << ERROR_COLOR << "illegal uci_path : " << STOP_COLOR << uci_path << std::endl;
+                return -1;
+            }
+            ucd_util->parse_volume_voc_xml(ucd_util->cache_img_dir, save_dir, uci_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info("parse_xml");
+            return -1;
+        }
+    }  
     else if(command_1 == "parse_json")
     {
         // todo 在 ucd_util 中实现一下，是一个图像一个图像进行保存，不要
@@ -2020,10 +2053,54 @@ int main(int argc, char ** argv)
                 std::string each_tag = argv[i];
                 tags.insert(each_tag);
             }
-            UCDataset* ucd = new UCDataset(ucd_path);
-            ucd->parse_ucd(true);
-            ucd->filter_by_tags(tags);
-            ucd->save_to_ucd(save_path);
+            if(ucd_util->is_ucd_path(ucd_path))
+            {
+                UCDataset* ucd = new UCDataset(ucd_path);
+                ucd->parse_ucd(true);
+                ucd->filter_by_tags(tags);
+                ucd->save_to_ucd(save_path);
+                delete ucd;
+            }
+            else if(ucd_util->is_uci_path(ucd_path))
+            {
+                std::cout << WARNNING_COLOR << "filter uci use 'filter_volume_by_tags' " << STOP_COLOR << std::endl;
+            }
+            else
+            {
+                std::cout << ERROR_COLOR << "illeagal ucd_path and uci_path : " << ucd_path << STOP_COLOR << std::endl;
+                return -1;
+            }
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "filter_volume_by_tags")
+    {
+        if(argc > 5)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_path = argv[3];
+            std::string volume_size_str = argv[4];
+            int volume_size = std::stoi(volume_size_str);
+
+            if(! pystring::endswith(save_path, ".uci"))
+            {
+                std::cout << ERROR_COLOR << "illegal uci path : " << save_path << STOP_COLOR << std::endl;
+                return -1;
+            }
+
+            std::set<std::string> tags;
+            for(int i=5; i<argc; i++)
+            {
+                std::string each_tag = argv[i];
+                tags.insert(each_tag);
+            }
+
+            std::string save_dir = get_file_folder(save_path);
+            std::string save_name = get_file_name(save_path);
+            ucd_util->filter_by_tags_volume(tags, ucd_path, save_dir, save_name, volume_size);
         }
         else
         {

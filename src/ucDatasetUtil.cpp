@@ -619,7 +619,11 @@ void UCDataset::add_ucd_info(std::string ucd_path)
 {
     UCDataset * other = new UCDataset(ucd_path);
     other->parse_ucd(true);
+    UCDataset::add_ucd_info(other);
+}
 
+void UCDataset::add_ucd_info(UCDataset* other)
+{
     // merge uc_list
     for(int i=0; i<other->uc_list.size(); i++)
     {
@@ -662,13 +666,12 @@ void UCDataset::add_ucd_info(std::string ucd_path)
                 }
                 else
                 {
-                    // std::cout << "repeated obj : " << uc << ", " << obj->label << std::endl; 
+                    std::cout << "repeated obj : " << uc << ", " << obj->label << std::endl; 
                 }
             }
         }
         iter++;
     }
-    delete other;
 }
 
 void UCDataset::save_to_ucd(std::string save_path)
@@ -954,7 +957,7 @@ void UCDataset::save_to_labelme_json_with_assign_uc(std::string save_json_path, 
     o << std::setw(4) << json_info << std::endl;
 }
 
-void UCDataset::filter_by_conf(float conf_th)
+void UCDataset::filter_by_conf(float conf_th, bool clear_obj)
 {
     // todo 是不是有垃圾需要删掉，如何删除
     std::vector<DeteObj> new_alarms;
@@ -978,9 +981,11 @@ void UCDataset::filter_by_conf(float conf_th)
     }
 }
 
-void UCDataset::filter_by_nms(float nms_th, bool ignore_tag)
+void UCDataset::filter_by_nms(float nms_th, bool ignore_tag, bool clear_obj)
 {
     // 先用比较搓的办法，后续要进行重写
+
+    // 释放已经不使用的资源
 
     UCDataset* ucd = new UCDataset();
 
@@ -995,6 +1000,33 @@ void UCDataset::filter_by_nms(float nms_th, bool ignore_tag)
         iter++;
     }
     UCDataset::object_info = ucd->object_info;
+}
+
+void UCDataset::filter_by_tags(std::set<std::string> tags, bool clear_obj)
+{
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        std::vector<LabelmeObj*> objs;
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            LabelmeObj* obj = iter->second[i];
+            if(tags.count(obj->label) > 0)
+            {
+                objs.push_back(obj);
+            }
+            else if(clear_obj)
+            {
+                delete obj;
+            }
+        }
+        iter->second = objs;
+        if(objs.size() == 0)
+        {
+            UCDataset::size_info.erase(iter->first);
+        }
+        iter++;
+    }
 }
 
 void UCDataset::crop_dete_res_with_assign_uc(std::string uc, std::string img_path, std::string save_dir)
@@ -1794,29 +1826,6 @@ void UCDataset::exec(std::string command_path)
     infile.close();
 }
 
-void UCDataset::filter_by_tags(std::set<std::string> tags)
-{
-    auto iter = UCDataset::object_info.begin();
-    while(iter != UCDataset::object_info.end())
-    {
-        std::vector<LabelmeObj*> objs;
-        for(int i=0; i<iter->second.size(); i++)
-        {
-            LabelmeObj* obj = iter->second[i];
-            if(tags.count(obj->label) > 0)
-            {
-                objs.push_back(obj);
-            }
-        }
-        iter->second = objs;
-        if(objs.size() == 0)
-        {
-            UCDataset::size_info.erase(iter->first);
-        }
-        iter++;
-    }
-}
-
 void UCDataset::drop_tags(std::set<std::string> tags)
 {
     auto iter = UCDataset::object_info.begin();
@@ -1902,8 +1911,6 @@ void UCDataset::save_to_huge_ucd(std::string save_dir, std::string save_name, in
         {"label_used",      UCDataset::label_used},
         {"uc_list",         UCDataset::uc_list},
         {"volume_size",     UCDataset::volume_size},
-        // {"size_info",       UCDataset::size_info},
-        // {"shapes",          {}},
     };
 
     std::map<std::string, std::vector<nlohmann::json> > shapes_info;
@@ -1919,10 +1926,11 @@ void UCDataset::save_to_huge_ucd(std::string save_dir, std::string save_name, in
             each_obj["points"]      = obj_vector[i]->points;
             each_obj["conf"]        = obj_vector[i]->conf;
             shapes_info[iter->first].push_back(each_obj);
+
         }
         iter++;
     }  
-    
+
     std::string uci_path, obi_path, szi_path;
     if(volume_index == 0)
     {
@@ -1952,7 +1960,6 @@ void UCDataset::save_to_huge_ucd(std::string save_dir, std::string save_name, in
     size_info["size_info"] = UCDataset::size_info;
     std::ofstream o3(szi_path);
     o3 << std::setw(4) << size_info << std::endl;
-
 }
 
 void UCDataset::clear_obj_info()
@@ -1997,11 +2004,19 @@ void UCDataset::load_uci(std::string uci_path)
     }
 }
 
-void UCDataset::parse_volume(int volumn_index, bool parse_szi, bool parse_obi)
+void UCDataset::parse_volume(int volumn_index, bool parse_szi, bool parse_obi, bool clear_obj)
 {
     // 数据清空
     UCDataset::uc_list.clear();
     UCDataset::size_info.clear();
+    if(clear_obj)
+    {
+        UCDataset::clear_obj_info();
+    }
+    else
+    {
+        UCDataset::object_info.clear();
+    }
 
     std::string uci_path;
     if(volumn_index == 0)
@@ -2048,9 +2063,6 @@ void UCDataset::parse_volume(int volumn_index, bool parse_szi, bool parse_obi)
         if(uc_list          != nullptr) { UCDataset::uc_list = uc_list; }
         UCDataset::unique();
     }
-
-    // 先清空 obj 信息
-    UCDataset::clear_obj_info();
 
     if(parse_szi)
     {
@@ -2222,6 +2234,21 @@ void UCDataset::to_uci(std::string uci_path, int volume_size)
         std::cout << "save volume : " << std::to_string(volume_count) << std::endl;
     }
     delete each_ucd;
+}
+
+int UCDataset::get_info_count()
+{
+    int info_count = 0;
+    info_count += UCDataset::uc_list.size();
+    info_count += UCDataset::size_info.size() * 2;
+    
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        info_count += iter->second.size() * 4;
+        iter++;
+    }
+    return info_count;
 }
 
 // 
@@ -2736,6 +2763,44 @@ void UCDatasetUtil::get_ucd_from_file_dir(std::string file_dir, std::string ucd_
     delete ucd;
 }
 
+void UCDatasetUtil::get_ucd_from_dete_server(std::string  dete_server_dir, std::string ucd_path, std::string save_path)
+{
+
+    if(! is_file(ucd_path))
+    {
+        std::cout << ERROR_COLOR << "illegal ucd path : " << ucd_path << STOP_COLOR << std::endl;
+        return;
+    }
+
+    UCDataset* ucd = new UCDataset(ucd_path);
+    ucd->parse_ucd(false);
+    UCDataset* save_ucd = new UCDataset(save_path);
+
+    tqdm bar;
+    int N = ucd->uc_list.size();
+    for(int i=0; i<ucd->uc_list.size(); i++)
+    {
+        bar.progress(i, N);
+        std::string uc = ucd->uc_list[i];
+        std::string dete_xml_path = dete_server_dir + "/" + uc.substr(0, 3) + "/" + uc + ".xml";
+
+        if(! is_read_file(dete_xml_path))
+        {
+            std::cout << WARNNING_COLOR << "can't read " << dete_xml_path << STOP_COLOR << std::endl;
+            save_ucd->uc_list.push_back(uc);
+        }
+        else
+        {
+            save_ucd->add_voc_xml_info(uc, dete_xml_path);
+        }
+        bar.progress(i, N);
+    }
+    bar.finish();
+    save_ucd->save_to_ucd(save_path);
+    delete ucd;
+    delete save_ucd;
+}
+
 void UCDatasetUtil::merge_ucds(std::string save_path, std::vector<std::string> ucd_path_vector)
 {
     if(ucd_path_vector.size() < 2)
@@ -2887,26 +2952,41 @@ void UCDatasetUtil::count_volume_tags(std::string uci_path)
 
     std::map<std::string, std::map<std::string, int> > count_map = ucd->count_volume_tags();
     int tag_count = 0;
-    int dete_obj_count=0; 
+    int dete_obj_count = 0; 
     // print statistics res
+    std::cout << "--------------------------------------------------------------" << std::endl;
+    std::cout << std::setw(15) << std::left << "shape" << std::setw(20) << std::left << "tag" << std::setw(15) << std::left << "count" << "percentage(%)" << std::endl;
+    std::cout << "--------------------------------------------------------------" << std::endl;
+    
+    // 
+    auto iter_a = count_map.begin();
+    while(iter_a != count_map.end())
+    {
+        auto iter_b = iter_a->second.begin();
+        while(iter_b != iter_a->second.end())
+        {
+            dete_obj_count += iter_b->second;
+            iter_b++;
+        }
+        iter_a++;
+    }
+    
     auto iter_count = count_map.begin();
-    std::cout << "---------------------------------------------" << std::endl;
     while(iter_count != count_map.end())
     {
         auto iter = iter_count->second.begin();
         while(iter != iter_count->second.end())
         {
-            dete_obj_count += iter->second;
-            std::cout << std::setw(15) << std::left << "[" + iter_count->first + "]" << std::setw(20) << std::left << iter->first  << " : " << iter->second << std::endl;
+            std::cout << std::setw(15) << std::left << "[" + iter_count->first + "]" << std::setw(20) << std::left << iter->first << std::setw(15) << std::left << iter->second << 100 * iter->second / (dete_obj_count * 1.0) << std::endl;
             tag_count += 1;
             iter++;
         }
         iter_count ++;
     }
-    std::cout << "---------------------------------------------" << std::endl;
+    std::cout << "--------------------------------------------------------------" << std::endl;
     std::cout << "number of tag : " << tag_count << std::endl;
     std::cout << "number of obj : " << dete_obj_count << std::endl;
-    std::cout << "---------------------------------------------" << std::endl;
+    std::cout << "--------------------------------------------------------------" << std::endl;
     delete ucd;
 }
 
@@ -3201,6 +3281,51 @@ void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std
         bar.progress(index, N);
         index += 1;
         iter ++;
+    }
+    bar.finish();
+    delete ucd;
+}
+
+void UCDatasetUtil::parse_volume_voc_xml(std::string img_dir, std::string save_dir, std::string uci_path)
+{
+    if(! is_dir(img_dir))
+    {
+        std::cout << ERROR_COLOR << "img_dir not exists : " << img_dir << STOP_COLOR << std::endl;
+        throw "img_dir not exists";
+    }
+
+    if(! is_dir(save_dir))
+    {
+        std::cout << ERROR_COLOR << "save_dir not exists : " << save_dir << STOP_COLOR << std::endl;
+        throw "save_dir not exists";
+    }
+
+    if(! UCDatasetUtil::is_uci_path(uci_path))
+    {
+        std::cout << ERROR_COLOR << "illegal uci_path : " << uci_path << STOP_COLOR << std::endl;
+        throw "ucd_path not exists";
+    }
+
+    std::set<std::string> img_suffix {".jpg", ".JPG", ".png", ".PNG"};
+    UCDataset *ucd = new UCDataset();
+    ucd->load_uci(uci_path);
+
+    tqdm bar;
+    int N = ucd->volume_count;
+
+    for(int i=0; i<ucd->volume_count; i++)
+    {
+        bar.progress(i, N);
+        ucd->parse_volume(i, true, true, true);
+        auto iter = ucd->object_info.begin();
+        while(iter != ucd->object_info.end())
+        {
+            std::string uc = iter->first;
+            std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
+            std::string xml_path = save_dir + "/" + uc + ".xml";
+            ucd->save_to_voc_xml_with_assign_uc(xml_path, img_path, uc);
+            iter ++;
+        }
     }
     bar.finish();
     delete ucd;
@@ -3908,6 +4033,47 @@ void UCDatasetUtil::interset_ucds(std::string save_path, std::string ucd_path_a,
     ucd_res->save_to_ucd(save_path);
 }
 
+void UCDatasetUtil::filter_by_tags_volume(std::set<std::string> tags, std::string uci_path,  std::string save_dir, std::string save_name, int volume_size)
+{
+
+    UCDataset* ucd = new UCDataset();
+    ucd->load_uci(uci_path);
+    UCDataset* res = new UCDataset();
+    
+    tqdm bar;
+    int N = ucd->volume_count;
+
+    int volume_index = 0;
+    for(int i=0; i<ucd->volume_count; i++)
+    {
+        bar.progress(i, N);
+        ucd->parse_volume(i, true, true, false);
+        ucd->filter_by_tags(tags);
+        res->add_ucd_info(ucd);
+
+        if(res->get_info_count() > volume_size * 1000 * 100)
+        {
+            res->volume_size = volume_size;
+            res->save_to_huge_ucd(save_dir, save_name, volume_index);
+            volume_index += 1;
+            // clear each_ucd 
+            res->clear_obj_info();
+            res->object_info.clear();
+            res->uc_list.clear();
+            res->size_info.clear();
+        }
+    }
+    bar.finish();
+
+    // rest
+    if(res->get_info_count() > 0)
+    {
+        res->volume_size = volume_size;
+        res->save_to_huge_ucd(save_dir, save_name, volume_index);
+    }
+    delete res;
+    delete ucd;
+}
 
 
 

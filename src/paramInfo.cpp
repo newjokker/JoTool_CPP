@@ -331,6 +331,15 @@ void UcdParamOpt::load_param_info()
     param_parse_xml->demo.push_back("ucd parse_xml test.json ./xml      (将 test.json中包含的xml数据解析到 ./xml 文件夹下)");  
     UcdParamOpt::add_param(param_parse_xml);
     
+    // parse_volume_xml
+    ParamInfo * param_parse_volume_xml = new ParamInfo("parse_volume_xml");
+    param_parse_volume_xml->group = "convert";
+    param_parse_volume_xml->grammar = "ucd parse_volume_xml json_path save_dir";
+    param_parse_volume_xml->english_explain = "parse xml from json";
+    param_parse_volume_xml->chinese_explain = "从 uci 中解析出 xml"; 
+    param_parse_volume_xml->demo.push_back("ucd parse_volume_xml test.uci ./xml      (将 test.uci 中包含的xml数据解析到 ./xml 文件夹下)");  
+    UcdParamOpt::add_param(param_parse_volume_xml);
+    
     // parse_json
     ParamInfo * param_parse_json = new ParamInfo("parse_json");
     param_parse_json->group = "convert";
@@ -413,6 +422,25 @@ void UcdParamOpt::load_param_info()
     param_from_json->demo.push_back("ucd from_json ./json test.json        (将 ./json 路径下面的名字符合 uc 规则的所有 json 制作成 ucd)");
     UcdParamOpt::add_param(param_from_json);
     
+    // from_dete_server
+    ParamInfo * param_from_dete_server = new ParamInfo("from_dete_server");
+    param_from_dete_server->group = "convert";
+    param_from_dete_server->grammar = "ucd param_from_dete_server dete_server_dir ucd_path ucd_save_path";
+    param_from_dete_server->english_explain = "";
+    param_from_dete_server->chinese_explain = "在 dete_server 生成的文件夹下面找到 ucd 中包含的 uc 的检测结果，生成 ucd";   
+    param_from_dete_server->demo.push_back("ucd param_from_dete_server dete_xml test.json save.json       (从 dete_xml 文件夹下挑选出 test.json 中包含的图片(uc)的xml,生成 ucd");
+    param_from_dete_server->demo.push_back("----------------------------------------------");
+    param_from_dete_server->demo.push_back("server dir format:");
+    param_from_dete_server->demo.push_back("Dad/");
+    param_from_dete_server->demo.push_back("    Dad00u1.xml");
+    param_from_dete_server->demo.push_back("    Dad00u2.xml");
+    param_from_dete_server->demo.push_back("    Dad00u3.xml");
+    param_from_dete_server->demo.push_back("Dae/");
+    param_from_dete_server->demo.push_back("    Dae00u1.xml");
+    param_from_dete_server->demo.push_back("    Dae00u2.xml");
+    param_from_dete_server->demo.push_back("----------------------------------------------");
+    UcdParamOpt::add_param(param_from_dete_server);
+
     // info
     ParamInfo * param_info = new ParamInfo("info");
     param_info->group = "info";
@@ -851,7 +879,7 @@ void UcdParamOpt::load_param_info()
     param_update_tags->demo.push_back("ucd update_tags aqm.json res.json anquanmao:aqm cebiandai:cbd       (将 aqm.json 中的 anquanmao 改为 aqm cebiandai 改为 cbd 进行更新)");
     UcdParamOpt::add_param(param_update_tags);
 
-    // update_tags
+    // filter_by_tags
     ParamInfo * param_filter_by_tags = new ParamInfo("filter_by_tags");
     param_filter_by_tags->group = "filter";
     param_filter_by_tags->grammar = "ucd filter_by_tags ucd_path save_path tag1 tag2 ...";
@@ -859,6 +887,15 @@ void UcdParamOpt::load_param_info()
     param_filter_by_tags->chinese_explain = "数据集中只保留指定标签";   
     param_filter_by_tags->demo.push_back("ucd filter_by_tags aqm.json res.json aqm cbd person                   (将 aqm.json 只保留 aqm cbd person 三个标签)");
     UcdParamOpt::add_param(param_filter_by_tags);
+
+    // filter_volume_by_tags
+    ParamInfo * param_filter_volume_by_tags = new ParamInfo("filter_volume_by_tags");
+    param_filter_volume_by_tags->group = "filter";
+    param_filter_volume_by_tags->grammar = "ucd filter_volume_by_tags uci_path save_path volume_size tag1 tag2 ...";
+    param_filter_volume_by_tags->english_explain = "";
+    param_filter_volume_by_tags->chinese_explain = "分卷数据集中只保留指定标签";   
+    param_filter_volume_by_tags->demo.push_back("ucd filter_volume_by_tags aqm.uci res.uci 10 aqm cbd person                   (将 aqm.uci 只保留 aqm cbd person 三个标签)");
+    UcdParamOpt::add_param(param_filter_volume_by_tags);
 
     // drop_tags
     ParamInfo * param_drop_tags = new ParamInfo("drop_tags");

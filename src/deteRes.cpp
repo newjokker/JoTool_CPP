@@ -408,7 +408,6 @@ void DeteRes::parse_img_info(std::string img_path)
 
 void DeteRes::save_to_xml(std::string save_path)
 {
-    
     // refer : https://blog.csdn.net/K346K346/article/details/48750417
 
     // 声明
@@ -497,6 +496,8 @@ void DeteRes::save_to_xml(std::string save_path)
     }
     // save
     doc->SaveFile(save_path.c_str());
+    doc->Clear();
+    delete doc;
 }
 
 std::map<std::string, int> DeteRes::count_tags()

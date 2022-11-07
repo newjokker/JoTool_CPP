@@ -66,8 +66,8 @@ class UCDataset
         // 装载 ucd 将读取 uci 的 volume 信息
         void load_uci(std::string uci_path);
 
-        // 解析某一个分卷 volume，解析一个分卷的时候需要对旧的分卷进行清空的？
-        void parse_volume(int volumn_index, bool parse_szi=false, bool parse_obi=false);
+        // 解析某一个分卷 volume，默认对 obj 进行过滤
+        void parse_volume(int volumn_index, bool parse_szi=false, bool parse_obi=false, bool clear_obj=true);
 
         // 打印 json 数据
         void print_ucd_info();
@@ -115,6 +115,7 @@ class UCDataset
 
         // 增量解析 ucd_info
         void add_ucd_info(std::string ucd_path);
+        void add_ucd_info(UCDataset* ucd);
 
         // 保存为 ucd（斜框矩形如何进行保存）
         void save_to_ucd(std::string save_path);
@@ -135,16 +136,17 @@ class UCDataset
         void get_dete_res_with_assign_uc(jotools::DeteRes* dete_res, std::string assign_uc);
 
         // 根据阈值进行过滤
-        void filter_by_conf(float conf_th);
+        void filter_by_conf(float conf_th, bool clear_obj=true);
 
         // 根据标签进行过滤
-        void filter_by_tags(std::vector<std::string> tags);
+        void filter_by_tags(std::set<std::string> tags, bool clear_obj=true);
+        // void filter_by_tags_volume(std::set<std::string> tags, std::string save_dir, std::string save_name, int volume_size=30);
 
         // 根据面积进行过滤
-        void filter_by_area(float area_th);
+        void filter_by_area(float area_th, bool clear_obj=true);
 
         // 对 ucd 做 nms
-        void filter_by_nms(float nms_th, bool ignore_tag);
+        void filter_by_nms(float nms_th, bool ignore_tag, bool clear_obj=true);
 
         // crop_dete_res
         void crop_dete_res_with_assign_uc(std::string uc, std::string img_path, std::string save_dir);
@@ -172,9 +174,6 @@ class UCDataset
         // 执行 ucd command 脚本, 保存为新的 ucd 
         void exec(std::string command_path);
 
-        // 过滤标签
-        void filter_by_tags(std::set<std::string> tags);
-
         // 抛弃标签
         void drop_tags(std::set<std::string> tags);
 
@@ -200,6 +199,9 @@ class UCDataset
 
         // 保存为 uci 数据
         void to_uci(std::string uci_path, int volume_size=30);
+
+        // 获取信息数量, uc 数目 + size_info 数目 * 2 + obj 数目 * 4
+        int get_info_count();
 
     private:
         std::string json_path;
@@ -249,6 +251,7 @@ class UCDatasetUtil
 
         // 从 ucd 中解析出指定 uc 的 voc_xml 文件 （img_dir 用于读取图片的长宽，要是不存在的话那么就设置为 -1）
         void parse_voc_xml(std::string img_dir, std::string save_dir, std::string ucd_path);
+        void parse_volume_voc_xml(std::string img_dir, std::string save_dir, std::string ucd_path);
 
         // to yolo train_data
         void parse_yolo_train_data(std::string img_dir, std::string save_dir, std::string ucd_path, std::vector<std::string> label_list = {});
@@ -282,6 +285,9 @@ class UCDatasetUtil
         
         // 从文件中获取 ucd，只解析文件名，不解析文件内容
         void get_ucd_from_file_dir(std::string file_dir, std::string ucd_path);
+
+        // 从检测服务结果计算 ucd
+        void get_ucd_from_dete_server(std::string  dete_server_dir, std::string ucd_path, std::string save_path);
 
         // 将多个 ucd 进行合并
         void merge_ucds(std::string save_path, std::vector<std::string> ucd_path_vector);
@@ -352,6 +358,9 @@ class UCDatasetUtil
 
         // 将 uci 保存的 ucd 换乘 json 保存的 ucd 
         void uci_to_json(std::string uci_path, std::string json_path);
+
+        // 对标签进行筛选
+        void filter_by_tags_volume(std::set<std::string> tags, std::string uci_path, std::string save_dir, std::string save_name, int volume_size=30);
 
 
     private:
