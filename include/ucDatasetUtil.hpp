@@ -357,7 +357,7 @@ class UCDatasetUtil
         void json_to_uci(std::string json_path, std::string uci_path, int volume_size=30);
 
         // 将 uci 保存的 ucd 换乘 json 保存的 ucd 
-        void uci_to_json(std::string uci_path, std::string json_path);
+        void uci_to_json(std::string uci_path, std::string json_path, int volume_size=30);
 
         // 对标签进行筛选
         void filter_by_tags_volume(std::set<std::string> tags, std::string uci_path, std::string save_dir, std::string save_name, int volume_size=30);

@@ -157,6 +157,9 @@ int main(int argc, char ** argv)
     // version
     std::string app_version = "v2.1.1";
 
+    // uci_info
+    int volume_size         = 20;
+
     // cache dir
     std::string cache_dir;
 
@@ -189,6 +192,7 @@ int main(int argc, char ** argv)
         sql_pwd     = (const std::string &)xini_file["sql"]["pwd"];
         sql_db      = (const std::string &)xini_file["sql"]["db"];
         cache_dir   = (const std::string &)xini_file["cache"]["dir"];
+        volume_size = ((const int &)xini_file["uci"]["volume_size"]);
     }
     else
     {
@@ -200,6 +204,7 @@ int main(int argc, char ** argv)
         xini_write["sql"]["user"]       = sql_user;
         xini_write["sql"]["pwd"]        = sql_pwd;
         xini_write["sql"]["db"]         = sql_db;
+        xini_write["uci"]["volume_size"]= volume_size;
         xini_write.dump(config_path);   
     }
     
@@ -215,7 +220,6 @@ int main(int argc, char ** argv)
         std::cout << "-----------------------------------------------------------" << std::endl;
         std::cout << "set cache_dir with 'ucd set cache_dir {cache_dir}' " << std::endl;
         std::cout << "-----------------------------------------------------------" << std::endl;
-        // throw "cache_dir not exists!";
     }
 
     // 文件夹权限检查    
@@ -544,9 +548,9 @@ int main(int argc, char ** argv)
     {
         if(argc == 4 or argc == 5)
         {
-            std::string xml_dir = argv[2];
-            std::string save_path = argv[3];
-            int volume_size = 30;                   // 30 大概 280M
+            std::string xml_dir     = argv[2];
+            std::string save_path   = argv[3];
+            int volume_size         = volume_size;                   // 30 大概 280M
 
             if(argc == 5)
             {
@@ -2250,7 +2254,7 @@ int main(int argc, char ** argv)
         {
             std::string json_path   = argv[2];
             std::string uci_path    = argv[3];
-            int volume_size         = 30;
+            int volume_size         = volume_size;
             if(argc == 5)
             {
                 std::string volume_size_str = argv[4];
@@ -2265,14 +2269,19 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "uci_to_json")
     {
-        ucd_param_opt->not_ready("minus");
-        return -1;
-
-        if(argc == 4)
+        if((argc == 4) || (argc == 5))
         {
-            std::string json_path   = argv[2];
-            std::string uci_path    = argv[3];
-            // ucd_util->uci_to_json(uci_path, json_path);
+            std::string uci_path    = argv[2];
+            std::string json_path   = argv[3];
+            int volume_size         = volume_size;
+
+            if(argc == 5)
+            {
+                std::string volume_size_str = argv[4];
+                volume_size                 = std::stoi(volume_size_str);
+            }
+
+            ucd_util->uci_to_json(uci_path, json_path, volume_size);
         }
         else
         {

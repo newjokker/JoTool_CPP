@@ -1001,10 +1001,11 @@ void UcdParamOpt::load_param_info()
     // uci_to_json
     ParamInfo * param_uci_to_json = new ParamInfo("uci_to_json");
     param_uci_to_json->group = "convert";
-    param_uci_to_json->grammar = "ucd uci_to_json uci_path json_path";
+    param_uci_to_json->grammar = "ucd uci_to_json uci_path json_path {volume_size:30}";
     param_uci_to_json->english_explain = "";
     param_uci_to_json->chinese_explain = "将 ucd 从 .uci 格式转为 .json 格式";   
-    param_uci_to_json->demo.push_back("ucd json_to_uci test.uci test.json                   (将 test.uci 文件转为 test.json 分卷文件)");
+    param_uci_to_json->demo.push_back("ucd json_to_uci test.uci test.json                   (将 test.uci 文件转为 test.json 文件, 分卷大小默认为 30)");
+    param_uci_to_json->demo.push_back("ucd json_to_uci test.uci test.json  20                (将 test.uci 文件转为 test.json 文件，分卷大小为 20)");
     UcdParamOpt::add_param(param_uci_to_json);
     
     // interset

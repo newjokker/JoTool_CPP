@@ -252,9 +252,6 @@ void UCDataset::print_ucd_info()
 
 void UCDataset::print_volume_info()
 {
-    // UCDataset* ucd = new UCDataset();
-    // UCDataset::load_uci(UCDataset::volumn_dir + "/" + UCDataset::volume_name + ".uci");
-
     tqdm bar;
     int N = UCDataset::volume_count;
     int img_size_count = 0;
@@ -4010,9 +4007,56 @@ void UCDatasetUtil::json_to_uci(std::string json_path, std::string uci_path, int
     delete ucd;
 }
 
-void UCDatasetUtil::uci_to_json(std::string uci_path, std::string json_path)
+void UCDatasetUtil::uci_to_json(std::string uci_path, std::string json_path, int volume_size)
 {
+    UCDataset* ucd = new UCDataset();
+    ucd->load_uci(uci_path);
+    UCDataset* res = new UCDataset(json_path);
 
+    std::string save_dir = get_file_folder(json_path);
+    std::string save_name = get_file_name(json_path);
+
+    if(! is_write_dir(save_dir))
+    {
+        std::cout << ERROR_COLOR << "save_dir is not writeable : " << save_dir << STOP_COLOR << std::endl;
+        return;
+    }
+
+    tqdm bar;
+    int N = ucd->volume_count;
+    int json_index = 0;
+    // 获取分卷信息进行存储
+    for(int i=0; i<ucd->volume_count; i++)
+    {
+        bar.progress(i, N);
+        ucd->parse_volume(i, true, true, false);
+        res->add_ucd_info(ucd);
+
+        if(res->get_info_count() > volume_size * 1000 * 100)
+        {
+            std::string each_save_path = save_dir + "/" + save_name + "_" + std::to_string(json_index) + ".json";
+            res->save_to_ucd(each_save_path);
+            res->clear_obj_info();
+            res->uc_list.clear();
+            res->object_info.clear();
+            res->size_info.clear();
+            json_index += 1;
+        }
+    }
+
+    if(res->get_info_count() > 0)
+    {
+        if(json_index > 0)
+        {
+            json_path = save_dir + "/" + save_name + "_" + std::to_string(json_index) + ".json";
+        }
+        res->save_to_ucd(json_path);
+    }
+
+    bar.finish();
+    res->clear_obj_info();
+    delete ucd;
+    delete res;
 }
 
 void UCDatasetUtil::interset_ucds(std::string save_path, std::string ucd_path_a, std::string ucd_path_b)
@@ -4074,7 +4118,6 @@ void UCDatasetUtil::filter_by_tags_volume(std::set<std::string> tags, std::strin
     delete res;
     delete ucd;
 }
-
 
 
 
