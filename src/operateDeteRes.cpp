@@ -19,6 +19,12 @@
 #include "ucDatasetUtil.hpp"
 #include "include/tqdm.h"
 
+#define ERROR_COLOR         "\x1b[35m"
+#define WARNNING_COLOR      "\033[33m"
+#define STOP_COLOR          "\033[0m"
+
+
+
 namespace jotools
 {
 
@@ -423,9 +429,8 @@ DeteAcc::DeteAcc()
 std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and_standard(DeteRes a, DeteRes b, std::string uc, UCDataset* compare_res_ucd)
 {
 
-    // 没有置信度的话不好排列，这个比较恶心，当没有置信度的时候直接随机排列吧
-    // todo dete_res 中的对象，根据 conf 进行排列，从大到小
-    // 增加函数 sort_alarm_by_conf
+    // 记录错误的类型 mistake[a->b] = 0
+
 
     // sort by conf 
     a.sort_by_conf();
@@ -435,15 +440,17 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
 
     float iou_th = 0.5;
     std::map<int, bool> has_obj_map;
+    std::map<int, bool> has_mis_map;                                    // 是否存在标签被标记为 mistake 
     std::map<std::string, std::map<std::string, int> > acc_res;
-    acc_res["correct"] = {};
-    acc_res["miss"] = {};
-    acc_res["extra"] = {};
-    acc_res["mistake"] = {};
+    acc_res["correct"]  = {};
+    acc_res["miss"]     = {};
+    acc_res["extra"]    = {};
+    acc_res["mistake"]  = {};
 
     for(int i=0; i<b.alarms.size(); i++)
     {
         has_obj_map[i] = false;
+        has_mis_map[i] = false;
     }
 
     for(int i=0; i<a.alarms.size(); i++)
@@ -484,14 +491,17 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
             {
                 DeteObj mistake_dete_obj = a.alarms[i];
                 mistake_dete_obj.tag = "mistake_" + a.alarms[i].tag;
+                has_mis_map[max_iou_index] = true;
+
                 compare_dete_res->add_dete_obj(mistake_dete_obj);
-                if(acc_res["mistake"].count(a.alarms[i].tag) == 0)
+                std::string mistake_str = a.alarms[i].tag + "->" + max_iou_obj.tag;
+                if(acc_res["mistake"].count(mistake_str) == 0)
                 {
-                    acc_res["mistake"][a.alarms[i].tag] = 1;
+                    acc_res["mistake"][mistake_str] = 1;
                 }
                 else
                 {
-                    acc_res["mistake"][a.alarms[i].tag] += 1;
+                    acc_res["mistake"][mistake_str] += 1;
                 }                
             }
         }
@@ -514,7 +524,8 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
     // 检查漏检
     for(int i=0; i<b.alarms.size(); i++)
     {
-        if(has_obj_map[i] == false)
+        // 当一个标签既没有对应正确的标签也没有对应的错误标签，就属于漏掉的
+        if((has_obj_map[i] == false) and (has_mis_map[i] == false))
         {
             DeteObj miss_dete_obj = b.alarms[i];
             miss_dete_obj.tag = "miss_" + b.alarms[i].tag;
@@ -530,22 +541,6 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
             }   
         }
     }
-
-    
-
-    // // print
-    // auto iter = acc_res.begin();
-    // while(iter != acc_res.end())
-    // {
-    //     std::map<std::string, int> each_res = iter->second;
-    //     auto iter_2 = each_res.begin();
-    //     while(iter_2 != each_res.end())
-    //     {
-    //         std::cout << iter->first << ", " << iter_2->first << ", " << iter_2->second << std::endl;
-    //         iter_2 ++;
-    //     }
-    //     iter ++;
-    // }
 
     compare_res_ucd->add_dete_res_info(uc, *compare_dete_res);
     return acc_res;
@@ -579,20 +574,6 @@ std::map<std::string, std::map<std::string, int> > merge_compare_res(std::map<st
         }
         iter_a++;
     }
-    
-    // auto iter = b.begin();
-    // while(iter != b.end())
-    // {
-    //     std::map<std::string, int> each_res = iter->second;
-    //     auto iter_2 = each_res.begin();
-    //     while(iter_2 != each_res.end())
-    //     {
-    //         std::cout << iter->first << ", " << iter_2->first << ", " << iter_2->second << std::endl;
-    //         iter_2 ++;
-    //     }
-    //     iter ++;
-    // }
-
     return b;
 }
 
@@ -665,13 +646,15 @@ void DeteAcc::cal_acc_rec(std::string ucd_customer, std::string ucd_standard, st
         iter_res++;
     }
 
-    float correct = static_res["correct"];
-    float extra = static_res["extra"];
-    float miss = static_res["miss"];
-    float mistake = static_res["mistake"];
+    float correct   = static_res["correct"];
+    float extra     = static_res["extra"];
+    float miss      = static_res["miss"];
+    float mistake   = static_res["mistake"];
     std::cout << "----------------------------------------" << std::endl;
-    std::cout << std::setw(10) << std::left << "accurate" << "     " <<  (correct)/(correct +  extra + mistake) << std::endl;    
-    std::cout << std::setw(10) << std::left << "recall" << "     " <<  (correct)/(correct +  miss + mistake) << std::endl;    
+    // 加的是错误的里面，有多少是被错标为 某一项的
+    std::cout << WARNNING_COLOR << "输出的 accurate recall 指标可能有误，目前只用做参考，等待完善" << STOP_COLOR << std::endl;
+    std::cout << std::setw(10) << std::left << "accurate" << "     "    <<  (correct)/(correct +  extra + mistake) << std::endl;    
+    std::cout << std::setw(10) << std::left << "recall  " << "     "    <<  (correct)/(correct +  miss  + mistake) << std::endl;    
     std::cout << "----------------------------------------" << std::endl;
 
     compare_res_ucd->size_info = ucd_b->size_info;

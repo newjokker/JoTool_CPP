@@ -37,15 +37,11 @@ using namespace std;
 
 // 完成 C++ 版本的 文件 服务，再部署到 docker 上面，这样在哪个服务器上都能方便进行启动
 
-// todo json 读取大文件太慢，能不能只读取需要的部分，比如打印 info 信息，不需要后面的 xml_info 信息，是否可以不读取到内存里，不行的话就直接自己写一个解析 json 的代码，用做快速解析
-
-// 下载某一些图片报错，库中就没对应的图片，是先 rename 后入库导致的
+// 下载某一些图片报错，库中就没对应的图片，是先 rename 后入库导致的, 还有就是没有权限读取缓存文件导致的
 
 // 交互设计之类的全部抄 git 的
 
 // 解析出来的 json 中存放的 jpg 图片是压缩过的，这样存放的数据能小一点
-
-// 我之前的 python acc 代码有问题，计算正确的个数的时候明显不对，需要修改
 
 // add config such as -c --c 
 
@@ -54,8 +50,6 @@ using namespace std;
 // label_used 是无序的要记得这个
 
 // 标准的质量控制，去掉那些重复的，可以反复跑训练集，得到结果，进行对比
-
-// 增加寻找有问题的 标签的信息
 
 // 数据组平时要维护的四个服务（1）检测服务 （2）数据集标注错误检查服务, cleanlab （3）数据集标注遗漏检查服务（4）数据集更新工具, ucd 实现
 
@@ -70,19 +64,12 @@ using namespace std;
 
 // ucd 支持自定义的服务接口（1）检测服务 （2）数据检查服务，查看数据检查的进度，还有几个在等待的，还需要等待大概多长时间，检测到什么进度了等信息
 
-// 检测接口 uc 
-// 推荐接口 ucd_a ucd_b 
-// 存放的形式 
-
 // server 
 // 查看提供的检测服务
 // ucd dete_check (每一个服务做成一个 docker, 可以查看当前服务是否可用, 所有的服务做成 post uc get xml_file 的形式，可以直接保存，客户端那边不需要复杂的解析操作)
 // ucd dete prebase test.json save_dir (存在缓存文件的不进行检测)
 // ucd dete 
 // 检测过程使用进度条显示进度，默认是自动使用保存文件夹下面的路径
-// 
-
-// filter_by_tags_like 使用相似的原则对标签进行过滤，一次性只能匹配一条原则
 
 // acc 中 mistake 和 miss 可以针对一个目标 所有算召回率需要注意 miss + correct 就是全部目标的量了
 
@@ -96,13 +83,9 @@ using namespace std;
 
 // ucd dete 一次发一个 uc 过去，返回一个 xml 文件回来
 
-// 如何能减少内存的使用，obj 多了之后，内存就爆了
-
 // 使用 ucd 直接启动 docker，就直接使用武汉那个接口，指定输入检测文件夹换为指定输入 ucd 即可，不用 ucd 直接启动 docker，直接用 ucd 打印启动的命令即可，记不住的是 docker 启动命令
 
 // 增加全文匹配额功能，对指定的关键字进行查找
-
-// color_map 直接打印出来是什么颜色
 
 // foretell, 选择很多句子，随机打印其中的一句，或许 有帮助呢
 // 占卜，将周易 64卦象随机地输出，输出对应的爻辞之类的，
@@ -126,6 +109,25 @@ using namespace std;
 // 操作完了最好能显示做了什么操作，有什么影响
 
 // 超大数据集可以直接存储为存文本数据，这样可以一行一行读取，前面是头文件，就是数据的 uc 信息，以及不同的 uc 信息在多少行，这样的话只要遍历一下头文件就能快速拿到 data 数据，这样更加合理
+
+// 看看是不是 labelmeObj 结构体占用的空间太大了，去掉其中没用的属性和函数
+
+// 一个训练分类的服务，输入是一个 ucd 和 保存模型的文件夹地址，或者直接就是 一个模型地址，值保留在验证集中效果最好的一个模型就行
+
+// cleanLab 服务，输入的是一个 ucd，返回的是一个 ucd，
+// 提取 ucd 中的 uc_list 和 label_used 标签，进行处理
+
+
+// uc_list 改为 uc_set 比较好，现在的方式去重非常不方便
+
+// minus 删除对应的 obj，有是否删除 obj 对应的选项
+// cleanlab 的标准操作
+// (1) clean_lab 生成 res_ucd
+
+
+// ucd acc 功能最后的召回率和精准率统计还是有点问题的，需要进行修复一下，每一个小的项目都统计出来
+// 
+
 
 
 int main(int argc, char ** argv)
@@ -155,7 +157,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v2.1.1";
+    std::string app_version = "v2.2.1";
 
     // uci_info
     int volume_size         = 20;
@@ -193,6 +195,12 @@ int main(int argc, char ** argv)
         sql_db      = (const std::string &)xini_file["sql"]["db"];
         cache_dir   = (const std::string &)xini_file["cache"]["dir"];
         volume_size = ((const int &)xini_file["uci"]["volume_size"]);
+
+        // 分卷大小不能为 0 会有很多问题 
+        if(volume_size <= 0)
+        {
+            volume_size = 30;
+        }
     }
     else
     {
@@ -595,7 +603,6 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "from_dete_server")
     {
-        // 检测结果是固定格式的
         if(argc == 5)
         {
             std::string server_dir  = argv[2];
@@ -801,6 +808,8 @@ int main(int argc, char ** argv)
             std::cout << "sql_db        : " << sql_db << std::endl;
             std::cout << "[cache]" << std::endl;
             std::cout << "cache_dir     : " << cache_dir << std::endl;
+            std::cout << "[uci]"    << std::endl;
+            std::cout << "volume_size   : " << volume_size << std::endl;
             std::cout << "-----------------------------" << std::endl;
             return -1;
         }
@@ -919,7 +928,7 @@ int main(int argc, char ** argv)
             }
             else
             {
-                std::cout << "image dir not exists : " << img_dir << std::endl;
+                std::cout << ERROR_COLOR << "image dir not exists : " << img_dir << STOP_COLOR << std::endl;
                 ucd_param_opt->print_command_info("rename_img");
                 return -1;
             }
@@ -994,14 +1003,18 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "count_files")
     {
-        if (argc== 4)
+        if ((argc==3) || (argc ==4))
         {
-            std::string xml_dir = argv[2];
-            std::string recursive = argv[3];
-            bool is_recursive = true;
-            if((recursive == "false") || (recursive == "False") || (recursive == "0"))
+            std::string xml_dir     = argv[2];
+            bool is_recursive       = true;
+
+            if(argc ==4)
             {
-                is_recursive = false;
+                std::string recursive   = argv[3];
+                if((recursive == "false") || (recursive == "False") || (recursive == "0"))
+                {
+                    is_recursive = false;
+                }            
             }
             count_files(xml_dir, is_recursive);
         }
@@ -1229,6 +1242,10 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "acc")
     {
+
+        // 统计那一部分需要修改，mistake a->b 的错误全部统计出来
+        // ucd_param_opt->not_ready(command_1);
+        // return -1;
 
         // 因为 没有记录 conf 信息，所以不好改变 config 得到不同 config 下面的结果
 
@@ -2291,6 +2308,12 @@ int main(int argc, char ** argv)
     else if(command_1 == "obi_to_obi")
     {
         // 重新划分分卷大小
+    }
+    else if(command_1 == "search_word")
+    {
+        // 全文本匹配功能
+        // 指定需要寻找的文件夹，指定需要配置的文件的类型，指定
+        // 类似 : grep jokker /home/ldq/ -r , 但是功能更加强大一些
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {

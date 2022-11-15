@@ -540,7 +540,7 @@ void UcdParamOpt::load_param_info()
     param_count_files->group = "info";
     param_count_files->grammar = "ucd count_files file_dir recursive(true|1|True|false|0|False)";
     param_count_files->english_explain = "statistics file by suffix";
-    param_count_files->chinese_explain = "统计文件夹中各后缀的文件数";   
+    param_count_files->chinese_explain = "统计文件夹中各后缀的文件数, 默认穿透文件夹进行统计";   
     param_count_files->demo.push_back("ucd count_files ./test 1                     (统计 ./test 文件夹下面各个后缀数据的个数, 穿透文件夹)");
     param_count_files->demo.push_back("ucd count_files ./test 0                     (统计 ./test 文件夹下面各个后缀数据的个数, 不穿透文件夹)");
     UcdParamOpt::add_param(param_count_files);

@@ -14,6 +14,12 @@
 #include "include/tqdm.h"
 
 
+#define ERROR_COLOR         "\x1b[35m"
+#define WARNNING_COLOR      "\033[33m"
+#define STOP_COLOR          "\033[0m"
+
+
+
 static bool is_uc(std::string uc)
 {
     if(uc.size() != 7){ return false; }
@@ -79,6 +85,14 @@ SaturnDatabaseSQL::SaturnDatabaseSQL(std::string host, int port, std::string use
 
 void SaturnDatabaseSQL::rename_img_dir(std::string img_dir, int buffer_img_size)
 {
+
+
+    if(img_dir == "./")
+    {
+        std::cout << ERROR_COLOR << "因为未知的原因现在还不支持在当前路径下运行 " << img_dir << STOP_COLOR << std::endl;
+        return;
+    }
+
 
     // fixme 本身是 uc 名字的就不要操作了，直接拷贝或者复制就行，有 uc 格式的看在不在数据库就完事了
 

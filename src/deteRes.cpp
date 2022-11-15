@@ -219,7 +219,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
             }
             else
             {
-                std::cout << WARNNING_COLOR << "parse xml error, lose depth, " + xml_path << STOP_COLOR << std::endl;
+                // std::cout << WARNNING_COLOR << "parse xml error, lose depth, " + xml_path << STOP_COLOR << std::endl;
                 // throw "parse xml error, lose depth, " + xml_path;
                 DeteRes::depth = -1;
             }
@@ -242,7 +242,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
         }
         else
         {
-            std::cout << WARNNING_COLOR << "parse xml error, lose folder, " + xml_path << STOP_COLOR << std::endl;
+            // std::cout << WARNNING_COLOR << "parse xml error, lose folder, " + xml_path << STOP_COLOR << std::endl;
             // throw "parse xml error, lose folder, " + xml_path;
             DeteRes::folder = "";
         }
@@ -263,7 +263,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
         }
         else
         {
-            std::cout << WARNNING_COLOR << "parse xml error, lose path, " + xml_path << STOP_COLOR << std::endl;
+            // std::cout << WARNNING_COLOR << "parse xml error, lose path, " + xml_path << STOP_COLOR << std::endl;
             // throw "parse xml error, lose path, " + xml_path;
             DeteRes::img_path = "";
         }
@@ -284,7 +284,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
         }
         else
         {
-            std::cout << WARNNING_COLOR << "parse xml error, lose filename, " + xml_path << STOP_COLOR << std::endl;
+            // std::cout << WARNNING_COLOR << "parse xml error, lose filename, " + xml_path << STOP_COLOR << std::endl;
             // throw "parse xml error, lose filename, " + xml_path; 
             DeteRes::file_name = "";         
         }
@@ -367,7 +367,18 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
                         throw "parse xml error, lose ymax" + xml_path;
                     }
 
-                    DeteRes::alarms.push_back(*obj_info);
+                    if(obj_info->x1 >= obj_info->x2)
+                    {
+                        std::cout << WARNNING_COLOR << "x1 >= x2, skip obj : " << xml_path << STOP_COLOR << std::endl;
+                    }
+                    else if(obj_info->y1 >= obj_info->y2)
+                    {
+                        std::cout << WARNNING_COLOR << "y1 >= y2, skip obj : " << xml_path << STOP_COLOR << std::endl;
+                    }
+                    else
+                    {
+                        DeteRes::alarms.push_back(*obj_info);
+                    }                    
                 }
                 else
                 {
