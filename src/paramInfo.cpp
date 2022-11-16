@@ -9,7 +9,9 @@
 #include <iomanip>
 #include "include/paramInfo.hpp"
 
-
+#define ERROR_COLOR         "\x1b[35m"
+#define WARNNING_COLOR      "\033[33m"
+#define STOP_COLOR          "\033[0m"
 
 int min_edit_cost(std::string s1, std::string s2, int ic, int dc, int rc) 
 {
@@ -244,7 +246,7 @@ void UcdParamOpt::print_all_fun()
     auto iter_group = gropu_map.begin();
     while(iter_group != gropu_map.end())
     {
-        std::cout << iter_group->first << std::endl;
+        std::cout << WARNNING_COLOR << iter_group->first << STOP_COLOR << std::endl;
         auto iter_command = iter_group->second.begin();
         while(iter_command != iter_group->second.end())
         {
@@ -422,6 +424,15 @@ void UcdParamOpt::load_param_info()
     param_from_json->demo.push_back("ucd from_json ./json test.json        (将 ./json 路径下面的名字符合 uc 规则的所有 json 制作成 ucd)");
     UcdParamOpt::add_param(param_from_json);
     
+    // from_uc
+    ParamInfo * param_from_uc = new ParamInfo("from_uc");
+    param_from_uc->group = "convert";
+    param_from_uc->grammar = "ucd from_uc ucd_path uc1 uc2 uc3 uc4";
+    param_from_uc->english_explain = "get ucd from uc_list";
+    param_from_uc->chinese_explain = "根据指定的 uc 生成 ucd, 会对 uc 的合法性进行检查 剔除不合法的 uc";   
+    param_from_uc->demo.push_back("ucd from_uc ./test.json Fuc0001 Fuc0002 Fuc0003      (生成一个只有 Fuc0001 Fuc0002 Fuc0003 三个 uc 的 ucd)");
+    UcdParamOpt::add_param(param_from_uc);
+
     // from_dete_server
     ParamInfo * param_from_dete_server = new ParamInfo("from_dete_server");
     param_from_dete_server->group = "convert";
@@ -732,6 +743,15 @@ void UcdParamOpt::load_param_info()
     param_filter_by_nms->demo.push_back("ucd filter_by_nms test.json res.json 0.1 0 (以 nms=0.1 为参数 test.json 中的所有对象进行 nms 操作, 不同标签之间不做 nms)");      
     UcdParamOpt::add_param(param_filter_by_nms);
 
+    // filter_by_uc
+    ParamInfo * param_filter_by_uc = new ParamInfo("filter_by_uc");
+    param_filter_by_uc->group = "filter";
+    param_filter_by_uc->grammar = "ucd filter_by_uc ucd_path save_ucd_path uc1 uc2 uc3";
+    param_filter_by_uc->english_explain = "do nms ";
+    param_filter_by_uc->chinese_explain = "ucd 中只保留指定的 uc 去掉其他的 uc 信息";  
+    param_filter_by_uc->demo.push_back("ucd filter_by_uc test.json res.json Fuc0001 Fuc0002  (test.json 中除了 Fuc0001 Fuc0002 两个 uc 其他所有uc都去掉 保存为 res.json)");      
+    UcdParamOpt::add_param(param_filter_by_uc);
+
     // conf_analysis
     ParamInfo * param_conf_analysis = new ParamInfo("conf_analysis");
     param_conf_analysis->group = "analysis";
@@ -830,10 +850,11 @@ void UcdParamOpt::load_param_info()
     // uc_info
     ParamInfo * param_uc_info = new ParamInfo("uc_info");
     param_uc_info->group = "info";
-    param_uc_info->grammar = "ucd uc_info ucd_path uc";
+    param_uc_info->grammar = "ucd uc_info ucd_path uc1 uc2 uc3";
     param_uc_info->english_explain = "";
     param_uc_info->chinese_explain = "查看执行 uc 的对应信息";   
     param_uc_info->demo.push_back("ucd uc_info test.json Dsm07qp                                (将 Dsm07qp 相关的信息打印出来)");
+    param_uc_info->demo.push_back("ucd uc_info test.json Dsm07qp Fuc0001                        (将 Dsm07qp Fuc0001 相关的信息打印出来)");
     UcdParamOpt::add_param(param_uc_info);
 
     // exec

@@ -128,6 +128,21 @@ using namespace std;
 // ucd acc 功能最后的召回率和精准率统计还是有点问题的，需要进行修复一下，每一个小的项目都统计出来
 // 
 
+// 增加计算 AP 的功能
+
+// 申请更多的内存，现在共享内存用不了多少就崩掉了，如何能申请更多的内存，一般服务器都是 128G 内存
+
+// 有些图片截取小图之后是反色的，为什么会这样，是因为原图的问题吗？Dxm00d0
+
+// get_ucd_list_by_uc , 根据几个 uc 直接生成 ucd ，用于快速测试
+
+// filter_by_uc 
+
+// joUtil 里面 cut_small_img 好像是有问题的 Dxg0e5r Dxh0iku
+
+// minus 有 obj 相减的操作，
+
+// 增加计算 AP 的放方法
 
 
 int main(int argc, char ** argv)
@@ -157,7 +172,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v2.2.1";
+    std::string app_version = "v2.2.2";
 
     // uci_info
     int volume_size         = 20;
@@ -599,6 +614,25 @@ int main(int argc, char ** argv)
         {
             ucd_param_opt->print_command_info(command_1);
             return -1;       
+        }
+    }
+    else if(command_1 == "from_uc")
+    {
+        if(argc > 3)
+        {
+            std::string save_ucd_path = argv[2];
+            std::vector<std::string> uc_list;
+            for(int i=3; i<argc; i++)
+            {
+                std::string uc = argv[i];
+                uc_list.push_back(uc);
+            }
+            ucd_util->get_ucd_from_uc_list(save_ucd_path, uc_list);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+            return -1;
         }
     }
     else if(command_1 == "from_dete_server")
@@ -1534,6 +1568,109 @@ int main(int argc, char ** argv)
             ucd_param_opt->print_command_info(command_1);
         }
     }
+    else if(command_1 == "filter_by_uc")
+    {
+        if(argc > 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_path = argv[3];
+            std::set<std::string> uc_set;
+
+            if(! is_read_file(ucd_path))
+            {
+                std::cout << ERROR_COLOR << "ucd path not readable : " << ucd_path << STOP_COLOR << std::endl;
+                return -1;
+            }
+
+            if(! pystring::endswith(ucd_path, ".json"))
+            {
+                std::cout << ERROR_COLOR << "illegal ucd path : " << ucd_path << STOP_COLOR << std::endl;
+                return -1;
+            }
+
+            for(int i=4; i<argc; i++)
+            {
+                std::string uc = argv[i];
+                uc_set.insert(uc);
+            }
+
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->filter_by_uc_set(uc_set, true);
+            ucd->save_to_ucd(save_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+            return -1;
+        }
+    }
+    else if(command_1 == "filter_by_tags")
+    {
+        if(argc > 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_path = argv[3];
+            std::set<std::string> tags;
+            for(int i=4; i<argc; i++)
+            {
+                std::string each_tag = argv[i];
+                tags.insert(each_tag);
+            }
+            if(ucd_util->is_ucd_path(ucd_path))
+            {
+                UCDataset* ucd = new UCDataset(ucd_path);
+                ucd->parse_ucd(true);
+                ucd->filter_by_tags(tags);
+                ucd->save_to_ucd(save_path);
+                delete ucd;
+            }
+            else if(ucd_util->is_uci_path(ucd_path))
+            {
+                std::cout << WARNNING_COLOR << "filter uci use 'filter_volume_by_tags' " << STOP_COLOR << std::endl;
+            }
+            else
+            {
+                std::cout << ERROR_COLOR << "illeagal ucd_path and uci_path : " << ucd_path << STOP_COLOR << std::endl;
+                return -1;
+            }
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "filter_volume_by_tags")
+    {
+        if(argc > 5)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_path = argv[3];
+            std::string volume_size_str = argv[4];
+            int volume_size = std::stoi(volume_size_str);
+
+            if(! pystring::endswith(save_path, ".uci"))
+            {
+                std::cout << ERROR_COLOR << "illegal uci path : " << save_path << STOP_COLOR << std::endl;
+                return -1;
+            }
+
+            std::set<std::string> tags;
+            for(int i=5; i<argc; i++)
+            {
+                std::string each_tag = argv[i];
+                tags.insert(each_tag);
+            }
+
+            std::string save_dir = get_file_folder(save_path);
+            std::string save_name = get_file_name(save_path);
+            ucd_util->filter_by_tags_volume(tags, ucd_path, save_dir, save_name, volume_size);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
     else if(command_1 == "uc_analysis")
     {
         if(argc == 3)
@@ -1776,32 +1913,51 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "uc_info")
     {
-        // 打印指定的 uc 的信息
-
-        if(argc == 4)
+        if(argc >= 4)
         {
             std::string ucd_path = argv[2];
-            std::string uc = argv[3];
+            std::vector<std::string> uc_list;
+            for(int i=3; i<argc; i++)
+            {
+                std::string each_uc = argv[i];
+                uc_list.push_back(each_uc);
+            }
+
             UCDataset* ucd = new UCDataset(ucd_path);
             ucd->parse_ucd(true);
 
-            // size_info
-            std::cout << "-----------------------" << std::endl;
-            if(ucd->size_info.count(uc) > 0)
+            for(int i=0; i<uc_list.size(); i++)
             {
-                std::cout << "(w, h) : (" << ucd->size_info[uc][0] << ", " << ucd->size_info[uc][1] << ")" << std::endl;
-            }
-            std::cout << "-----------------------" << std::endl;
-
-            // obj_info
-            if(ucd->object_info.count(uc) > 0)
-            {
-                for(int i=0; i<ucd->object_info[uc].size(); i++)
+                std::string uc = uc_list[i];
+                // size_info
+                std::cout << WARNNING_COLOR << "-----------------------------" << uc << "----------------------------" << STOP_COLOR << std::endl;
+                std::cout << "-----------------------" << std::endl;
+                if(ucd->size_info.count(uc) > 0)
                 {
-                    ucd->object_info[uc][i]->print_info();
-                    std::cout << "-----------------------" << std::endl;
+                    std::cout << "(w, h) : (" << ucd->size_info[uc][0] << ", " << ucd->size_info[uc][1] << ")" << std::endl;
+                }
+                else
+                {
+                    std::cout << "(w, h) : (" << "-1" << ", " << "-1" << ")" << std::endl;
+                }
+                std::cout << "-----------------------" << std::endl;
+
+                // obj_info
+                if(ucd->object_info.count(uc) > 0)
+                {
+                    for(int i=0; i<ucd->object_info[uc].size(); i++)
+                    {
+                        ucd->object_info[uc][i]->print_info();
+                        std::cout << "-----------------------" << std::endl;
+                    }
+                }
+                else
+                {
+                    std::cout << "obj : empty" << std::endl;
                 }
             }
+
+
         }
         else
         {
@@ -2056,72 +2212,6 @@ int main(int argc, char ** argv)
             ucd->parse_ucd(true);
             ucd->update_tags(tag_map);
             ucd->save_to_ucd(save_path);
-        }
-        else
-        {
-            ucd_param_opt->print_command_info(command_1);
-        }
-    }
-    else if(command_1 == "filter_by_tags")
-    {
-        if(argc > 4)
-        {
-            std::string ucd_path = argv[2];
-            std::string save_path = argv[3];
-            std::set<std::string> tags;
-            for(int i=4; i<argc; i++)
-            {
-                std::string each_tag = argv[i];
-                tags.insert(each_tag);
-            }
-            if(ucd_util->is_ucd_path(ucd_path))
-            {
-                UCDataset* ucd = new UCDataset(ucd_path);
-                ucd->parse_ucd(true);
-                ucd->filter_by_tags(tags);
-                ucd->save_to_ucd(save_path);
-                delete ucd;
-            }
-            else if(ucd_util->is_uci_path(ucd_path))
-            {
-                std::cout << WARNNING_COLOR << "filter uci use 'filter_volume_by_tags' " << STOP_COLOR << std::endl;
-            }
-            else
-            {
-                std::cout << ERROR_COLOR << "illeagal ucd_path and uci_path : " << ucd_path << STOP_COLOR << std::endl;
-                return -1;
-            }
-        }
-        else
-        {
-            ucd_param_opt->print_command_info(command_1);
-        }
-    }
-    else if(command_1 == "filter_volume_by_tags")
-    {
-        if(argc > 5)
-        {
-            std::string ucd_path = argv[2];
-            std::string save_path = argv[3];
-            std::string volume_size_str = argv[4];
-            int volume_size = std::stoi(volume_size_str);
-
-            if(! pystring::endswith(save_path, ".uci"))
-            {
-                std::cout << ERROR_COLOR << "illegal uci path : " << save_path << STOP_COLOR << std::endl;
-                return -1;
-            }
-
-            std::set<std::string> tags;
-            for(int i=5; i<argc; i++)
-            {
-                std::string each_tag = argv[i];
-                tags.insert(each_tag);
-            }
-
-            std::string save_dir = get_file_folder(save_path);
-            std::string save_name = get_file_name(save_path);
-            ucd_util->filter_by_tags_volume(tags, ucd_path, save_dir, save_name, volume_size);
         }
         else
         {

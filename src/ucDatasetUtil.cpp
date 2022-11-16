@@ -1026,6 +1026,40 @@ void UCDataset::filter_by_tags(std::set<std::string> tags, bool clear_obj)
     }
 }
 
+void UCDataset::filter_by_uc_set(std::set<std::string> uc_set, bool clear_obj)
+{
+    std::vector<std::string> uc_list;
+    for(int i=0; i<UCDataset::uc_list.size(); i++)
+    {
+        std::string uc = UCDataset::uc_list[i];
+        
+        if(uc_set.count(uc) == 0)
+        {
+            if(UCDataset::size_info.count(uc) > 0)
+            {
+                UCDataset::size_info.erase(uc);
+            }
+            
+            if(UCDataset::object_info.count(uc) > 0)
+            {
+                if(clear_obj == true)
+                {
+                    for(int j=0; j<UCDataset::object_info[uc].size(); j++)
+                    {
+                        delete UCDataset::object_info[uc][j];
+                    }
+                }
+                UCDataset::object_info.erase(uc);
+            }
+        }
+        else
+        {
+            uc_list.push_back(uc);
+        }
+    }
+    UCDataset::uc_list = uc_list;
+}
+
 void UCDataset::crop_dete_res_with_assign_uc(std::string uc, std::string img_path, std::string save_dir)
 {
     if(UCDataset::object_info.count(uc) == 0)
@@ -2796,6 +2830,26 @@ void UCDatasetUtil::get_ucd_from_dete_server(std::string  dete_server_dir, std::
     save_ucd->save_to_ucd(save_path);
     delete ucd;
     delete save_ucd;
+}
+
+void UCDatasetUtil::get_ucd_from_uc_list(std::string save_path, std::vector<std::string> uc_list)
+{
+    UCDataset* ucd = new UCDataset(save_path);
+    for(int i=0; i<uc_list.size(); i++)
+    {
+        if(is_uc(uc_list[i]))
+        {
+            ucd->uc_list.push_back(uc_list[i]);
+        }
+        else
+        {
+            std::cout << WARNNING_COLOR << uc_list[i] << " is not uc" << STOP_COLOR << std::endl;
+        }
+    }
+
+    ucd->unique();
+    ucd->save_to_ucd(save_path);
+    delete ucd;
 }
 
 void UCDatasetUtil::merge_ucds(std::string save_path, std::vector<std::string> ucd_path_vector)

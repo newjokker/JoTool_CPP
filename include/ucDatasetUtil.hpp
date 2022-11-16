@@ -140,7 +140,9 @@ class UCDataset
 
         // 根据标签进行过滤
         void filter_by_tags(std::set<std::string> tags, bool clear_obj=true);
-        // void filter_by_tags_volume(std::set<std::string> tags, std::string save_dir, std::string save_name, int volume_size=30);
+
+        // 根据 uc 进行过滤
+        void filter_by_uc_set(std::set<std::string> uc_set, bool clear_obj=true);
 
         // 根据面积进行过滤
         void filter_by_area(float area_th, bool clear_obj=true);
@@ -362,6 +364,8 @@ class UCDatasetUtil
         // 对标签进行筛选
         void filter_by_tags_volume(std::set<std::string> tags, std::string uci_path, std::string save_dir, std::string save_name, int volume_size=30);
 
+        // 从 uc_list 生成 ucd
+        void get_ucd_from_uc_list(std::string save_path, std::vector<std::string> uc_list);
 
     private:
         
