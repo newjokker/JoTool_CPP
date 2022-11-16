@@ -128,21 +128,15 @@ using namespace std;
 // ucd acc 功能最后的召回率和精准率统计还是有点问题的，需要进行修复一下，每一个小的项目都统计出来
 // 
 
-// 增加计算 AP 的功能
-
 // 申请更多的内存，现在共享内存用不了多少就崩掉了，如何能申请更多的内存，一般服务器都是 128G 内存
 
 // 有些图片截取小图之后是反色的，为什么会这样，是因为原图的问题吗？Dxm00d0
 
-// get_ucd_list_by_uc , 根据几个 uc 直接生成 ucd ，用于快速测试
-
-// filter_by_uc 
-
 // joUtil 里面 cut_small_img 好像是有问题的 Dxg0e5r Dxh0iku
 
-// minus 有 obj 相减的操作，
-
 // 增加计算 AP 的放方法
+
+// drop_extra_info, 以 uc_list 为基准，uc_list 中没有的元素 object_info 和 size_info 中有的话 删除
 
 
 int main(int argc, char ** argv)
@@ -172,7 +166,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v2.2.2";
+    std::string app_version = "v2.2.3";
 
     // uci_info
     int volume_size         = 20;
@@ -183,8 +177,8 @@ int main(int argc, char ** argv)
     // get user name
     struct passwd* pwd;
     uid_t userid;
-	userid = getuid();
-	pwd = getpwuid(userid);
+	userid              = getuid();
+	pwd                 = getpwuid(userid);
     std::string pw_name = pwd->pw_name;
     
     // if config_path is "~/ucdconfig.ini" can't read the file, so should get the user name for ~
@@ -792,14 +786,11 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "minus")
     {
-        // ucd_param_opt->not_ready("minus");
-        // return -1;
-
         if(argc == 5)
         {
-            std::string ucd_path_1 = argv[2];
-            std::string ucd_path_2 = argv[3];
-            std::string ucd_save_path = argv[4];
+            std::string ucd_path_1      = argv[2];
+            std::string ucd_path_2      = argv[3];
+            std::string ucd_save_path   = argv[4];
             ucd_util->ucd_minus(ucd_save_path, ucd_path_1, ucd_path_2);
         }
         else
@@ -868,7 +859,7 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
-    else if(command_1 == "--version" || command_1 == "-V")
+    else if(command_1 == "--version" || command_1 == "-V" || command_1 == "-v" || command_1 == "-version")
     {
         std::cout << "uc_dataset : " << app_version << std::endl;
         return -1;
@@ -1800,7 +1791,7 @@ int main(int argc, char ** argv)
             {
                 for(int i=0; i<ucd->uc_list.size()-1; i++)
                 {
-                    std::cout << ucd->uc_list[i] << ",";
+                    std::cout << ucd->uc_list[i] << " ";
                 }
                 std::cout << ucd->uc_list[ucd->uc_list.size()-1] << std::endl;
             }
@@ -2172,8 +2163,7 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "fake_uc")
     {
-        // FUC 开始的数据默认为 fake uc
-        // 将文件名和 Fuc 进行映射，注意的是文件不能超过 9999 个，最多这么多的 fack uc 使用
+        std::cout << WARNNING_COLOR << "fake_uc 功能慎用，不要将 fake uc 与正确 uc 混合使用" << STOP_COLOR << std::endl;
 
         if(argc == 3)
         {
@@ -2404,6 +2394,24 @@ int main(int argc, char ** argv)
         // 全文本匹配功能
         // 指定需要寻找的文件夹，指定需要配置的文件的类型，指定
         // 类似 : grep jokker /home/ldq/ -r , 但是功能更加强大一些
+    }
+    else if(command_1 == "test")
+    {
+
+        UCDataset* a = new UCDataset();
+        std::vector<UCDataset*> b;
+
+        a->add_ucd_info("/home/ldq/ucd_dir/del/test.json");
+
+        // std::cout << a.count << std::endl;
+        // std::cout << b[0]->size_info.size() << std::endl;
+
+
+        a->delete_obj(a->uc_list[0], a->object_info[a->uc_list[0]][0]);
+
+        a->save_to_ucd("/home/ldq/ucd_dir/del/test2.json");
+
+
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {

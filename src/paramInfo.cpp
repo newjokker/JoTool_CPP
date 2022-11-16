@@ -251,7 +251,7 @@ void UcdParamOpt::print_all_fun()
         while(iter_command != iter_group->second.end())
         {
             ParamInfo param_info = UcdParamOpt::get_param(iter_command->data());
-            std::cout << std::setw(20) << std::right << iter_command->data() << "," ;
+            std::cout << std::setw(25) << std::right << iter_command->data() << "," ;
             std::cout << std::setw(4) << std::left << " " << param_info.grammar << std::endl;
             iter_command++;
         }
@@ -496,7 +496,7 @@ void UcdParamOpt::load_param_info()
     param_minus->group = "opt";
     param_minus->grammar = "ucd minus ucd_path1 ucd_path2 save_path";
     param_minus->english_explain = "do minus operation between two ucd";
-    param_minus->chinese_explain = "减操作数据集，目前不操作 object_info 信息";   
+    param_minus->chinese_explain = "减操作数据集, obj 信息也会进行相减操作";   
     param_minus->demo.push_back("ucd minus test1.json test2.json res.json       (将 test1.josn - test2.json 得到 res.json)");
     UcdParamOpt::add_param(param_minus);
     

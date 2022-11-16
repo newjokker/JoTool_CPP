@@ -86,8 +86,8 @@ class UCDataset
         
         void add_obj(std::string uc, LabelmeObj *obj);
 
-        // 删除 obj
-        void delete_obj(std::string uc, LabelmeObj *obj); 
+        // 删除 obj, 选择是否删除指针
+        void delete_obj(std::string uc, LabelmeObj *obj, bool clear_obj=true); 
 
         // 对 uc 进行切片
         std::vector<std::string> uc_slice(int start, int end);

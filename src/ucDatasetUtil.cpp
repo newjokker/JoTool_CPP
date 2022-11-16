@@ -449,12 +449,16 @@ bool UCDataset::has_obj(std::string uc, LabelmeObj *obj)
     return false;
 }
 
-void UCDataset::delete_obj(std::string uc, LabelmeObj *obj)
+void UCDataset::delete_obj(std::string uc, LabelmeObj *obj, bool clear_obj)
 {
     for(int j=0; j<UCDataset::object_info[uc].size(); j++)
     {
         if(UCDataset::object_info[uc][j]->equal_to(obj))
         {
+            if(clear_obj)
+            {
+                delete UCDataset::object_info[uc][j];
+            }
             UCDataset::object_info[uc].erase(UCDataset::object_info[uc].begin() + j);
         }
     }
@@ -2898,35 +2902,35 @@ void UCDatasetUtil::ucd_minus(std::string save_path, std::string ucd_path_1, std
     ucd1->parse_ucd(true);
     UCDataset* ucd2 = new UCDataset(ucd_path_2);
     ucd2->parse_ucd(true);
-    UCDataset* ucd_res = new UCDataset(save_path);
-    std::vector<std::string> uc_difference;
-    // set_intersection
+
+    //
+    std::vector<std::string> uc_intersection;
     std::set<std::string> uc_set1(ucd1->uc_list.begin(), ucd1->uc_list.end());
     std::set<std::string> uc_set2(ucd2->uc_list.begin(), ucd2->uc_list.end());
-    std::set_difference(uc_set1.begin(), uc_set1.end(), uc_set2.begin(), uc_set2.end(), std::inserter(uc_difference, uc_difference.begin()));
-    // 
-    ucd_res->uc_list = uc_difference;
-    // 
-    for(int i=0; i<uc_difference.size(); i++)
-    {
-        std::string uc = uc_difference[i];
+    std::set_intersection(uc_set1.begin(), uc_set1.end(), uc_set2.begin(), uc_set2.end(), std::inserter(uc_intersection, uc_intersection.begin()));
+    std::map< std::string, std::vector<int> > size_info;
 
-        if(ucd1->object_info.count(uc) > 0)
+    for(int i=0; i<uc_intersection.size(); i++)
+    {
+        std::string uc = uc_intersection[i];
+        // delete obj
+        if(ucd2->object_info.count(uc) > 0)
         {
-            ucd_res->object_info[uc] = ucd1->object_info[uc];
+            for(int j=0; j<ucd2->object_info[uc].size(); j++)
+            {
+                ucd1->delete_obj(uc, ucd2->object_info[uc][j]);
+            }
         }
 
+        // add size_info
         if(ucd1->size_info.count(uc) > 0)
         {
-            ucd_res->size_info[uc] = ucd1->size_info[uc];
+            size_info[uc] = ucd1->size_info[uc];
         }
     }
-    //
-    ucd_res->save_to_ucd(save_path);
-    // delete
+    ucd1->save_to_ucd(save_path);
     delete ucd1;
     delete ucd2;
-    delete ucd_res;
 }
 
 bool UCDatasetUtil::is_ucd_path(std::string ucd_path)
