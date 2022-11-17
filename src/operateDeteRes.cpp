@@ -421,6 +421,7 @@ float dete_obj_iou(DeteObj a, DeteObj b)
 
 //
 
+
 DeteAcc::DeteAcc()
 {
     DeteAcc::iou = 0.5;
@@ -428,9 +429,6 @@ DeteAcc::DeteAcc()
 
 std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and_standard(DeteRes a, DeteRes b, std::string uc, UCDataset* compare_res_ucd)
 {
-
-    // 记录错误的类型 mistake[a->b] = 0
-
 
     // sort by conf 
     a.sort_by_conf();
@@ -490,11 +488,12 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
             else
             {
                 DeteObj mistake_dete_obj = a.alarms[i];
-                mistake_dete_obj.tag = "mistake_" + a.alarms[i].tag;
+                mistake_dete_obj.tag = "mistake_" + max_iou_obj.tag + ":" + a.alarms[i].tag;;
                 has_mis_map[max_iou_index] = true;
 
                 compare_dete_res->add_dete_obj(mistake_dete_obj);
-                std::string mistake_str = a.alarms[i].tag + "->" + max_iou_obj.tag;
+                std::string mistake_str = a.alarms[i].tag;
+                // std::string mistake_str = max_iou_obj.tag;
                 if(acc_res["mistake"].count(mistake_str) == 0)
                 {
                     acc_res["mistake"][mistake_str] = 1;
@@ -577,96 +576,250 @@ std::map<std::string, std::map<std::string, int> > merge_compare_res(std::map<st
     return b;
 }
 
-void DeteAcc::cal_acc_rec(std::string ucd_customer, std::string ucd_standard, std::string save_ucd_path)
+std::map<std::string, std::vector<float> > DeteAcc::cal_acc_rec(UCDataset* ucd_a, UCDataset* ucd_b, std::string save_ucd_path, bool print)
 {
-    // 解析两个 ucd 对应的 object
-
-    if(! (is_file(ucd_customer) && is_file(ucd_standard)))
-    {
-        std::cout << "ucd path not exists " << std::endl;
-        throw "ucd path not exists";
-    }
-
-    UCDataset* ucd_a = new UCDataset(ucd_customer);
-    UCDataset* ucd_b = new UCDataset(ucd_standard);
-    ucd_a->parse_ucd(true);
-    ucd_b->parse_ucd(true);
-
+    std::map<std::string, std::vector<float> > res;
     std::map<std::string, std::map<std::string, int> > compare_res;
-
     UCDataset* compare_res_ucd = new UCDataset();
 
-    tqdm bar;
-    int N = ucd_b->object_info.size();
-    int i =0;
-    auto iter_b = ucd_b->object_info.begin();
-    while(iter_b != ucd_b->object_info.end())
+    // 找到 a b uc 的合集
+    std::set<std::string> uc_set;
+    for(int i=0; i<ucd_a->uc_list.size(); i++)
     {
-        std::string uc = iter_b->first;
-        DeteRes *each_b = new DeteRes();
-        DeteRes *each_a = new DeteRes();
-        ucd_b->get_dete_res_with_assign_uc(each_b, uc);
-        ucd_a->get_dete_res_with_assign_uc(each_a, uc);
-
-        std::map<std::string, std::map<std::string, int> > each_compare_res = DeteAcc::compare_customer_and_standard(*each_a, *each_b, uc, compare_res_ucd);
-        compare_res = merge_compare_res(compare_res, each_compare_res);
-        bar.progress(i, N);
-        iter_b ++;
-        i++;
+        uc_set.insert(ucd_a->uc_list[i]);
     }
-    bar.finish();
 
-    // print
-    std::map<std::string, int> static_res;
-    //
-    std::cout << "----------------------------------------" << std::endl;
-    std::cout << "             stastic result             " << std::endl;
-    std::cout << "----------------------------------------" << std::endl;
-    //
-    auto iter = compare_res.begin();
-    while(iter != compare_res.end())
+    for(int i=0; i<ucd_b->uc_list.size(); i++)
     {
-        static_res[iter->first] = 0;
-        std::map<std::string, int> each_res = iter->second;
-        auto iter_2 = each_res.begin();
-        while(iter_2 != each_res.end())
+        uc_set.insert(ucd_b->uc_list[i]);
+    }
+
+    if(print)
+    {
+        tqdm bar;
+        int N = uc_set.size();
+
+        int i =0;
+        auto iter_uc = uc_set.begin();
+        while(iter_uc != uc_set.end())
         {
-            std::cout << std::setw(10) << std::left << iter->first << "     " << std::setw(15) << std::left << iter_2->first << "     " << iter_2->second << std::endl;
-            static_res[iter->first] += iter_2->second;
-            iter_2 ++;
+            std::string uc = iter_uc->data();
+            DeteRes *each_b = new DeteRes();
+            DeteRes *each_a = new DeteRes();
+            ucd_b->get_dete_res_with_assign_uc(each_b, uc);
+            ucd_a->get_dete_res_with_assign_uc(each_a, uc);
+            std::map<std::string, std::map<std::string, int> > each_compare_res = DeteAcc::compare_customer_and_standard(*each_a, *each_b, uc, compare_res_ucd);
+            compare_res = merge_compare_res(compare_res, each_compare_res);
+            bar.progress(i, N);
+            iter_uc ++;
+            i++;
         }
-        iter ++;
+        bar.finish();
     }
-    std::cout << "----------------------------------------" << std::endl;
-
-    auto iter_res = static_res.begin();
-    while(iter_res != static_res.end())
+    else
     {
-        std::cout << std::setw(10) << std::left << iter_res->first << "     " <<  iter_res->second << std::endl;
-        iter_res++;
+        int i =0;
+        auto iter_uc = uc_set.begin();
+        while(iter_uc != uc_set.end())
+        {
+            std::string uc = iter_uc->data();
+            DeteRes *each_b = new DeteRes();
+            DeteRes *each_a = new DeteRes();
+            ucd_b->get_dete_res_with_assign_uc(each_b, uc);
+            ucd_a->get_dete_res_with_assign_uc(each_a, uc);
+            std::map<std::string, std::map<std::string, int> > each_compare_res = DeteAcc::compare_customer_and_standard(*each_a, *each_b, uc, compare_res_ucd);
+            compare_res = merge_compare_res(compare_res, each_compare_res);            
+            iter_uc ++;
+            i++;
+        }
     }
 
-    float correct   = static_res["correct"];
-    float extra     = static_res["extra"];
-    float miss      = static_res["miss"];
-    float mistake   = static_res["mistake"];
-    std::cout << "----------------------------------------" << std::endl;
-    // 加的是错误的里面，有多少是被错标为 某一项的
-    std::cout << WARNNING_COLOR << "输出的 accurate recall 指标可能有误，目前只用做参考，等待完善" << STOP_COLOR << std::endl;
-    std::cout << std::setw(10) << std::left << "accurate" << "     "    <<  (correct)/(correct +  extra + mistake) << std::endl;    
-    std::cout << std::setw(10) << std::left << "recall  " << "     "    <<  (correct)/(correct +  miss  + mistake) << std::endl;    
-    std::cout << "----------------------------------------" << std::endl;
+    // stastic
+    std::set<std::string> all_tags      = ucd_a->get_tags();
+    std::set<std::string> all_tags_b    = ucd_b->get_tags();
+    all_tags.insert(all_tags_b.begin(), all_tags_b.end());
+    
+    if(print)
+    {
+        std::cout << "------------------------------------------------------------------------------------" << std::endl;
+        std::cout << "                                    STASTIC" << std::endl;
+        std::cout << "------------------------------------------------------------------------------------" << std::endl;
+        std::cout << std::setw(20) << std::left << "TAG" << std::setw(10) << std::left << "CORRECT" << std::setw(10) << std::left << "MISS" << std::setw(10) << std::left << "EXTRA" 
+                    << std::setw(10) << std::left << "MISTAKE" << std::setw(15) << std::left << "P(100%)" << std::setw(15) << std::left << "R(100%)" << std::endl;
+        std::cout << "------------------------------------------------------------------------------------" << std::endl;
+    }
+
+    int all_correct_num = 0;
+    int all_miss_num    = 0;
+    int all_extra_num   = 0;
+    int all_mistake_num = 0;
+    float all_p         = 0;
+    float all_r         = 0;
+
+    auto iter = all_tags.begin();
+    while(iter != all_tags.end())
+    {
+        std::string tag = iter->data();
+        int correct_num = 0;
+        int miss_num    = 0;
+        int extra_num   = 0;
+        int mistake_num = 0;
+        float each_p    = 0;
+        float each_r    = 0;
+
+        if(compare_res["correct"].count(tag) > 0)
+        {
+            correct_num = compare_res["correct"][tag];
+        } 
+
+        if(compare_res["extra"].count(tag) > 0)
+        {
+            extra_num   = compare_res["extra"][tag];
+        } 
+
+        if(compare_res["miss"].count(tag) > 0)
+        {
+            miss_num    = compare_res["miss"][tag];
+        } 
+
+        if(compare_res["mistake"].count(tag) > 0)
+        {
+            mistake_num = compare_res["mistake"][tag];
+        } 
+
+        if((correct_num + mistake_num + extra_num) > 0)
+        {
+            each_p = 100 * (correct_num * 1.0) / (correct_num + mistake_num + extra_num);
+        }
+
+        if((correct_num + miss_num) > 0)
+        {
+            each_r = 100 * (correct_num * 1.0) / (correct_num + miss_num);
+        } 
+
+        all_correct_num += correct_num;
+        all_extra_num   += extra_num;
+        all_miss_num    += miss_num;
+        all_mistake_num += mistake_num;
+        
+
+        res[tag].push_back(each_p);
+        res[tag].push_back(each_r);
+
+        if(print)
+        {
+            std::cout << std::setw(20) << std::left << tag << std::setw(10) << std::left << correct_num << std::setw(10) << std::left << miss_num << std::setw(10) << std::left << extra_num 
+                    << std::setw(10) << std::left << mistake_num << std::setw(15) << std::left << each_p << std::setw(15) << std::left << each_r << std::endl;
+        }
+        iter++;
+    } 
+
+
+    if((all_correct_num + all_mistake_num + all_extra_num) > 0)
+    {
+        all_p = 100 * (all_correct_num * 1.0) / (all_correct_num + all_mistake_num + all_extra_num);
+    }
+
+    if((all_correct_num + all_miss_num) > 0)
+    {
+        all_r = 100 * (all_correct_num * 1.0) / (all_correct_num + all_miss_num);
+    } 
+
+    if(print)
+    {
+        std::cout << "------------------------------------------------------------------------------------" << std::endl;
+        std::cout << std::setw(20) << std::left << "TOTAL" << std::setw(10) << std::left << all_correct_num << std::setw(10) << std::left << all_miss_num << std::setw(10) << std::left << all_extra_num 
+                << std::setw(10) << std::left << all_miss_num << std::setw(15) << std::left << all_p << std::setw(15) << std::left << all_r << std::endl;
+        std::cout << "------------------------------------------------------------------------------------" << std::endl;
+        std::cout << "IOU : " << DeteAcc::iou << std::endl;
+        std::cout << "------------------------------------------------------------------------------------" << std::endl;
+        std::cout << "" << std::endl;
+        std::cout << WARNNING_COLOR << "* 一横排全部统计为 0 是没有检测到也没有遗漏，是被误检了其他类型了，不是误检到当前类型，所以误检不统计" << STOP_COLOR << std::endl;
+        std::cout << WARNNING_COLOR << "* 这个函数还需要再测测，看看否有遗漏的问题" << STOP_COLOR << std::endl;
+    }
 
     compare_res_ucd->size_info = ucd_b->size_info;
-
     if(save_ucd_path.size() > 0)
     {
         compare_res_ucd->save_to_ucd(save_ucd_path);
     }
-
-    delete ucd_a;
-    delete ucd_b;
     delete compare_res_ucd;
+    return res;
 }
+
+static float vector_means(std::vector<float> res)
+{
+    if(res.size() == 0)
+    {
+        return 0;
+    }
+
+    float res_sum = 0;
+    for(int i=0; i<res.size(); i++)
+    {
+        res_sum += res[i];
+    }
+    return res_sum / res.size();
+}
+
+void DeteAcc::cal_map(UCDataset* ucd_a, UCDataset* ucd_b)
+{
+    std::cout << "---------------------------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << std::setw(20) << std::left << "TAG         (P/R)";
+    std::vector<std::string> ap_list;
+    
+    // 各个类别的 ap 的均值就是 map
+
+    std::map< std::string, std::vector<float> > tag_ap_dict; 
+    std::map< std::string, std::vector<float> > tag_ar_dict; 
+
+    for(int i=5; i<100; i+=10)
+    {
+        ucd_a->filter_by_conf(i * 0.01, false);
+        std::map<std::string, std::vector<float> > each_res = DeteAcc::cal_acc_rec(ucd_a, ucd_b, "", false);
+        auto iter = each_res.begin();
+        while(iter != each_res.end())
+        {
+            std::string tag = iter->first;
+            tag_ap_dict[tag].push_back(iter->second[0]);
+            tag_ar_dict[tag].push_back(iter->second[1]);
+            iter++;
+        }
+        std::cout << std::setw(8) << std::left << i;
+    }
+    std::cout << std::setw(8) << std::left << "AP (100%)" << std::endl;
+    std::cout << "---------------------------------------------------------------------------------------------------------------" << std::endl;
+
+    auto iter_ap = tag_ap_dict.begin();
+    while(iter_ap != tag_ap_dict.end())
+    {
+        // float each_ap = vector_means(iter_ap->second);
+        // percion
+        std::cout << std::setiosflags(std::ios::fixed) << std::setprecision(2);
+        std::cout << std::setw(20) << std::left << iter_ap->first;
+        for(int j=0; j<iter_ap->second.size(); j++)
+        {
+            std::cout << std::setw(8) << std::left << iter_ap->second[j];
+        }
+        std::cout << std::endl;
+        // recall
+        std::cout << std::setw(20) << std::left << " ";
+        for(int x=0; x<tag_ar_dict[iter_ap->first].size(); x++)
+        {
+            std::cout << std::setw(8) << std::left << tag_ar_dict[iter_ap->first][x];
+        }
+        std::cout << "wait_for_cal" << std::endl;
+        std::cout << "                    -------------------------------------------------------------------------------------------" << std::endl;
+        iter_ap++;
+    }
+
+    std::cout << "---------------------------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << std::setw(10) << std::left << "AVERAGE" << std::setw(10) << std::left << "P(100%)" << std::setw(10) << std::left << "R(100%)" 
+              << std::setw(10) << std::left << "IOU : " + std::to_string(DeteAcc::iou) << std::endl;
+    std::cout << "---------------------------------------------------------------------------------------------------------------" << std::endl;
+
+    std::cout << WARNNING_COLOR << "wait for cal" << STOP_COLOR << std::endl;
+}
+
 
 }

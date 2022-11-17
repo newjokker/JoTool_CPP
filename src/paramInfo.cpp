@@ -647,6 +647,9 @@ void UcdParamOpt::load_param_info()
     param_acc->chinese_explain = "两个 ucd 之间计算精准率和召回率, ucd_customer 自定义检测结果, ucd_standard: 标准检测结果";   
     param_acc->demo.push_back("ucd acc test1.json test2.json                               (将 test1.json 与 test2.json 计算召回率和准确率打印出来)");
     param_acc->demo.push_back("ucd acc test1.json test2.json res.json                      (将 test1.json 与 test2.json 计算召回率和准确率，结果保存在 res.json 中)");
+    param_acc->demo.push_back("-------------------");
+    param_acc->demo.push_back("mistake a:b , 错把 a 检测成了 b");
+    param_acc->demo.push_back("-------------------");
     UcdParamOpt::add_param(param_acc);
 
     // attr

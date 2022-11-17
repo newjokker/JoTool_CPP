@@ -166,7 +166,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v2.2.3";
+    std::string app_version = "v2.2.4";
 
     // uci_info
     int volume_size         = 20;
@@ -1272,6 +1272,9 @@ int main(int argc, char ** argv)
         // ucd_param_opt->not_ready(command_1);
         // return -1;
 
+
+        // 处理 gt 中没有对应的 uc，dete_res 中有对应的 uc 的情况
+
         if(argc == 5 || argc == 4)
         {
             std::string ucd_customer = argv[2];
@@ -1286,8 +1289,54 @@ int main(int argc, char ** argv)
                 ucd_save_res = argv[4];
             }
 
+            // 
+            if(! (is_file(ucd_customer) && is_file(ucd_standard)))
+            {
+                std::cout << "ucd path not exists " << std::endl;
+                throw "ucd path not exists";
+            }
+
+            UCDataset* ucd_a = new UCDataset(ucd_customer);
+            UCDataset* ucd_b = new UCDataset(ucd_standard);
+            ucd_a->parse_ucd(true);
+            ucd_b->parse_ucd(true);
+
             jotools::DeteAcc* acc = new DeteAcc();
-            acc->cal_acc_rec(ucd_customer, ucd_standard, ucd_save_res);
+            acc->iou = 0.5;
+            acc->cal_acc_rec(ucd_a, ucd_b, ucd_save_res);
+            delete acc;
+            delete ucd_a;
+            delete ucd_b;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "map")
+    {
+        if(argc == 4)
+        {
+            std::string ucd_customer = argv[2];
+            std::string ucd_standard = argv[3];
+            jotools::DeteAcc* acc = new DeteAcc();
+            acc->iou = 0.5;
+
+
+            if(! (is_file(ucd_customer) && is_file(ucd_standard)))
+            {
+                std::cout << "ucd path not exists " << std::endl;
+                throw "ucd path not exists";
+            }
+
+            UCDataset* ucd_a = new UCDataset(ucd_customer);
+            UCDataset* ucd_b = new UCDataset(ucd_standard);
+            ucd_a->parse_ucd(true);
+            ucd_b->parse_ucd(true);
+
+            acc->cal_map(ucd_a, ucd_b);
+            delete ucd_a;
+            delete ucd_b;
             delete acc;
         }
         else
@@ -1769,7 +1818,7 @@ int main(int argc, char ** argv)
                 auto iter_tag = tags.begin();
                 while(iter_tag != tags.end())
                 {
-                    std::cout << iter_tag->data() << ",";
+                    std::cout << iter_tag->data() << " ";
                     iter_tag++;
                 }
                 std::cout << std::endl;
