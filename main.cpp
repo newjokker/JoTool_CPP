@@ -1272,19 +1272,20 @@ int main(int argc, char ** argv)
         // ucd_param_opt->not_ready(command_1);
         // return -1;
 
-        // 因为 没有记录 conf 信息，所以不好改变 config 得到不同 config 下面的结果
-
-        // 生成结果为一个 ucd ，每个标签就是对应的检测结果
-
-        // 为了推广使用和自己和别人的进行对比，举一些比较极端的例子，肯定会有差异的，指出这些差异的原因和解决方案，用 ucd 
-
-        // 每个标签计算 acc res
-
-        if(argc == 5)
+        if(argc == 5 || argc == 4)
         {
             std::string ucd_customer = argv[2];
             std::string ucd_standard = argv[3];
-            std::string ucd_save_res = argv[4];
+            std::string ucd_save_res;
+            if(argc == 4)
+            {
+                ucd_save_res = "";
+            }
+            else
+            {
+                ucd_save_res = argv[4];
+            }
+
             jotools::DeteAcc* acc = new DeteAcc();
             acc->cal_acc_rec(ucd_customer, ucd_standard, ucd_save_res);
             delete acc;

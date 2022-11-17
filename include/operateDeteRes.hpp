@@ -53,7 +53,7 @@ namespace jotools
             std::map<std::string, std::map<std::string, int> > compare_customer_and_standard(DeteRes a, DeteRes b, std::string uc, UCDataset * c);
 
             // 检测结果计算 acc rec
-            void cal_acc_rec(std::string ucd_customer, std::string ucd_standard, std::string save_ucd_path);
+            void cal_acc_rec(std::string ucd_customer, std::string ucd_standard, std::string save_ucd_path="");
 
 
     };

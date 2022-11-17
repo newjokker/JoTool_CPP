@@ -642,10 +642,11 @@ void UcdParamOpt::load_param_info()
     // acc
     ParamInfo * param_acc = new ParamInfo("acc");
     param_acc->group = "analysis";
-    param_acc->grammar = "ucd acc ucd_customer, ucd_standard compare_res_ucd_path";
+    param_acc->grammar = "ucd acc ucd_customer, ucd_standard {compare_res_ucd_path}";
     param_acc->english_explain = "get acc rec from two ucd";
     param_acc->chinese_explain = "两个 ucd 之间计算精准率和召回率, ucd_customer 自定义检测结果, ucd_standard: 标准检测结果";   
-    param_acc->demo.push_back("ucd acc test1.json test2.json res.json                               (将 test1.json 与 test2.json 计算召回率和准确率，结果保存在 res.json 中)");
+    param_acc->demo.push_back("ucd acc test1.json test2.json                               (将 test1.json 与 test2.json 计算召回率和准确率打印出来)");
+    param_acc->demo.push_back("ucd acc test1.json test2.json res.json                      (将 test1.json 与 test2.json 计算召回率和准确率，结果保存在 res.json 中)");
     UcdParamOpt::add_param(param_acc);
 
     // attr

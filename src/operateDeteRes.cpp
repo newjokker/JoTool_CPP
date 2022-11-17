@@ -658,7 +658,11 @@ void DeteAcc::cal_acc_rec(std::string ucd_customer, std::string ucd_standard, st
     std::cout << "----------------------------------------" << std::endl;
 
     compare_res_ucd->size_info = ucd_b->size_info;
-    compare_res_ucd->save_to_ucd(save_ucd_path);
+
+    if(save_ucd_path.size() > 0)
+    {
+        compare_res_ucd->save_to_ucd(save_ucd_path);
+    }
 
     delete ucd_a;
     delete ucd_b;
