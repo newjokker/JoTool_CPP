@@ -40,7 +40,7 @@ static bool is_uc(std::string uc)
 
     if(uc.size() != 7){ return false; }
 
-    if(((int)uc[0] < (int)'C') || ((int)uc[0] > int('K'))) { return false; }
+    if(((int)uc[0] < (int)'C') || ((int)uc[0] > int('Z'))) { return false; }
     if(((int)uc[1] < (int)'a') || ((int)uc[1] > int('z'))) { return false; }
     if(((int)uc[2] < (int)'a') || ((int)uc[2] > int('z'))) { return false; }
     return true;

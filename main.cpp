@@ -166,7 +166,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v2.2.4";
+    std::string app_version = "v2.3.1";
 
     // uci_info
     int volume_size         = 20;
