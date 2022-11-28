@@ -138,11 +138,17 @@ using namespace std;
 
 // drop_extra_info, 以 uc_list 为基准，uc_list 中没有的元素 object_info 和 size_info 中有的话 删除
 
-// folder analysis 查看指定文件夹中的各个文件夹占用的空间大小
-
 // count_folder， 统计文件夹中的文件信息，统计文件夹的大小
 
 // 搞一个寻找漏检的服务，主要难点在于如何判断是漏检 （1）其他类型是一种颜色，判断为漏检的是一种颜色，画图对比，漏检的画在最里面，框最粗，颜色最显眼
+
+// 指定读取 /home/ldq/Apps_jokker 下面的动态库在有些地方报错，不知道原因
+// https://blog.csdn.net/bandaoyu/article/details/113181179?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-113181179-blog-89405715.pc_relevant_3mothn_strategy_recovery&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-113181179-blog-89405715.pc_relevant_3mothn_strategy_recovery&utm_relevant_index=1
+// 如果是段错误。将 /home/ldq/Apps_jokker/ 这个路径改名字就不会出现段错误，会出现找不到动态库，再用下面的方法试一下
+// cd /etc/ld.so.conf.d
+// vim ucd.conf
+// 增加要检查的路径 /home/ldq/Apps_jokker/so_dir
+// sudo ldconfig 执行命令生效
 
 
 int main(int argc, char ** argv)
@@ -172,7 +178,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v2.3.3";
+    std::string app_version = "v2.3.4";
 
     // uci_info
     int volume_size         = 20;
@@ -1059,6 +1065,10 @@ int main(int argc, char ** argv)
     {
         // 查看文件夹中包含的文件夹中存储的信息，对每一个文件夹使用 count_files
         // 查看每一个文件夹的大小
+
+
+
+
     }
     else if(command_1 == "cut_small_img")
     {
