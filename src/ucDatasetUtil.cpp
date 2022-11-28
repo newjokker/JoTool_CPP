@@ -1210,9 +1210,9 @@ void UCDataset::absorb(std::string meat_ucd, std::string save_path, std::string 
         }
         else if((need_attr == "object_info") || (need_attr == "all"))
         {
-            if((UCDataset::object_info.count(uc) == 0) && (ucd->object_info.count(uc) > 0))
+            for(int j=0; j<ucd->object_info[uc].size(); j++)
             {
-                UCDataset::object_info[uc] = ucd->object_info[uc];
+                UCDataset::add_obj(uc, ucd->object_info[uc][j]);
             }
         }
         else
@@ -3325,10 +3325,11 @@ void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std
     int index = 0;
     int N = ucd->object_info.size();
     auto iter = ucd->object_info.begin();
-    while(iter != ucd->object_info.end())
+    
+    // 没有 obj 也要输出空的 xml
+    for(int i=0; i<ucd->uc_list.size(); i++)
     {
-        std::string uc = iter->first;
-        // UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, uc);
+        std::string uc = ucd->uc_list[i];
         std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
         std::string xml_path = save_dir + "/" + uc + ".xml";
         ucd->save_to_voc_xml_with_assign_uc(xml_path, img_path, uc);
@@ -3337,6 +3338,21 @@ void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std
         index += 1;
         iter ++;
     }
+
+    // 没有 obj 不输出 xml
+    // while(iter != ucd->object_info.end())
+    // {
+    //     std::string uc = iter->first;
+    //     // UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, uc);
+    //     std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
+    //     std::string xml_path = save_dir + "/" + uc + ".xml";
+    //     ucd->save_to_voc_xml_with_assign_uc(xml_path, img_path, uc);
+    //     // std::cout << index << ", parse xml : " << uc << std::endl;
+    //     bar.progress(index, N);
+    //     index += 1;
+    //     iter ++;
+    // }
+
     bar.finish();
     delete ucd;
 }

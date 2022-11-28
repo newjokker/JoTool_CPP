@@ -138,6 +138,12 @@ using namespace std;
 
 // drop_extra_info, 以 uc_list 为基准，uc_list 中没有的元素 object_info 和 size_info 中有的话 删除
 
+// folder analysis 查看指定文件夹中的各个文件夹占用的空间大小
+
+// count_folder， 统计文件夹中的文件信息，统计文件夹的大小
+
+// 搞一个寻找漏检的服务，主要难点在于如何判断是漏检 （1）其他类型是一种颜色，判断为漏检的是一种颜色，画图对比，漏检的画在最里面，框最粗，颜色最显眼
+
 
 int main(int argc, char ** argv)
 {
@@ -166,7 +172,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v2.3.1";
+    std::string app_version = "v2.3.3";
 
     // uci_info
     int volume_size         = 20;
@@ -1048,6 +1054,11 @@ int main(int argc, char ** argv)
             ucd_param_opt->print_command_info("count_files");
             return -1;
         }
+    }
+    else if(command_1 == "count_folder")
+    {
+        // 查看文件夹中包含的文件夹中存储的信息，对每一个文件夹使用 count_files
+        // 查看每一个文件夹的大小
     }
     else if(command_1 == "cut_small_img")
     {
@@ -2067,8 +2078,8 @@ int main(int argc, char ** argv)
             // 解压缩
             std::system("unzip -n /home/ldq/Apps_jokker/ucd_app_temp.zip -d /home/ldq/Apps_jokker/ucd_app_temp");
             std::system("cp -r /home/ldq/Apps_jokker/ucd_app_temp/* /home/ldq/Apps_jokker");
-            std::system("cp -r /home/ldq/Apps_jokker/so_dir/* /usr/lib");
-            std::system("rm -r /home/ldq/Apps_jokker/ucd_app_temp");
+            // std::system("cp -r /home/ldq/Apps_jokker/so_dir/* /usr/lib");
+            // std::system("rm -r /home/ldq/Apps_jokker/ucd_app_temp");
             sleep(0.5);
             std::system("rm -r /home/ldq/Apps_jokker/ucd_app_temp.zip");
             sleep(0.5);

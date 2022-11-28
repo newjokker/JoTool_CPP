@@ -27,10 +27,9 @@ def move_require_so_to_assign_dir(require_txt_path, so_dir):
             save_path = os.path.join(so_dir, os.path.split(each)[1])
             shutil.copy(each, save_path)
 
-            print('-' * 30)
-            print(each_line)
-            print(each)
-            print(save_path)
+            print(each.strip(), "==>", save_path)
+            print("-"*50)
+
 
 def get_require_txt(app_path, require_txt_path):
     os.system("ldd {0} > {1}".format(app_path, require_txt_path))
