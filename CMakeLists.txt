@@ -10,7 +10,7 @@ SET(CMAKE_CXX_FLAGS "-std=c++11 -O3")
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}
     "/usr/include"
-	"/home/ldq/Apps_jokker/so_dir"
+	# "/home/ldq/Apps_jokker/so_dir"
     "/usr/include/mysql"
 )
 
@@ -28,15 +28,15 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 #SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 # 设置静态库文件目录
-# set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "/home/ldq/Apps_jokker/so_dir")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
+#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "/home/ldq/Apps_jokker/so_dir")
 # 动态库文件目录
-# set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
 # 指定固定的动态库路径，约定俗成的路径
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "/home/ldq/Apps_jokker/so_dir")
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "/home/ldq/Apps_jokker/so_dir")
 # 可执行文件目录
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "/home/ldq/Apps_jokker")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "/home/ldq/Apps_jokker")
 
 
 #set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH} "~/libtorch/libtorch")
@@ -54,7 +54,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRCLIST)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/tools SRCLIST)
 
-add_library(saturntools_v2.3.4 SHARED ${SRCLIST})   
+add_library(saturntools_v2.4.2 SHARED ${SRCLIST})   
 # add_library(saturntools STATIC ${SRCLIST})   
 
 add_executable(ucd main.cpp)
@@ -64,14 +64,13 @@ target_link_libraries(
     # ${TORCH_LIBRARIES}
     ${OpenCV_LIBS}
     OpenSSL::Crypto OpenSSL::SSL
-    saturntools_v2.3.4
+    saturntools_v2.4.2
 	nlohmann_json::nlohmann_json
     ${MYSQL_LIBS}
 )
     
 
 set_property(TARGET ucd PROPERTY CXX_STANDARD 14)
-
 
 
 

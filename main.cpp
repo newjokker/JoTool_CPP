@@ -153,7 +153,6 @@ using namespace std;
 
 int main(int argc, char ** argv)
 {
-
     // param
     UcdParamOpt *ucd_param_opt = new UcdParamOpt();
     ucd_param_opt->load_param_info();
@@ -178,7 +177,7 @@ int main(int argc, char ** argv)
     std::string sql_db      = "Saturn_Database_V1";
     
     // version
-    std::string app_version = "v2.3.4";
+    std::string app_version = "v2.4.2";
 
     // uci_info
     int volume_size         = 20;
@@ -2085,14 +2084,18 @@ int main(int argc, char ** argv)
                 return -1;
             }
 
+
+            // temp 文件夹不存在的话就会重新一个
+            // 
+
             // 解压缩
             std::system("unzip -n /home/ldq/Apps_jokker/ucd_app_temp.zip -d /home/ldq/Apps_jokker/ucd_app_temp");
             std::system("cp -r /home/ldq/Apps_jokker/ucd_app_temp/* /home/ldq/Apps_jokker");
             // std::system("cp -r /home/ldq/Apps_jokker/so_dir/* /usr/lib");
             // std::system("rm -r /home/ldq/Apps_jokker/ucd_app_temp");
-            sleep(0.5);
-            std::system("rm -r /home/ldq/Apps_jokker/ucd_app_temp.zip");
-            sleep(0.5);
+            // sleep(0.5);
+            // std::system("rm -r /home/ldq/Apps_jokker/ucd_app_temp.zip");
+            // sleep(0.5);
             std::system("chmod 777 /home/ldq/Apps_jokker/* -R");
             std::cout << "--------------------------------------" << std::endl;
             std::cout << "change ucd version by :" << std::endl;

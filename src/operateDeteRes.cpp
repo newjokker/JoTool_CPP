@@ -580,6 +580,7 @@ std::map<std::string, std::vector<float> > DeteAcc::cal_acc_rec(UCDataset* ucd_a
 {
     std::map<std::string, std::vector<float> > res;
     std::map<std::string, std::map<std::string, int> > compare_res;
+    std::map<std::string, int> gt_count;
     UCDataset* compare_res_ucd = new UCDataset();
 
     // 找到 a b uc 的合集
@@ -608,6 +609,20 @@ std::map<std::string, std::vector<float> > DeteAcc::cal_acc_rec(UCDataset* ucd_a
             DeteRes *each_a = new DeteRes();
             ucd_b->get_dete_res_with_assign_uc(each_b, uc);
             ucd_a->get_dete_res_with_assign_uc(each_a, uc);
+
+            // add gt_count
+            std::map<std::string, int> each_count_res = each_b->count_tags();
+            auto iter_dete_res = each_count_res.begin();
+            while(iter_dete_res != each_count_res.end())
+            {
+                if(gt_count.count(iter_dete_res->first) == 0)
+                {
+                    gt_count[iter_dete_res->first] = 0;
+                }
+                gt_count[iter_dete_res->first] += iter_dete_res->second;
+                iter_dete_res++;
+            }
+
             std::map<std::string, std::map<std::string, int> > each_compare_res = DeteAcc::compare_customer_and_standard(*each_a, *each_b, uc, compare_res_ucd);
             compare_res = merge_compare_res(compare_res, each_compare_res);
             bar.progress(i, N);
@@ -624,9 +639,23 @@ std::map<std::string, std::vector<float> > DeteAcc::cal_acc_rec(UCDataset* ucd_a
         {
             std::string uc = iter_uc->data();
             DeteRes *each_b = new DeteRes();
-            DeteRes *each_a = new DeteRes();
+            DeteRes *each_a = new DeteRes();            
             ucd_b->get_dete_res_with_assign_uc(each_b, uc);
             ucd_a->get_dete_res_with_assign_uc(each_a, uc);
+            
+            // add gt_count
+            std::map<std::string, int> each_count_res = each_b->count_tags();
+            auto iter_dete_res = each_count_res.begin();
+            while(iter_dete_res != each_count_res.end())
+            {
+                if(gt_count.count(iter_dete_res->first) == 0)
+                {
+                    gt_count[iter_dete_res->first] = 0;
+                }
+                gt_count[iter_dete_res->first] += iter_dete_res->second;
+                iter_dete_res++;
+            }
+            
             std::map<std::string, std::map<std::string, int> > each_compare_res = DeteAcc::compare_customer_and_standard(*each_a, *each_b, uc, compare_res_ucd);
             compare_res = merge_compare_res(compare_res, each_compare_res);            
             iter_uc ++;
@@ -641,18 +670,19 @@ std::map<std::string, std::vector<float> > DeteAcc::cal_acc_rec(UCDataset* ucd_a
     
     if(print)
     {
-        std::cout << "------------------------------------------------------------------------------------" << std::endl;
-        std::cout << "                                    STASTIC" << std::endl;
-        std::cout << "------------------------------------------------------------------------------------" << std::endl;
+        std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
+        std::cout << "                                             STASTIC" << std::endl;
+        std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
         std::cout << std::setw(20) << std::left << "TAG" << std::setw(10) << std::left << "CORRECT" << std::setw(10) << std::left << "MISS" << std::setw(10) << std::left << "EXTRA" 
-                    << std::setw(10) << std::left << "MISTAKE" << std::setw(15) << std::left << "P(100%)" << std::setw(15) << std::left << "R(100%)" << std::endl;
-        std::cout << "------------------------------------------------------------------------------------" << std::endl;
+                    << std::setw(10) << std::left << "MISTAKE" << std::setw(15) << std::left << "GT_COUNT" << std::setw(15) << std::left << "P(100%)" << std::setw(15) << std::left << "R(100%)" << std::endl;
+        std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
     }
 
     int all_correct_num = 0;
     int all_miss_num    = 0;
     int all_extra_num   = 0;
     int all_mistake_num = 0;
+    int all_gt_num      = 0;        // 所有标签的数目，之前计算正确的数目的方式是有点问题的
     float all_p         = 0;
     float all_r         = 0;
 
@@ -664,8 +694,19 @@ std::map<std::string, std::vector<float> > DeteAcc::cal_acc_rec(UCDataset* ucd_a
         int miss_num    = 0;
         int extra_num   = 0;
         int mistake_num = 0;
+        int gt_num      = 0;
         float each_p    = 0;
         float each_r    = 0;
+
+        if(gt_count.count(tag) == 0)
+        {
+            gt_num = 0;
+        }
+        else
+        {
+            gt_num = gt_count[tag];
+        }
+        all_gt_num += gt_num;
 
         if(compare_res["correct"].count(tag) > 0)
         {
@@ -692,9 +733,9 @@ std::map<std::string, std::vector<float> > DeteAcc::cal_acc_rec(UCDataset* ucd_a
             each_p = 100 * (correct_num * 1.0) / (correct_num + mistake_num + extra_num);
         }
 
-        if((correct_num + miss_num) > 0)
+        if((correct_num > 0) && (gt_num > 0))
         {
-            each_r = 100 * (correct_num * 1.0) / (correct_num + miss_num);
+            each_r = 100 * (correct_num * 1.0) / gt_num;
         } 
 
         all_correct_num += correct_num;
@@ -709,7 +750,7 @@ std::map<std::string, std::vector<float> > DeteAcc::cal_acc_rec(UCDataset* ucd_a
         if(print)
         {
             std::cout << std::setw(20) << std::left << tag << std::setw(10) << std::left << correct_num << std::setw(10) << std::left << miss_num << std::setw(10) << std::left << extra_num 
-                    << std::setw(10) << std::left << mistake_num << std::setw(15) << std::left << each_p << std::setw(15) << std::left << each_r << std::endl;
+                    << std::setw(10) << std::left << mistake_num << std::setw(15) << std::left << gt_num << std::setw(15) << std::left << each_p << std::setw(15) << std::left << each_r << std::endl;
         }
         iter++;
     } 
@@ -722,17 +763,18 @@ std::map<std::string, std::vector<float> > DeteAcc::cal_acc_rec(UCDataset* ucd_a
 
     if((all_correct_num + all_miss_num) > 0)
     {
-        all_r = 100 * (all_correct_num * 1.0) / (all_correct_num + all_miss_num);
+        // all_r = 100 * (all_correct_num * 1.0) / (all_correct_num + all_miss_num);
+        all_r = 100 * (all_correct_num * 1.0) / (all_gt_num);
     } 
 
     if(print)
     {
-        std::cout << "------------------------------------------------------------------------------------" << std::endl;
+        std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
         std::cout << std::setw(20) << std::left << "TOTAL" << std::setw(10) << std::left << all_correct_num << std::setw(10) << std::left << all_miss_num << std::setw(10) << std::left << all_extra_num 
-                << std::setw(10) << std::left << all_miss_num << std::setw(15) << std::left << all_p << std::setw(15) << std::left << all_r << std::endl;
-        std::cout << "------------------------------------------------------------------------------------" << std::endl;
+                << std::setw(10) << std::left << all_mistake_num << std::setw(15) << std::left << all_gt_num << std::setw(15) << std::left << all_p << std::setw(15) << std::left << all_r << std::endl;
+        std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
         std::cout << "IOU : " << DeteAcc::iou << std::endl;
-        std::cout << "------------------------------------------------------------------------------------" << std::endl;
+        std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
         std::cout << "" << std::endl;
         std::cout << WARNNING_COLOR << "* 一横排全部统计为 0 是没有检测到也没有遗漏，是被误检了其他类型了，不是误检到当前类型，所以误检不统计" << STOP_COLOR << std::endl;
         std::cout << WARNNING_COLOR << "* 这个函数还需要再测测，看看否有遗漏的问题" << STOP_COLOR << std::endl;
