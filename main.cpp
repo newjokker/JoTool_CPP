@@ -176,8 +176,11 @@ int main(int argc, char ** argv)
     std::string sql_pwd     = "root123";
     std::string sql_db      = "Saturn_Database_V1";
     
+    // app dir path
+    std::string app_dir     = "/home/ldq/Apps_jokker";
+
     // version
-    std::string app_version = "v2.4.2";
+    std::string app_version = "v2.4.3";
 
     // uci_info
     int volume_size         = 20;
@@ -872,7 +875,32 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "--version" || command_1 == "-V" || command_1 == "-v" || command_1 == "-version")
     {
-        std::cout << "uc_dataset : " << app_version << std::endl;
+        std::cout << "-----------------------------------" << std::endl;
+        std::cout << "            " << app_version << std::endl;
+        std::cout << "-----------------------------------" << std::endl;
+        if(! is_read_dir(app_dir))
+        {
+            std::cout << "app dir is not readable : " << app_dir << std::endl;
+            return -1;
+        }
+
+        std::vector<std::string> app_path_list = get_all_file_path(app_dir);
+
+        for(int i=0; i<app_path_list.size(); i++)
+        {
+            std::string app_name = get_file_name(app_path_list[i]);
+
+            if(pystring::endswith(app_path_list[i], app_version))
+            {
+                std::cout << "* ";
+            }
+            else
+            {
+                std::cout << "  ";
+            }
+            std::cout << app_path_list[i] << std::endl;
+        }
+        std::cout << "-----------------------------------" << std::endl;
         return -1;
     }
     else if(command_1 == "set")
@@ -2050,6 +2078,10 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "update")
     {
+        std::cout << "ucd update 因为容易出现问题被禁用" << std::endl;
+        ucd_param_opt->not_ready();
+        return -1;
+
         // 将最新的下载包放在 80 服务器上，下载到本地，放到对应的目录下即可
         std::string app_dir = "/home/ldq/Apps_jokker";
         if(! is_dir(app_dir))
