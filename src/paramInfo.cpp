@@ -652,6 +652,14 @@ void UcdParamOpt::load_param_info()
     param_acc->demo.push_back("-------------------");
     UcdParamOpt::add_param(param_acc);
 
+    // map
+    ParamInfo * param_map = new ParamInfo("map");
+    param_map->group = "analysis";
+    param_map->grammar = "ucd map ucd_customer, ucd_standard";
+    param_map->chinese_explain = "以后一个 ucd 为标准结果计算 map";   
+    param_map->demo.push_back("ucd map test1.json test2.json                               (以 test2.json 为标准结果计算 test1.json 的 map");
+    UcdParamOpt::add_param(param_map);
+
     // attr
     ParamInfo * param_attr = new ParamInfo("attr");
     param_attr->group = "sync";
@@ -1041,6 +1049,15 @@ void UcdParamOpt::load_param_info()
     param_interset->chinese_explain = "找到两个 ucd 的 uc_listr 交集";   
     param_interset->demo.push_back("ucd interset res.json ucd_a.json ucd_b.json             (将 ucd_a.json 和 ucd_b.json 的交集保存在 res.json)");
     UcdParamOpt::add_param(param_interset);
+
+    // foretell
+    ParamInfo * param_foretell = new ParamInfo("foretell");
+    param_foretell->group = "fun";
+    param_foretell->grammar = "ucd foretell context";
+    param_foretell->chinese_explain = "输入一段文字，输出一个预言";   
+    param_foretell->demo.push_back("ucd foretell hello             (对 hello 进行预言)");
+    UcdParamOpt::add_param(param_foretell);
+
 }
 
 void UcdParamOpt::not_ready(std::string method_name)

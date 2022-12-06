@@ -10,5 +10,6 @@
 
 std::string get_file_md5(std::string lpcstrFilePath);
 
+std::string get_str_md5(std::string assign_str);
 
 #endif

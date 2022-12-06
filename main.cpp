@@ -23,6 +23,7 @@
 #include "include/lablelmeObj.hpp"
 #include "include/tqdm.h"
 #include <regex>
+#include "include/the_book_of_change.hpp"
 
 using json = nlohmann::json;
 using namespace jotools;
@@ -180,7 +181,7 @@ int main(int argc, char ** argv)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.4.3";
+    std::string app_version = "v2.4.4";
 
     // uci_info
     int volume_size         = 20;
@@ -1363,13 +1364,15 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "map")
     {
+
+        std::cout << WARNNING_COLOR << "结果存在问题，仅供参考" << STOP_COLOR << std::endl;
+
         if(argc == 4)
         {
             std::string ucd_customer = argv[2];
             std::string ucd_standard = argv[3];
             jotools::DeteAcc* acc = new DeteAcc();
             acc->iou = 0.5;
-
 
             if(! (is_file(ucd_customer) && is_file(ucd_standard)))
             {
@@ -2078,7 +2081,9 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "update")
     {
-        std::cout << "ucd update 因为容易出现问题被禁用" << std::endl;
+        std::cout << WARNNING_COLOR << "ucd update 因为容易出现问题被禁用" << STOP_COLOR<< std::endl;
+        std::cout << WARNNING_COLOR << "使用 ucd -V 查看可切换的版本和当前版本，如果没有需要的版本找 凌德泉 安装需要的版本" << STOP_COLOR<< std::endl;
+
         ucd_param_opt->not_ready();
         return -1;
 
@@ -2400,6 +2405,15 @@ int main(int argc, char ** argv)
     else if(command_1 == "foretell")
     {
         // 预言
+        if(argc == 3)
+        {
+            std::string text = argv[2];
+            get_change(text);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
     else if(command_1 == "ls")
     {
