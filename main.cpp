@@ -181,7 +181,7 @@ int main(int argc, char ** argv)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.4.4";
+    std::string app_version = "v2.4.5";
 
     // uci_info
     int volume_size         = 20;
