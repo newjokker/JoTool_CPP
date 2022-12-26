@@ -29,9 +29,10 @@ using json = nlohmann::json;
 using namespace jotools;
 using namespace std;
 
-#define ERROR_COLOR         "\x1b[35m"
-#define WARNNING_COLOR      "\033[33m"
-#define STOP_COLOR          "\033[0m"
+#define ERROR_COLOR         "\x1b[1;31m"    // 红色
+#define HIGHTLIGHT_COLOR    "\033[1;35m"    // 品红
+#define WARNNING_COLOR      "\033[1;33m"    // 橙色
+#define STOP_COLOR          "\033[0m"       // 复原
 
 
 // nginx 负载均衡，可以在风火轮上部署，转到 111 和 209 服务器上
@@ -107,10 +108,9 @@ using namespace std;
 
 // 看看是不是 labelmeObj 结构体占用的空间太大了，去掉其中没用的属性和函数
 
-// 一个训练分类的服务，输入是一个 ucd 和 保存模型的文件夹地址，或者直接就是 一个模型地址，值保留在验证集中效果最好的一个模型就行
+// TODO: 一个训练分类的服务，输入是一个 ucd 和 保存模型的文件夹地址，或者直接就是 一个模型地址，值保留在验证集中效果最好的一个模型就行
 
-// uc_list 改为 uc_set 比较好，现在的方式去重非常不方便
-
+// FIXME: uc_list 改为 uc_set 比较好，现在的方式去重非常不方便
 
 // 申请更多的内存，现在共享内存用不了多少就崩掉了，如何能申请更多的内存，一般服务器都是 128G 内存
 
@@ -137,7 +137,7 @@ int main(int argc, char ** argv)
         // std::cout << "need parameter number >= 1 get : " << argc-1 << std::endl;
         // refer : https://patorjk.com/software/taag/#p=display&f=Graffiti&t=Type%20Something%20
 
-        std::cout << "\x1b[35m" ;
+        std::cout << "\x1b[1;35m" ;
         std::cout <<"            _____                      _____                      _____          "<< std::endl;
         std::cout <<"           /\\    \\                    /\\    \\                    /\\    \\         "<< std::endl;
         std::cout <<"          /::\\____\\                  /::\\    \\                  /::\\    \\        "<< std::endl;
@@ -164,11 +164,11 @@ int main(int argc, char ** argv)
 
         std::cout << WARNNING_COLOR << "Welcome to UCD!" << STOP_COLOR << std::endl;
         std::cout << " " << std::endl;
-        std::cout <<"   * use " << ERROR_COLOR << "ucd help "   << STOP_COLOR << "get ucd function : chinese explain" << std::endl;
+        std::cout <<"   * use " << HIGHTLIGHT_COLOR << "ucd help "   << STOP_COLOR << "get ucd function : chinese explain" << std::endl;
         std::cout << "" << std::endl;
-        std::cout <<"   * use " << ERROR_COLOR << "ucd grammar "  << STOP_COLOR << "get ucd function : grammar" << std::endl;
+        std::cout <<"   * use " << HIGHTLIGHT_COLOR << "ucd grammar "  << STOP_COLOR << "get ucd function : grammar" << std::endl;
         std::cout << " " << std::endl;
-        std::cout <<"   * use " << ERROR_COLOR << "ucd help help "  << STOP_COLOR << "get the way to use help" << std::endl;
+        std::cout <<"   * use " << HIGHTLIGHT_COLOR << "ucd help help "  << STOP_COLOR << "get the way to use help" << std::endl;
         std::cout << " " << std::endl;
         return -1;
     }

@@ -19,9 +19,10 @@
 #include "ucDatasetUtil.hpp"
 #include "include/tqdm.h"
 
-#define ERROR_COLOR         "\x1b[35m"
-#define WARNNING_COLOR      "\033[33m"
-#define STOP_COLOR          "\033[0m"
+#define ERROR_COLOR         "\x1b[1;31m"    // 红色
+#define HIGHTLIGHT_COLOR    "\033[1;35m"    // 品红
+#define WARNNING_COLOR      "\033[1;33m"    // 橙色
+#define STOP_COLOR          "\033[0m"       // 复原
 
 
 
