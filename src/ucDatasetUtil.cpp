@@ -2658,8 +2658,8 @@ void UCDatasetUtil::get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_pa
     ucd->save_to_ucd(ucd_path);
 
     // print
-    std::cout << "is  uc count : " << is_uc_count << std::endl;
-    std::cout << "not uc count : " << not_uc_count << std::endl;
+    std::cout << WARNNING_COLOR << "is  uc count : " << is_uc_count  << STOP_COLOR << std::endl;
+    std::cout << WARNNING_COLOR << "not uc count : " << not_uc_count << STOP_COLOR << std::endl;
 
     delete ucd;
 }

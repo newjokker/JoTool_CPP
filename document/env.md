@@ -344,6 +344,18 @@ MESSAGE(STATUS, "------------------------------------------------------------")
 
 ```
 
+### 读取指定路径下的动态库
+
+* 指定读取 /home/ldq/Apps_jokker 下面的动态库在有些地方报错，不知道原因
+* https://blog.csdn.net/bandaoyu/article/details/113181179?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-113181179-blog-89405715.pc_relevant_3mothn_strategy_recovery&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-113181179-blog-89405715.pc_relevant_3mothn_strategy_recovery&utm_relevant_index=1
+* 如果是段错误。将 /home/ldq/Apps_jokker/ 这个路径改名字就不会出现段错误，会出现找不到动态库，再用下面的方法试一下
+* cd /etc/ld.so.conf.d
+* vim ucd.conf
+* 增加要检查的路径 /home/ldq/Apps_jokker/so_dir
+* sudo ldconfig 执行命令生效
+
+
+
 
 ### 最小的 docker 
 

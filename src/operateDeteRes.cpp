@@ -200,11 +200,15 @@ void count_files(std::string folder_path, bool recursive)
         }
 
         auto iter = file_count_map.begin();
+        std::cout << "----------------------" << std::endl;
+        std::cout << std::setw(10) << std::left << "suffix" << " : " << "count" << std::endl;
+        std::cout << "----------------------" << std::endl;
         while(iter != file_count_map.end())
         {
-            std::cout << iter->first << " : " << iter->second << std::endl;
+            std::cout << std::setw(10) << std::left << iter->first << " : " << iter->second << std::endl;
             iter++;
         }
+        std::cout << "----------------------" << std::endl;
     }
 
 void xml_check(std::string xml_dir, std::string img_dir, int size_th, bool remove_error_path)

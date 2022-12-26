@@ -103,28 +103,13 @@ using namespace std;
 // json_to_uci 可以指定每一卷的大小，from_huge_xml 也要能指定每一卷的大小
 // uci_to_json  不做内存大小限制，内存不够的话直接就报错了
 
-// ls， 读取所有卷文件大小，因为可以指定每一卷文件的大小
-
-// 增加 tar 关键字 将 uci 分卷文件进行打包，方便 uci 文件的传播
-
-// 操作完了最好能显示做了什么操作，有什么影响
-
 // 超大数据集可以直接存储为存文本数据，这样可以一行一行读取，前面是头文件，就是数据的 uc 信息，以及不同的 uc 信息在多少行，这样的话只要遍历一下头文件就能快速拿到 data 数据，这样更加合理
 
 // 看看是不是 labelmeObj 结构体占用的空间太大了，去掉其中没用的属性和函数
 
 // 一个训练分类的服务，输入是一个 ucd 和 保存模型的文件夹地址，或者直接就是 一个模型地址，值保留在验证集中效果最好的一个模型就行
 
-// cleanLab 服务，输入的是一个 ucd，返回的是一个 ucd，
-// 提取 ucd 中的 uc_list 和 label_used 标签，进行处理
-
-
 // uc_list 改为 uc_set 比较好，现在的方式去重非常不方便
-
-// minus 删除对应的 obj，有是否删除 obj 对应的选项
-// cleanlab 的标准操作
-// (1) clean_lab 生成 res_ucd
-
 
 // ucd acc 功能最后的召回率和精准率统计还是有点问题的，需要进行修复一下，每一个小的项目都统计出来
 // 
@@ -141,15 +126,6 @@ using namespace std;
 
 // count_folder， 统计文件夹中的文件信息，统计文件夹的大小
 
-// 搞一个寻找漏检的服务，主要难点在于如何判断是漏检 （1）其他类型是一种颜色，判断为漏检的是一种颜色，画图对比，漏检的画在最里面，框最粗，颜色最显眼
-
-// 指定读取 /home/ldq/Apps_jokker 下面的动态库在有些地方报错，不知道原因
-// https://blog.csdn.net/bandaoyu/article/details/113181179?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-113181179-blog-89405715.pc_relevant_3mothn_strategy_recovery&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-113181179-blog-89405715.pc_relevant_3mothn_strategy_recovery&utm_relevant_index=1
-// 如果是段错误。将 /home/ldq/Apps_jokker/ 这个路径改名字就不会出现段错误，会出现找不到动态库，再用下面的方法试一下
-// cd /etc/ld.so.conf.d
-// vim ucd.conf
-// 增加要检查的路径 /home/ldq/Apps_jokker/so_dir
-// sudo ldconfig 执行命令生效
 
 
 int main(int argc, char ** argv)
@@ -1094,7 +1070,8 @@ int main(int argc, char ** argv)
         // 查看文件夹中包含的文件夹中存储的信息，对每一个文件夹使用 count_files
         // 查看每一个文件夹的大小
 
-
+        // du -sh * 查看当前目录下的所有文件夹的大小
+        // 
 
 
     }
