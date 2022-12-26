@@ -1057,6 +1057,14 @@ void UcdParamOpt::load_param_info()
     param_foretell->chinese_explain = "输入一段文字，输出一个预言";   
     param_foretell->demo.push_back("ucd foretell hello             (对 hello 进行预言)");
     UcdParamOpt::add_param(param_foretell);
+    
+    // grammar
+    ParamInfo * param_grammar = new ParamInfo("grammar");
+    param_grammar->group = "opt";
+    param_grammar->grammar = "ucd grammar";
+    param_grammar->chinese_explain = "输出所有关键字的语法";   
+    // param_grammar->demo.push_back("ucd grammar             (对 hello 进行预言)");
+    UcdParamOpt::add_param(param_grammar);
 
 }
 

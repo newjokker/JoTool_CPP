@@ -111,8 +111,6 @@ using namespace std;
 
 // uc_list 改为 uc_set 比较好，现在的方式去重非常不方便
 
-// ucd acc 功能最后的召回率和精准率统计还是有点问题的，需要进行修复一下，每一个小的项目都统计出来
-// 
 
 // 申请更多的内存，现在共享内存用不了多少就崩掉了，如何能申请更多的内存，一般服务器都是 128G 内存
 
@@ -136,8 +134,42 @@ int main(int argc, char ** argv)
 
     if ((argc < 2))
     {
-        std::cout << "need parameter number >= 1 get : " << argc-1 << std::endl;
-        ucd_param_opt->print_all_fun();
+        // std::cout << "need parameter number >= 1 get : " << argc-1 << std::endl;
+        // refer : https://patorjk.com/software/taag/#p=display&f=Graffiti&t=Type%20Something%20
+
+        std::cout << "\x1b[35m" ;
+        std::cout <<"            _____                      _____                      _____          "<< std::endl;
+        std::cout <<"           /\\    \\                    /\\    \\                    /\\    \\         "<< std::endl;
+        std::cout <<"          /::\\____\\                  /::\\    \\                  /::\\    \\        "<< std::endl;
+        std::cout <<"         /:::/    /                 /::::\\    \\                /::::\\    \\       "<< std::endl;
+        std::cout <<"        /:::/    /                 /::::::\\    \\              /::::::\\    \\      "<< std::endl;
+        std::cout <<"       /:::/    /                 /:::/\\:::\\    \\            /:::/\\:::\\    \\     "<< std::endl;
+        std::cout <<"      /:::/    /                 /:::/  \\:::\\    \\          /:::/  \\:::\\    \\    "<< std::endl;
+        std::cout <<"     /:::/    /                 /:::/    \\:::\\    \\        /:::/    \\:::\\    \\   "<< std::endl;
+        std::cout <<"    /:::/    /      _____      /:::/    / \\:::\\    \\      /:::/    / \\:::\\    \\  "<< std::endl;
+        std::cout <<"   /:::/____/      /\\    \\    /:::/    /   \\:::\\    \\    /:::/    /   \\:::\\ ___\\ "<< std::endl;
+        std::cout <<"  |:::|    /      /::\\____\\  /:::/____/     \\:::\\____\\  /:::/____/     \\:::|    |"<< std::endl;
+        std::cout <<"  |:::|____\\     /:::/    /  \\:::\\    \\      \\::/    /  \\:::\\    \\     /:::|____|"<< std::endl;
+        std::cout <<"   \\:::\\    \\   /:::/    /    \\:::\\    \\      \\/____/    \\:::\\    \\   /:::/    / "<< std::endl;
+        std::cout <<"    \\:::\\    \\ /:::/    /      \\:::\\    \\                 \\:::\\    \\ /:::/    /  "<< std::endl;
+        std::cout <<"     \\:::\\    /:::/    /        \\:::\\    \\                 \\:::\\    /:::/    /   "<< std::endl;
+        std::cout <<"      \\:::\\__/:::/    /          \\:::\\    \\                 \\:::\\  /:::/    /    "<< std::endl;
+        std::cout <<"       \\::::::::/    /            \\:::\\    \\                 \\:::\\/:::/    /     "<< std::endl;
+        std::cout <<"        \\::::::/    /              \\:::\\    \\                 \\::::::/    /      "<< std::endl;
+        std::cout <<"         \\::::/    /                \\:::\\____\\                 \\::::/    /       "<< std::endl;
+        std::cout <<"          \\::/____/                  \\::/    /                  \\::/____/        "<< std::endl;
+        std::cout <<"           ~~                         \\/____/                    ~~              "<< std::endl;
+        std::cout << "\033[0m" << std::endl;
+        std::cout << "" << std::endl;
+
+        std::cout << WARNNING_COLOR << "Welcome to UCD!" << STOP_COLOR << std::endl;
+        std::cout << " " << std::endl;
+        std::cout <<"   * use " << ERROR_COLOR << "ucd help "   << STOP_COLOR << "get ucd function : chinese explain" << std::endl;
+        std::cout << "" << std::endl;
+        std::cout <<"   * use " << ERROR_COLOR << "ucd grammar "  << STOP_COLOR << "get ucd function : grammar" << std::endl;
+        std::cout << " " << std::endl;
+        std::cout <<"   * use " << ERROR_COLOR << "ucd help help "  << STOP_COLOR << "get the way to use help" << std::endl;
+        std::cout << " " << std::endl;
         return -1;
     }
 
@@ -157,7 +189,7 @@ int main(int argc, char ** argv)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.4.5";
+    std::string app_version = "v2.4.6";
 
     // uci_info
     int volume_size         = 20;
@@ -2509,6 +2541,11 @@ int main(int argc, char ** argv)
         a->save_to_ucd("/home/ldq/ucd_dir/del/test2.json");
 
 
+    }
+    else if(command_1 == "grammar")
+    {
+        ucd_param_opt->print_all_fun();
+        return -1;
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {
