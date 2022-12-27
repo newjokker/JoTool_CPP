@@ -193,7 +193,7 @@ int main(int argc, char ** argv)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.4.6";
+    std::string app_version = "v2.5.1";
 
     // uci_info
     int volume_size         = 20;
@@ -2096,7 +2096,7 @@ int main(int argc, char ** argv)
     else if(command_1 == "update")
     {
         std::cout << WARNNING_COLOR << "ucd update 因为容易出现问题被禁用" << STOP_COLOR<< std::endl;
-        std::cout << WARNNING_COLOR << "使用 ucd -V 查看可切换的版本和当前版本，如果没有需要的版本找 凌德泉 安装需要的版本" << STOP_COLOR<< std::endl;
+        std::cout << WARNNING_COLOR << "使用 ucd -V 查看可切换的版本和当前版本，如果没有需要的版本找 凌德泉 要安装包，安装安装包即可" << STOP_COLOR<< std::endl;
 
         ucd_param_opt->not_ready();
         return -1;

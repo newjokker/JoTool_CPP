@@ -38,32 +38,24 @@ def get_require_txt(app_path, require_txt_path):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) != 3:
-        print("move_dll app_path save_dir")
-    else:
-        appPath = sys.argv[1]
-        saveDir = sys.argv[2]
 
-        # # ---------------------------
-        # appPath = r"/usr/code/build/ucd"
-        # saveDir = r"/usr/code/scripts/ucd_server"
-        # # ---------------------------
+    if len(sys.argv) != 3:
+        print("move_dll save_dir ucd_name")
+    else:
+        saveDir     = sys.argv[1]
+        saveName    = sys.argv[2]       # ucd_v2.5.1
+        saveDir     = os.path.join(saveDir, saveName)
+        # ---------------------------
+        appPath = r"../bin/ucd"
+        # ---------------------------
 
         saveTxtPath = os.path.join(saveDir, "require.txt")
         soDir = os.path.join(saveDir, "so_dir")
-        os.makedirs(saveDir, exist_ok=True)
-        os.makedirs(soDir, exist_ok=True)
+        os.makedirs(saveDir,    exist_ok=True)
+        os.makedirs(soDir,      exist_ok=True)
 
         get_require_txt(appPath, saveTxtPath)
         move_require_so_to_assign_dir(saveTxtPath, soDir)
-        shutil.copy(appPath, os.path.join(saveDir, os.path.split(appPath)[1]))
-
-
-
-
-
-
-
-
-
-
+        #
+        shutil.copy(appPath, os.path.join(saveDir, saveName))
+        shutil.copy("./install_ucd.sh", os.path.join(saveDir, "install_" + saveName + ".sh"))
