@@ -64,8 +64,8 @@ bool ParamInfo::is_similar(std::string other_command)
 
 void ParamInfo::print_info()
 {
-    std::cout << ParamInfo::command << std::endl;
-    std::cout << "   " << ParamInfo::grammar << std::endl;
+    std::cout << HIGHTLIGHT_COLOR << ParamInfo::command << STOP_COLOR << std::endl;
+    std::cout << WARNNING_COLOR << "   " << ParamInfo::grammar << STOP_COLOR << std::endl;
     // std::cout << "   " << ParamInfo::english_explain << std::endl;
     std::cout << "   " << ParamInfo::chinese_explain << std::endl;
 
@@ -204,7 +204,7 @@ void UcdParamOpt::print_command_info(std::string command)
 void UcdParamOpt::print_group_info(std::string group)
 {
     std::cout << "--------------------------------------------------------------------------" << std::endl;
-    std::cout << "                                " << group << std::endl;
+    std::cout << HIGHTLIGHT_COLOR << "                                " << group << STOP_COLOR << std::endl;
     std::cout << "--------------------------------------------------------------------------" << std::endl;
     std::cout << std::endl;
     auto iter = UcdParamOpt::param_map.begin();
@@ -212,7 +212,7 @@ void UcdParamOpt::print_group_info(std::string group)
     {
         if(iter->second.group == group)
         {
-            std::cout << std::setw(15) << std::left << iter->second.command << " " ;
+            std::cout << WARNNING_COLOR << std::setw(15) << std::left << iter->second.command << " " << STOP_COLOR;
             std::cout << std::setw(4) << std::left << " " << iter->second.grammar << std::endl;
             std::cout << std::endl;
         }
@@ -277,7 +277,7 @@ void UcdParamOpt::print_all_fun_chinese()
     auto iter_group = gropu_map.begin();
     while(iter_group != gropu_map.end())
     {
-        std::cout << iter_group->first << std::endl;
+        std::cout << WARNNING_COLOR << iter_group->first << STOP_COLOR << std::endl;
         auto iter_command = iter_group->second.begin();
         while(iter_command != iter_group->second.end())
         {

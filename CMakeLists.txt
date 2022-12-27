@@ -55,7 +55,7 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRCLIST)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/tools SRCLIST)
 
 add_library(saturntools_v2.4.6 SHARED ${SRCLIST})   
-# add_library(saturntools STATIC ${SRCLIST})   
+# add_library(saturntools_v2.4.6 STATIC ${SRCLIST})   
 
 add_executable(ucd main.cpp)
 
@@ -68,7 +68,7 @@ target_link_libraries(
 	nlohmann_json::nlohmann_json
     ${MYSQL_LIBS}
 )
-    
+
 
 set_property(TARGET ucd PROPERTY CXX_STANDARD 14)
 

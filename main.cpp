@@ -124,6 +124,8 @@ using namespace std;
 
 // count_folder， 统计文件夹中的文件信息，统计文件夹的大小
 
+// TODO: 做成 python 类型，输入 python 之后直接进入 pythyon 的环境变量，一直到 按 ctrl + c 才退出
+
 
 
 int main(int argc, char ** argv)
@@ -169,6 +171,8 @@ int main(int argc, char ** argv)
         std::cout <<"   * use " << HIGHTLIGHT_COLOR << "ucd grammar "  << STOP_COLOR << "get ucd function : grammar" << std::endl;
         std::cout << " " << std::endl;
         std::cout <<"   * use " << HIGHTLIGHT_COLOR << "ucd help help "  << STOP_COLOR << "get the way to use help" << std::endl;
+        std::cout << " " << std::endl;
+        std::cout <<"   * use " << HIGHTLIGHT_COLOR << "ucd set cache_dir {cache_dir} "  << STOP_COLOR << "set cache_dir" << std::endl;
         std::cout << " " << std::endl;
         return -1;
     }
@@ -260,6 +264,7 @@ int main(int argc, char ** argv)
         std::cout << "-----------------------------------------------------------" << std::endl;
         std::cout << "set cache_dir with 'ucd set cache_dir {cache_dir}' " << std::endl;
         std::cout << "-----------------------------------------------------------" << std::endl;
+        return -1;
     }
 
     // 文件夹权限检查    
