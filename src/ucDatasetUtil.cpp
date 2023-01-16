@@ -3602,14 +3602,6 @@ void UCDatasetUtil::area_analysis(std::string ucd_path, int seg_count)
         {
             float each_area = iter->second[i]->get_area();
 
-            if(each_area > 1000000)
-            {
-                std::cout << iter->first << std::endl;
-                std::cout << area_max << std::endl;
-                iter->second[i]->print_info();
-                std::cout << "-----------------" << std::endl;
-            }  
-
             area_vector.push_back(each_area);
 
             if(each_area > area_max)
@@ -3641,8 +3633,8 @@ void UCDatasetUtil::area_analysis(std::string ucd_path, int seg_count)
     std::map<int, int> area_map;
     
     std::cout << "------------------------------" << std::endl;
-    std::cout << "area_min" << "     " << area_min << "     " << area_min_uc << std::endl;
-    std::cout << "area_max" << "     " << area_max << "     " << area_max_uc << std::endl;
+    std::cout << "area_min  " << std::setw(15) << std::left << area_min << " " << area_min_uc << std::endl;
+    std::cout << "area_max  " << std::setw(15) << std::left << area_max << " " << area_max_uc << std::endl;
     std::cout << "------------------------------" << std::endl;
     std::cout << " 百分位数 " << std::endl;
 
@@ -3657,9 +3649,10 @@ void UCDatasetUtil::area_analysis(std::string ucd_path, int seg_count)
 
     float area_seg = (area_max - area_min);
 
-    for(int i=0; i<area_size; i++)
+    for(int i=1; i<=area_size; i++)
     {
-        int area = (int)seg_count * ((area_vector[i] - area_min) / (area_seg * 1.0));
+        // -1 是为了包含最大值
+        int area = (int)seg_count * ((area_vector[i] - area_min -1) / (area_seg * 1.0));
         if(area_map.count(area) == 0)
         {
             area_map[area] = 1;
