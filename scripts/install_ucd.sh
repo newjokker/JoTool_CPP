@@ -3,19 +3,18 @@
 
 # 需要使用 sudo 权限执行，否则无法修改 /etc/ld.so.conf.d 的权限
 
-
 # 指定安装的目录
 # --------------------------------------------------------------------------
-install_dir=$1
 package_dir="./"
 ucd_name="ucd_v2.5.1"
 # --------------------------------------------------------------------------
 
 # 必须要有指定的参数
-if [ $# != 1 ] ; then
-    echo "need 1 args : install folder"
-    echo "需要指定安装目录，通过参数进行传入"
-    exit 1;
+if [ $# == 0 ] ; then
+    install_dir="/home/ldq/Apps_jokker"
+    echo "- use default install_dir : ${install_dir}"
+else
+    install_dir=$1
 fi
 
 echo "- start install ucd"

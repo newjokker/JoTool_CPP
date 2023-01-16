@@ -3539,18 +3539,29 @@ void UCDatasetUtil::conf_analysis(std::string ucd_path, int seg_count)
     std::map<float, int> conf_map;
     
     std::cout << "------------------------------" << std::endl;
+    std::cout << "conf_min  : " << "     " << conf_vector[0] << std::endl;
+    std::cout << "conf_max  : " << "     " << conf_vector[conf_vector.size() - 1] << std::endl;
+    std::cout << "------------------------------" << std::endl;
+    std::cout << " 百分位数" << std::endl;
 
-    for(int i=0; i<seg_count; i++)
+    for(int i=1; i<seg_count; i++)
     {
         std::string seg_index = std::to_string(i) + "/" + std::to_string(seg_count);
         std::cout << std::setw(10) << std::left << seg_index << conf_vector[(conf_size/seg_count)*i] << std::endl; 
     }
     
-
     std::cout << "------------------------------" << std::endl;
+    std::cout << "比例分布: 比较容易搞错，步长为 最大值 / 步数" << std::endl;
 
+    int count_none = 0;  // 没有的 conf(-1) 的值的个数
     for(int i=0; i<conf_size; i++)
     {
+        if(conf_vector[i] == -1)
+        {
+            count_none += 1;
+            continue;
+        }
+
         int conf = (int)(conf_vector[i] * seg_count);
         if(conf_map.count(conf) == 0)
         {
@@ -3563,12 +3574,12 @@ void UCDatasetUtil::conf_analysis(std::string ucd_path, int seg_count)
     }
 
     // 按照绝对值进行分析
+    std::cout << std::setw(10) << std::left << "-1" << count_none << std::endl;
     for(int i=0; i<seg_count; i++)
     {
         float conf_value = i/(seg_count * 1.0);
         std::cout << std::setw(10) << std::left << conf_value << conf_map[i] << std::endl;
     }
-
     std::cout << "------------------------------" << std::endl;
 
     delete ucd;
@@ -3582,22 +3593,35 @@ void UCDatasetUtil::area_analysis(std::string ucd_path, int seg_count)
 
     float area_max = 0;
     float area_min = std::pow(10, 8);
+    std::string area_max_uc = "NONE";
+    std::string area_min_uc = "NONE";
     auto iter = ucd->object_info.begin();
     while(iter != ucd->object_info.end())
     {
         for(int i=0; i<iter->second.size(); i++)
         {
             float each_area = iter->second[i]->get_area();
+
+            if(each_area > 1000000)
+            {
+                std::cout << iter->first << std::endl;
+                std::cout << area_max << std::endl;
+                iter->second[i]->print_info();
+                std::cout << "-----------------" << std::endl;
+            }  
+
             area_vector.push_back(each_area);
 
             if(each_area > area_max)
             {
                 area_max = each_area;
+                area_max_uc = iter->first;
             }
             
             if(each_area < area_min)
             {
                 area_min = each_area;
+                area_min_uc = iter->first;
             }
         }
         iter++;
@@ -3617,17 +3641,19 @@ void UCDatasetUtil::area_analysis(std::string ucd_path, int seg_count)
     std::map<int, int> area_map;
     
     std::cout << "------------------------------" << std::endl;
-    std::cout << "area_min" << "     " << area_min << std::endl;
-    std::cout << "area_max" << "     " << area_max << std::endl;
+    std::cout << "area_min" << "     " << area_min << "     " << area_min_uc << std::endl;
+    std::cout << "area_max" << "     " << area_max << "     " << area_max_uc << std::endl;
     std::cout << "------------------------------" << std::endl;
+    std::cout << " 百分位数 " << std::endl;
 
-    for(int i=0; i<seg_count; i++)
+    for(int i=1; i<seg_count; i++)
     {
         std::string seg_index = std::to_string(i) + "/" + std::to_string(seg_count);
-        std::cout << std::setw(10) << std::left << seg_index << area_vector[(area_size/seg_count)*i] << std::endl; 
+        std::cout << std::setw(10) << std::left << seg_index << area_vector[(area_size/seg_count) * i] << std::endl; 
     }
     
     std::cout << "------------------------------" << std::endl;
+    std::cout << "比例分布: 比较容易搞错，步长为 最大值 / 步数" << std::endl;
 
     float area_seg = (area_max - area_min);
 
@@ -3792,13 +3818,21 @@ void UCDatasetUtil::draw_res(std::string ucd_path, std::string save_dir, std::ve
     {
         uc_list = ucd->uc_list;
     }
+    else
+    {
+        for(int i=0; i<uc_list.size(); i++)
+        {
+            std::cout << HIGHTLIGHT_COLOR << uc_list[i] << ","; 
+        }
+        std::cout << STOP_COLOR << std::endl;
+    }
 
     tqdm bar;
     int N = uc_list.size();
 
     for(int i=0; i<uc_list.size(); i++)
     {
-        std::string uc = ucd->uc_list[i];
+        std::string uc = uc_list[i];
         UCDatasetUtil::load_img_with_assign_uc(UCDatasetUtil::cache_img_dir, uc);
         DeteRes* dete_res = new DeteRes();
         ucd->get_dete_res_with_assign_uc(dete_res, uc);

@@ -41,8 +41,6 @@ using namespace std;
 
 // 下载某一些图片报错，库中就没对应的图片，是先 rename 后入库导致的, 还有就是没有权限读取缓存文件导致的
 
-// 交互设计之类的全部抄 git 的
-
 // 解析出来的 json 中存放的 jpg 图片是压缩过的，这样存放的数据能小一点
 
 // add config such as -c --c 
@@ -73,9 +71,7 @@ using namespace std;
 // ucd dete 
 // 检测过程使用进度条显示进度，默认是自动使用保存文件夹下面的路径
 
-// acc 中 mistake 和 miss 可以针对一个目标 所有算召回率需要注意 miss + correct 就是全部目标的量了
-
-// draw  count_tags cut_small_img 都要能针对一个 uc 进行处理
+// draw count_tags cut_small_img 都要能针对一个 uc 进行处理
 
 // 检测服务函数要的，docker 和 ucd 之间的交互要使用新的方式，（1）写一个 docker 管理器，管理当前电脑上的 docker 服务（2）docker 不使用的时候不要占据太多的资源，可以一直在后台启动
 
@@ -89,20 +85,9 @@ using namespace std;
 
 // 增加全文匹配额功能，对指定的关键字进行查找
 
-// foretell, 选择很多句子，随机打印其中的一句，或许 有帮助呢
-// 占卜，将周易 64卦象随机地输出，输出对应的爻辞之类的，
-// 随机输入一段字符串，计算字符串的 md5 返回对应的 64 卦的内容
-
 // 定时任务 + 一次检测一个 文件夹 ucd + 检测结果也是 ucd Die_prebase_0_5_0, 这样的话只要分析一下 uc_analysis 就知道要下载哪些 ucd 进行 absorb
 
-// ucd tar, ucd untar 将一个数据集打包到有一起方便用 ucd 之外的工具进行操作
-
-// 写一个规则打印的函数，每次都要查询烦得要死，还不如自己实现一个
-
-// 先同时支持 .json 数据 和 .uci 数据，后期等实际使用后的结果再去分开
-
-// json_to_uci 可以指定每一卷的大小，from_huge_xml 也要能指定每一卷的大小
-// uci_to_json  不做内存大小限制，内存不够的话直接就报错了
+// TODO: 写一个规则打印的函数，每次都要查询烦得要死，还不如自己实现一个
 
 // 超大数据集可以直接存储为存文本数据，这样可以一行一行读取，前面是头文件，就是数据的 uc 信息，以及不同的 uc 信息在多少行，这样的话只要遍历一下头文件就能快速拿到 data 数据，这样更加合理
 
@@ -110,22 +95,23 @@ using namespace std;
 
 // TODO: 一个训练分类的服务，输入是一个 ucd 和 保存模型的文件夹地址，或者直接就是 一个模型地址，值保留在验证集中效果最好的一个模型就行
 
-// FIXME: uc_list 改为 uc_set 比较好，现在的方式去重非常不方便
-
 // 申请更多的内存，现在共享内存用不了多少就崩掉了，如何能申请更多的内存，一般服务器都是 128G 内存
 
 // 有些图片截取小图之后是反色的，为什么会这样，是因为原图的问题吗？Dxm00d0
 
 // joUtil 里面 cut_small_img 好像是有问题的 Dxg0e5r Dxh0iku
 
-// 增加计算 AP 的放方法
+// TODO: 增加计算 AP 的放方法
 
 // drop_extra_info, 以 uc_list 为基准，uc_list 中没有的元素 object_info 和 size_info 中有的话 删除
 
-// count_folder， 统计文件夹中的文件信息，统计文件夹的大小
+// TODO: count_folder， 统计文件夹中的文件信息，统计文件夹的大小
 
 // TODO: 做成 python 类型，输入 python 之后直接进入 pythyon 的环境变量，一直到 按 ctrl + c 才退出
 
+// FIXME: 存在 bug 只要 ucd 安装了，有些软件就不能安装，会报确实 .so 的错误
+
+// FIXME: uc_list 改为 uc_set 比较好，现在的方式去重非常不方便
 
 
 int main(int argc, char ** argv)
@@ -193,7 +179,7 @@ int main(int argc, char ** argv)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.5.1";
+    std::string app_version = "v2.5.2";
 
     // uci_info
     int volume_size         = 20;
@@ -1805,8 +1791,8 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "area_analysis")
     {
-        ucd_param_opt->not_ready(command_1);
-        return -1;
+        // ucd_param_opt->not_ready(command_1);
+        // return -1;
 
         if(argc == 4)
         {
@@ -2551,6 +2537,20 @@ int main(int argc, char ** argv)
     {
         ucd_param_opt->print_all_fun();
         return -1;
+    }
+    else if(command_1 == "game")
+    {
+
+        while(1)
+        {
+            std::cout << "               _ooOoo_                " << std::endl;
+            sleep(1);
+            std::system("clear");
+        }
+
+        // std::create
+
+
     }
     else if(ucd_param_opt->has_simliar_command(command_1))
     {

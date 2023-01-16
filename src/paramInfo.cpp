@@ -608,6 +608,7 @@ void UcdParamOpt::load_param_info()
     param_cache_info->demo.push_back("34      :     /home/data/ucd_cache");
     param_cache_info->demo.push_back("107     :     /home/ucd_cache/");
     param_cache_info->demo.push_back("33      :     /home/data/ucd_cache");
+    param_cache_info->demo.push_back("50      :     /home/suanfa-2/ucd_cache");
     param_cache_info->demo.push_back("----------------------------------------");
     UcdParamOpt::add_param(param_cache_info);
     
