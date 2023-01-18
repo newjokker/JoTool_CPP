@@ -301,8 +301,10 @@ class UCDatasetUtil
         void ucd_diff(std::string ucd_path_1, std::string ucd_path_2);
         
         // 去除在 ucd1 中 ucd2 中也存在的 uc
-        void ucd_minus(std::string save_path, std::string ucd_path_1, std::string ucd_path_2);
+        void ucd_minus_obj(std::string save_path, std::string ucd_path_1, std::string ucd_path_2);
         
+        void ucd_minus_uc(std::string save_path, std::string ucd_path_1, std::string ucd_path_2);
+
         // 统计标签的个数
         void count_ucd_tags(std::string ucd_path);
         

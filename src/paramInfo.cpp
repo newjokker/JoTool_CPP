@@ -493,14 +493,23 @@ void UcdParamOpt::load_param_info()
     param_merge->demo.push_back("ucd merge merge.json test1.json test2.json test3.json      (合并 test1.josn test2.json test3.json 得到 merge.json)");  
     UcdParamOpt::add_param(param_merge);
     
-    // minus
-    ParamInfo * param_minus = new ParamInfo("minus");
-    param_minus->group = "opt";
-    param_minus->grammar = "ucd minus ucd_path1 ucd_path2 save_path";
-    param_minus->english_explain = "do minus operation between two ucd";
-    param_minus->chinese_explain = "减操作数据集, obj 信息也会进行相减操作";   
-    param_minus->demo.push_back("ucd minus test1.json test2.json res.json       (将 test1.josn - test2.json 得到 res.json)");
-    UcdParamOpt::add_param(param_minus);
+    // minus_obj
+    ParamInfo * param_minus_obj = new ParamInfo("minus_obj");
+    param_minus_obj->group = "opt";
+    param_minus_obj->grammar = "ucd minus_obj ucd_path1 ucd_path2 save_path";
+    param_minus_obj->english_explain = "do minus operation between two ucd";
+    param_minus_obj->chinese_explain = "减操作数据集, 删除存在 ucd_path2 中的 obj 信息 uc 不变";   
+    param_minus_obj->demo.push_back("ucd minus test1.json test2.json res.json       (将 test1.josn - test2.json 得到 res.json)");
+    UcdParamOpt::add_param(param_minus_obj);
+
+    // minus_uc
+    ParamInfo * param_minus_uc = new ParamInfo("minus_uc");
+    param_minus_uc->group = "opt";
+    param_minus_uc->grammar = "ucd minus_uc ucd_path1 ucd_path2 save_path";
+    param_minus_uc->english_explain = "do minus operation between two ucd";
+    param_minus_uc->chinese_explain = "减操作数据集, 删除存在 ucd_path2 中的 uc 信息，当 uc 存在与 uc 对应的 size_info 和 obj_info 也都不存在了";   
+    param_minus_uc->demo.push_back("ucd minus test1.json test2.json res.json       (将 test1.josn - test2.json 得到 res.json)");
+    UcdParamOpt::add_param(param_minus_uc);
     
     // diff
     ParamInfo * param_diff = new ParamInfo("diff");

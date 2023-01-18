@@ -1209,7 +1209,13 @@ void UCDataset::absorb(std::string meat_ucd, std::string save_path, std::string 
                 UCDataset::size_info[uc] = ucd->size_info[uc];
             }
         }
-        else if((need_attr == "object_info") || (need_attr == "all"))
+        else
+        {
+            std::cout << ERROR_COLOR << "attr_name support, [size_info, object_info, all]" << STOP_COLOR << std::endl;
+            throw "attr_name support, [size_info, object_info, all]";
+        }
+        
+        if((need_attr == "object_info") || (need_attr == "all"))
         {
             for(int j=0; j<ucd->object_info[uc].size(); j++)
             {
@@ -1218,8 +1224,8 @@ void UCDataset::absorb(std::string meat_ucd, std::string save_path, std::string 
         }
         else
         {
-            std::cout << "attr_name not support, [size_info, object_info]";
-            throw "attr_name not support, [size_info, object_info]";
+            std::cout << ERROR_COLOR << "attr_name support, [size_info, object_info, all]" << STOP_COLOR << std::endl;
+            throw "attr_name support, [size_info, object_info, all]";
         }
         bar.progress(i, N);
     }
@@ -2897,7 +2903,7 @@ void UCDatasetUtil::ucd_diff(std::string ucd_path_1, std::string ucd_path_2)
     delete ucd2;
 }
 
-void UCDatasetUtil::ucd_minus(std::string save_path, std::string ucd_path_1, std::string ucd_path_2)
+void UCDatasetUtil::ucd_minus_obj(std::string save_path, std::string ucd_path_1, std::string ucd_path_2)
 {
     UCDataset* ucd1 = new UCDataset(ucd_path_1);
     ucd1->parse_ucd(true);
@@ -2929,6 +2935,49 @@ void UCDatasetUtil::ucd_minus(std::string save_path, std::string ucd_path_1, std
             size_info[uc] = ucd1->size_info[uc];
         }
     }
+    ucd1->save_to_ucd(save_path);
+    delete ucd1;
+    delete ucd2;
+}
+
+void UCDatasetUtil::ucd_minus_uc(std::string save_path, std::string ucd_path_1, std::string ucd_path_2)
+{
+    UCDataset* ucd1 = new UCDataset(ucd_path_1);
+    ucd1->parse_ucd(true);
+    UCDataset* ucd2 = new UCDataset(ucd_path_2);
+    ucd2->parse_ucd(true);
+
+    //
+    std::set<std::string> uc_set2(ucd2->uc_list.begin(), ucd2->uc_list.end());
+    std::vector<std::string> uc_list_new;
+
+    for(int i=0; i<ucd1->uc_list.size(); i++)
+    {
+        std::string uc = ucd1->uc_list[i];
+        if(uc_set2.count(uc) > 0)
+        {
+            // 删除对应 object_info
+            if(ucd1->object_info.count(uc) > 0)
+            {
+                for(int j=0; j<ucd1->object_info[uc].size(); j++)
+                {
+                    delete ucd1->object_info[uc][j];
+                }
+                ucd1->object_info.erase(uc);
+            }
+            
+            // 删除对应 size_info 
+            if(ucd1->size_info.count(uc) > 0)
+            {
+                ucd1->size_info.erase(uc);
+            }
+        }
+        else
+        {
+            uc_list_new.push_back(uc);
+        }
+    }
+    ucd1->uc_list = uc_list_new;
     ucd1->save_to_ucd(save_path);
     delete ucd1;
     delete ucd2;

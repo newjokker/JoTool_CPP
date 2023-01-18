@@ -179,7 +179,7 @@ int main(int argc, char ** argv)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.5.2";
+    std::string app_version = "v2.5.4";
 
     // uci_info
     int volume_size         = 20;
@@ -798,18 +798,33 @@ int main(int argc, char ** argv)
             return -1;
         }
     }
-    else if(command_1 == "minus")
+    else if(command_1 == "minus_obj")
     {
         if(argc == 5)
         {
             std::string ucd_path_1      = argv[2];
             std::string ucd_path_2      = argv[3];
             std::string ucd_save_path   = argv[4];
-            ucd_util->ucd_minus(ucd_save_path, ucd_path_1, ucd_path_2);
+            ucd_util->ucd_minus_obj(ucd_save_path, ucd_path_1, ucd_path_2);
         }
         else
         {
-            ucd_param_opt->print_command_info("minus");
+            ucd_param_opt->print_command_info(command_1);
+            return -1;
+        }
+    }
+    else if(command_1 == "minus_uc")
+    {
+        if(argc == 5)
+        {
+            std::string ucd_path_1      = argv[2];
+            std::string ucd_path_2      = argv[3];
+            std::string ucd_save_path   = argv[4];
+            ucd_util->ucd_minus_uc(ucd_save_path, ucd_path_1, ucd_path_2);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
             return -1;
         }
     }
