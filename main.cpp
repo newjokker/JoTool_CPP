@@ -179,7 +179,7 @@ int main(int argc, char ** argv)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.5.4";
+    std::string app_version = "v2.5.5";
 
     // uci_info
     int volume_size         = 20;
@@ -2033,11 +2033,22 @@ int main(int argc, char ** argv)
             UCDataset* ucd = new UCDataset(ucd_path);
             ucd->parse_ucd(true);
 
+            // uc_list -> uc_set
+            set<std::string> uc_set(ucd->uc_list.begin(), ucd->uc_list.end());
+
             for(int i=0; i<uc_list.size(); i++)
             {
-                std::string uc = uc_list[i];
-                // size_info
+                std::string uc = uc_list[i];                
+                
                 std::cout << WARNNING_COLOR << "-----------------------------" << uc << "----------------------------" << STOP_COLOR << std::endl;
+                
+                if(uc_set.count(uc) == 0)
+                {
+                    std::cout << ERROR_COLOR << "uc not exists : " << uc << STOP_COLOR << std::endl;
+                    continue;
+                }
+
+                // size_info
                 std::cout << "-----------------------" << std::endl;
                 if(ucd->size_info.count(uc) > 0)
                 {
