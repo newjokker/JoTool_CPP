@@ -1058,7 +1058,7 @@ void UcdParamOpt::load_param_info()
     param_interset->group = "opt";
     param_interset->grammar = "ucd interset save_path ucd_path_a ucd_path_b";
     param_interset->english_explain = "";
-    param_interset->chinese_explain = "找到两个 ucd 的 uc_listr 交集";   
+    param_interset->chinese_explain = "找到两个 ucd 的 uc_list 交集";   
     param_interset->demo.push_back("ucd interset res.json ucd_a.json ucd_b.json             (将 ucd_a.json 和 ucd_b.json 的交集保存在 res.json)");
     UcdParamOpt::add_param(param_interset);
 

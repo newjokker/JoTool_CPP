@@ -117,8 +117,6 @@ using namespace std;
 
 // TODO: 对所有的检测框进行缩放处理，的函数支持一下
 
-// TODO: 拿到交集信息，
-
 
 
 int main(int argc, char ** argv)
@@ -186,7 +184,7 @@ int main(int argc, char ** argv)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.5.5";
+    std::string app_version = "v2.5.6";
 
     // uci_info
     int volume_size         = 20;
