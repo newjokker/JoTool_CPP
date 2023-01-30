@@ -114,6 +114,15 @@ using namespace std;
 // FIXME: uc_list 改为 uc_set 比较好，现在的方式去重非常不方便
 
 
+
+// FIXME: 裁剪不分别放到对应的文件夹中的功能实现
+
+// TODO: 对所有的检测框进行缩放处理，的函数支持一下
+
+// TODO: 拿到交集信息，
+
+
+
 int main(int argc, char ** argv)
 {
     // param
@@ -900,21 +909,60 @@ int main(int argc, char ** argv)
         }
 
         std::vector<std::string> app_path_list = get_all_file_path(app_dir);
+        std::vector<int> app_version_list;
+        std::map< int, std::string > app_version_map;
 
         for(int i=0; i<app_path_list.size(); i++)
         {
-            std::string app_name = get_file_name(app_path_list[i]);
-
-            if(pystring::endswith(app_path_list[i], app_version))
+            std::string app_name = get_file_name_suffix(app_path_list[i]);
+            if(! pystring::startswith(app_name, "ucd_v"))
             {
-                std::cout << "* ";
+                continue;
+            }
+
+            // get verrsion int
+            int version_int = 0;
+            std::string app_version_str = app_name.substr(5);
+            std::vector<std::string> app_name_list = pystring::split(app_version_str, ".");
+            if(app_name_list.size() != 3)
+            {
+                continue;
             }
             else
             {
-                std::cout << "  ";
+                int version_1 =  std::stoi(app_name_list[0]) * 1000000;
+                int version_2 =  std::stoi(app_name_list[1]) * 1000;
+                int version_3 =  std::stoi(app_name_list[2]);
+                version_int = version_1 + version_2 + version_3;
+
+                if(pystring::endswith(app_name, app_version))
+                {
+                    app_version_map[version_int] = "*   " + app_path_list[i];
+                }
+                else
+                {
+                    app_version_map[version_int] = "    " + app_path_list[i];
+                }
+                app_version_list.push_back(version_int);
             }
-            std::cout << app_path_list[i] << std::endl;
         }
+
+        // sort by version
+        std::sort(app_version_list.begin(), app_version_list.end());
+
+        // print version info
+        for(int i=0; i<app_version_list.size(); i++)
+        {
+            if(app_version_map[app_version_list[i]][0] == '*')
+            {
+                std::cout << HIGHTLIGHT_COLOR << app_version_map[app_version_list[i]] << STOP_COLOR << std::endl;
+            }
+            else
+            {
+                std::cout << app_version_map[app_version_list[i]] << std::endl;
+            }
+        }
+
         std::cout << "-----------------------------------" << std::endl;
         return -1;
     }
