@@ -1065,7 +1065,7 @@ void UCDataset::filter_by_uc_set(std::set<std::string> uc_set, bool clear_obj)
     UCDataset::uc_list = uc_list;
 }
 
-void UCDataset::crop_dete_res_with_assign_uc(std::string uc, std::string img_path, std::string save_dir)
+void UCDataset::crop_dete_res_with_assign_uc(std::string uc, std::string img_path, std::string save_dir, bool is_split)
 {
     if(UCDataset::object_info.count(uc) == 0)
     {
@@ -1082,7 +1082,7 @@ void UCDataset::crop_dete_res_with_assign_uc(std::string uc, std::string img_pat
     jotools::DeteRes* dete_res = new DeteRes();
     dete_res->parse_img_info(img_path);
     UCDataset::get_dete_res_with_assign_uc(dete_res, uc);
-    dete_res->crop_dete_obj(save_dir, true);
+    dete_res->crop_dete_obj(save_dir, is_split);
     delete dete_res;
 }
 
@@ -3270,9 +3270,6 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
         UCDatasetUtil::load_img_with_assign_uc(UCDatasetUtil::cache_img_dir, uc);
         std::set<std::string> img_suffix {".jpg", ".JPG", ".png", ".PNG"};
         std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
-        // std::string img_path = get_file_by_suffix_set("/home/ldq/ucd_dir/img", uc, img_suffix);
-
-        // std::cout << "img_path : " << img_path << std::endl; 
 
         if(img_path == "")
         {
@@ -3280,7 +3277,7 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
         }
         else
         {
-            ucd->crop_dete_res_with_assign_uc(uc, img_path,  save_dir);
+            ucd->crop_dete_res_with_assign_uc(uc, img_path,  save_dir, is_split);
         }
         uc_index += 1;
         bar.progress(uc_index, N);

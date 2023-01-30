@@ -151,7 +151,7 @@ class UCDataset
         void filter_by_nms(float nms_th, bool ignore_tag, bool clear_obj=true);
 
         // crop_dete_res
-        void crop_dete_res_with_assign_uc(std::string uc, std::string img_path, std::string save_dir);
+        void crop_dete_res_with_assign_uc(std::string uc, std::string img_path, std::string save_dir, bool is_split=true);
 
         // 获得子序列
         void get_sub_ucd(int sub_count, bool is_random, std::string save_path);
