@@ -122,8 +122,6 @@ using namespace std;
 
 
 
-
-
 int main(int argc, char ** argv)
 {
     // param
@@ -189,7 +187,7 @@ int main(int argc, char ** argv)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.5.7";
+    std::string app_version = "v2.5.8";
 
     // uci_info
     int volume_size         = 20;
@@ -309,9 +307,9 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "load")
     {        
-        if(argc < 2)
+        if(argc <= 2)
         {
-            ucd_param_opt->print_command_info("load");
+            ucd_param_opt->print_command_info(command_1);
             return -1;
         }
         std::string ucd_name = argv[2];

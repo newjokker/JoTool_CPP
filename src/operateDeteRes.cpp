@@ -461,15 +461,52 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
         DeteObj max_iou_obj;
         float max_iou = 0;
         int max_iou_index = -1;
-        //
+        
+        bool has_correct_tag    = false;                                            // 有对应的标签
         for(int j=0; j<b.alarms.size(); j++)
         {
+            bool is_correct_tag     = false;                                        // 当前是相同的标签
             float each_iou = dete_obj_iou(a.alarms[i], b.alarms[j]);
-            if((each_iou > max_iou) && (has_obj_map[j] == false))
+
+            if(a.alarms[i].tag == b.alarms[j].tag)
             {
-                max_iou = each_iou;
-                max_iou_obj = b.alarms[j];
-                max_iou_index = j;
+                is_correct_tag = true;
+            }
+
+            if(has_obj_map[j] == false)
+            {
+                if((has_correct_tag == true) && (is_correct_tag == true))
+                {
+                    if(each_iou > max_iou)
+                    {
+                        max_iou         = each_iou;
+                        max_iou_obj     = b.alarms[j];
+                        max_iou_index   = j; 
+                    }
+                }
+                else if((has_correct_tag == false) && (is_correct_tag == true))
+                {
+                    if(each_iou > DeteAcc::iou)
+                    {
+                        max_iou         = each_iou;
+                        max_iou_obj     = b.alarms[j];
+                        max_iou_index   = j; 
+                        has_correct_tag = true;     
+                    }
+                }
+                else if((has_correct_tag == false) && (is_correct_tag == false))
+                {
+                    if(each_iou > max_iou)
+                    {
+                        max_iou         = each_iou;
+                        max_iou_obj     = b.alarms[j];
+                        max_iou_index   = j; 
+                    }
+                }
+                else
+                {
+                    continue;
+                }
             }
         }
 
