@@ -948,7 +948,7 @@ void UcdParamOpt::load_param_info()
     param_drop_tags->grammar = "ucd drop_tags ucd_path save_path tag1 tag2 ...";
     param_drop_tags->english_explain = "";
     param_drop_tags->chinese_explain = "数据集中删除指定标签";   
-    param_drop_tags->demo.push_back("ucd filter_by_tags aqm.json res.json aqm cbd person                   (将 aqm.json 只保留 aqm cbd person 三个标签)");
+    param_drop_tags->demo.push_back("ucd drop_tags aqm.json res.json aqm cbd person                   (将 aqm.json 删除 aqm cbd person 三个标签)");
     UcdParamOpt::add_param(param_drop_tags);
 
     // zen
@@ -1075,8 +1075,15 @@ void UcdParamOpt::load_param_info()
     param_grammar->group = "opt";
     param_grammar->grammar = "ucd grammar";
     param_grammar->chinese_explain = "输出所有关键字的语法";   
-    // param_grammar->demo.push_back("ucd grammar             (对 hello 进行预言)");
     UcdParamOpt::add_param(param_grammar);
+
+    // augment
+    ParamInfo * param_augment = new ParamInfo("augment");
+    param_augment->group = "opt";
+    param_augment->grammar = "ucd augment ucd_path save_path x1 x2 y1 y2 (左右上下）{is_relative，默认相对缩放}";
+    param_augment->chinese_explain = "对检测框进行缩放(相对|绝对)";   
+    param_augment->demo.push_back("ucd augment test.json save.json 0.5 0.5 -0.1 -0.1 true  (使用相对的方式对 test.json 中的所有检测框的往左往右分别扩展 宽度 * 0.5, 往上往下分别缩小高度 * 0.1)");
+    UcdParamOpt::add_param(param_augment);
 
 }
 

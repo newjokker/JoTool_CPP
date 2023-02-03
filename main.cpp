@@ -115,7 +115,12 @@ using namespace std;
 
 
 
-// TODO: 对所有的检测框进行缩放处理，的函数支持一下
+// TODO: 对所有的检测框进行缩放处理，的函数支持一下，augment
+
+// FIXME: devide 函数的 输入逻辑改一下，改成需要的样式，输入保存文件夹，输入保存的名字，不要文件夹加名字 这样不容易理解
+
+
+
 
 
 
@@ -184,7 +189,7 @@ int main(int argc, char ** argv)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.5.6";
+    std::string app_version = "v2.5.7";
 
     // uci_info
     int volume_size         = 20;
@@ -933,11 +938,11 @@ int main(int argc, char ** argv)
 
                 if(pystring::endswith(app_name, app_version))
                 {
-                    app_version_map[version_int] = "*   " + app_path_list[i];
+                    app_version_map[version_int] = "* " + app_path_list[i];
                 }
                 else
                 {
-                    app_version_map[version_int] = "    " + app_path_list[i];
+                    app_version_map[version_int] = "  " + app_path_list[i];
                 }
                 app_version_list.push_back(version_int);
             }
@@ -2460,6 +2465,10 @@ int main(int argc, char ** argv)
             std::string ucd_path = argv[2];
             ucd_util->get_random_color_map(ucd_path);
         }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
     else if(command_1 == "dete")
     {
@@ -2471,6 +2480,48 @@ int main(int argc, char ** argv)
     {
         // i_ching 
         // 
+    }
+    else if(command_1 == "augment")
+    {
+        if(argc == 8 || argc == 9)
+        {
+            std::string ucd_path    = argv[2];
+            std::string save_path   = argv[3];
+
+            if((! is_read_file(ucd_path)) || (! pystring::endswith(ucd_path, ".json")))
+            {
+                std::cout << ERROR_COLOR << "ucd path not illeagle : " << ucd_path << STOP_COLOR << std::endl;
+                // throw "ucd path not illeagle";
+                return -1;
+            }
+
+            float x1, x2, y1, y2;
+            x1 = std::stof(argv[4]);
+            x2 = std::stof(argv[5]);
+            y1 = std::stof(argv[6]);
+            y2 = std::stof(argv[7]);
+
+            bool is_relative = true;
+            if(argc == 9)
+            {
+                std::string is_relative_str   = argv[8];
+                if((is_relative_str == "false") || (is_relative_str == "False") || (is_relative_str == "0"))
+                {
+                    is_relative = false;
+                }
+            }
+
+            UCDataset *ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->do_augment(x1, x2, y1, y2, is_relative);
+            ucd->save_to_ucd(save_path);
+            delete ucd;
+            return 1;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
     else if(command_1 == "foretell")
     {

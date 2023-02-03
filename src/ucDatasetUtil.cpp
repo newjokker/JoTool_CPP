@@ -1094,7 +1094,7 @@ void UCDataset::get_sub_ucd(int sub_count, bool is_random, std::string save_path
         throw "sub_count > uc_list.size()";
     }
 
-    UCDataset* new_ucd = new UCDataset(save_path);
+    UCDataset* new_ucd      = new UCDataset(save_path);
     new_ucd->dataset_name   = UCDataset::dataset_name;
     new_ucd->model_version  = UCDataset::model_version;
     new_ucd->model_name     = UCDataset::model_name;
@@ -1202,6 +1202,13 @@ void UCDataset::absorb(std::string meat_ucd, std::string save_path, std::string 
     for(int i=0; i<UCDataset::uc_list.size(); i++)
     {
         std::string uc = UCDataset::uc_list[i];
+
+        if((need_attr != "size_info") && (need_attr != "all") && (need_attr != "object_info"))
+        {
+            std::cout << ERROR_COLOR << "attr_name support, [size_info, object_info, all] not " << need_attr << STOP_COLOR << std::endl;
+            return;
+        }
+
         if((need_attr == "size_info") || (need_attr == "all"))
         {
             if((UCDataset::size_info.count(uc) == 0) && (ucd->size_info.count(uc) > 0))
@@ -1209,12 +1216,7 @@ void UCDataset::absorb(std::string meat_ucd, std::string save_path, std::string 
                 UCDataset::size_info[uc] = ucd->size_info[uc];
             }
         }
-        else
-        {
-            std::cout << ERROR_COLOR << "attr_name support, [size_info, object_info, all]" << STOP_COLOR << std::endl;
-            throw "attr_name support, [size_info, object_info, all]";
-        }
-        
+
         if((need_attr == "object_info") || (need_attr == "all"))
         {
             for(int j=0; j<ucd->object_info[uc].size(); j++)
@@ -1222,11 +1224,7 @@ void UCDataset::absorb(std::string meat_ucd, std::string save_path, std::string 
                 UCDataset::add_obj(uc, ucd->object_info[uc][j]);
             }
         }
-        else
-        {
-            std::cout << ERROR_COLOR << "attr_name support, [size_info, object_info, all]" << STOP_COLOR << std::endl;
-            throw "attr_name support, [size_info, object_info, all]";
-        }
+
         bar.progress(i, N);
     }
     bar.finish();
@@ -2291,6 +2289,76 @@ int UCDataset::get_info_count()
         iter++;
     }
     return info_count;
+}
+
+int UCDataset::do_augment(float ax1, float ax2, float ay1, float ay2,  bool is_relative)
+{
+    // 检查是否每个 uc 都有对应的 宽高数据
+    for(int i=0; i<UCDataset::uc_list.size(); i++)
+    {
+        std::string uc = UCDataset::uc_list[i];
+        if(UCDataset::size_info.count(uc) == 0)
+        {
+            std::cout << ERROR_COLOR << "uc size_info is empty : " << uc << STOP_COLOR << std::endl;
+            // throw "uc size_info is empty";
+            return -1;
+        }
+
+        if(UCDataset::size_info[uc][0] == -1 || UCDataset::size_info[uc][1] == -1)
+        {
+            std::cout << ERROR_COLOR << "uc size_info is -1 : " << uc << STOP_COLOR << std::endl;
+            // throw "uc size_info is empty";
+            return -1;
+        }
+    }
+
+    // 遍历每一个 obj 对范围进行扩增
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        std::string uc = iter->first;
+        int width   = UCDataset::size_info[uc][0];
+        int height  = UCDataset::size_info[uc][1];
+        for(int i=0; i<UCDataset::object_info[uc].size(); i++)
+        {
+            LabelmeObj *obj = UCDataset::object_info[uc][i];
+            float x1 = obj->points[0][0];
+            float y1 = obj->points[0][1];
+            float x2 = obj->points[1][0];
+            float y2 = obj->points[1][1];
+
+            int region_width  = x2 - x1;
+            int region_height = y2 - y1;
+
+            int x_min, x_max, y_min, y_max;
+            if(is_relative)
+            {
+                x_min = x1 - region_width   * ax1;
+                x_max = x2 + region_width   * ax2;
+                y_min = y1 - region_height  * ay1;
+                y_max = y2 + region_height  * ay2;
+            }
+            else
+            {
+                x_min = x1 - ax1;
+                x_max = x2 + ax2;
+                y_min = y1 - ay1;
+                y_max = y2 + ay2;
+            }
+            
+            x_min = std::max(0, x_min);
+            y_min = std::max(0, y_min);
+            x_max = std::min(width  -1, x_max);
+            y_max = std::min(height -1, y_max);
+
+            // update obj
+            obj->points[0][0] = x_min;
+            obj->points[0][1] = y_min;
+            obj->points[1][0] = x_max;
+            obj->points[1][1] = y_max;
+        }
+        iter++;
+    }
 }
 
 // 
@@ -3549,7 +3617,30 @@ void UCDatasetUtil::uc_analysis(std::string ucd_path)
             month -= 12;
             day += 15;
         }
-        std::string date = std::to_string(year) + "-" + std::to_string(month) + "-" + std::to_string(day);
+
+        // month_str
+        std::string date_month;
+        if(std::to_string(month).size() == 1)
+        {
+            date_month = "0" + std::to_string(month);
+        }
+        else
+        {
+            date_month = std::to_string(month);
+        }
+
+        // day_str
+        std::string date_day;
+        if(std::to_string(day).size() == 1)
+        {
+            date_day = "0" + std::to_string(day);
+        }
+        else
+        {
+            date_day = std::to_string(day);
+        }
+
+        std::string date = std::to_string(year) + "-" + date_month + "-" + date_day;
         std::cout << uc << "   " << std::setw(10) << std::left << date << "   " << iter->second << std::endl;
         iter++;
     }

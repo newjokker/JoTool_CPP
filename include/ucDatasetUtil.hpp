@@ -205,6 +205,9 @@ class UCDataset
         // 获取信息数量, uc 数目 + size_info 数目 * 2 + obj 数目 * 4
         int get_info_count();
 
+        // 检测框范围往外扩展
+        int do_augment(float x1, float x2, float y1, float y2,  bool is_relative);
+
     private:
         std::string json_path;
 };
