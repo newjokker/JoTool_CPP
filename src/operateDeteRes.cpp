@@ -432,17 +432,18 @@ DeteAcc::DeteAcc()
     DeteAcc::iou = 0.5;
 }
 
-std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and_standard(DeteRes a, DeteRes b, std::string uc, UCDataset* compare_res_ucd)
+std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and_standard(DeteRes dete, DeteRes gt, std::string uc, UCDataset* compare_res_ucd)
 {
 
     // sort by conf 
-    a.sort_by_conf();
-    b.sort_by_conf();
+    dete.sort_by_conf();
+    gt.sort_by_conf();
 
     DeteRes* compare_dete_res = new DeteRes();
 
     float iou_th = 0.5;
-    std::map<int, bool> has_obj_map;
+    std::map<int, bool> has_obj_map_dete;
+    std::map<int, bool> has_obj_map_gt;
     std::map<int, bool> has_mis_map;                                    // 是否存在标签被标记为 mistake 
     std::map<std::string, std::map<std::string, int> > acc_res;
     acc_res["correct"]  = {};
@@ -450,137 +451,155 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
     acc_res["extra"]    = {};
     acc_res["mistake"]  = {};
 
-    for(int i=0; i<b.alarms.size(); i++)
+
+    // 第一遍找到所有能匹配上的标签
+    for(int i=0; i<dete.alarms.size(); i++)
     {
-        has_obj_map[i] = false;
-        has_mis_map[i] = false;
+        has_obj_map_dete[i] = false;
     }
 
-    for(int i=0; i<a.alarms.size(); i++)
+    for(int i=0; i<gt.alarms.size(); i++)
+    {
+        has_obj_map_gt[i] = false;
+    }
+
+    for(int i=0; i<gt.alarms.size(); i++)
     {
         DeteObj max_iou_obj;
-        float max_iou = 0;
-        int max_iou_index = -1;
-        
-        bool has_correct_tag    = false;                                            // 有对应的标签
-        for(int j=0; j<b.alarms.size(); j++)
+        float max_iou           = -1;
+        int max_iou_index       = -1;
+
+        // 找到单个元素的最匹配标签
+        for(int j=0; j<dete.alarms.size(); j++)
         {
             bool is_correct_tag     = false;                                        // 当前是相同的标签
-            float each_iou = dete_obj_iou(a.alarms[i], b.alarms[j]);
+            float each_iou          = dete_obj_iou(gt.alarms[i], dete.alarms[j]);
 
-            if(a.alarms[i].tag == b.alarms[j].tag)
+            if(dete.alarms[j].tag != gt.alarms[i].tag)
             {
-                is_correct_tag = true;
+                continue;;
             }
-
-            if(has_obj_map[j] == false)
+            else if((dete.alarms[j].tag == gt.alarms[i].tag) && (has_obj_map_dete[j] == false) && (each_iou > max_iou))
             {
-                if((has_correct_tag == true) && (is_correct_tag == true))
+                max_iou         = each_iou;
+                max_iou_obj     = gt.alarms[i];
+                max_iou_index   = j; 
+            }
+        }
+
+        // 决定是否匹配
+        if(max_iou > DeteAcc::iou)
+        {
+            has_obj_map_gt[i] = true;
+            std::string correct_tag = gt.alarms[i].tag;
+            has_obj_map_dete[max_iou_index] = true;
+            DeteObj correct_dete_obj = dete.alarms[max_iou_index];
+            correct_dete_obj.tag = "correct_" + correct_tag;
+            compare_dete_res->add_dete_obj(correct_dete_obj);
+
+            if(acc_res["correct"].count(correct_tag) == 0)
+            {
+                acc_res["correct"][correct_tag] = 1;
+            }
+            else
+            {
+                acc_res["correct"][correct_tag] += 1;
+            }
+        } 
+    }
+
+    // 第二遍找 mistake 数据
+    for(int i=0; i<gt.alarms.size(); i++)
+    {
+        if(has_obj_map_gt[i] == true)
+        {
+            continue;
+        }
+
+        std::cout << "存在未匹配 gt" << std::endl;
+
+        DeteObj max_iou_obj;
+        float max_iou           = -1;
+        int max_iou_index       = -1;
+
+        // 找到单个元素的最匹配标签
+        for(int j=0; j<dete.alarms.size(); j++)
+        {
+            if(has_obj_map_dete[j] == false)
+            {
+                bool is_correct_tag     = false;                                        
+                float each_iou          = dete_obj_iou(gt.alarms[i], dete.alarms[j]);
+
+                if(each_iou > max_iou)
                 {
-                    if(each_iou > max_iou)
-                    {
-                        max_iou         = each_iou;
-                        max_iou_obj     = b.alarms[j];
-                        max_iou_index   = j; 
-                    }
-                }
-                else if((has_correct_tag == false) && (is_correct_tag == true))
-                {
-                    if(each_iou > DeteAcc::iou)
-                    {
-                        max_iou         = each_iou;
-                        max_iou_obj     = b.alarms[j];
-                        max_iou_index   = j; 
-                        has_correct_tag = true;     
-                    }
-                }
-                else if((has_correct_tag == false) && (is_correct_tag == false))
-                {
-                    if(each_iou > max_iou)
-                    {
-                        max_iou         = each_iou;
-                        max_iou_obj     = b.alarms[j];
-                        max_iou_index   = j; 
-                    }
-                }
-                else
-                {
-                    continue;
+                    max_iou         = each_iou;
+                    max_iou_obj     = gt.alarms[i];
+                    max_iou_index   = j; 
                 }
             }
         }
 
+        // 决定是否匹配
+        std::cout << "iou : " << max_iou << std::endl;
         if(max_iou > DeteAcc::iou)
         {
-            if(a.alarms[i].tag == max_iou_obj.tag)
+            has_obj_map_gt[i] = true;
+            std::string mistake_tag = gt.alarms[i].tag;
+            has_obj_map_dete[max_iou_index] = true;
+            DeteObj mistake_dete_obj = dete.alarms[max_iou_index];
+            mistake_dete_obj.tag = "mistake_" + gt.alarms[i].tag + ":" + dete.alarms[max_iou_index].tag;
+            compare_dete_res->add_dete_obj(mistake_dete_obj);
+
+            if(acc_res["mistake"].count(mistake_tag) == 0)
             {
-                has_obj_map[max_iou_index] = true;
-                DeteObj correct_dete_obj = a.alarms[i];
-                correct_dete_obj.tag = "correct_" + a.alarms[i].tag;
-                compare_dete_res->add_dete_obj(correct_dete_obj);
-                if(acc_res["correct"].count(a.alarms[i].tag) == 0)
-                {
-                    acc_res["correct"][a.alarms[i].tag] = 1;
-                }
-                else
-                {
-                    acc_res["correct"][a.alarms[i].tag] += 1;
-                }
+                acc_res["mistake"][mistake_tag] = 1;
             }
             else
             {
-                DeteObj mistake_dete_obj = a.alarms[i];
-                mistake_dete_obj.tag = "mistake_" + max_iou_obj.tag + ":" + a.alarms[i].tag;;
-                has_mis_map[max_iou_index] = true;
-
-                compare_dete_res->add_dete_obj(mistake_dete_obj);
-                std::string mistake_str = a.alarms[i].tag;
-                // std::string mistake_str = max_iou_obj.tag;
-                if(acc_res["mistake"].count(mistake_str) == 0)
-                {
-                    acc_res["mistake"][mistake_str] = 1;
-                }
-                else
-                {
-                    acc_res["mistake"][mistake_str] += 1;
-                }                
+                acc_res["mistake"][mistake_tag] += 1;
             }
         }
         else
         {
-            DeteObj extra_dete_obj = a.alarms[i];
-            extra_dete_obj.tag = "extra_" + a.alarms[i].tag;
-            compare_dete_res->add_dete_obj(extra_dete_obj);
-            if(acc_res["extra"].count(a.alarms[i].tag) == 0)
+            // miss 掉了数据
+            std::string miss_tag = gt.alarms[i].tag;
+            has_obj_map_gt[i] = true;
+            DeteObj miss_dete_obj = gt.alarms[i];
+            miss_dete_obj.tag = "miss_" +  miss_tag;
+            compare_dete_res->add_dete_obj(miss_dete_obj);
+
+            if(acc_res["miss"].count(miss_tag) == 0)
             {
-                acc_res["extra"][a.alarms[i].tag] = 1;
+                acc_res["miss"][miss_tag] = 1;
             }
             else
             {
-                acc_res["extra"][a.alarms[i].tag] += 1;
-            }       
-        }
+                acc_res["miss"][miss_tag] += 1;
+            }
+        } 
     }
 
-    // 检查漏检
-    for(int i=0; i<b.alarms.size(); i++)
+    // 第三遍找 extra 的数据
+    for(int i=0; i<dete.alarms.size(); i++)
     {
-        // 当一个标签既没有对应正确的标签也没有对应的错误标签，就属于漏掉的
-        if((has_obj_map[i] == false) and (has_mis_map[i] == false))
+        if(has_obj_map_dete[i] == false)
         {
-            DeteObj miss_dete_obj = b.alarms[i];
-            miss_dete_obj.tag = "miss_" + b.alarms[i].tag;
-            compare_dete_res->add_dete_obj(miss_dete_obj);
-            //
-            if(acc_res["miss"].count(b.alarms[i].tag) == 0)
+            // miss 掉了数据
+            std::string extra_tag = dete.alarms[i].tag;
+            has_obj_map_dete[i] = true;
+            DeteObj dete_dete_obj = dete.alarms[i];
+            dete_dete_obj.tag = "extra_" + extra_tag;
+            compare_dete_res->add_dete_obj(dete_dete_obj);
+
+            if(acc_res["extra"].count(extra_tag) == 0)
             {
-                acc_res["miss"][b.alarms[i].tag] = 1;
+                acc_res["extra"][extra_tag] = 1;
             }
             else
             {
-                acc_res["miss"][b.alarms[i].tag] += 1;
-            }   
-        }
+                acc_res["extra"][extra_tag] += 1;
+            }
+        }            
     }
 
     compare_res_ucd->add_dete_res_info(uc, *compare_dete_res);

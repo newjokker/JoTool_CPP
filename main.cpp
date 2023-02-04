@@ -119,7 +119,11 @@ using namespace std;
 
 // FIXME: devide 函数的 输入逻辑改一下，改成需要的样式，输入保存文件夹，输入保存的名字，不要文件夹加名字 这样不容易理解
 
+// FIXME: 应该用 gt 匹配 dete, 而不是反过来
 
+// FIXME: filter_by_tag 可以使用通配符号，这样会方便的多
+
+// 
 
 
 int main(int argc, char ** argv)
@@ -187,7 +191,7 @@ int main(int argc, char ** argv)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.5.8";
+    std::string app_version = "v2.5.10";
 
     // uci_info
     int volume_size         = 20;
