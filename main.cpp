@@ -123,7 +123,7 @@ using namespace std;
 
 // FIXME: filter_by_tag 可以使用通配符号，这样会方便的多
 
-// 
+// TODO: 增加通配符匹配，更加方便 filter_by_tags | drop_tags | ucd get tags 增加通配符选项 | 
 
 
 int main(int argc, char ** argv)
@@ -191,7 +191,7 @@ int main(int argc, char ** argv)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.5.10";
+    std::string app_version = "v2.6.1";
 
     // uci_info
     int volume_size         = 20;
@@ -2641,20 +2641,17 @@ int main(int argc, char ** argv)
     else if(command_1 == "test")
     {
 
-        UCDataset* a = new UCDataset();
-        std::vector<UCDataset*> b;
+        std::string assign_str  = argv[2];
+        std::string regex_str   = argv[3];
 
-        a->add_ucd_info("/home/ldq/ucd_dir/del/test.json");
-
-        // std::cout << a.count << std::endl;
-        // std::cout << b[0]->size_info.size() << std::endl;
-
-
-        a->delete_obj(a->uc_list[0], a->object_info[a->uc_list[0]][0]);
-
-        a->save_to_ucd("/home/ldq/ucd_dir/del/test2.json");
-
-
+        if(is_match(assign_str, regex_str))
+        {
+            std::cout  << "match : " << assign_str << " - " << regex_str << std::endl;
+        }
+        else
+        {
+            std::cout << ERROR_COLOR << "not match : " << assign_str << " - " << regex_str << STOP_COLOR << std::endl;
+        }
     }
     else if(command_1 == "grammar")
     {

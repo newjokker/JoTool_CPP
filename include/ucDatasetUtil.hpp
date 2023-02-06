@@ -177,7 +177,7 @@ class UCDataset
         void exec(std::string command_path);
 
         // 抛弃标签
-        void drop_tags(std::set<std::string> tags);
+        void drop_tags(std::set<std::string> tags, bool clear_obj=true);
 
         // 更新标签
         void update_tags(std::map< std::string, std::string > tag_map);

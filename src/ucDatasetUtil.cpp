@@ -1013,14 +1013,40 @@ void UCDataset::filter_by_tags(std::set<std::string> tags, bool clear_obj)
         for(int i=0; i<iter->second.size(); i++)
         {
             LabelmeObj* obj = iter->second[i];
-            if(tags.count(obj->label) > 0)
+            auto iter_tag = tags.begin();
+            bool be_choose = false; 
+            while(iter_tag != tags.end())
             {
-                objs.push_back(obj);
+                // 如果是通配符的话，通配符中有一个 * 
+                if(pystring::count(iter_tag->data(), "*") == 1)
+                {
+                    if(is_match(obj->label, iter_tag->data()))
+                    {
+                        objs.push_back(obj);
+                        iter_tag++;
+                        be_choose = true;
+                        continue;
+                    }
+                }
+                else
+                {
+                    if(obj->label == iter_tag->data())
+                    {
+                        objs.push_back(obj);  
+                        iter_tag++; 
+                        be_choose = true;
+                        continue;
+                    }
+                }
+                iter_tag++;
             }
-            else if(clear_obj)
+
+            // 当没有被选中的元素需要被删除时候，删除
+            if((clear_obj) && (be_choose == false))
             {
                 delete obj;
             }
+
         }
         iter->second = objs;
         if(objs.size() == 0)
@@ -1866,7 +1892,7 @@ void UCDataset::exec(std::string command_path)
     infile.close();
 }
 
-void UCDataset::drop_tags(std::set<std::string> tags)
+void UCDataset::drop_tags(std::set<std::string> tags, bool clear_obj)
 {
     auto iter = UCDataset::object_info.begin();
     while(iter != UCDataset::object_info.end())
@@ -1875,10 +1901,41 @@ void UCDataset::drop_tags(std::set<std::string> tags)
         for(int i=0; i<iter->second.size(); i++)
         {
             LabelmeObj* obj = iter->second[i];
-            if(tags.count(obj->label) == 0)
+            auto iter_tag = tags.begin();
+            bool be_choose = false; 
+            while(iter_tag != tags.end())
+            {
+                // 如果是通配符的话，通配符中有一个 * 
+                if(pystring::count(iter_tag->data(), "*") == 1)
+                {
+                    if(is_match(obj->label, iter_tag->data()))
+                    {
+                        iter_tag++;
+                        be_choose = true;
+                        continue;
+                    }
+                }
+                else
+                {
+                    if(obj->label == iter_tag->data())
+                    {
+                        iter_tag++; 
+                        be_choose = true;
+                        continue;
+                    }
+                }
+                iter_tag++;
+            }
+
+            if(be_choose == false)
             {
                 objs.push_back(obj);
-                // delete obj;
+            }
+
+            // 当没有被选中的元素需要被删除时候，删除
+            if((clear_obj) && (be_choose == true))
+            {
+                delete obj;
             }
         }
         iter->second = objs;

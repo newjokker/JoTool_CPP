@@ -12,7 +12,13 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <pystring.h>
 #include "../include/fileOperateUtil.hpp"
+
+#define ERROR_COLOR         "\x1b[1;31m"    // 红色
+#define HIGHTLIGHT_COLOR    "\033[1;35m"    // 品红
+#define WARNNING_COLOR      "\033[1;33m"    // 橙色
+#define STOP_COLOR          "\033[0m"       // 复原
 
 
 bool is_file(std::string filename) 
@@ -81,6 +87,132 @@ bool is_write_dir(std::string folder_path)
         return false;
     }
     return true;
+}
+
+bool is_head_match(std::string assign_str, std::string regex_str)
+{
+
+    if(regex_str.size() <= 1)
+    {
+        std::cout << ERROR_COLOR << "regex_str's length need great then 1 : " << regex_str << STOP_COLOR << std::endl;
+        throw "regex_str's length need great then 1 : " + regex_str;
+    }
+
+    int star_count = pystring::count(regex_str, "*");
+    int assign_str_length = assign_str.size();
+
+    if((star_count == 1) && (regex_str[0] == '*'))
+    {
+        int tail_str_count = regex_str.size() - 1;
+        std::string tail_str = regex_str.substr(1);
+
+        if(assign_str_length - tail_str_count < 0)
+        {
+            return false;
+        }
+
+        if(assign_str.substr(assign_str_length - tail_str_count, assign_str_length) == tail_str)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        std::cout << ERROR_COLOR << "need one * in regex_str's head : " << regex_str << STOP_COLOR << std::endl;
+        throw "need one * in regex_str : " + regex_str;
+    }
+}
+
+bool is_tail_match(std::string assign_str, std::string regex_str)
+{
+    if(regex_str.size() <= 1)
+    {
+        std::cout << ERROR_COLOR << "regex_str's length need great then 1 : " << regex_str << STOP_COLOR << std::endl;
+        throw "regex_str's length need great then 1 : " + regex_str;
+    }
+
+    int star_count = pystring::count(regex_str, "*");
+    int assign_str_length = assign_str.size();
+
+    if((star_count == 1) && (regex_str[regex_str.size()-1] == '*'))
+    {
+        // 对比星号之外的几个字符
+        int head_str_count = regex_str.size() - 1;
+        std::string head_str = regex_str.substr(0, head_str_count);
+        
+        if(head_str_count > assign_str_length)
+        {
+            return false;
+        }
+
+        if(assign_str.substr(0, head_str_count) == head_str)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        std::cout << ERROR_COLOR << "need one * in regex_str's tail : " << regex_str << STOP_COLOR << std::endl;
+        throw "need one * in regex_str : " + regex_str;
+    }
+}
+
+bool is_match(std::string assign_str, std::string regex_str)
+{
+    // 目前只支持一个星号的匹配
+    // 只支持星号的匹配
+    // 三种情况，当星号在字符串最前面，在中间，在最后面
+
+
+    if(regex_str.size() <= 1)
+    {
+        std::cout << ERROR_COLOR << "regex_str's length need great then 1 : " << regex_str << STOP_COLOR << std::endl;
+        throw "regex_str's length need great then 1 : " + regex_str;
+    }
+
+    int star_count = pystring::count(regex_str, "*");
+    int assign_str_length = assign_str.size();
+
+    if(star_count == 1)
+    {
+        if(regex_str[0] == '*')
+        {
+            return is_head_match(assign_str, regex_str);
+        }
+        else if(regex_str[regex_str.size()-1] == '*')
+        {
+            return is_tail_match(assign_str, regex_str);
+        }
+        else
+        {
+            // 在中间的话，拆成两部分，前一部分符合 * 在尾部的规则，后一部分符合 * 在头部的规则，两部分都符合才算符合
+            int star_index = pystring::index(regex_str, "*");
+            std::string tail_regex = regex_str.substr(0, star_index + 1);
+            std::string head_regex = regex_str.substr(star_index, assign_str_length);
+
+            if(is_head_match(assign_str, head_regex) && is_tail_match(assign_str, tail_regex))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+    else
+    {
+        std::cout << ERROR_COLOR << "need one * in regex_str : " << regex_str << ", " << star_count << STOP_COLOR << std::endl;
+        throw "need one * in regex_str : " + regex_str;
+    }
 }
 
 std::string get_file_folder(std::string file_path)

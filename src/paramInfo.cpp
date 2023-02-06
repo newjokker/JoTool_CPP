@@ -929,8 +929,10 @@ void UcdParamOpt::load_param_info()
     param_filter_by_tags->group = "filter";
     param_filter_by_tags->grammar = "ucd filter_by_tags ucd_path save_path tag1 tag2 ...";
     param_filter_by_tags->english_explain = "";
-    param_filter_by_tags->chinese_explain = "数据集中只保留指定标签";   
+    param_filter_by_tags->chinese_explain = "数据集中只保留指定标签（支持通配符 * 匹配）";   
     param_filter_by_tags->demo.push_back("ucd filter_by_tags aqm.json res.json aqm cbd person                   (将 aqm.json 只保留 aqm cbd person 三个标签)");
+    param_filter_by_tags->demo.push_back("ucd filter_by_tags aqm.json res.json aqm*                             (将 aqm.json 只保留 aqm 开头的所有标签)");
+    param_filter_by_tags->demo.push_back("ucd filter_by_tags aqm.json res.json aqm*ll                           (将 aqm.json 只保留 aqm 开头ll结尾的所有标签)");
     UcdParamOpt::add_param(param_filter_by_tags);
 
     // filter_volume_by_tags
@@ -948,7 +950,8 @@ void UcdParamOpt::load_param_info()
     param_drop_tags->grammar = "ucd drop_tags ucd_path save_path tag1 tag2 ...";
     param_drop_tags->english_explain = "";
     param_drop_tags->chinese_explain = "数据集中删除指定标签";   
-    param_drop_tags->demo.push_back("ucd drop_tags aqm.json res.json aqm cbd person                   (将 aqm.json 删除 aqm cbd person 三个标签)");
+    param_drop_tags->demo.push_back("ucd drop_tags aqm.json res.json aqm cbd person                     (将 aqm.json 删除 aqm cbd person 三个标签)");
+    param_drop_tags->demo.push_back("ucd drop_tags aqm.json res.json aqm*                               (将 aqm.json 删除 aqm 开头的所有标签)");
     UcdParamOpt::add_param(param_drop_tags);
 
     // zen
