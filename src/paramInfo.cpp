@@ -865,10 +865,10 @@ void UcdParamOpt::load_param_info()
     // devide
     ParamInfo * param_devide = new ParamInfo("devide");
     param_devide->group = "opt";
-    param_devide->grammar = "ucd devide ucd_path save_path devide_count";
+    param_devide->grammar = "ucd devide ucd_path save_dir save_name devide_count";
     param_devide->english_explain = "";
     param_devide->chinese_explain = "将 ucd 随机平均地划分为指定的份数";   
-    param_devide->demo.push_back("ucd devide test.json devide.json 5                            (将 test.json 随机划分为五份, 保存路径形式 devide_1.json, devide_2.json ... )");
+    param_devide->demo.push_back("ucd devide test.json ./ devide 5                            (将 test.json 随机划分为五份, 保存路径形式 devide_1.json, devide_2.json ... )");
     UcdParamOpt::add_param(param_devide);
 
     // uc_info

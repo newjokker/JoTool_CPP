@@ -119,11 +119,6 @@ using namespace std;
 
 // FIXME: devide 函数的 输入逻辑改一下，改成需要的样式，输入保存文件夹，输入保存的名字，不要文件夹加名字 这样不容易理解
 
-// FIXME: 应该用 gt 匹配 dete, 而不是反过来
-
-// FIXME: filter_by_tag 可以使用通配符号，这样会方便的多
-
-// TODO: 增加通配符匹配，更加方便 filter_by_tags | drop_tags | ucd get tags 增加通配符选项 | 
 
 
 int main(int argc, char ** argv)
@@ -191,7 +186,7 @@ int main(int argc, char ** argv)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.6.1";
+    std::string app_version = "v2.6.2";
 
     // uci_info
     int volume_size         = 20;
@@ -2291,11 +2286,13 @@ int main(int argc, char ** argv)
     }
     else if(command_1 == "devide")
     {
-        if(argc == 5)
+        if(argc == 6)
         {
-            std::string ucd_path = argv[2];
-            std::string save_path = argv[3];
-            int devide_count = std::stoi(argv[4]);
+            std::string ucd_path    = argv[2];
+            std::string save_dir    = argv[3];
+            std::string save_name   = argv[4];
+            int devide_count = std::stoi(argv[5]);
+            std::string save_path = pystring::strip(save_dir, "/") + "/" + save_name + ".json";
             UCDataset* ucd = new UCDataset(ucd_path);
             ucd->parse_ucd(true);
             ucd->devide(save_path, devide_count);
