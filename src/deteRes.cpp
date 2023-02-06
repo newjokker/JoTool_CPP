@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include "../include/deteRes.hpp"
 #include "../include/tinyxml2.h"
+#include "../include/pystring.h"
 #include "../include/fileOperateUtil.hpp"
 
 
@@ -750,7 +751,29 @@ void DeteRes::draw_dete_res(std::string save_path, std::map<std::string, Color> 
 
         DeteObj dete_obj = DeteRes::alarms[i];
 
-        if(color_map.count(dete_obj.tag) == 0)
+        if(color_map.count(dete_obj.tag) > 0)
+        {
+            Color each_color = color_map[dete_obj.tag];
+            color = {each_color.b, each_color.g, each_color.r};
+        }
+        // 标签以 correct_, mistake_, miss_, extra_ 开头，当color.txt 未指定时，会给指定的颜色
+        else if(pystring::startswith(dete_obj.tag, "correct_"))
+        {
+            color = {0, 255, 0};
+        }
+        else if(pystring::startswith(dete_obj.tag, "mistake_"))
+        {
+            color = {0, 0, 255};
+        }
+        else if(pystring::startswith(dete_obj.tag, "miss_"))
+        {
+            color = {0, 255, 255};
+        }
+        else if(pystring::startswith(dete_obj.tag, "extra_"))
+        {
+            color = {255, 0, 255};
+        }
+        else
         {
             // 默认颜色
             if(color_map.count("default") == 0)
@@ -764,11 +787,6 @@ void DeteRes::draw_dete_res(std::string save_path, std::map<std::string, Color> 
                 Color each_color = color_map["default"];
                 color = {each_color.b, each_color.g, each_color.r};
             }
-        }
-        else
-        {
-            Color each_color = color_map[dete_obj.tag];
-            color = {each_color.b, each_color.g, each_color.r};
         }
         // 
         std::string tag_conf = dete_obj.tag + ":" + std::to_string(int(dete_obj.conf * 100)) + "%";

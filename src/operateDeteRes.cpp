@@ -516,8 +516,6 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
             continue;
         }
 
-        std::cout << "存在未匹配 gt" << std::endl;
-
         DeteObj max_iou_obj;
         float max_iou           = -1;
         int max_iou_index       = -1;
@@ -540,7 +538,6 @@ std::map<std::string, std::map<std::string, int> > DeteAcc::compare_customer_and
         }
 
         // 决定是否匹配
-        std::cout << "iou : " << max_iou << std::endl;
         if(max_iou > DeteAcc::iou)
         {
             has_obj_map_gt[i] = true;

@@ -99,8 +99,6 @@ using namespace std;
 
 // 有些图片截取小图之后是反色的，为什么会这样，是因为原图的问题吗？Dxm00d0
 
-// joUtil 里面 cut_small_img 好像是有问题的 Dxg0e5r Dxh0iku
-
 // TODO: 增加计算 AP 的放方法
 
 // drop_extra_info, 以 uc_list 为基准，uc_list 中没有的元素 object_info 和 size_info 中有的话 删除
@@ -113,11 +111,7 @@ using namespace std;
 
 // FIXME: uc_list 改为 uc_set 比较好，现在的方式去重非常不方便
 
-
-
-// TODO: 对所有的检测框进行缩放处理，的函数支持一下，augment
-
-// FIXME: devide 函数的 输入逻辑改一下，改成需要的样式，输入保存文件夹，输入保存的名字，不要文件夹加名字 这样不容易理解
+// TODO: 画图时，当一个标签没有指定的情况下，要是是以 correct 靠头就给 绿色 mistake 就是 红色，extra 就是黄色，miss 就是橙色 这样来分
 
 
 
@@ -186,7 +180,7 @@ int main(int argc, char ** argv)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.6.2";
+    std::string app_version = "v2.6.4";
 
     // uci_info
     int volume_size         = 20;

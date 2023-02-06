@@ -977,7 +977,7 @@ void UcdParamOpt::load_param_info()
     param_draw->group = "opt";
     param_draw->grammar = "ucd draw ucd_path save_dir {uc} {uc} {uc} ...";
     param_draw->english_explain = "";
-    param_draw->chinese_explain = "将 uc 中的 obj 画出来，可以在配置文件中指定各个标签的颜色";   
+    param_draw->chinese_explain = "将 uc 中的 obj 画出来，可以在配置文件中指定各个标签的颜色，标签以 correct_, mistake_, miss_, extra_ 开头 当color.txt 未指定标签颜色时，会给指定的颜色";   
     param_draw->demo.push_back("ucd draw test.json ./draw                                       (将 test.json 中的所有 uc 中的 obj 画出并保存在 ./draw 文件夹下)");
     param_draw->demo.push_back("ucd draw test.json ./draw  Dem1iwe Dem1iwk Dem1iwy              (将 test.json 中的 Dem1iwe Dem1iwk Dem1iwy 三个 uc 画出并保存在 ./draw 文件夹下)");
     UcdParamOpt::add_param(param_draw);
