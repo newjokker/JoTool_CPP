@@ -18,6 +18,8 @@ class ParamInfo
         std::string chinese_explain;
         // 语法
         std::string grammar;
+        // 长短参数的用法
+        std::map<std::string, std::string> args_info;
         // 另外说明，注意点
         std::string describe;
         // 所属分区，比如 converse, filter, help, for_train, 

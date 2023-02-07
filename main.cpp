@@ -24,6 +24,7 @@
 #include "include/tqdm.h"
 #include <regex>
 #include "include/the_book_of_change.hpp"
+#include "include/parseArgs.hpp"
 
 using json = nlohmann::json;
 using namespace jotools;
@@ -113,14 +114,27 @@ using namespace std;
 
 // TODO: 画图时，当一个标签没有指定的情况下，要是是以 correct 靠头就给 绿色 mistake 就是 红色，extra 就是黄色，miss 就是橙色 这样来分
 
+// TODO: map 最后的结果画图出来，可以画简单点的图，找 C++ 或者 opencv 的画图软件
+
+// TODO: 增加 -m  --path 等长短参数的解析, 短参数后面不带参数，长的后面带参数
+
+// TODO: 
 
 
-int main(int argc, char ** argv)
+int main(int argc, char ** argv_old)
 {
     // param
     UcdParamOpt *ucd_param_opt = new UcdParamOpt();
     ucd_param_opt->load_param_info();
 
+    // 自定义的方法解析参数
+    std::vector<std::string> argv;
+    std::set<std::string> short_args;
+    std::map< std::string, std::string > long_args;
+    bool status = parse_args(argc, argv_old, argv, short_args, long_args);
+    argc = argv.size();
+
+    // 
     if ((argc < 2))
     {
         // std::cout << "need parameter number >= 1 get : " << argc-1 << std::endl;
@@ -180,7 +194,7 @@ int main(int argc, char ** argv)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.6.4";
+    std::string app_version = "v2.7.1";
 
     // uci_info
     int volume_size         = 20;
@@ -1406,7 +1420,17 @@ int main(int argc, char ** argv)
             ucd_b->parse_ucd(true);
 
             jotools::DeteAcc* acc = new DeteAcc();
-            acc->iou = 0.5;
+
+            if(long_args.count("iou") > 0)
+            {
+                float iou = std::stof(long_args["iou"]);
+                acc->iou = iou;
+            }
+            else
+            {
+                acc->iou = 0.5;
+            }
+
             acc->cal_acc_rec(ucd_a, ucd_b, ucd_save_res);
             delete acc;
             delete ucd_a;
@@ -2632,16 +2656,28 @@ int main(int argc, char ** argv)
     else if(command_1 == "test")
     {
 
-        std::string assign_str  = argv[2];
-        std::string regex_str   = argv[3];
 
-        if(is_match(assign_str, regex_str))
+        for(int i=0; i<argc; i++)
         {
-            std::cout  << "match : " << assign_str << " - " << regex_str << std::endl;
+            std::cout << argv[i] << std::endl;
         }
-        else
+
+        std::cout << "--------------------------------" << std::endl;
+
+        auto iter_set = short_args.begin();
+        while(iter_set != short_args.end())
         {
-            std::cout << ERROR_COLOR << "not match : " << assign_str << " - " << regex_str << STOP_COLOR << std::endl;
+            std::cout << iter_set->data() << std::endl;
+            iter_set++;
+        }
+
+        std::cout << "--------------------------------" << std::endl;
+
+        auto iter_map = long_args.begin();
+        while(iter_map != long_args.end())
+        {
+            std::cout << iter_map->first << " : " << iter_map->second << std::endl;
+            iter_map++;
         }
     }
     else if(command_1 == "grammar")

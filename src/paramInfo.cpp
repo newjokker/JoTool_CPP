@@ -66,7 +66,14 @@ void ParamInfo::print_info()
 {
     std::cout << HIGHTLIGHT_COLOR << ParamInfo::command << STOP_COLOR << std::endl;
     std::cout << WARNNING_COLOR << "   " << ParamInfo::grammar << STOP_COLOR << std::endl;
-    // std::cout << "   " << ParamInfo::english_explain << std::endl;
+
+    auto iter = ParamInfo::args_info.begin();
+    while (iter != ParamInfo::args_info.end())
+    {
+        std::cout << WARNNING_COLOR << "     " << std::setw(10) << std::left << iter->first << iter->second << STOP_COLOR << std::endl; 
+        iter++; 
+    }
+    
     std::cout << "   " << ParamInfo::chinese_explain << std::endl;
 
     if(ParamInfo::demo.size() != 0)
@@ -655,6 +662,7 @@ void UcdParamOpt::load_param_info()
     ParamInfo * param_acc = new ParamInfo("acc");
     param_acc->group = "analysis";
     param_acc->grammar = "ucd acc ucd_customer, ucd_standard {compare_res_ucd_path}";
+    param_acc->args_info["--iou"] = "指定计算 acc 使用的 iou";
     param_acc->english_explain = "get acc rec from two ucd";
     param_acc->chinese_explain = "两个 ucd 之间计算精准率和召回率, ucd_customer 自定义检测结果, ucd_standard: 标准检测结果";   
     param_acc->demo.push_back("ucd acc test1.json test2.json                               (将 test1.json 与 test2.json 计算召回率和准确率打印出来)");
@@ -1075,7 +1083,7 @@ void UcdParamOpt::load_param_info()
     
     // grammar
     ParamInfo * param_grammar = new ParamInfo("grammar");
-    param_grammar->group = "opt";
+    param_grammar->group = "info";
     param_grammar->grammar = "ucd grammar";
     param_grammar->chinese_explain = "输出所有关键字的语法";   
     UcdParamOpt::add_param(param_grammar);
