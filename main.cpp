@@ -116,9 +116,12 @@ using namespace std;
 
 // TODO: map 最后的结果画图出来，可以画简单点的图，找 C++ 或者 opencv 的画图软件
 
-// TODO: 增加 -m  --path 等长短参数的解析, 短参数后面不带参数，长的后面带参数
+// TODO: map 计算结果有问题
 
-// TODO: 
+// TODO: 多个模型和 gt 进行对比，可以把多条曲线画在一个画纸上，
+
+// TODO: 指定默认使用的 python 环境，这样 c++ 直接调用 Python 做一些操作
+
 
 
 int main(int argc, char ** argv_old)
@@ -135,48 +138,6 @@ int main(int argc, char ** argv_old)
     argc = argv.size();
 
     // 
-    if ((argc < 2))
-    {
-        // std::cout << "need parameter number >= 1 get : " << argc-1 << std::endl;
-        // refer : https://patorjk.com/software/taag/#p=display&f=Graffiti&t=Type%20Something%20
-
-        std::cout << "\x1b[1;35m" ;
-        std::cout <<"            _____                      _____                      _____          "<< std::endl;
-        std::cout <<"           /\\    \\                    /\\    \\                    /\\    \\         "<< std::endl;
-        std::cout <<"          /::\\____\\                  /::\\    \\                  /::\\    \\        "<< std::endl;
-        std::cout <<"         /:::/    /                 /::::\\    \\                /::::\\    \\       "<< std::endl;
-        std::cout <<"        /:::/    /                 /::::::\\    \\              /::::::\\    \\      "<< std::endl;
-        std::cout <<"       /:::/    /                 /:::/\\:::\\    \\            /:::/\\:::\\    \\     "<< std::endl;
-        std::cout <<"      /:::/    /                 /:::/  \\:::\\    \\          /:::/  \\:::\\    \\    "<< std::endl;
-        std::cout <<"     /:::/    /                 /:::/    \\:::\\    \\        /:::/    \\:::\\    \\   "<< std::endl;
-        std::cout <<"    /:::/    /      _____      /:::/    / \\:::\\    \\      /:::/    / \\:::\\    \\  "<< std::endl;
-        std::cout <<"   /:::/____/      /\\    \\    /:::/    /   \\:::\\    \\    /:::/    /   \\:::\\ ___\\ "<< std::endl;
-        std::cout <<"  |:::|    /      /::\\____\\  /:::/____/     \\:::\\____\\  /:::/____/     \\:::|    |"<< std::endl;
-        std::cout <<"  |:::|____\\     /:::/    /  \\:::\\    \\      \\::/    /  \\:::\\    \\     /:::|____|"<< std::endl;
-        std::cout <<"   \\:::\\    \\   /:::/    /    \\:::\\    \\      \\/____/    \\:::\\    \\   /:::/    / "<< std::endl;
-        std::cout <<"    \\:::\\    \\ /:::/    /      \\:::\\    \\                 \\:::\\    \\ /:::/    /  "<< std::endl;
-        std::cout <<"     \\:::\\    /:::/    /        \\:::\\    \\                 \\:::\\    /:::/    /   "<< std::endl;
-        std::cout <<"      \\:::\\__/:::/    /          \\:::\\    \\                 \\:::\\  /:::/    /    "<< std::endl;
-        std::cout <<"       \\::::::::/    /            \\:::\\    \\                 \\:::\\/:::/    /     "<< std::endl;
-        std::cout <<"        \\::::::/    /              \\:::\\    \\                 \\::::::/    /      "<< std::endl;
-        std::cout <<"         \\::::/    /                \\:::\\____\\                 \\::::/    /       "<< std::endl;
-        std::cout <<"          \\::/____/                  \\::/    /                  \\::/____/        "<< std::endl;
-        std::cout <<"           ~~                         \\/____/                    ~~              "<< std::endl;
-        std::cout << "\033[0m" << std::endl;
-        std::cout << "" << std::endl;
-
-        std::cout << WARNNING_COLOR << "Welcome to UCD!" << STOP_COLOR << std::endl;
-        std::cout << " " << std::endl;
-        std::cout <<"   * use " << HIGHTLIGHT_COLOR << "ucd help "   << STOP_COLOR << "get ucd function : chinese explain" << std::endl;
-        std::cout << "" << std::endl;
-        std::cout <<"   * use " << HIGHTLIGHT_COLOR << "ucd grammar "  << STOP_COLOR << "get ucd function : grammar" << std::endl;
-        std::cout << " " << std::endl;
-        std::cout <<"   * use " << HIGHTLIGHT_COLOR << "ucd help help "  << STOP_COLOR << "get the way to use help" << std::endl;
-        std::cout << " " << std::endl;
-        std::cout <<"   * use " << HIGHTLIGHT_COLOR << "ucd set cache_dir {cache_dir} "  << STOP_COLOR << "set cache_dir" << std::endl;
-        std::cout << " " << std::endl;
-        return -1;
-    }
 
     // server
     std::string host        = "192.168.3.111";
@@ -194,7 +155,7 @@ int main(int argc, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.7.1";
+    std::string app_version = "v2.7.2";
 
     // uci_info
     int volume_size         = 20;
@@ -253,9 +214,130 @@ int main(int argc, char ** argv_old)
         xini_write.dump(config_path);   
     }
     
+    // ucd | ucd -v | ucd -V 
+    if ((argc < 2) && (short_args.count("v")==0) && (short_args.count("V")==0))
+    {
+        // std::cout << "need parameter number >= 1 get : " << argc-1 << std::endl;
+        // refer : https://patorjk.com/software/taag/#p=display&f=Graffiti&t=Type%20Something%20
+
+        std::cout << "\x1b[1;35m" ;
+        std::cout <<"            _____                      _____                      _____          "<< std::endl;
+        std::cout <<"           /\\    \\                    /\\    \\                    /\\    \\         "<< std::endl;
+        std::cout <<"          /::\\____\\                  /::\\    \\                  /::\\    \\        "<< std::endl;
+        std::cout <<"         /:::/    /                 /::::\\    \\                /::::\\    \\       "<< std::endl;
+        std::cout <<"        /:::/    /                 /::::::\\    \\              /::::::\\    \\      "<< std::endl;
+        std::cout <<"       /:::/    /                 /:::/\\:::\\    \\            /:::/\\:::\\    \\     "<< std::endl;
+        std::cout <<"      /:::/    /                 /:::/  \\:::\\    \\          /:::/  \\:::\\    \\    "<< std::endl;
+        std::cout <<"     /:::/    /                 /:::/    \\:::\\    \\        /:::/    \\:::\\    \\   "<< std::endl;
+        std::cout <<"    /:::/    /      _____      /:::/    / \\:::\\    \\      /:::/    / \\:::\\    \\  "<< std::endl;
+        std::cout <<"   /:::/____/      /\\    \\    /:::/    /   \\:::\\    \\    /:::/    /   \\:::\\ ___\\ "<< std::endl;
+        std::cout <<"  |:::|    /      /::\\____\\  /:::/____/     \\:::\\____\\  /:::/____/     \\:::|    |"<< std::endl;
+        std::cout <<"  |:::|____\\     /:::/    /  \\:::\\    \\      \\::/    /  \\:::\\    \\     /:::|____|"<< std::endl;
+        std::cout <<"   \\:::\\    \\   /:::/    /    \\:::\\    \\      \\/____/    \\:::\\    \\   /:::/    / "<< std::endl;
+        std::cout <<"    \\:::\\    \\ /:::/    /      \\:::\\    \\                 \\:::\\    \\ /:::/    /  "<< std::endl;
+        std::cout <<"     \\:::\\    /:::/    /        \\:::\\    \\                 \\:::\\    /:::/    /   "<< std::endl;
+        std::cout <<"      \\:::\\__/:::/    /          \\:::\\    \\                 \\:::\\  /:::/    /    "<< std::endl;
+        std::cout <<"       \\::::::::/    /            \\:::\\    \\                 \\:::\\/:::/    /     "<< std::endl;
+        std::cout <<"        \\::::::/    /              \\:::\\    \\                 \\::::::/    /      "<< std::endl;
+        std::cout <<"         \\::::/    /                \\:::\\____\\                 \\::::/    /       "<< std::endl;
+        std::cout <<"          \\::/____/                  \\::/    /                  \\::/____/        "<< std::endl;
+        std::cout <<"           ~~                         \\/____/                    ~~              "<< std::endl;
+        std::cout << "\033[0m" << std::endl;
+        std::cout << "" << std::endl;
+
+        std::cout << WARNNING_COLOR << "Welcome to UCD!" << STOP_COLOR << std::endl;
+        std::cout << " " << std::endl;
+        std::cout <<"   * use " << HIGHTLIGHT_COLOR << "ucd help "   << STOP_COLOR << "get ucd function : chinese explain" << std::endl;
+        std::cout << "" << std::endl;
+        std::cout <<"   * use " << HIGHTLIGHT_COLOR << "ucd grammar "  << STOP_COLOR << "get ucd function : grammar" << std::endl;
+        std::cout << " " << std::endl;
+        std::cout <<"   * use " << HIGHTLIGHT_COLOR << "ucd help help "  << STOP_COLOR << "get the way to use help" << std::endl;
+        std::cout << " " << std::endl;
+        std::cout <<"   * use " << HIGHTLIGHT_COLOR << "ucd set cache_dir {cache_dir} "  << STOP_COLOR << "set cache_dir" << std::endl;
+        std::cout << " " << std::endl;
+        return -1;
+    }
+    else if((short_args.count("v")>0) || (short_args.count("V")>0))
+    {
+        std::cout << "-----------------------------------" << std::endl;
+        std::cout << "            " << app_version << std::endl;
+        std::cout << "-----------------------------------" << std::endl;
+        if(! is_read_dir(app_dir))
+        {
+            std::cout << "app dir is not readable : " << app_dir << std::endl;
+            return -1;
+        }
+
+        std::vector<std::string> app_path_list = get_all_file_path(app_dir);
+        std::vector<int> app_version_list;
+        std::map< int, std::string > app_version_map;
+
+        for(int i=0; i<app_path_list.size(); i++)
+        {
+            std::string app_name = get_file_name_suffix(app_path_list[i]);
+            if(! pystring::startswith(app_name, "ucd_v"))
+            {
+                continue;
+            }
+
+            // get verrsion int
+            int version_int = 0;
+            std::string app_version_str = app_name.substr(5);
+            std::vector<std::string> app_name_list = pystring::split(app_version_str, ".");
+            if(app_name_list.size() != 3)
+            {
+                continue;
+            }
+            else
+            {
+                int version_1 =  std::stoi(app_name_list[0]) * 1000000;
+                int version_2 =  std::stoi(app_name_list[1]) * 1000;
+                int version_3 =  std::stoi(app_name_list[2]);
+                version_int = version_1 + version_2 + version_3;
+
+                if(pystring::endswith(app_name, app_version))
+                {
+                    app_version_map[version_int] = "* " + app_path_list[i];
+                }
+                else
+                {
+                    app_version_map[version_int] = "  " + app_path_list[i];
+                }
+                app_version_list.push_back(version_int);
+            }
+        }
+
+        // sort by version
+        std::sort(app_version_list.begin(), app_version_list.end());
+
+        // print version info
+        for(int i=0; i<app_version_list.size(); i++)
+        {
+            if(app_version_map[app_version_list[i]][0] == '*')
+            {
+                std::cout << HIGHTLIGHT_COLOR << app_version_map[app_version_list[i]] << STOP_COLOR << std::endl;
+            }
+            else
+            {
+                std::cout << app_version_map[app_version_list[i]] << std::endl;
+            }
+        }
+        std::cout << "-----------------------------------" << std::endl;
+        return -1;
+    }
+
     // init ucd_util
-    UCDatasetUtil* ucd_util = new UCDatasetUtil(host ,port, cache_dir);
-    std::string command_1 = argv[1];
+    UCDatasetUtil* ucd_util = new UCDatasetUtil(host, port, cache_dir);
+    std::string command_1;
+    if(argc >= 2)
+    {
+        command_1 = argv[1];
+    }
+    else
+    {
+        std::cout << ERROR_COLOR << "not enough parameter" << STOP_COLOR << std::endl;
+        return -1;
+    }
 
     // must set ucd_cache 
     if((! is_dir(cache_dir)) && (command_1 != "set") && (command_1 != "help")) 
@@ -553,6 +635,12 @@ int main(int argc, char ** argv_old)
             else
             {
                 std::cout << ERROR_COLOR << "illegal uci path : " << ucd_path << STOP_COLOR << std::endl;
+            }
+
+            // 打印标签信息 
+            if(short_args.count("a") > 0)
+            {
+                ucd_util->count_ucd_tags(ucd_path);
             }
             delete ucd;
         }
@@ -902,75 +990,6 @@ int main(int argc, char ** argv_old)
             ucd_param_opt->print_command_info("meta");
             return -1;
         }
-    }
-    else if(command_1 == "--version" || command_1 == "-V" || command_1 == "-v" || command_1 == "-version")
-    {
-        std::cout << "-----------------------------------" << std::endl;
-        std::cout << "            " << app_version << std::endl;
-        std::cout << "-----------------------------------" << std::endl;
-        if(! is_read_dir(app_dir))
-        {
-            std::cout << "app dir is not readable : " << app_dir << std::endl;
-            return -1;
-        }
-
-        std::vector<std::string> app_path_list = get_all_file_path(app_dir);
-        std::vector<int> app_version_list;
-        std::map< int, std::string > app_version_map;
-
-        for(int i=0; i<app_path_list.size(); i++)
-        {
-            std::string app_name = get_file_name_suffix(app_path_list[i]);
-            if(! pystring::startswith(app_name, "ucd_v"))
-            {
-                continue;
-            }
-
-            // get verrsion int
-            int version_int = 0;
-            std::string app_version_str = app_name.substr(5);
-            std::vector<std::string> app_name_list = pystring::split(app_version_str, ".");
-            if(app_name_list.size() != 3)
-            {
-                continue;
-            }
-            else
-            {
-                int version_1 =  std::stoi(app_name_list[0]) * 1000000;
-                int version_2 =  std::stoi(app_name_list[1]) * 1000;
-                int version_3 =  std::stoi(app_name_list[2]);
-                version_int = version_1 + version_2 + version_3;
-
-                if(pystring::endswith(app_name, app_version))
-                {
-                    app_version_map[version_int] = "* " + app_path_list[i];
-                }
-                else
-                {
-                    app_version_map[version_int] = "  " + app_path_list[i];
-                }
-                app_version_list.push_back(version_int);
-            }
-        }
-
-        // sort by version
-        std::sort(app_version_list.begin(), app_version_list.end());
-
-        // print version info
-        for(int i=0; i<app_version_list.size(); i++)
-        {
-            if(app_version_map[app_version_list[i]][0] == '*')
-            {
-                std::cout << HIGHTLIGHT_COLOR << app_version_map[app_version_list[i]] << STOP_COLOR << std::endl;
-            }
-            else
-            {
-                std::cout << app_version_map[app_version_list[i]] << std::endl;
-            }
-        }
-
-        std::cout << "-----------------------------------" << std::endl;
-        return -1;
     }
     else if(command_1 == "set")
     {
@@ -1385,14 +1404,6 @@ int main(int argc, char ** argv_old)
     }
     else if(command_1 == "acc")
     {
-
-        // 统计那一部分需要修改，mistake a->b 的错误全部统计出来
-        // ucd_param_opt->not_ready(command_1);
-        // return -1;
-
-
-        // 处理 gt 中没有对应的 uc，dete_res 中有对应的 uc 的情况
-
         if(argc == 5 || argc == 4)
         {
             std::string ucd_customer = argv[2];
@@ -1446,12 +1457,22 @@ int main(int argc, char ** argv_old)
 
         std::cout << WARNNING_COLOR << "结果存在问题，仅供参考" << STOP_COLOR << std::endl;
 
-        if(argc == 4)
+        if((argc == 4) || (argc == 5))
         {
             std::string ucd_customer = argv[2];
             std::string ucd_standard = argv[3];
             jotools::DeteAcc* acc = new DeteAcc();
-            acc->iou = 0.5;
+
+            // assign iou
+            if(long_args.count("iou") > 0)
+            {
+                float iou = std::stof(long_args["iou"]);
+                acc->iou = iou;
+            }
+            else
+            {
+                acc->iou = 0.5;
+            }
 
             if(! (is_file(ucd_customer) && is_file(ucd_standard)))
             {
@@ -1464,7 +1485,16 @@ int main(int argc, char ** argv_old)
             ucd_a->parse_ucd(true);
             ucd_b->parse_ucd(true);
 
-            acc->cal_map(ucd_a, ucd_b);
+            if(argc == 5)
+            {
+                std::string save_path = argv[4];
+                acc->cal_map(ucd_a, ucd_b, save_path);
+            }
+            else
+            {
+                acc->cal_map(ucd_a, ucd_b);
+            }
+
             delete ucd_a;
             delete ucd_b;
             delete acc;

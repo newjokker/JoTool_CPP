@@ -464,6 +464,7 @@ void UcdParamOpt::load_param_info()
     // info
     ParamInfo * param_info = new ParamInfo("info");
     param_info->group = "info";
+    param_info->args_info["-a"] = "会增加打印 count_tags 输出的信息";
     param_info->grammar = "ucd info ucd_path | uci_path";
     param_info->english_explain = "show ucd info";
     param_info->chinese_explain = "查看数据集信息 (dataset_name, uc_count, model_name, model_version, add_time, update_time, describe, label_used, img_size_count)";   
@@ -662,7 +663,7 @@ void UcdParamOpt::load_param_info()
     ParamInfo * param_acc = new ParamInfo("acc");
     param_acc->group = "analysis";
     param_acc->grammar = "ucd acc ucd_customer, ucd_standard {compare_res_ucd_path}";
-    param_acc->args_info["--iou"] = "指定计算 acc 使用的 iou";
+    param_acc->args_info["--iou"] = "指定计算 acc 使用的 iou, 默认值为 0.5";
     param_acc->english_explain = "get acc rec from two ucd";
     param_acc->chinese_explain = "两个 ucd 之间计算精准率和召回率, ucd_customer 自定义检测结果, ucd_standard: 标准检测结果";   
     param_acc->demo.push_back("ucd acc test1.json test2.json                               (将 test1.json 与 test2.json 计算召回率和准确率打印出来)");
@@ -675,9 +676,11 @@ void UcdParamOpt::load_param_info()
     // map
     ParamInfo * param_map = new ParamInfo("map");
     param_map->group = "analysis";
-    param_map->grammar = "ucd map ucd_customer, ucd_standard";
-    param_map->chinese_explain = "以后一个 ucd 为标准结果计算 map";   
+    param_map->grammar = "ucd map ucd_customer ucd_standard {save_path}";
+    param_map->args_info["--iou"] = "指定计算 map 使用的 iou, 默认值为 0.5";
+    param_map->chinese_explain = "以后一个 ucd 为标准结果计算 map, 可以保存检测结果为 TXT 使用 python 画图";   
     param_map->demo.push_back("ucd map test1.json test2.json                               (以 test2.json 为标准结果计算 test1.json 的 map");
+    param_map->demo.push_back("ucd map test1.json test2.json  chart.txt                    (以 test2.json 为标准结果计算 test1.json 的 map, 将信息保存到 chart.txt 中去");
     UcdParamOpt::add_param(param_map);
 
     // attr

@@ -57,7 +57,7 @@ namespace jotools
             std::map<std::string, std::vector<float> > cal_acc_rec(UCDataset* customer_ucd, UCDataset* standard_ucd, std::string save_ucd_path="", bool print=true);
 
             // 计算 MAP
-            void cal_map(UCDataset* customer_ucd, UCDataset* standard_ucd);
+            void cal_map(UCDataset* customer_ucd, UCDataset* standard_ucd, std::string save_path="");
 
 
     };

@@ -821,9 +821,11 @@ std::map<std::string, std::vector<float> > DeteAcc::cal_acc_rec(UCDataset* ucd_a
 
     if((all_correct_num + all_miss_num) > 0)
     {
-        // all_r = 100 * (all_correct_num * 1.0) / (all_correct_num + all_miss_num);
         all_r = 100 * (all_correct_num * 1.0) / (all_gt_num);
     } 
+
+    res["TOTAL"].push_back(all_p); 
+    res["TOTAL"].push_back(all_r); 
 
     if(print)
     {
@@ -834,8 +836,8 @@ std::map<std::string, std::vector<float> > DeteAcc::cal_acc_rec(UCDataset* ucd_a
         std::cout << "IOU : " << DeteAcc::iou << std::endl;
         std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
         std::cout << "" << std::endl;
-        std::cout << WARNNING_COLOR << "* 一横排全部统计为 0 是没有检测到也没有遗漏，是被误检了其他类型了，不是误检到当前类型，所以误检不统计" << STOP_COLOR << std::endl;
-        std::cout << WARNNING_COLOR << "* 这个函数还需要再测测，看看否有遗漏的问题" << STOP_COLOR << std::endl;
+        // std::cout << WARNNING_COLOR << "* 一横排全部统计为 0 是没有检测到也没有遗漏，是被误检了其他类型了，不是误检到当前类型，所以误检不统计" << STOP_COLOR << std::endl;
+        // std::cout << WARNNING_COLOR << "* 这个函数还需要再测测，看看否有遗漏的问题" << STOP_COLOR << std::endl;
     }
 
     compare_res_ucd->size_info = ucd_b->size_info;
@@ -862,7 +864,7 @@ static float vector_means(std::vector<float> res)
     return res_sum / res.size();
 }
 
-void DeteAcc::cal_map(UCDataset* ucd_a, UCDataset* ucd_b)
+void DeteAcc::cal_map(UCDataset* ucd_a, UCDataset* ucd_b, std::string save_path)
 {
     std::cout << "---------------------------------------------------------------------------------------------------------------" << std::endl;
     std::cout << std::setw(20) << std::left << "TAG         (P/R)";
@@ -873,7 +875,8 @@ void DeteAcc::cal_map(UCDataset* ucd_a, UCDataset* ucd_b)
     std::map< std::string, std::vector<float> > tag_ap_dict; 
     std::map< std::string, std::vector<float> > tag_ar_dict; 
 
-    for(int i=5; i<100; i+=10)
+    // start:stop:step, 5:100:10
+    for(int i=20; i<100; i+=10)
     {
         ucd_a->filter_by_conf(i * 0.01, false);
         std::map<std::string, std::vector<float> > each_res = DeteAcc::cal_acc_rec(ucd_a, ucd_b, "", false);
@@ -895,22 +898,45 @@ void DeteAcc::cal_map(UCDataset* ucd_a, UCDataset* ucd_b)
     {
         // float each_ap = vector_means(iter_ap->second);
         // percion
-        std::cout << std::setiosflags(std::ios::fixed) << std::setprecision(2);
-        std::cout << std::setw(20) << std::left << iter_ap->first;
-        for(int j=0; j<iter_ap->second.size(); j++)
+
+        if(iter_ap->first != "TOTAL")
         {
-            std::cout << std::setw(8) << std::left << iter_ap->second[j];
+            std::cout << std::setiosflags(std::ios::fixed) << std::setprecision(2);
+            std::cout << std::setw(20) << std::left << iter_ap->first;
+            for(int j=0; j<iter_ap->second.size(); j++)
+            {
+                std::cout << std::setw(8) << std::left << iter_ap->second[j];
+            }
+            std::cout << std::endl;
+            // recall
+            std::cout << std::setw(20) << std::left << " ";
+            for(int x=0; x<tag_ar_dict[iter_ap->first].size(); x++)
+            {
+                std::cout << std::setw(8) << std::left << tag_ar_dict[iter_ap->first][x];
+            }
+            std::cout << "wait_for_cal" << std::endl;
+            std::cout << "                    -------------------------------------------------------------------------------------------" << std::endl;
+        }
+        iter_ap++;
+    }
+
+    if(tag_ap_dict.count("TOTAL") > 0)
+    {
+
+        std::cout << std::setiosflags(std::ios::fixed) << std::setprecision(2);
+        std::cout << HIGHTLIGHT_COLOR << std::setw(20) << std::left << "TOTAL";
+        for(int j=0; j<tag_ap_dict["TOTAL"].size(); j++)
+        {
+            std::cout << HIGHTLIGHT_COLOR << std::setw(8) << std::left << tag_ap_dict["TOTAL"][j];
         }
         std::cout << std::endl;
         // recall
         std::cout << std::setw(20) << std::left << " ";
-        for(int x=0; x<tag_ar_dict[iter_ap->first].size(); x++)
+        for(int x=0; x<tag_ar_dict["TOTAL"].size(); x++)
         {
-            std::cout << std::setw(8) << std::left << tag_ar_dict[iter_ap->first][x];
+            std::cout << std::setw(8) << std::left << tag_ar_dict["TOTAL"][x];
         }
-        std::cout << "wait_for_cal" << std::endl;
-        std::cout << "                    -------------------------------------------------------------------------------------------" << std::endl;
-        iter_ap++;
+        std::cout << "wait_for_cal" << STOP_COLOR << std::endl;
     }
 
     std::cout << "---------------------------------------------------------------------------------------------------------------" << std::endl;
@@ -918,8 +944,38 @@ void DeteAcc::cal_map(UCDataset* ucd_a, UCDataset* ucd_b)
               << std::setw(10) << std::left << "IOU : " + std::to_string(DeteAcc::iou) << std::endl;
     std::cout << "---------------------------------------------------------------------------------------------------------------" << std::endl;
 
-    std::cout << WARNNING_COLOR << "wait for cal" << STOP_COLOR << std::endl;
+
+    // 将打印的数据输出到 TXT 中去
+    if(save_path != "")
+    {
+        std::ofstream OutFile(save_path); 
+        auto iter_ap = tag_ap_dict.begin();
+        while(iter_ap != tag_ap_dict.end())
+        {
+            OutFile << iter_ap->first << std::endl;
+
+            // p
+            OutFile << "p";
+            for(int j=0; j<iter_ap->second.size(); j++)
+            {
+                OutFile << ","<< iter_ap->second[j];
+            }
+            OutFile << std::endl;
+            
+            // r
+            OutFile << "r";
+            for(int x=0; x<tag_ar_dict[iter_ap->first].size(); x++)
+            {
+                OutFile << "," << tag_ar_dict[iter_ap->first][x];
+            }
+            OutFile << std::endl;
+        
+            iter_ap++;
+        }
+        OutFile.close();
+    }
 }
+
 
 
 }
