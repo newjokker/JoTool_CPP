@@ -84,6 +84,9 @@ class UCDataset
         // 指定 uc 中是否存在某个对象
         bool has_obj(std::string uc, LabelmeObj *obj);
         
+        // 查看 uc_list 中是否包含指定 uc
+        bool has_uc(std::string uc);
+
         void add_obj(std::string uc, LabelmeObj *obj);
 
         // 删除 obj, 选择是否删除指针

@@ -123,6 +123,10 @@ using namespace std;
 // TODO: 指定默认使用的 python 环境，这样 c++ 直接调用 Python 做一些操作
 
 
+// TODO: 通配符在不同的机器上会有问题
+
+// TODO: has_uc 可以一次性看多个 uc ，打印的时候打印 uc 以及不存在的 后面打印 false 即可。
+
 
 int main(int argc, char ** argv_old)
 {
@@ -155,7 +159,7 @@ int main(int argc, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.7.2";
+    std::string app_version = "v2.7.3";
 
     // uci_info
     int volume_size         = 20;
@@ -1810,6 +1814,7 @@ int main(int argc, char ** argv_old)
     {
         if(argc > 4)
         {
+            // std::cout << HIGHTLIGHT_COLOR << "使用通配符匹配的时候，某些机器会存在无法匹配的问题（特别是a 开头的 tag），使用完函数，最好手工核对一下" << STOP_COLOR << std::endl;
             std::string ucd_path = argv[2];
             std::string save_path = argv[3];
             std::set<std::string> tags;
@@ -2026,23 +2031,29 @@ int main(int argc, char ** argv_old)
     }
     else if(command_1 == "has_uc")
     {
-        if(argc == 4)
+        if(argc >= 4)
         {
             std::string ucd_path = argv[2];
-            std::string uc = argv[3];
-
             UCDataset* ucd = new UCDataset(ucd_path);
             ucd->parse_ucd();
 
-            for(int i=0; i<ucd->uc_list.size(); i++)
+            std::cout << "------------------" << std::endl;
+            std::cout << "   UC    : HAS UC " << std::endl;
+            std::cout << "------------------" << std::endl;
+
+            for(int i=3; i<argc; i++)
             {
-                if(ucd->uc_list[i] == uc)
+                std::string uc = argv[i];
+                if(ucd->has_uc(uc))
                 {
-                    std::cout << "True" << std::endl;
-                    return -1;
+                    std::cout << uc << "  :  " << "True" << std::endl;
+                }
+                else
+                {
+                    std::cout << ERROR_COLOR << uc << "  :  " << "False" << STOP_COLOR << std::endl;
                 }
             }
-            std::cout << "False" << std::endl;
+            std::cout << "------------------" << std::endl;
             return -1;
         }
         else

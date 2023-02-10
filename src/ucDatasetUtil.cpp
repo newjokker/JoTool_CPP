@@ -450,6 +450,23 @@ bool UCDataset::has_obj(std::string uc, LabelmeObj *obj)
     return false;
 }
 
+bool UCDataset::has_uc(std::string uc)
+{
+    if(! is_uc(uc))
+    {
+        return false;
+    }
+
+    for(int i=0; i<UCDataset::uc_list.size(); i++)
+    {
+        if(UCDataset::uc_list[i] == uc)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void UCDataset::delete_obj(std::string uc, LabelmeObj *obj, bool clear_obj)
 {
     for(int j=0; j<UCDataset::object_info[uc].size(); j++)

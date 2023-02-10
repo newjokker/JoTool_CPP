@@ -826,10 +826,10 @@ void UcdParamOpt::load_param_info()
     // has_uc
     ParamInfo * param_has_uc = new ParamInfo("has_uc");
     param_has_uc->group = "info";
-    param_has_uc->grammar = "ucd has_uc ucd_path assign_uc";
+    param_has_uc->grammar = "ucd has_uc ucd_path assign_uc_1 assign_uc_2";
     param_has_uc->english_explain = "";
     param_has_uc->chinese_explain = "判断指定的 uc 是否在 ucd 的 uc_list 中";   
-    param_has_uc->demo.push_back("ucd has_uc aqm.json Die11mk               (查看 aqm.json 中是否包含 uc Die11mk)");
+    param_has_uc->demo.push_back("ucd has_uc aqm.json Die11mk Die12mk Die13mk Die14mk            (查看 aqm.json 中是否包含 uc Die11mk Die12mk Die13mk Die14mk)");
     UcdParamOpt::add_param(param_has_uc);
     
     // sub
