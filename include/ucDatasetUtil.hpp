@@ -211,6 +211,10 @@ class UCDataset
         // 检测框范围往外扩展
         int do_augment(float x1, float x2, float y1, float y2,  bool is_relative);
 
+        // 删除多余的信息，没有出现在 uc_list 中，但是 size_info 和 object_info 中有结果
+        int drop_extra_info();
+        
+
     private:
         std::string json_path;
 };

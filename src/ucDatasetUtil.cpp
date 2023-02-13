@@ -1995,6 +1995,38 @@ void UCDataset::drop_empty_uc()
     UCDataset::uc_list = uc_list;
 }
 
+int UCDataset::drop_extra_info()
+{
+    // 遍历 size_info, object_info 删除多余的 uc 即可
+    std::set<std::string> uc_set(UCDataset::uc_list.begin(), UCDataset::uc_list.end());
+
+    auto size_iter = UCDataset::size_info.begin();
+    while(size_iter != UCDataset::size_info.end())
+    {
+        std::string uc = size_iter->first;
+        if(uc_set.count(uc) == 0)
+        {
+            UCDataset::size_info.erase(uc);
+        }
+        size_iter++;
+    }
+
+    auto obj_iter = UCDataset::object_info.begin();
+    while(obj_iter != UCDataset::object_info.end())
+    {
+        std::string uc = obj_iter->first;
+        if(uc_set.count(uc) == 0)
+        {
+            for(int i=0; i<UCDataset::object_info[uc].size(); i++)
+            {
+                delete UCDataset::object_info[uc][i];
+            }
+            UCDataset::object_info.erase(uc);
+        }
+        obj_iter++;
+    }
+}
+
 std::set<std::string> UCDataset::get_tags()
 {
     auto iter = UCDataset::object_info.begin();

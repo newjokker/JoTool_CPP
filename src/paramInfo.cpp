@@ -965,6 +965,24 @@ void UcdParamOpt::load_param_info()
     param_drop_tags->demo.push_back("ucd drop_tags aqm.json res.json aqm*                               (将 aqm.json 删除 aqm 开头的所有标签)");
     UcdParamOpt::add_param(param_drop_tags);
 
+    // drop_extra_info
+    ParamInfo * param_drop_extra_info = new ParamInfo("drop_extra_info");
+    param_drop_extra_info->group = "filter";
+    param_drop_extra_info->grammar = "ucd drop_extra_info ucd_path save_path";
+    param_drop_extra_info->english_explain = "";
+    param_drop_extra_info->chinese_explain = "去除多余的 size_info, object_info, 叫做 drop_extra_info, 没有对应的 uc 所有的其他的信息都要删除";   
+    param_drop_extra_info->demo.push_back("ucd param_drop_extra_info aqm.json res.json                     (将 aqm.json 中不应该有的 size_info 和 object_info 信息删除)");
+    UcdParamOpt::add_param(param_drop_extra_info);
+
+    // keep_only_uc
+    ParamInfo * param_keep_only_uc = new ParamInfo("keep_only_uc");
+    param_keep_only_uc->group = "filter";
+    param_keep_only_uc->grammar = "ucd keep_only_uc ucd_path save_path";
+    param_keep_only_uc->english_explain = "";
+    param_keep_only_uc->chinese_explain = "数据集中只保留 uc 信息删除其他所有信息";   
+    param_keep_only_uc->demo.push_back("ucd keep_only_uc aqm.json res.json                              (只保留 aqm.json 中的 uc 信息生成 res.json)");
+    UcdParamOpt::add_param(param_keep_only_uc);
+
     // zen
     ParamInfo * param_zen = new ParamInfo("zen");
     param_zen->group = "fun";

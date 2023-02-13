@@ -44,13 +44,9 @@ using namespace std;
 
 // 解析出来的 json 中存放的 jpg 图片是压缩过的，这样存放的数据能小一点
 
-// add config such as -c --c 
-
 // add meachine learning , basic content,  
 
 // label_used 是无序的要记得这个
-
-// 标准的质量控制，去掉那些重复的，可以反复跑训练集，得到结果，进行对比
 
 // 数据组平时要维护的四个服务（1）检测服务 （2）数据集标注错误检查服务, cleanlab （3）数据集标注遗漏检查服务（4）数据集更新工具, ucd 实现
 
@@ -60,8 +56,6 @@ using namespace std;
 
 // 将需要的功能进行服务化，
 // ucd 只是一个数据集处理的工具，不需要增加太多的功能
-
-// ucd 支持所有的检测接口 v1, v2, v3, v4, v5 
 
 // ucd 支持自定义的服务接口（1）检测服务 （2）数据检查服务，查看数据检查的进度，还有几个在等待的，还需要等待大概多长时间，检测到什么进度了等信息
 
@@ -100,8 +94,6 @@ using namespace std;
 
 // 有些图片截取小图之后是反色的，为什么会这样，是因为原图的问题吗？Dxm00d0
 
-// TODO: 增加计算 AP 的放方法
-
 // drop_extra_info, 以 uc_list 为基准，uc_list 中没有的元素 object_info 和 size_info 中有的话 删除
 
 // TODO: count_folder， 统计文件夹中的文件信息，统计文件夹的大小
@@ -112,8 +104,6 @@ using namespace std;
 
 // FIXME: uc_list 改为 uc_set 比较好，现在的方式去重非常不方便
 
-// TODO: 画图时，当一个标签没有指定的情况下，要是是以 correct 靠头就给 绿色 mistake 就是 红色，extra 就是黄色，miss 就是橙色 这样来分
-
 // TODO: map 最后的结果画图出来，可以画简单点的图，找 C++ 或者 opencv 的画图软件
 
 // TODO: map 计算结果有问题
@@ -122,10 +112,11 @@ using namespace std;
 
 // TODO: 指定默认使用的 python 环境，这样 c++ 直接调用 Python 做一些操作
 
-
 // TODO: 通配符在不同的机器上会有问题
 
-// TODO: has_uc 可以一次性看多个 uc ，打印的时候打印 uc 以及不存在的 后面打印 false 即可。
+// TODO: AP50 的概念搞错了，是控制 iou 而不是 conf 
+
+
 
 
 int main(int argc, char ** argv_old)
@@ -159,7 +150,7 @@ int main(int argc, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.7.3";
+    std::string app_version = "v2.7.5";
 
     // uci_info
     int volume_size         = 20;
@@ -1877,6 +1868,27 @@ int main(int argc, char ** argv_old)
             ucd_param_opt->print_command_info(command_1);
         }
     }
+    else if(command_1 == "keep_only_uc")
+    {
+        // 去掉除 uc 之外的所有信息
+        if(argc == 4)
+        {
+            std::string ucd_path    = argv[2];
+            std::string save_path   = argv[3];
+            
+            UCDataset *ucd = new UCDataset(ucd_path);
+            UCDataset *ucd_new = new UCDataset();
+            ucd->parse_ucd(false);
+            ucd_new->uc_list = ucd->uc_list;
+            ucd_new->save_to_ucd(save_path);
+            delete ucd;
+            delete ucd_new;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
     else if(command_1 == "uc_analysis")
     {
         if(argc == 3)
@@ -2514,6 +2526,22 @@ int main(int argc, char ** argv_old)
         {
             ucd_param_opt->print_command_info(command_1);
         }
+    }
+    else if(command_1 == "drop_extra_info")
+    {
+        if(argc == 4)
+        {
+            std::string ucd_path    = argv[2];
+            std::string save_path   = argv[3];
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->drop_extra_info();
+            ucd->save_to_ucd(save_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }   
     }
     else if(command_1 == "random_color")
     {
