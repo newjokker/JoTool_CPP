@@ -859,7 +859,7 @@ void UcdParamOpt::load_param_info()
     param_update->english_explain = "";
     param_update->chinese_explain = "对 ucd 进行更新，只下载并配置库文件，还需要手动去改 ~/.bash_aliases 文件";   
     param_update->demo.push_back("ucd update                                        (将 ucd 更新到最新版本)");
-    param_update->demo.push_back("ucd update ucd_v1.4.7                             (将 ucd 版本更新带 ucd_v1.4.7)");
+    param_update->demo.push_back("ucd update v1.4.7                                 (将 ucd 版本更新带 ucd_v1.4.7)");
     UcdParamOpt::add_param(param_update);
 
     // absorb

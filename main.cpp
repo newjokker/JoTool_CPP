@@ -116,6 +116,7 @@ using namespace std;
 
 // TODO: AP50 的概念搞错了，是控制 iou 而不是 conf 
 
+// 
 
 
 
@@ -150,7 +151,7 @@ int main(int argc, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.7.5";
+    std::string app_version = "v2.7.6";
 
     // uci_info
     int volume_size         = 20;
@@ -208,7 +209,10 @@ int main(int argc, char ** argv_old)
         xini_write["uci"]["volume_size"]= volume_size;
         xini_write.dump(config_path);   
     }
-    
+
+    // init ucd_util
+    UCDatasetUtil* ucd_util = new UCDatasetUtil(host, port, cache_dir);
+
     // ucd | ucd -v | ucd -V 
     if ((argc < 2) && (short_args.count("v")==0) && (short_args.count("V")==0))
     {
@@ -254,75 +258,10 @@ int main(int argc, char ** argv_old)
     }
     else if((short_args.count("v")>0) || (short_args.count("V")>0))
     {
-        std::cout << "-----------------------------------" << std::endl;
-        std::cout << "            " << app_version << std::endl;
-        std::cout << "-----------------------------------" << std::endl;
-        if(! is_read_dir(app_dir))
-        {
-            std::cout << "app dir is not readable : " << app_dir << std::endl;
-            return -1;
-        }
-
-        std::vector<std::string> app_path_list = get_all_file_path(app_dir);
-        std::vector<int> app_version_list;
-        std::map< int, std::string > app_version_map;
-
-        for(int i=0; i<app_path_list.size(); i++)
-        {
-            std::string app_name = get_file_name_suffix(app_path_list[i]);
-            if(! pystring::startswith(app_name, "ucd_v"))
-            {
-                continue;
-            }
-
-            // get verrsion int
-            int version_int = 0;
-            std::string app_version_str = app_name.substr(5);
-            std::vector<std::string> app_name_list = pystring::split(app_version_str, ".");
-            if(app_name_list.size() != 3)
-            {
-                continue;
-            }
-            else
-            {
-                int version_1 =  std::stoi(app_name_list[0]) * 1000000;
-                int version_2 =  std::stoi(app_name_list[1]) * 1000;
-                int version_3 =  std::stoi(app_name_list[2]);
-                version_int = version_1 + version_2 + version_3;
-
-                if(pystring::endswith(app_name, app_version))
-                {
-                    app_version_map[version_int] = "* " + app_path_list[i];
-                }
-                else
-                {
-                    app_version_map[version_int] = "  " + app_path_list[i];
-                }
-                app_version_list.push_back(version_int);
-            }
-        }
-
-        // sort by version
-        std::sort(app_version_list.begin(), app_version_list.end());
-
-        // print version info
-        for(int i=0; i<app_version_list.size(); i++)
-        {
-            if(app_version_map[app_version_list[i]][0] == '*')
-            {
-                std::cout << HIGHTLIGHT_COLOR << app_version_map[app_version_list[i]] << STOP_COLOR << std::endl;
-            }
-            else
-            {
-                std::cout << app_version_map[app_version_list[i]] << std::endl;
-            }
-        }
-        std::cout << "-----------------------------------" << std::endl;
+        ucd_util->get_ucd_version_info(app_dir, app_version);
         return -1;
     }
 
-    // init ucd_util
-    UCDatasetUtil* ucd_util = new UCDatasetUtil(host, port, cache_dir);
     std::string command_1;
     if(argc >= 2)
     {
@@ -2224,29 +2163,16 @@ int main(int argc, char ** argv_old)
     }
     else if(command_1 == "update")
     {
-        std::cout << WARNNING_COLOR << "ucd update 因为容易出现问题被禁用" << STOP_COLOR<< std::endl;
-        std::cout << WARNNING_COLOR << "使用 ucd -V 查看可切换的版本和当前版本，如果没有需要的版本找 凌德泉 要安装包，安装安装包即可" << STOP_COLOR<< std::endl;
-
-        ucd_param_opt->not_ready();
-        return -1;
-
-        // 将最新的下载包放在 80 服务器上，下载到本地，放到对应的目录下即可
         std::string app_dir = "/home/ldq/Apps_jokker";
         if(! is_dir(app_dir))
         {
-            create_folder(app_dir);
-        }
-
-        if(! is_dir(app_dir))
-        {
-            std::cout << "create app_dir failed : " << app_dir << std::endl;
+            std::cout << ERROR_COLOR << "app must in path : " << app_dir << ", no such folder"<< STOP_COLOR << std::endl;
             return -1;
         }
         
-        if((argc == 3) || (argc == 2))
+        if(argc == 3 || argc == 2)
         {
             std::string version;
-            std::string save_path = "/home/ldq/Apps_jokker/ucd_app_temp.zip";
             
             if(argc == 3)
             {
@@ -2254,31 +2180,45 @@ int main(int argc, char ** argv_old)
             }
             else
             {
-                version = "latest";
+                std::string check_url = "http://" + host + ":" + std::to_string(port);
+                httplib::Client cli(check_url);
+                auto res = cli.Get("/ucd/ucd_version_list");
+                
+                if(res != nullptr)
+                {
+                    json data = json::parse(res->body);
+                    // customer
+                    for(int i=0; i<data["ucd_version_info"].size(); i++)
+                    {
+                        std::cout << "  remote : " << data["ucd_version_info"][i] << std::endl;
+                    }
+
+                    int version_count = data["ucd_version_info"].size();
+                    if(version_count > 0)
+                    {
+                        version = data["ucd_version_info"][version_count-1];
+                        version = "v" + version.substr(1, version.size()-1);
+                    }
+                    else
+                    {
+                        std::cout << ERROR_COLOR << "no ucd version in remote server" << STOP_COLOR << std::endl;
+                    }
+                }
+                else
+                {
+                    std::cout << ERROR_COLOR << "get latest ucd version failed " << STOP_COLOR << std::endl;
+                    std::cout << ERROR_COLOR << "connect error : " << check_url << STOP_COLOR << std::endl;
+                    return -1;
+                }
             }
-            ucd_util->load_ucd_app(version, save_path);
+            
+            // 下载数据
+            ucd_util->load_ucd_app(version, app_dir);
 
-            if(! is_file(save_path))
-            {
-                std::cout << "can't load file : " << save_path << std::endl;
-                return -1;
-            }
-
-
-            // temp 文件夹不存在的话就会重新一个
-            // 
-
-            // 解压缩
-            std::system("unzip -n /home/ldq/Apps_jokker/ucd_app_temp.zip -d /home/ldq/Apps_jokker/ucd_app_temp");
-            std::system("cp -r /home/ldq/Apps_jokker/ucd_app_temp/* /home/ldq/Apps_jokker");
-            // std::system("cp -r /home/ldq/Apps_jokker/so_dir/* /usr/lib");
-            // std::system("rm -r /home/ldq/Apps_jokker/ucd_app_temp");
-            // sleep(0.5);
-            // std::system("rm -r /home/ldq/Apps_jokker/ucd_app_temp.zip");
-            // sleep(0.5);
-            std::system("chmod 777 /home/ldq/Apps_jokker/* -R");
             std::cout << "--------------------------------------" << std::endl;
             std::cout << "change ucd version by :" << std::endl;
+            std::cout << "  sudo chmod 777 /home/ldq/Apps_jokker -R" << std::endl;
+            std::cout << "  sudo ldconfig" << std::endl;
             std::cout << "  vim ~/.bash_aliases" << std::endl;
             std::cout << "  source ~/.bash_aliases" << std::endl;
             std::cout << "" << std::endl;

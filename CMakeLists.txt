@@ -54,7 +54,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRCLIST)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/tools SRCLIST)
 
-add_library(saturntools_v2.7.5 SHARED ${SRCLIST})   
+add_library(saturntools_v2.7.6 SHARED ${SRCLIST})   
 # add_library(saturntools_v2.4.6 STATIC ${SRCLIST})   
 
 add_executable(ucd main.cpp)
@@ -64,7 +64,7 @@ target_link_libraries(
     # ${TORCH_LIBRARIES}
     ${OpenCV_LIBS}
     OpenSSL::Crypto OpenSSL::SSL
-    saturntools_v2.7.5
+    saturntools_v2.7.6
 	nlohmann_json::nlohmann_json
     ${MYSQL_LIBS}
 )

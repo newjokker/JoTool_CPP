@@ -2702,9 +2702,18 @@ void UCDatasetUtil::load_ucd(std::string ucd_name, std::string save_path)
     UCDatasetUtil::load_file("/ucd/" + ucd_name, save_path);
 }
 
-void UCDatasetUtil::load_ucd_app(std::string version, std::string save_path)
+void UCDatasetUtil::load_ucd_app(std::string version, std::string save_dir)
 {
-    UCDatasetUtil::load_file("/ucd_app/" + version, save_path);
+    // 必须指定版本，
+    std::string save_ucd_path   = save_dir + "/" + "ucd_" + version;
+    std::string save_so_path    = save_dir + "/" + "so_dir"+ "/" + "libsaturntools_" + version + ".so";
+    UCDatasetUtil::load_file("/ucd_app/so_" + version, save_so_path);
+    UCDatasetUtil::load_file("/ucd_app/" + version, save_ucd_path);
+
+    if((! is_file(save_ucd_path)) || (! is_file(save_so_path)))
+    {
+        std::cout << ERROR_COLOR << "load app file filed !" << STOP_COLOR << std::endl;
+    }
 }
 
 void UCDatasetUtil::search_ucd()
@@ -4464,7 +4473,98 @@ void UCDatasetUtil::filter_by_tags_volume(std::set<std::string> tags, std::strin
     delete ucd;
 }
 
+void UCDatasetUtil::get_ucd_version_info(std::string app_dir, std::string app_version)
+{
 
+    std::cout << "-----------------------------------" << std::endl;
+    std::cout << "            " << app_version << std::endl;
+    std::cout << "-----------------------------------" << std::endl;
+    if(! is_read_dir(app_dir))
+    {
+        std::cout << "app dir is not readable : " << app_dir << std::endl;
+        return;
+    }
+
+    std::vector<std::string> app_path_list = get_all_file_path(app_dir);
+    std::vector<int> app_version_list;
+    std::map< int, std::string > app_version_map;
+
+    for(int i=0; i<app_path_list.size(); i++)
+    {
+        std::string app_name = get_file_name_suffix(app_path_list[i]);
+        if(! pystring::startswith(app_name, "ucd_v"))
+        {
+            continue;
+        }
+
+        // get verrsion int
+        int version_int = 0;
+        std::string app_version_str = app_name.substr(5);
+        std::vector<std::string> app_name_list = pystring::split(app_version_str, ".");
+        if(app_name_list.size() != 3)
+        {
+            continue;
+        }
+        else
+        {
+            int version_1 =  std::stoi(app_name_list[0]) * 1000000;
+            int version_2 =  std::stoi(app_name_list[1]) * 1000;
+            int version_3 =  std::stoi(app_name_list[2]);
+            version_int = version_1 + version_2 + version_3;
+
+            if(pystring::endswith(app_name, app_version))
+            {
+                app_version_map[version_int] = "* local  : " + app_path_list[i];
+            }
+            else
+            {
+                app_version_map[version_int] = "  local  : " + app_path_list[i];
+            }
+            app_version_list.push_back(version_int);
+        }
+    }
+
+    // sort by version
+    std::sort(app_version_list.begin(), app_version_list.end());
+
+    // print version info
+    for(int i=0; i<app_version_list.size(); i++)
+    {
+        if(app_version_map[app_version_list[i]][0] == '*')
+        {
+            std::cout << HIGHTLIGHT_COLOR << app_version_map[app_version_list[i]] << STOP_COLOR << std::endl;
+        }
+        else
+        {
+            std::cout << app_version_map[app_version_list[i]] << std::endl;
+        }
+    }
+    std::cout << "-----------------------------------" << std::endl;
+
+
+    // -------------
+
+
+    std::string check_url = "http://" + UCDatasetUtil::host + ":" + std::to_string(UCDatasetUtil::port);
+    httplib::Client cli(check_url);
+    auto res = cli.Get("/ucd/ucd_version_list");
+    
+    if(res != nullptr)
+    {
+        json data = json::parse(res->body);
+        // customer
+        for(int i=0; i<data["ucd_version_info"].size(); i++)
+        {
+            std::cout << "  remote : " << data["ucd_version_info"][i] << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << ERROR_COLOR << "connect error : " << check_url << STOP_COLOR << std::endl;
+    }
+    std::cout << "-----------------------------------" << std::endl;
+
+}
 
 
 

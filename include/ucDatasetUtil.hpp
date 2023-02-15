@@ -379,6 +379,9 @@ class UCDatasetUtil
         // 从 uc_list 生成 ucd
         void get_ucd_from_uc_list(std::string save_path, std::vector<std::string> uc_list);
 
+        // 查看本地路径下的 ucd 版本信息
+        void get_ucd_version_info(std::string ucd_dir, std::string app_version);
+
     private:
         
         // 下载云上的数据
