@@ -213,6 +213,9 @@ class UCDataset
 
         // 删除多余的信息，没有出现在 uc_list 中，但是 size_info 和 object_info 中有结果
         int drop_extra_info();
+
+        // 将 uc_list 转为 uc_set 方便对比
+        std::set<std::string> get_uc_set();
         
 
     private:
@@ -323,7 +326,7 @@ class UCDatasetUtil
 
         // 清空缓存
         void cache_clear();
-        void cache_clear(std::string ucd_path);
+        void cache_clear(std::string ucd_path, bool reversal=false);
         
         // 打印文字
         void print_words(std::string name, int width=50, int height=50);

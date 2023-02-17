@@ -116,8 +116,19 @@ using namespace std;
 
 // TODO: AP50 的概念搞错了，是控制 iou 而不是 conf 
 
-// 
+// TODO: ucd + docker 可以根据模型 + config 直接跑出结果，貌似比 saturn_lib 更加方便
 
+// TODO: 使用 ucd 检查可用的服务，服务需要一直开着才能接收到 ucd 的交互信息
+
+// TODO: ucd 中集成那些可以训练或者统计的东西，（1）统计每个函数查看语法的概率 （2）查看每个函数的使用频次 （3）
+
+// TODO: ucd 语法的自动填充，节省人力，减少报错
+
+// TODO: 根据各个部件之间的相关关系推断，某一个部件的检测是否存在错误，部件的相关关系，K 近邻的方式对一张图进行描述，比如是输电还是配电，衡量距离的方式就是 检测目标分布的差异性
+
+// FIXME: parse_txt 用进度条
+
+// FIXME: save 进度条会出现不动的情况，当保存的地址是有图片的时候
 
 
 int main(int argc, char ** argv_old)
@@ -132,8 +143,6 @@ int main(int argc, char ** argv_old)
     std::map< std::string, std::string > long_args;
     bool status = parse_args(argc, argv_old, argv, short_args, long_args);
     argc = argv.size();
-
-    // 
 
     // server
     std::string host        = "192.168.3.111";
@@ -151,7 +160,7 @@ int main(int argc, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.7.6";
+    std::string app_version = "v2.8.2";
 
     // uci_info
     int volume_size         = 20;
@@ -1296,6 +1305,12 @@ int main(int argc, char ** argv_old)
             // 删除 ucd 包含的所有图片
             if(argc == 3)
             {
+                bool reversal = false;
+                if(short_args.count("r") > 0)
+                {
+                    reversal = true;
+                }
+
                 std::string ucd_path = argv[2];
                 if(! ucd_util->is_ucd_path(ucd_path))
                 {
@@ -1304,7 +1319,7 @@ int main(int argc, char ** argv_old)
                 }
                 else
                 {
-                    ucd_util->cache_clear(ucd_path);
+                    ucd_util->cache_clear(ucd_path, reversal);
                 }
             }
             // 删除所有的文件
@@ -2163,7 +2178,6 @@ int main(int argc, char ** argv_old)
     }
     else if(command_1 == "update")
     {
-        std::string app_dir = "/home/ldq/Apps_jokker";
         if(! is_dir(app_dir))
         {
             std::cout << ERROR_COLOR << "app must in path : " << app_dir << ", no such folder"<< STOP_COLOR << std::endl;
@@ -2173,7 +2187,7 @@ int main(int argc, char ** argv_old)
         if(argc == 3 || argc == 2)
         {
             std::string version;
-            
+    
             if(argc == 3)
             {
                 version = argv[2];
@@ -2216,7 +2230,14 @@ int main(int argc, char ** argv_old)
             ucd_util->load_ucd_app(version, app_dir);
 
             std::cout << "--------------------------------------" << std::endl;
+            std::cout << "load ucd_" + version + " success" << std::endl;
+            std::cout << "--------------------------------------" << std::endl;
             std::cout << "change ucd version by :" << std::endl;
+
+            // TODO: 更改文件的权限
+            // TODO: 自动更新 ~/.bash_aliases 文件
+            // TODO: 自动 运行 ldconfig and source 
+
             std::cout << "  sudo chmod 777 /home/ldq/Apps_jokker -R" << std::endl;
             std::cout << "  sudo ldconfig" << std::endl;
             std::cout << "  vim ~/.bash_aliases" << std::endl;

@@ -2467,6 +2467,12 @@ int UCDataset::do_augment(float ax1, float ax2, float ay1, float ay2,  bool is_r
     }
 }
 
+std::set<std::string> UCDataset::get_uc_set()
+{
+    std::set<std::string> uc_set(UCDataset::uc_list.begin(), UCDataset::uc_list.end());
+    return uc_set;
+}
+
 // 
 UCDatasetUtil::UCDatasetUtil(std::string host, int port, std::string cache_dir)
 {
@@ -3302,7 +3308,7 @@ void UCDatasetUtil::cache_clear()
     bar.finish();
 }
 
-void UCDatasetUtil::cache_clear(std::string ucd_path)
+void UCDatasetUtil::cache_clear(std::string ucd_path, bool reversal)
 {
     if(! is_dir(UCDatasetUtil::cache_img_dir))
     {
@@ -3312,22 +3318,45 @@ void UCDatasetUtil::cache_clear(std::string ucd_path)
     // 清空全部缓存
     std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
     UCDataset* ucd = new UCDataset(ucd_path);
-    ucd->parse_ucd();
+    ucd->parse_ucd(false);
 
     tqdm bar;
-    int N = ucd->uc_list.size();
 
-    for(int i=0; i<ucd->uc_list.size(); i++)
+    if(reversal == false)
     {
-        std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, ucd->uc_list[i], suffix);
-
-        if(is_file(img_path))
+        // 删除指定标签
+        int N = ucd->uc_list.size();
+        for(int i=0; i<ucd->uc_list.size(); i++)
         {
-            remove(img_path.c_str());
-            // std::cout << i << " , remove : " << img_path << std::endl;
+            std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, ucd->uc_list[i], suffix);
+
+            if(is_file(img_path))
+            {
+                remove(img_path.c_str());
+                // std::cout << i << " , remove : " << img_path << std::endl;
+            }
+            bar.progress(i, N);
         }
-        bar.progress(i, N);
     }
+    else
+    {
+        // 不删除指定标签
+        std::vector<std::string> all_img_path_vector = get_all_file_path(UCDatasetUtil::cache_img_dir, suffix);
+        int N = all_img_path_vector.size();
+        std::set<std::string> uc_set = ucd->get_uc_set();
+
+        for(int i=0; i<all_img_path_vector.size(); i++)
+        {
+            std::string uc = get_file_name(all_img_path_vector[i]);
+            if(uc_set.count(uc) == 0)
+            {
+                // std::cout << "删除 uc " << uc << std::endl;
+                remove(all_img_path_vector[i].c_str());
+            }
+            bar.progress(i, N);
+        }
+    }
+
     bar.finish();
     delete ucd;
 }

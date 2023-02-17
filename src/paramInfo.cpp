@@ -633,10 +633,12 @@ void UcdParamOpt::load_param_info()
     ParamInfo * param_cache_clear = new ParamInfo("cache_clear");
     param_cache_clear->group = "cache";
     param_cache_clear->grammar = "ucd cache_clear {ucd_path}";
+    param_cache_clear->args_info["-r"] = "reversal, 只保留指定的 json 中的文件";
     param_cache_clear->english_explain = "clear cache";
     param_cache_clear->chinese_explain = "清空缓存信息, 后续需要按 y 确认删除";   
     param_cache_clear->demo.push_back("ucd cache_clear                              (删除全部缓存图片)");
     param_cache_clear->demo.push_back("ucd cache_clear test.json                    (删除 test.json 对应的全部缓存图片)");
+    param_cache_clear->demo.push_back("ucd cache_clear test.json -r                 (删除 test.json 除外的所有图片缓存)");
     UcdParamOpt::add_param(param_cache_clear);
     
     // cache_clean
@@ -819,7 +821,7 @@ void UcdParamOpt::load_param_info()
     param_drop->group = "opt";
     param_drop->grammar = "ucd drop attr_name ucd_path save_ucd_path";
     param_drop->english_explain = "";
-    param_drop->chinese_explain = "获取 ucd 中的信息 dataset_name, object_info, size_info, model_name, model_version, add_time, update_time, describe, label_used, uc_list]";   
+    param_drop->chinese_explain = "删除 ucd 中的信息 dataset_name, object_info, size_info, model_name, model_version, add_time, update_time, describe, label_used, uc_list]";   
     param_drop->demo.push_back("ucd drop object_info aqm.json aqm_drop_object_info.json     (将 aqm.json 中的 object_info 信息给抹去，保存为 aqm_drop_object_info.json)");
     UcdParamOpt::add_param(param_drop);
     
