@@ -126,12 +126,12 @@ using namespace std;
 
 // TODO: 根据各个部件之间的相关关系推断，某一个部件的检测是否存在错误，部件的相关关系，K 近邻的方式对一张图进行描述，比如是输电还是配电，衡量距离的方式就是 检测目标分布的差异性
 
-// FIXME: parse_txt 用进度条
-
 // FIXME: save 进度条会出现不动的情况，当保存的地址是有图片的时候
 
+// TODO: 自动记录所有的使用记录，打开一个文件以 a 形式将命令和时间写到缓存文件中去
 
-int main(int argc, char ** argv_old)
+
+int main(int argc_old, char ** argv_old)
 {
     // param
     UcdParamOpt *ucd_param_opt = new UcdParamOpt();
@@ -141,13 +141,14 @@ int main(int argc, char ** argv_old)
     std::vector<std::string> argv;
     std::set<std::string> short_args;
     std::map< std::string, std::string > long_args;
-    bool status = parse_args(argc, argv_old, argv, short_args, long_args);
-    argc = argv.size();
+    bool status = parse_args(argc_old, argv_old, argv, short_args, long_args);
+    int argc = argv.size();
 
     // server
     std::string host        = "192.168.3.111";
     int port                = 11101;
     std::string config_path;
+    std::string history_path;
     
     // sql info 
     int sql_port = 3306;
@@ -160,7 +161,7 @@ int main(int argc, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.8.2";
+    std::string app_version = "v2.8.3";
 
     // uci_info
     int volume_size         = 20;
@@ -179,10 +180,12 @@ int main(int argc, char ** argv_old)
     if(pw_name == "root")
     {
         config_path = "/" + pw_name + "/ucdconfig.ini";
+        history_path = "/" + pw_name + "/.ucdhistory.txt";
     }
     else
     {
         config_path = "/home/" + pw_name + "/ucdconfig.ini";
+        history_path = "/home/" + pw_name + ".ucdhistory.txt";
     }
 
     // read config
@@ -218,6 +221,20 @@ int main(int argc, char ** argv_old)
         xini_write["uci"]["volume_size"]= volume_size;
         xini_write.dump(config_path);   
     }
+
+    // save history info
+    ofstream outfile(history_path, ofstream::app);
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+    outfile << 1900 + ltm->tm_year << "-" << 1 + ltm->tm_mon << "-" << ltm->tm_mday << " " << ltm->tm_hour << ":" << ltm->tm_min << ":" << ltm->tm_sec << " : ";
+    // 
+    for(int i=0; i<argc_old; i++)
+    {
+        outfile << argv_old[i];
+        outfile << " ";
+    }
+    outfile << std::endl;
+    outfile.close(); 
 
     // init ucd_util
     UCDatasetUtil* ucd_util = new UCDatasetUtil(host, port, cache_dir);
@@ -900,6 +917,7 @@ int main(int argc, char ** argv_old)
             std::cout << "host          : " << host << std::endl;
             std::cout << "port          : " << port << std::endl;
             std::cout << "config_path   : " << config_path << std::endl;
+            std::cout << "history_path  : " << history_path << std::endl;
             std::cout << "[sql]" << std::endl;
             std::cout << "sql_host      : " << sql_host << std::endl;
             std::cout << "sql_port      : " << sql_port << std::endl;
@@ -1949,7 +1967,7 @@ int main(int argc, char ** argv_old)
                 auto iter_tag = tags.begin();
                 while(iter_tag != tags.end())
                 {
-                    std::cout << iter_tag->data() << " ";
+                    std::cout << iter_tag->data() << ",";
                     iter_tag++;
                 }
                 std::cout << std::endl;

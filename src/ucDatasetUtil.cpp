@@ -857,7 +857,7 @@ void UCDataset::save_to_yolo_train_txt_with_assign_uc(std::string save_path, std
 
                 if(label_map.count(tag) == 0)
                 {
-                    std::cout << "tag not in tag_list, " << tag << std::endl;
+                    // std::cout << "tag not in tag_list, " << tag << std::endl;
                     continue;
                 }
                 else
@@ -3698,6 +3698,8 @@ void UCDatasetUtil::parse_yolo_train_data(std::string img_dir, std::string save_
         }
     }
 
+    tqdm bar;
+    int N = ucd->object_info.size();
     int index = 0;
     auto iter = ucd->object_info.begin();
     while(iter != ucd->object_info.end())
@@ -3707,11 +3709,13 @@ void UCDatasetUtil::parse_yolo_train_data(std::string img_dir, std::string save_
         std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
         std::string txt_path = save_dir + "/" + uc + ".txt";
         ucd->save_to_yolo_train_txt_with_assign_uc(txt_path, img_path, uc, label_list);
-        std::cout << index << ", parse txt : " << uc << std::endl;
+        // std::cout << index << ", parse txt : " << uc << std::endl;
         index += 1;
         iter ++;
+        bar.progress(index, N);
     }
     delete ucd;
+    bar.finish();
 }
 
 void UCDatasetUtil::uc_analysis(std::string ucd_path)

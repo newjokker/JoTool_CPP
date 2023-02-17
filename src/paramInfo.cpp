@@ -812,8 +812,9 @@ void UcdParamOpt::load_param_info()
     param_get->group = "info";
     param_get->grammar = "ucd get attr_name ucd_path";
     param_get->english_explain = "";
-    param_get->chinese_explain = "获取 ucd 中的信息，[dataset_name, uc_count, label_used_count, model_name, model_version, add_time, update_time, describe, label_used, uc_list]";   
+    param_get->chinese_explain = "获取 ucd 中的信息，[tags, dataset_name, uc_count, label_used_count, model_name, model_version, add_time, update_time, describe, label_used, uc_list]";   
     param_get->demo.push_back("ucd get label_used aqm.json                  (获取 aqm.json 数据中的 label_used 属性信息)");
+    param_get->demo.push_back("ucd get tags aqm.json                        (获取 aqm.json 数据中的所有标签，用逗号隔开打印出来)");
     UcdParamOpt::add_param(param_get);
 
     // drop
