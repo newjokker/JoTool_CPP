@@ -70,7 +70,7 @@ void ParamInfo::print_info()
     auto iter = ParamInfo::args_info.begin();
     while (iter != ParamInfo::args_info.end())
     {
-        std::cout << WARNNING_COLOR << "     " << std::setw(10) << std::left << iter->first << iter->second << STOP_COLOR << std::endl; 
+        std::cout << WARNNING_COLOR << "     " << iter->first << "    " << iter->second << STOP_COLOR << std::endl; 
         iter++; 
     }
     
@@ -145,8 +145,7 @@ void UcdParamOpt::add_param(ParamInfo *param_info)
 {
     if(UcdParamOpt::has_command(param_info->command))
     {
-        std::cout << "command exists : " << param_info->command << std::endl;
-        throw "command exists";
+        std::cout << ERROR_COLOR << "command exists : " << param_info->command << "paramInfo.cpp" << STOP_COLOR<< std::endl;
     }
     else
     {
@@ -579,6 +578,7 @@ void UcdParamOpt::load_param_info()
     ParamInfo * param_cut_small_img = new ParamInfo("cut_small_img");
     param_cut_small_img->group = "opt";
     param_cut_small_img->grammar = "ucd cut_small_img ucd_path save_dir is_split(true|1|True|false|0|False)";
+    param_cut_small_img->args_info["--no_cache"] = "1|True|true 低缓存模式，使用完下载的图片之后会删除，本地已有缓存的不进行删除";
     param_cut_small_img->english_explain = "cut img by dete obj";
     param_cut_small_img->chinese_explain = "裁剪出小图";   
     param_cut_small_img->demo.push_back("ucd cut_small_img test.json ./crop 1       (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，每个标签的的小图分文件夹存放)");
@@ -594,6 +594,15 @@ void UcdParamOpt::load_param_info()
     param_crop_to_xml->demo.push_back("ucd crop_to_xml ./crop ./xml                 (将 ./crop 文件夹中的小图文件夹映射回 xml 保存在 ./xml 文件夹)");
     param_crop_to_xml->demo.push_back("* atention, crop 文件夹下面要有小图文件夹，每个文件夹的名字是里面小图的真实标签");
     UcdParamOpt::add_param(param_crop_to_xml);
+    
+    // crop_to_xml_with_origin_tag
+    ParamInfo * param_crop_to_xml_with_origin_tag = new ParamInfo("crop_to_xml_with_origin_tag");
+    param_crop_to_xml_with_origin_tag->group = "opt";
+    param_crop_to_xml_with_origin_tag->grammar = "ucd crop_to_xml_with_origin_tag crop_dir, save_dir";
+    param_crop_to_xml_with_origin_tag->english_explain = "cut img to xml";
+    param_crop_to_xml_with_origin_tag->chinese_explain = "截图生成 xml，直接使用截图文件名中的标签，作为截图的标签，截图文件夹可以多层嵌套";   
+    param_crop_to_xml_with_origin_tag->demo.push_back("ucd crop_to_xml_with_origin_tag ./crop ./xml                 (将 ./crop 文件夹中的小图文件夹映射回 xml 保存在 ./xml 文件夹)");
+    UcdParamOpt::add_param(param_crop_to_xml_with_origin_tag);
 
     // say
     ParamInfo * param_say = new ParamInfo("say");
@@ -1119,6 +1128,16 @@ void UcdParamOpt::load_param_info()
     param_augment->chinese_explain = "对检测框进行缩放(相对|绝对)";   
     param_augment->demo.push_back("ucd augment test.json save.json 0.5 0.5 -0.1 -0.1 true  (使用相对的方式对 test.json 中的所有检测框的往左往右分别扩展 宽度 * 0.5, 往上往下分别缩小高度 * 0.1)");
     UcdParamOpt::add_param(param_augment);
+    
+    // fix_size_info
+    ParamInfo * param_fix_size_info = new ParamInfo("fix_size_info");
+    param_fix_size_info->group = "opt";
+    param_fix_size_info->grammar = "ucd fix size_info ucd_path save_path";
+    param_fix_size_info->args_info["--no_cache"] = "1|True|true 低缓存模式，使用完下载的图片之后会删除，本地已有缓存的不进行删除";
+    param_fix_size_info->chinese_explain = "对 size_info 信息进行修复";   
+    param_fix_size_info->demo.push_back("ucd fix size_info test.json save.json               (对 test.json 中的 size_info 信息进行修复)");
+    param_fix_size_info->demo.push_back("ucd fix size_info test.json save.json --no_cache 1   (使用低缓存模式对 test.json 中的 size_info 信息进行修复)");
+    UcdParamOpt::add_param(param_fix_size_info);
 
 }
 

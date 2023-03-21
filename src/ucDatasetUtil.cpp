@@ -2641,7 +2641,6 @@ void UCDatasetUtil::load_img(std::string save_dir, std::vector<std::string> uc_l
 
 void UCDatasetUtil::load_img_with_assign_uc(std::string save_dir, std::string uc)
 {
-
     // todo 这个函数有问题，好像下载下来的数据都是空的
     if(! is_dir(save_dir))
     {
@@ -3289,7 +3288,8 @@ void UCDatasetUtil::cache_clear()
 
     if(! is_dir(UCDatasetUtil::cache_img_dir))
     {
-        std::cout << "cache_img_dir not exists" << std::endl;
+        std::cout << ERROR_COLOR << "cache_img_dir not exists" << STOP_COLOR << std::endl;
+        throw "cache_img_dir not exists";
     }
 
     // 清空全部缓存
@@ -3312,7 +3312,8 @@ void UCDatasetUtil::cache_clear(std::string ucd_path, bool reversal)
 {
     if(! is_dir(UCDatasetUtil::cache_img_dir))
     {
-        std::cout << "ucd path not exists" << std::endl;
+        std::cout << ERROR_COLOR << "cache_img_dir not exists" << STOP_COLOR << std::endl;
+        throw "cache_img_dir not exists";
     }
 
     // 清空全部缓存
@@ -3359,6 +3360,23 @@ void UCDatasetUtil::cache_clear(std::string ucd_path, bool reversal)
 
     bar.finish();
     delete ucd;
+}
+
+void UCDatasetUtil::cache_clear_assign_uc(std::string uc)
+{
+    // 删除缓存中的指定文件
+    if(! is_dir(UCDatasetUtil::cache_img_dir))
+    {
+        std::cout << ERROR_COLOR << "cache_img_dir not exists" << STOP_COLOR << std::endl;
+        throw "cache_img_dir not exists";
+    }
+
+    std::string assign_uc_path = UCDatasetUtil::cache_img_dir + "/" + uc + ".jpg";    
+    if(is_file(assign_uc_path))
+    {
+        remove(assign_uc_path.c_str());
+    }
+    return;
 }
 
 void UCDatasetUtil::print_words(std::string name, int width, int height)
@@ -3452,7 +3470,7 @@ void UCDatasetUtil::print_words(std::string name, int width, int height)
     }
 }
 
-void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bool is_split)
+void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bool is_split, bool no_cache)
 {
     // 
     if(! is_dir(save_dir))
@@ -3479,17 +3497,23 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
     while(iter != ucd->object_info.end())
     {
         std::string uc = iter->first;
-        UCDatasetUtil::load_img_with_assign_uc(UCDatasetUtil::cache_img_dir, uc);
         std::set<std::string> img_suffix {".jpg", ".JPG", ".png", ".PNG"};
+        std::string img_path_old = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
+        UCDatasetUtil::load_img_with_assign_uc(UCDatasetUtil::cache_img_dir, uc);
         std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
 
         if(img_path == "")
         {
-            std::cout << ERROR_COLOR << "load uc img failed : " << uc << STOP_COLOR << std::endl;
+            std::cout << WARNNING_COLOR << "load uc img failed : " << uc << STOP_COLOR << std::endl;
         }
         else
         {
             ucd->crop_dete_res_with_assign_uc(uc, img_path,  save_dir, is_split);
+
+            if(no_cache && img_path_old == "")
+            {
+                UCDatasetUtil::cache_clear_assign_uc(uc);
+            }
         }
         uc_index += 1;
         bar.progress(uc_index, N);
@@ -4599,7 +4623,94 @@ void UCDatasetUtil::get_ucd_version_info(std::string app_dir, std::string app_ve
 
 }
 
+void UCDatasetUtil::fix_size_info(std::string ucd_path, std::string save_path, bool no_cache)
+{
 
+    if(! is_ucd_path(ucd_path))
+    {
+        std::cout << ERROR_COLOR << "not ucd path : " << ucd_path << STOP_COLOR << std::endl;
+        return;
+    }
+
+    UCDataset* ucd = new UCDataset(ucd_path);
+    ucd->parse_ucd(false);
+
+    // 遍历所有的uc 查看 uc 对应的 size_info
+    std::set<std::string> img_suffix {".jpg", ".JPG", ".png", ".PNG"};
+
+    int fix_success_count   = 0;
+    int fix_failed_count    = 0;
+    int not_need_fix        = 0;
+
+    tqdm bar;
+    int N = ucd->uc_list.size();
+
+    for(int i=0; i<ucd->uc_list.size(); i++)
+    {
+        std::string uc = ucd->uc_list[i];
+    
+        // need fix
+        bool need_fix = true;
+        if(ucd->size_info.count(uc) > 0)
+        {
+            if(ucd->size_info[uc][0] > 0)
+            {
+                need_fix = false;       
+            }
+        }
+
+        // fix size_info 
+        if(need_fix)
+        {
+            std::string img_path_old = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
+            UCDatasetUtil::load_img_with_assign_uc(UCDatasetUtil::cache_img_dir, uc);
+            std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
+
+            if(img_path == "")
+            {
+                std::cout << ERROR_COLOR << "load uc img failed : " << uc << STOP_COLOR << std::endl;
+                fix_failed_count += 1;
+            }
+            else
+            {
+                FILE *file = fopen(img_path.c_str(), "rb");
+                auto imageInfo = getImageInfo<IIFileReader>(file);
+                fclose(file);
+
+                int height = imageInfo.getHeight();
+                int width =  imageInfo.getWidth();
+
+                std::vector<int> size_info;
+                size_info.push_back(width);
+                size_info.push_back(height);
+                ucd->size_info[uc] = size_info;
+
+                fix_success_count += 1;
+            }
+            
+            if(no_cache && img_path_old == "")
+            {
+                UCDatasetUtil::cache_clear_assign_uc(uc);
+            }
+        }
+        else
+        {
+            not_need_fix += 1;
+        }
+        bar.progress(i, N);
+    }
+
+    // fix size_info_count : -1, fix failed count : -1
+    std::cout << "" << std::endl;
+    std::cout << WARNNING_COLOR << "fix_success    : " << fix_success_count << STOP_COLOR << std::endl;
+    std::cout << WARNNING_COLOR << "fix_failed     : " << fix_failed_count << STOP_COLOR << std::endl;
+    std::cout << WARNNING_COLOR << "not_need_fix   : " << not_need_fix << STOP_COLOR << std::endl;
+
+    bar.finish();
+    ucd->save_to_ucd(save_path);
+    delete ucd;
+
+}
 
 
 

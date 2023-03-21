@@ -327,12 +327,13 @@ class UCDatasetUtil
         // 清空缓存
         void cache_clear();
         void cache_clear(std::string ucd_path, bool reversal=false);
-        
+        void cache_clear_assign_uc(std::string uc);
+
         // 打印文字
         void print_words(std::string name, int width=50, int height=50);
         
         // 裁切小图
-        void cut_small_img(std::string ucd_path, std::string save_dir, bool is_split);
+        void cut_small_img(std::string ucd_path, std::string save_dir, bool is_split, bool no_cache=false);
 
         // uc_check
         void uc_check(std::vector<std::string> file_vector);
@@ -384,6 +385,10 @@ class UCDatasetUtil
 
         // 查看本地路径下的 ucd 版本信息
         void get_ucd_version_info(std::string ucd_dir, std::string app_version);
+
+        // 修复 size_info 信息
+        void fix_size_info(std::string ucd_path, std::string save_path, bool no_cache);
+
 
     private:
         

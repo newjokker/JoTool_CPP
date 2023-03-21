@@ -22,6 +22,7 @@ namespace jotools
 
     // 从截图中反推出小图
     void get_xml_from_crop_img(std::string crop_dir,  std::string save_xml_dir);
+    void get_xml_from_crop_img_use_origin_tag(std::string crop_dir,  std::string save_xml_dir);
 
     // 去除图片的元数据
     void remove_image_meta_info(std::string img_path);

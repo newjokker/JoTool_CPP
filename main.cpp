@@ -128,7 +128,15 @@ using namespace std;
 
 // FIXME: save 进度条会出现不动的情况，当保存的地址是有图片的时候
 
-// TODO: 自动记录所有的使用记录，打开一个文件以 a 形式将命令和时间写到缓存文件中去
+// TODO: save 函数设计不合理，合并 parse 和 save 函数， -s 参数是从 服务器中拿到数据，不加这个参数，就是解析本地的数据
+
+// TODO: cut_small_img 有些时候会报错，需要打印出报错的 uc 信息
+
+// TODO: 自动完善 ucd 信息  fix size_info, 指定图片路径（不指定的话 直接使用缓存数据），修复 size_info 信息，可以指定是否需要保存下载的 img 的信息
+
+// 
+
+
 
 
 int main(int argc_old, char ** argv_old)
@@ -161,7 +169,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.8.3";
+    std::string app_version = "v2.9.3";
 
     // uci_info
     int volume_size         = 20;
@@ -185,7 +193,7 @@ int main(int argc_old, char ** argv_old)
     else
     {
         config_path = "/home/" + pw_name + "/ucdconfig.ini";
-        history_path = "/home/" + pw_name + ".ucdhistory.txt";
+        history_path = "/home/" + pw_name + "/.ucdhistory.txt";
     }
 
     // read config
@@ -313,11 +321,13 @@ int main(int argc_old, char ** argv_old)
     // 文件夹权限检查    
     if(! is_read_dir(ucd_util->cache_img_dir))
     {
-        std::cout << WARNNING_COLOR << "WARNING : cache_img folder don't have read access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
+        std::cout << ERROR_COLOR << "WARNING : cache_img folder don't have read access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
+        return -1;
     }
     else if(! is_write_dir(ucd_util->cache_img_dir))
     {
-        std::cout << WARNNING_COLOR << "WARNING : cache_img folder don't have write access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
+        std::cout << ERROR_COLOR << "WARNING : cache_img folder don't have write access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
+        return -1;
     }
 
     // key word
@@ -1149,6 +1159,17 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "cut_small_img")
     {
+        // 低缓存模式
+        bool no_cache = false;
+        if(long_args.count("no_cache") > 0)
+        {
+            std::string no_cache_str = long_args["no_cache"];
+            if(no_cache_str == "1" || no_cache_str == "True" || no_cache_str == "true")
+            {
+                no_cache = true;
+            }
+        }
+
         if (argc == 5)
         {
             std::string ucd_path = argv[2];
@@ -1159,20 +1180,16 @@ int main(int argc_old, char ** argv_old)
             {
                 is_split = false;
             }
-            ucd_util->cut_small_img(ucd_path, save_dir, is_split);
+            ucd_util->cut_small_img(ucd_path, save_dir, is_split, no_cache);
         }
         else
         {
-            ucd_param_opt->print_command_info("cut_small_img");
+            ucd_param_opt->print_command_info(command_1);
             return -1;
         }
     }
     else if(command_1 == "crop_to_xml")
     {
-
-        // ucd_param_opt->not_ready(command_1);
-        // return -1;
-
         if (argc== 4)
         {
             std::string crop_dir = argv[2];
@@ -1184,6 +1201,20 @@ int main(int argc_old, char ** argv_old)
             ucd_param_opt->print_command_info("crop_to_xml");
             return -1;
         }
+    }
+    else if(command_1 == "crop_to_xml_with_origin_tag")
+    {
+        if (argc== 4)
+        {
+            std::string crop_dir = argv[2];
+            std::string save_dir = argv[3];
+            jotools::get_xml_from_crop_img_use_origin_tag(crop_dir, save_dir);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info("crop_to_xml_with_origin_tag");
+            return -1;
+        }  
     }
     else if(command_1 == "xml_check")
     {
@@ -2043,6 +2074,30 @@ int main(int argc_old, char ** argv_old)
         else
         {
             ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "fix_size_info")
+    {
+        bool no_cache = false;
+        if(long_args.count("no_cache") > 0)
+        {
+            std::string no_cache_str = long_args["no_cache"];
+            if(no_cache_str == "1" || no_cache_str == "True" || no_cache_str == "true")
+            {
+                no_cache = true;
+            }
+        }
+
+        if(argc == 4)
+        {
+            std::string ucd_path    = argv[2];
+            std::string save_path   = argv[3];
+            ucd_util->fix_size_info(ucd_path, save_path, no_cache);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+            return -1;
         }
     }
     else if(command_1 == "drop")

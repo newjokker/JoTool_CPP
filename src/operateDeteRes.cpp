@@ -126,13 +126,10 @@ void get_xml_from_crop_img(std::string crop_dir, std::string save_xml_dir)
     for(int i=0; i<folder_path_list.size(); i++)
     {
         std::vector<std::string> file_path_vector = get_all_file_path(folder_path_list[i]);
-
         std::set<std::string> suffixs {".jpg", ".png", ".JPG", ".PNG"};
-        
-        std::string folder_name = get_folder_name(folder_path_list[i]);
-
         std::vector<std::string> img_path_vector = filter_by_suffix(file_path_vector, suffixs);
 
+        std::string folder_name = get_folder_name(folder_path_list[i]);
         for(int j=0; j<img_path_vector.size(); j++)
         {
             std::string file_name = get_file_name(img_path_vector[j]);
@@ -148,6 +145,49 @@ void get_xml_from_crop_img(std::string crop_dir, std::string save_xml_dir)
             xml_info_map[uc].push_back(loc_str);
             // std::cout << uc << ", " << folder_name << ", " << loc_str << std::endl;
         }
+    }
+
+    // get xml
+    auto iter = xml_info_map.begin();
+    while (iter != xml_info_map.end())
+    {
+        DeteRes* dete_res = new DeteRes();
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            DeteObj* dete_obj = new DeteObj();
+            dete_obj->load_from_name_str(iter->second[i]);
+            // 这边修改名字
+
+            dete_res->add_dete_obj(*dete_obj);
+            delete dete_obj;
+            // std::cout << iter->first << " : " << iter->second.size() << std::endl;
+        }
+        std::string save_xml_path = save_xml_dir + "/" + iter->first + ".xml"; 
+        dete_res->save_to_xml(save_xml_path);
+        delete dete_res;
+        iter++;
+    }
+}
+
+void get_xml_from_crop_img_use_origin_tag(std::string crop_dir,  std::string save_xml_dir)
+{
+    std::set<std::string> suffixs {".jpg", ".png", ".JPG", ".PNG"};
+    std::vector<std::string> img_path_vector = get_all_file_path_recursive(crop_dir, suffixs);
+    std::map<std::string, std::vector<std::string>> xml_info_map;
+    DeteObj obj;
+
+    for(int i=0; i<img_path_vector.size(); i++)
+    {
+        std::string file_name = get_file_name(img_path_vector[i]);
+        std::vector<std::string> loc_str_list = pystring::split(file_name, "-+-");
+        std::string loc_str = loc_str_list[loc_str_list.size()-1];
+
+        // // 替换 loc_str 中的 tag 信息
+        // obj.load_from_name_str(loc_str);
+        // loc_str = obj.get_name_str();
+
+        std::string uc = file_name.substr(0, pystring::rfind(file_name, "-+-"));
+        xml_info_map[uc].push_back(loc_str);
     }
 
     // get xml
