@@ -132,10 +132,7 @@ using namespace std;
 
 // TODO: cut_small_img 有些时候会报错，需要打印出报错的 uc 信息
 
-// TODO: 自动完善 ucd 信息  fix size_info, 指定图片路径（不指定的话 直接使用缓存数据），修复 size_info 信息，可以指定是否需要保存下载的 img 的信息
-
-// 
-
+// TODO: 增加 cleanlab_server 方式的 cut_small_img ，或者 先 split 分为 N 份，在写一个 .sh 文件一个运行即可
 
 
 
@@ -169,7 +166,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.9.3";
+    std::string app_version = "v2.9.4";
 
     // uci_info
     int volume_size         = 20;
@@ -2759,29 +2756,26 @@ int main(int argc_old, char ** argv_old)
     else if(command_1 == "test")
     {
 
+        std::string s = "quicks";
+        std::regex r("quick*|hook*");
 
-        for(int i=0; i<argc; i++)
+        if (std::regex_search(s, r)) {
+            std::cout << "Match found!" << std::endl;
+        } 
+        else 
         {
-            std::cout << argv[i] << std::endl;
+            std::cout << "Match not found." << std::endl;
         }
 
-        std::cout << "--------------------------------" << std::endl;
-
-        auto iter_set = short_args.begin();
-        while(iter_set != short_args.end())
+        if (std::regex_search("hooks", r)) {
+            std::cout << "Match found!" << std::endl;
+        } 
+        else 
         {
-            std::cout << iter_set->data() << std::endl;
-            iter_set++;
+            std::cout << "Match not found." << std::endl;
         }
 
-        std::cout << "--------------------------------" << std::endl;
 
-        auto iter_map = long_args.begin();
-        while(iter_map != long_args.end())
-        {
-            std::cout << iter_map->first << " : " << iter_map->second << std::endl;
-            iter_map++;
-        }
     }
     else if(command_1 == "grammar")
     {

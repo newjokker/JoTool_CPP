@@ -1034,26 +1034,12 @@ void UCDataset::filter_by_tags(std::set<std::string> tags, bool clear_obj)
             bool be_choose = false; 
             while(iter_tag != tags.end())
             {
-                // 如果是通配符的话，通配符中有一个 * 
-                if(pystring::count(iter_tag->data(), "*") == 1)
+                if(is_match_regex(obj->label, iter_tag->data()))
                 {
-                    if(is_match(obj->label, iter_tag->data()))
-                    {
-                        objs.push_back(obj);
-                        iter_tag++;
-                        be_choose = true;
-                        continue;
-                    }
-                }
-                else
-                {
-                    if(obj->label == iter_tag->data())
-                    {
-                        objs.push_back(obj);  
-                        iter_tag++; 
-                        be_choose = true;
-                        continue;
-                    }
+                    objs.push_back(obj);
+                    iter_tag++;
+                    be_choose = true;
+                    continue;
                 }
                 iter_tag++;
             }
@@ -1922,24 +1908,11 @@ void UCDataset::drop_tags(std::set<std::string> tags, bool clear_obj)
             bool be_choose = false; 
             while(iter_tag != tags.end())
             {
-                // 如果是通配符的话，通配符中有一个 * 
-                if(pystring::count(iter_tag->data(), "*") == 1)
+                if(is_match_regex(obj->label, iter_tag->data()))
                 {
-                    if(is_match(obj->label, iter_tag->data()))
-                    {
-                        iter_tag++;
-                        be_choose = true;
-                        continue;
-                    }
-                }
-                else
-                {
-                    if(obj->label == iter_tag->data())
-                    {
-                        iter_tag++; 
-                        be_choose = true;
-                        continue;
-                    }
+                    iter_tag++;
+                    be_choose = true;
+                    continue;
                 }
                 iter_tag++;
             }

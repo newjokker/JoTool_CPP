@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <fstream>
 #include <vector>
+#include <regex>
 #include <set>
 #include <string.h>
 #include <sys/stat.h>
@@ -212,6 +213,20 @@ bool is_match(std::string assign_str, std::string regex_str)
     {
         std::cout << ERROR_COLOR << "need one * in regex_str : " << regex_str << ", " << star_count << STOP_COLOR << std::endl;
         throw "need one * in regex_str : " + regex_str;
+    }
+}
+
+bool is_match_regex(std::string s, std::string regex_str)
+{
+    std::regex r(regex_str);
+    
+    if (std::regex_search(s, r)) 
+    {
+        return true;
+    } 
+    else 
+    {
+        return false;
     }
 }
 

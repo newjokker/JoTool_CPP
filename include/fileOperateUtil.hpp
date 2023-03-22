@@ -39,9 +39,9 @@ bool is_write_dir(std::string);
 
 // 字符串是否匹配 a 是被匹配的句子，b 是带通配符
 bool is_match(std::string a, std::string b);
+bool is_match_regex(std::string a, std::string regex_str);
 bool is_head_match(std::string a, std::string b);
 bool is_tail_match(std::string a, std::string b);
-
 std::string get_file_folder(std::string);
 std::string get_file_suffix(std::string);
 std::string get_file_name(std::string);
