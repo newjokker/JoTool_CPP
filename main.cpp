@@ -132,7 +132,7 @@ using namespace std;
 
 // TODO: cut_small_img 有些时候会报错，需要打印出报错的 uc 信息
 
-// TODO: 增加 cleanlab_server 方式的 cut_small_img ，或者 先 split 分为 N 份，在写一个 .sh 文件一个运行即可
+// TODO: 增加 cleanlab_server 方式的 cut_small_img ，或者 先 split 分为 N 份，裁剪小图的代码多写几个使用分好隔开就行
 
 
 
@@ -166,7 +166,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.9.4";
+    std::string app_version = "v2.9.5";
 
     // uci_info
     int volume_size         = 20;

@@ -4606,7 +4606,7 @@ void UCDatasetUtil::fix_size_info(std::string ucd_path, std::string save_path, b
     }
 
     UCDataset* ucd = new UCDataset(ucd_path);
-    ucd->parse_ucd(false);
+    ucd->parse_ucd(true);
 
     // 遍历所有的uc 查看 uc 对应的 size_info
     std::set<std::string> img_suffix {".jpg", ".JPG", ".png", ".PNG"};
