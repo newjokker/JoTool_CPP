@@ -128,8 +128,6 @@ using namespace std;
 
 // FIXME: save 进度条会出现不动的情况，当保存的地址是有图片的时候
 
-// TODO: save 函数设计不合理，合并 parse 和 save 函数， -s 参数是从 服务器中拿到数据，不加这个参数，就是解析本地的数据
-
 // TODO: cut_small_img 有些时候会报错，需要打印出报错的 uc 信息
 
 // TODO: 增加 cleanlab_server 方式的 cut_small_img ，或者 先 split 分为 N 份，裁剪小图的代码多写几个使用分好隔开就行
@@ -166,7 +164,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.9.5";
+    std::string app_version = "v2.9.6";
 
     // uci_info
     int volume_size         = 20;
@@ -370,6 +368,12 @@ int main(int argc_old, char ** argv_old)
         }
         std::string ucd_name = argv[2];
         std::string ucd_save_path;
+
+        if(pystring::endswith(ucd_name, ".json"))
+        {
+            ucd_name = ucd_name.substr(0, ucd_name.size()-5);
+        }
+
         if(argc == 3)
         {
             ucd_save_path = ucd_name + ".json";
@@ -380,6 +384,10 @@ int main(int argc_old, char ** argv_old)
             if(is_dir(ucd_save_path))
             {
                 ucd_save_path += "/" + ucd_name + ".json";
+            }
+            else if(! pystring::endswith(ucd_save_path, ".json"))
+            {
+                ucd_save_path += ".json";
             }
         }
         else
@@ -404,6 +412,13 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "save")
     {
+
+        bool xml_from_json = true;
+        if(short_args.count("s") > 0)
+        {
+            xml_from_json = false;
+        }
+
         if((argc == 5) || (argc == 6))
         {
             std::string ucd_path = argv[2];
@@ -476,8 +491,28 @@ int main(int argc_old, char ** argv_old)
                 uc_vector = ucd->uc_list;
             }
 
+            // download img
             if(need_img){ucd_util->load_img(save_dir, uc_vector);}
-            if(need_xml){ucd_util->load_xml(save_dir, uc_vector);}
+
+            // parse xml 
+            if(need_xml)
+            {
+                if(xml_from_json)
+                {
+                    if(need_img)
+                    {
+                        ucd_util->parse_voc_xml(save_dir, save_dir, ucd_path);
+                    }
+                    else
+                    {
+                        ucd_util->parse_voc_xml(ucd_util->cache_img_dir, save_dir, ucd_path);
+                    }
+                }
+                else
+                {
+                    ucd_util->load_xml(save_dir, uc_vector);
+                }
+            }
             delete ucd;
         }
         else

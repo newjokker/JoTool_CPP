@@ -314,11 +314,13 @@ void UcdParamOpt::load_param_info()
     ParamInfo * param_save = new ParamInfo("save");
     param_save->group = "sync";
     param_save->grammar = "ucd save ucd_path save_dir save_mode(image,xml) {need_count}";
-    param_save->english_explain = "load img|xml from server";
-    param_save->chinese_explain = "从服务器下载 图片|标注 保存到指定文件夹"; 
+    param_save->args_info["-s"] = "增加 -s 代表 xml 不是从当前文件中解析出来的，而是从服务器下载的";
+    param_save->english_explain = "load img from server and parse xml from json";
+    param_save->chinese_explain = "从服务器下载 图片 保存到指定文件夹，从 json 解析 xml 保存到指定文件夹"; 
     param_save->demo.push_back("ucd save test.json ./img 10             (将 test.json 中带的所有图片保存到 ./img 路径下)");  
-    param_save->demo.push_back("ucd save test.json ./img 01             (将 test.json 中带的所有xml保存到 ./img 路径下)");  
+    param_save->demo.push_back("ucd save test.json ./img 01             (从 test.json 中解析出xml信息保存到 ./img 路径下)");  
     param_save->demo.push_back("ucd save test.json ./img 11             (将 test.json 中带的所有图片和xml保存到 ./img 路径下)");  
+    param_save->demo.push_back("ucd save test.json ./img 01 -s          (从 服务器下载 test.json 中包含的 uc 对应的 xml)");  
     UcdParamOpt::add_param(param_save);
     
     // save_cache
