@@ -8,6 +8,7 @@
 #include <iostream>
 #include <iomanip>
 #include "include/paramInfo.hpp"
+#include "include/pystring.h"
 
 #define ERROR_COLOR         "\x1b[1;31m"    // 红色
 #define HIGHTLIGHT_COLOR    "\033[1;35m"    // 品红
@@ -46,8 +47,14 @@ bool ParamInfo::is_similar(std::string other_command)
         return true;
     }
 
+    // 当包含这个关键字的时候也认为是相似的
+    if(pystring::find(ParamInfo::command, other_command) >= 0)
+    {
+        return true;
+    }
+
     // 字符串的相似程度就是计算字符串的最小编辑代价
-    int mec = min_edit_cost(ParamInfo::command, other_command, 1, 1, 1);
+    int mec = min_edit_cost(ParamInfo::command, other_command, 1, 1, 1.5);
     float diff_index = (float)mec / (float)ParamInfo::command.size();
 
     // std::cout << "diff index : " << diff_index << std::endl;
@@ -508,7 +515,7 @@ void UcdParamOpt::load_param_info()
     param_minus_obj->grammar = "ucd minus_obj ucd_path1 ucd_path2 save_path";
     param_minus_obj->english_explain = "do minus operation between two ucd";
     param_minus_obj->chinese_explain = "减操作数据集, 删除存在 ucd_path2 中的 obj 信息 uc 不变";   
-    param_minus_obj->demo.push_back("ucd minus test1.json test2.json res.json       (将 test1.josn - test2.json 得到 res.json)");
+    param_minus_obj->demo.push_back("ucd minus_obj test1.json test2.json res.json       (将 test1.josn - test2.json 得到 res.json)");
     UcdParamOpt::add_param(param_minus_obj);
 
     // minus_uc
@@ -517,7 +524,7 @@ void UcdParamOpt::load_param_info()
     param_minus_uc->grammar = "ucd minus_uc ucd_path1 ucd_path2 save_path";
     param_minus_uc->english_explain = "do minus operation between two ucd";
     param_minus_uc->chinese_explain = "减操作数据集, 删除存在 ucd_path2 中的 uc 信息，当 uc 存在与 uc 对应的 size_info 和 obj_info 也都不存在了";   
-    param_minus_uc->demo.push_back("ucd minus test1.json test2.json res.json       (将 test1.josn - test2.json 得到 res.json)");
+    param_minus_uc->demo.push_back("ucd minus_uc test1.json test2.json res.json       (将 test1.josn - test2.json 得到 res.json)");
     UcdParamOpt::add_param(param_minus_uc);
     
     // diff
@@ -1019,9 +1026,11 @@ void UcdParamOpt::load_param_info()
     ParamInfo * param_draw = new ParamInfo("draw");
     param_draw->group = "opt";
     param_draw->grammar = "ucd draw ucd_path save_dir {uc} {uc} {uc} ...";
+    param_draw->args_info["-f"] = "force, 强制重画，存储路径有相同的图片，也会强制重新画一遍";
     param_draw->english_explain = "";
     param_draw->chinese_explain = "将 uc 中的 obj 画出来，可以在配置文件中指定各个标签的颜色，标签以 correct_, mistake_, miss_, extra_ 开头 当color.txt 未指定标签颜色时，会给指定的颜色";   
     param_draw->demo.push_back("ucd draw test.json ./draw                                       (将 test.json 中的所有 uc 中的 obj 画出并保存在 ./draw 文件夹下)");
+    param_draw->demo.push_back("ucd draw test.json ./draw  -f                                   (将 test.json 中的所有 uc 中的 obj 画出并保存在 ./draw 文件夹下, 本地有画好的图片强制重画)");
     param_draw->demo.push_back("ucd draw test.json ./draw  Dem1iwe Dem1iwk Dem1iwy              (将 test.json 中的 Dem1iwe Dem1iwk Dem1iwy 三个 uc 画出并保存在 ./draw 文件夹下)");
     UcdParamOpt::add_param(param_draw);
     

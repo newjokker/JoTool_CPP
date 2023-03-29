@@ -574,7 +574,7 @@ void DeteRes::crop_dete_obj(std::string save_dir, bool split_by_tag, std::string
 
     if((DeteRes::width == 0) || (DeteRes::height == 0))
     {
-        std::cout << "parse img failed, wight or hwight == 0, uc : " << save_name << std::endl;
+        std::cout << ERROR_COLOR << "parse img failed, wight or hwight == 0, uc : " << STOP_COLOR << save_name << std::endl;
         return;
     }
 
@@ -606,7 +606,7 @@ void DeteRes::crop_dete_obj(std::string save_dir, bool split_by_tag, std::string
             }
             catch(...)
             {
-                std::cout << "crop_dete_obj error : " << each_save_name << std::endl;
+                std::cout << ERROR_COLOR << "crop_dete_obj error : " << each_save_name << STOP_COLOR << std::endl;
             }
         }
     }

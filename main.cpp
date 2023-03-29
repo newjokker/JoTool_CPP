@@ -94,15 +94,11 @@ using namespace std;
 
 // 有些图片截取小图之后是反色的，为什么会这样，是因为原图的问题吗？Dxm00d0
 
-// drop_extra_info, 以 uc_list 为基准，uc_list 中没有的元素 object_info 和 size_info 中有的话 删除
-
 // TODO: count_folder， 统计文件夹中的文件信息，统计文件夹的大小
 
 // TODO: 做成 python 类型，输入 python 之后直接进入 pythyon 的环境变量，一直到 按 ctrl + c 才退出
 
 // FIXME: 存在 bug 只要 ucd 安装了，有些软件就不能安装，会报确实 .so 的错误
-
-// FIXME: uc_list 改为 uc_set 比较好，现在的方式去重非常不方便
 
 // TODO: map 最后的结果画图出来，可以画简单点的图，找 C++ 或者 opencv 的画图软件
 
@@ -111,8 +107,6 @@ using namespace std;
 // TODO: 多个模型和 gt 进行对比，可以把多条曲线画在一个画纸上，
 
 // TODO: 指定默认使用的 python 环境，这样 c++ 直接调用 Python 做一些操作
-
-// TODO: 通配符在不同的机器上会有问题
 
 // TODO: AP50 的概念搞错了，是控制 iou 而不是 conf 
 
@@ -131,6 +125,18 @@ using namespace std;
 // TODO: cut_small_img 有些时候会报错，需要打印出报错的 uc 信息
 
 // TODO: 增加 cleanlab_server 方式的 cut_small_img ，或者 先 split 分为 N 份，裁剪小图的代码多写几个使用分好隔开就行
+
+// TODO: 重命名的时候，重复的图片直接删掉了，
+
+// TODO: 可以指定所有的标签都是一个颜色，用于结果检查，for_improve_recall， --assign_color [0,0,255] 
+
+// TODO: 每个函数运行完，需要有运行的基本信息，
+
+// TODO: from_yolo_txt 将 yolo_txt 的内容直接转为 json，需要获取 size_info 这个先要检验缓存中有住够的图片
+
+// TODO: draw 指定是否覆盖之前的文件，-f 就是覆盖之前的数据
+
+// TODO: 所有人使用一个版本就是最新版本，每次只要我自己去更新那几个文件就行，但是我如何把权限给所有的人呢
 
 
 
@@ -164,7 +170,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.9.6";
+    std::string app_version = "v2.9.7";
 
     // uci_info
     int volume_size         = 20;
@@ -427,13 +433,13 @@ int main(int argc_old, char ** argv_old)
             
             if(! is_file(ucd_path))
             {
-                std::cout << "json_path not exists : " << ucd_path << std::endl;
+                std::cout << ERROR_COLOR << "json_path not exists : " << ucd_path << STOP_COLOR << std::endl;
                 throw "json_path not exists";
             }
 
            if(! is_dir(save_dir))
             {
-                std::cout << "save_dir not exists : " << save_dir << std::endl;
+                std::cout << ERROR_COLOR << "save_dir not exists : " << save_dir << STOP_COLOR  << std::endl;
                 throw "save_dir not exists";
              }
 
@@ -490,6 +496,9 @@ int main(int argc_old, char ** argv_old)
             {
                 uc_vector = ucd->uc_list;
             }
+
+            // 
+            std::cout << HIGHTLIGHT_COLOR << "如果出错, 查看对缓存文件夹是否有权限，使用 ucd meta | grep cache_dir 查看缓存文件夹，使用 sudo chmod 777 {cache_dir} -R 修改权限" << STOP_COLOR << std::endl;
 
             // download img
             if(need_img){ucd_util->load_img(save_dir, uc_vector);}
@@ -899,7 +908,7 @@ int main(int argc_old, char ** argv_old)
         }
         else
         {
-            ucd_param_opt->print_command_info("merge");
+            ucd_param_opt->print_command_info(command_1);
             return -1;
         }
     }
@@ -2339,14 +2348,10 @@ int main(int argc_old, char ** argv_old)
             std::cout << "--------------------------------------" << std::endl;
             std::cout << "change ucd version by :" << std::endl;
 
-            // TODO: 更改文件的权限
-            // TODO: 自动更新 ~/.bash_aliases 文件
-            // TODO: 自动 运行 ldconfig and source 
-
-            std::cout << "  sudo chmod 777 /home/ldq/Apps_jokker -R" << std::endl;
-            std::cout << "  sudo ldconfig" << std::endl;
-            std::cout << "  vim ~/.bash_aliases" << std::endl;
-            std::cout << "  source ~/.bash_aliases" << std::endl;
+            std::cout << HIGHTLIGHT_COLOR << "  sudo chmod 777 /home/ldq/Apps_jokker -R" << STOP_COLOR << std::endl;
+            std::cout << HIGHTLIGHT_COLOR << "  sudo ldconfig" << STOP_COLOR << std::endl;
+            std::cout << HIGHTLIGHT_COLOR << "  vim ~/.bash_aliases" << STOP_COLOR << std::endl;
+            std::cout << HIGHTLIGHT_COLOR << "  source ~/.bash_aliases" << STOP_COLOR << std::endl;
             std::cout << "" << std::endl;
         }
         else
@@ -2560,6 +2565,14 @@ int main(int argc_old, char ** argv_old)
         std::string save_dir;
         std::vector<std::string> uc_list = {};
 
+        // 是否覆盖之前的图片
+        bool cover_old = false;
+
+        if(short_args.count("f") > 0)
+        {
+            cover_old = true;
+        }
+
         if(argc >= 4)
         {
             ucd_path = argv[2];
@@ -2569,7 +2582,7 @@ int main(int argc_old, char ** argv_old)
             {
                 uc_list.push_back(argv[i]);
             }
-            ucd_util->draw_res(ucd_path, save_dir, uc_list);
+            ucd_util->draw_res(ucd_path, save_dir, uc_list, cover_old);
         }
         else
         {

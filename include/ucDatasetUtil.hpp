@@ -354,7 +354,7 @@ class UCDatasetUtil
         void set_fack_uc(std::string folder_path);
 
         // 对检测结果进行画图
-        void draw_res(std::string ucd_path, std::string save_dir, std::vector<std::string> uc_list);
+        void draw_res(std::string ucd_path, std::string save_dir, std::vector<std::string> uc_list, bool cover_old_img=false);
 
         // 随机给不同的标签分配不同的颜色
         void get_random_color_map(std::string ucd_path);

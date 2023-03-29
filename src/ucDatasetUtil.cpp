@@ -1964,6 +1964,14 @@ void UCDataset::drop_empty_uc()
         {
             uc_list.push_back(uc);
         }
+        else
+        {
+            // clean extra size_info
+            if(UCDataset::size_info.count(uc) > 0)
+            {
+                UCDataset::size_info.erase(uc);
+            }
+        }
     }
     UCDataset::uc_list = uc_list;
 }
@@ -4055,7 +4063,7 @@ void UCDatasetUtil::set_fack_uc(std::string fake_folder)
     }
 }
 
-void UCDatasetUtil::draw_res(std::string ucd_path, std::string save_dir, std::vector<std::string> uc_list)
+void UCDatasetUtil::draw_res(std::string ucd_path, std::string save_dir, std::vector<std::string> uc_list, bool cover_old_img)
 {
 
     if(! is_file(ucd_path))
@@ -4108,20 +4116,19 @@ void UCDatasetUtil::draw_res(std::string ucd_path, std::string save_dir, std::ve
     for(int i=0; i<uc_list.size(); i++)
     {
         std::string uc = uc_list[i];
-        UCDatasetUtil::load_img_with_assign_uc(UCDatasetUtil::cache_img_dir, uc);
-        DeteRes* dete_res = new DeteRes();
-        ucd->get_dete_res_with_assign_uc(dete_res, uc);
-        std::string img_path = UCDatasetUtil::cache_img_dir + "/" + uc + ".jpg";
-        dete_res->parse_img_info(img_path);
         std::string save_path = save_dir + "/" + uc + ".jpg";
 
-        if(! is_file(save_path))
+        if((! is_file(save_path)) || cover_old_img)
         {
+            UCDatasetUtil::load_img_with_assign_uc(UCDatasetUtil::cache_img_dir, uc);
+            DeteRes* dete_res = new DeteRes();
+            ucd->get_dete_res_with_assign_uc(dete_res, uc);
+            std::string img_path = UCDatasetUtil::cache_img_dir + "/" + uc + ".jpg";
+            dete_res->parse_img_info(img_path);
             dete_res->draw_dete_res(save_path, color_map);
+            delete dete_res;
         }
-
         bar.progress(i, N);
-        delete dete_res;
     }
     bar.finish();
     delete ucd;

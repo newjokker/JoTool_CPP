@@ -151,7 +151,7 @@ void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_
 
     if((! is_dir(img_dir)) || (! is_dir(xml_dir)))
     {
-        std::cout << "image dir or xml dir not exists : " << img_dir << std::endl;
+        std::cout << ERROR_COLOR << "image dir or xml dir not exists : " << img_dir << STOP_COLOR << std::endl;
     }
 
     std::set<std::string> suffixs {".jpg", ".JPG", ".png", ".PNG"};
@@ -182,7 +182,7 @@ void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_
             }
             else
             {
-                std::cout << "can't find xml_path : " << xml_path << std::endl;
+                std::cout << HIGHTLIGHT_COLOR << "can't find xml_path : " << xml_path << STOP_COLOR << std::endl;
             }
             bar.progress(i, N);
         }
@@ -220,7 +220,7 @@ void SaturnDatabaseSQL::rename_img_json_dir(std::string img_dir, std::string jso
 
     if((! is_dir(img_dir)) || (! is_dir(json_dir)))
     {
-        std::cout << "image dir or xml dir not exists : " << img_dir << std::endl;
+        std::cout << ERROR_COLOR << "image dir or xml dir not exists : " << img_dir << STOP_COLOR << std::endl;
     }
 
     std::set<std::string> suffixs {".jpg", ".JPG", ".png", ".PNG"};
