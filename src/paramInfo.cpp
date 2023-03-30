@@ -311,10 +311,12 @@ void UcdParamOpt::load_param_info()
     ParamInfo * param_check = new ParamInfo("check");
     param_check->group = "sync";
     param_check->grammar = "ucd check";
+    param_check->args_info["--assign_uc"] = "查找包含某一个 uc 的所有 json 文件（只查找 official 数据库中最外层的 ucd:json）";
     param_check->english_explain = "get all ucd official|customer from server";
     param_check->chinese_explain = "查看服务器中所有 ucd 信息，包括官方 ucd 和 自定义 ucd";
-    param_check->demo.push_back("ucd check              (查看所有云端的 ucd)");   
-    param_check->demo.push_back("ucd check | grep fzc   (查看所有云端中带有 fzc 关键字的 ucd)"); 
+    param_check->demo.push_back("ucd check                          (查看所有云端的 ucd)");   
+    param_check->demo.push_back("ucd check --assign_uc Dka09ai      (查看 official 最外层 ucd:json 中包含 Dka09ai 进行返回)");   
+    param_check->demo.push_back("ucd check | grep fzc               (查看所有云端中带有 fzc 关键字的 ucd)"); 
     UcdParamOpt::add_param(param_check);
     
     // save
@@ -691,7 +693,7 @@ void UcdParamOpt::load_param_info()
     // history
     ParamInfo * param_history = new ParamInfo("history");
     param_history->group = "info";
-    param_history->grammar = "ucd history {line_count}";
+    param_history->grammar = "ucd history";
     param_history->args_info["--line"] = "指定处理最后多少行";
     param_history->args_info["-u"] = "输出时，去除重复命令的行，统计时不受影响";
     param_history->args_info["-i"] = "对使用的 ucd 命令进行统计";

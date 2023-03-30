@@ -2759,25 +2759,47 @@ void UCDatasetUtil::load_ucd_app(std::string version, std::string save_dir)
     }
 }
 
-void UCDatasetUtil::search_ucd()
+void UCDatasetUtil::search_ucd(std::string assign_uc)
 {
+    if((!is_uc(assign_uc)) && (assign_uc != ""))
+    {
+        std::cout << ERROR_COLOR << "error uc : " << assign_uc << STOP_COLOR << std::endl;
+        return;
+    }
+
     std::string check_url = "http://" + UCDatasetUtil::host + ":" + std::to_string(UCDatasetUtil::port);
     httplib::Client cli(check_url);
-    auto res = cli.Get("/ucd/check");
+    std::string url_path;
+
+    if(assign_uc == "")
+    {
+        url_path = "/ucd/check";
+    }
+    else
+    {
+        url_path = "/ucd/check_assign_uc/" + assign_uc;
+    }
     
+    auto res = cli.Get(url_path);
+
     if(res != nullptr)
     {
         json data = json::parse(res->body);
         // customer
+        std::cout << "--------------------------------------------------------" << std::endl;
+        std::cout << "         check all dataset in server:80, " << HIGHTLIGHT_COLOR << assign_uc << STOP_COLOR << std::endl;
+        std::cout << "--------------------------------------------------------" << std::endl;
         for(int i=0; i<data["official"].size(); i++)
         {
             std::cout << "official : " << data["official"][i] << std::endl;
         }
+
         // official
         for(int i=0; i<data["customer"].size(); i++)
         {
             std::cout << "customer : " << data["customer"][i] << std::endl;
         }
+        std::cout << "--------------------------------------------------------" << std::endl;
     }
     else
     {

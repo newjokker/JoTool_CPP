@@ -132,13 +132,12 @@ using namespace std;
 
 // TODO: 每个函数运行完，需要有运行的基本信息，
 
-// TODO: from_yolo_txt 将 yolo_txt 的内容直接转为 json，需要获取 size_info 这个先要检验缓存中有住够的图片
-
 // TODO: 所有人使用一个版本就是最新版本，每次只要我自己去更新那几个文件就行，但是我如何把权限给所有的人呢
 
-// TODO: ucd history 查看历史的命令，可以配合 grep 使用比较方便
-
 // TODO: diff_obj 对比 目标对象有对少是重合的，按照标签打印其中重合的个数和重合的比例
+
+// TODO: drop_tags 和 filter_by_tags 是不是文件名影响的 
+
 
 
 int main(int argc_old, char ** argv_old)
@@ -171,7 +170,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.9.8";
+    std::string app_version = "v3.0.2";
 
     // uci_info
     int volume_size         = 20;
@@ -360,9 +359,15 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "check")
     {
+        std::string assign_uc = "";
+        if(long_args.count("assign_uc") > 0)
+        {
+            assign_uc = long_args["assign_uc"];
+        }
+
         if(argc == 2)
         {
-            ucd_util->search_ucd();
+            ucd_util->search_ucd(assign_uc);
         }
         else
         {
