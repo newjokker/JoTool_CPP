@@ -282,7 +282,7 @@ std::vector<std::string> get_all_file_path(std::string path)
     struct dirent* ptr;
     if(!(pDir = opendir(path.c_str())))
     {
-        std::cout << "Folder doesn't Exist! " << path << std::endl;
+        std::cout << ERROR_COLOR << "Folder doesn't Exist! " << STOP_COLOR << path << std::endl;
         throw "folder doesn't exists, " + path;           
     }
     while((ptr = readdir(pDir))!=0) {
@@ -291,7 +291,6 @@ std::vector<std::string> get_all_file_path(std::string path)
             if(is_file(path + "/" + ptr->d_name))
             {
                 filenames.push_back(path + "/" + ptr->d_name);
-                // std::cout << "file file : " << path + "/" + ptr->d_name << std::endl;
             }
         }
     }
@@ -306,7 +305,7 @@ std::vector<std::string> get_all_folder_path(std::string path)
     struct dirent* ptr;
     if(!(pDir = opendir(path.c_str())))
     {
-        std::cout << "Folder doesn't Exist! " << path << std::endl;
+        std::cout << ERROR_COLOR << "Folder doesn't Exist! " << STOP_COLOR << path << std::endl;
         throw "folder doesn't exists, " + path;           
         return folder_names;
     }
@@ -359,7 +358,7 @@ static void _GetFileNames(std::string path, std::vector<std::string>& filenames)
     struct dirent* ptr;
     if(!(pDir = opendir(path.c_str())))
     {
-        std::cout << "Folder doesn't Exist!" << std::endl;
+        std::cout << ERROR_COLOR << "Folder doesn't Exist! " << STOP_COLOR << path << std::endl;
         return;
     }
     while((ptr = readdir(pDir))!=0) {
@@ -449,7 +448,7 @@ void move_file_vector_to_dir(std::vector<std::string> file_vector, std::string s
 {
     if(! is_dir(save_dir))
     {
-        std::cout << "save_dir not exists : " << save_dir << std::endl;
+        std::cout << ERROR_COLOR << "save folder doesn't Exist! " << STOP_COLOR << std::endl;
         throw "save_dir not exists";
     }
 

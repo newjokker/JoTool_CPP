@@ -450,6 +450,15 @@ void UcdParamOpt::load_param_info()
     param_from_uc->demo.push_back("ucd from_uc ./test.json Fuc0001 Fuc0002 Fuc0003      (生成一个只有 Fuc0001 Fuc0002 Fuc0003 三个 uc 的 ucd)");
     UcdParamOpt::add_param(param_from_uc);
 
+    // from_yolo_txt
+    ParamInfo * param_from_yolo_txt = new ParamInfo("from_yolo_txt");
+    param_from_yolo_txt->group = "convert";
+    param_from_yolo_txt->grammar = "ucd from_yolo_txt txt_dir ucd_path";
+    param_from_yolo_txt->args_info["--size_ucd"] = "yolo_txt 想恢复成 obj 必须获取原始图像长宽信息，当缓存中没有对应的图片时，可以指定存储长宽信息的 ucd:json 文件";
+    param_from_yolo_txt->chinese_explain = "从符合 yolo 训练条件的 txt 数据中恢复 obj 信息";   
+    param_from_yolo_txt->demo.push_back("ucd from_yolo_txt ./txt_dir res.json --size_ucd ./size_info.json      (从 txt_dir 的txt文件生成 ucd:json，指定从 size_info.json 中获取需要图片的长宽信息)");
+    UcdParamOpt::add_param(param_from_yolo_txt);
+
     // from_dete_server
     ParamInfo * param_from_dete_server = new ParamInfo("from_dete_server");
     param_from_dete_server->group = "convert";
@@ -669,15 +678,29 @@ void UcdParamOpt::load_param_info()
     param_cache_clean->demo.push_back("ucd cache_clean img_dir                      (将 img_dir 文件夹中错误的图片全部删除(大小为 0 的图片)))");
     UcdParamOpt::add_param(param_cache_clean);
 
-    // to_yolo
-    ParamInfo * param_to_yolo = new ParamInfo("to_yolo");
-    param_to_yolo->group = "convert";
-    param_to_yolo->grammar = "ucd to_yolo ucd_path save_dir {label_list}";
-    param_to_yolo->english_explain = "convert ucd to yolo train txt (format)";
-    param_to_yolo->chinese_explain = "将 ucd 转为 yolo txt 格式的数据，需要指定转换的标签，不指定的标签不转换";
-    param_to_yolo->demo.push_back("ucd to_yolo test_1.json ./yolo_train_txt                         (使用 test_1.json 中的 label_used 属性，将 test_1.json 中的目标转为 yolo 格式的 txt 数据，存放到 ./yolo_train_txt 文件夹中)");   
-    param_to_yolo->demo.push_back("ucd to_yolo test_2.json ./yolo_train_txt Fnormal,fzc_broken      (指定需要转为 txt 的标签)");   
-    UcdParamOpt::add_param(param_to_yolo);
+    // to_yolo_txt
+    ParamInfo * param_to_yolo_txt = new ParamInfo("to_yolo_txt");
+    param_to_yolo_txt->group = "convert";
+    param_to_yolo_txt->grammar = "ucd to_yolo_txt ucd_path save_dir {label_list}";
+    param_to_yolo_txt->english_explain = "convert ucd to yolo train txt (format)";
+    param_to_yolo_txt->chinese_explain = "将 ucd 转为 yolo txt 格式的数据，需要指定转换的标签，不指定的标签不转换";
+    param_to_yolo_txt->demo.push_back("ucd to_yolo_txt test_1.json ./yolo_train_txt                         (使用 test_1.json 中的 label_used 属性，将 test_1.json 中的目标转为 yolo 格式的 txt 数据，存放到 ./yolo_train_txt 文件夹中)");   
+    param_to_yolo_txt->demo.push_back("ucd to_yolo_txt test_2.json ./yolo_train_txt Fnormal,fzc_broken      (指定需要转为 txt 的标签)");   
+    UcdParamOpt::add_param(param_to_yolo_txt);
+
+    // history
+    ParamInfo * param_history = new ParamInfo("history");
+    param_history->group = "info";
+    param_history->grammar = "ucd history {line_count}";
+    param_history->args_info["--line"] = "指定处理最后多少行";
+    param_history->args_info["-u"] = "输出时，去除重复命令的行，统计时不受影响";
+    param_history->args_info["-i"] = "对使用的 ucd 命令进行统计";
+    param_history->chinese_explain = "打印之前使用的 ucd 命令";
+    param_history->demo.push_back("ucd history                  (打印 ucd 所有历史使用命令)");   
+    param_history->demo.push_back("ucd history --line 20        (打印 ucd 使用的最后 20 行使用命令)");   
+    param_history->demo.push_back("ucd history -i               (打印 ucd 关键字使用频次分布)");   
+    param_history->demo.push_back("ucd history -i --line 100    (打印 ucd 关键字最后一百行命令使用频次分布)");   
+    UcdParamOpt::add_param(param_history);
 
     // acc
     ParamInfo * param_acc = new ParamInfo("acc");

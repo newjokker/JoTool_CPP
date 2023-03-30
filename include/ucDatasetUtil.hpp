@@ -107,6 +107,9 @@ class UCDataset
         // 增量解析 xml 数据到 ucd 中
         void add_voc_xml_info(std::string uc, std::string voc_xml_path);
 
+        // 增加解析 yolo_txt 到 ucd 中
+        void add_yolo_txt_info(std::string uc, std::string txt_path, int width, int height);
+
         // 增量 添加 deteRes 数据到 ucd 中
         void add_dete_res_info(std::string uc, DeteRes dete_res);
         
@@ -301,6 +304,9 @@ class UCDatasetUtil
         // 从文件中获取 ucd，只解析文件名，不解析文件内容
         void get_ucd_from_file_dir(std::string file_dir, std::string ucd_path);
 
+        // 从 yolo 训练的 txt 格式生成 json
+        void get_ucd_from_yolo_txt_dir(std::string yolo_txt_dir, std::string ucd_path, std::string size_ucd="");
+
         // 从检测服务结果计算 ucd
         void get_ucd_from_dete_server(std::string  dete_server_dir, std::string ucd_path, std::string save_path);
 
@@ -388,6 +394,9 @@ class UCDatasetUtil
 
         // 修复 size_info 信息
         void fix_size_info(std::string ucd_path, std::string save_path, bool no_cache);
+
+        // 找到缓存中 uc 图片
+        std::string get_cache_uc_img_path(std::string uc);
 
 
     private:

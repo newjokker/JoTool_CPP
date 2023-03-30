@@ -134,10 +134,11 @@ using namespace std;
 
 // TODO: from_yolo_txt 将 yolo_txt 的内容直接转为 json，需要获取 size_info 这个先要检验缓存中有住够的图片
 
-// TODO: draw 指定是否覆盖之前的文件，-f 就是覆盖之前的数据
-
 // TODO: 所有人使用一个版本就是最新版本，每次只要我自己去更新那几个文件就行，但是我如何把权限给所有的人呢
 
+// TODO: ucd history 查看历史的命令，可以配合 grep 使用比较方便
+
+// TODO: diff_obj 对比 目标对象有对少是重合的，按照标签打印其中重合的个数和重合的比例
 
 
 int main(int argc_old, char ** argv_old)
@@ -156,7 +157,7 @@ int main(int argc_old, char ** argv_old)
     // server
     std::string host        = "192.168.3.111";
     int port                = 11101;
-    std::string config_path;
+    std::string config_path = "";
     std::string history_path;
     
     // sql info 
@@ -170,13 +171,13 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v2.9.7";
+    std::string app_version = "v2.9.8";
 
     // uci_info
     int volume_size         = 20;
 
     // cache dir
-    std::string cache_dir;
+    std::string cache_dir = "";
 
     // get user name
     struct passwd* pwd;
@@ -311,24 +312,28 @@ int main(int argc_old, char ** argv_old)
     // must set ucd_cache 
     if((! is_dir(cache_dir)) && (command_1 != "set") && (command_1 != "help")) 
     {
-        std::cout << WARNNING_COLOR << "cache_dir not exists, edit ucdconfig.ini cache/cache_dir : " << STOP_COLOR << std::endl;
+        std::cout << WARNNING_COLOR << "cache_dir not exists, edit ucdconfig.ini cache/dir : " << STOP_COLOR << std::endl;
         std::cout << "ucdconfig path : " << config_path << std::endl;
         std::cout << "-----------------------------------------------------------" << std::endl;
         std::cout << "set cache_dir with 'ucd set cache_dir {cache_dir}' " << std::endl;
         std::cout << "-----------------------------------------------------------" << std::endl;
         return -1;
     }
-
-    // 文件夹权限检查    
-    if(! is_read_dir(ucd_util->cache_img_dir))
+    
+    // 检查文件夹权限
+    if(command_1 != "set")
     {
-        std::cout << ERROR_COLOR << "WARNING : cache_img folder don't have read access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
-        return -1;
-    }
-    else if(! is_write_dir(ucd_util->cache_img_dir))
-    {
-        std::cout << ERROR_COLOR << "WARNING : cache_img folder don't have write access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
-        return -1;
+        // 文件夹权限检查    
+        if(! is_read_dir(ucd_util->cache_img_dir))
+        {
+            std::cout << ERROR_COLOR << "WARNING : cache_img folder don't have read access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
+            return -1;
+        }
+        else if(! is_write_dir(ucd_util->cache_img_dir))
+        {
+            std::cout << ERROR_COLOR << "WARNING : cache_img folder don't have write access : " << ucd_util->cache_img_dir << STOP_COLOR << std::endl;
+            return -1;
+        }
     }
 
     // key word
@@ -757,6 +762,27 @@ int main(int argc_old, char ** argv_old)
             return -1;
         }
     }
+    else if(command_1 == "from_yolo_txt")
+    {
+        // 用于辅助获取 size_info 的 json 文件
+        std::string size_ucd_path = "";
+        if(long_args.count("size_ucd") > 0)
+        {
+            size_ucd_path = long_args["size_ucd"];
+        }
+
+        if(argc == 4)
+        {
+            std::string txt_folder      = argv[2];
+            std::string save_ucd_path   = argv[3];
+            ucd_util->get_ucd_from_yolo_txt_dir(txt_folder, save_ucd_path, size_ucd_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+            return -1;
+        }
+    }
     else if(command_1 == "from_dete_server")
     {
         if(argc == 5)
@@ -976,7 +1002,7 @@ int main(int argc_old, char ** argv_old)
             std::cout << "sql_pwd       : " << sql_pwd << std::endl;
             std::cout << "sql_db        : " << sql_db << std::endl;
             std::cout << "[cache]" << std::endl;
-            std::cout << "cache_dir     : " << cache_dir << std::endl;
+            std::cout << "dir           : " << cache_dir << std::endl;
             std::cout << "[uci]"    << std::endl;
             std::cout << "volume_size   : " << volume_size << std::endl;
             std::cout << "-----------------------------" << std::endl;
@@ -1543,7 +1569,7 @@ int main(int argc_old, char ** argv_old)
             ucd_param_opt->print_command_info(command_1);
         }
     }
-    else if(command_1 == "to_yolo")
+    else if(command_1 == "to_yolo_txt")
     {
         if(argc == 4 || argc == 5)
         {
@@ -2115,6 +2141,122 @@ int main(int argc_old, char ** argv_old)
         else
         {
             ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "history")
+    {
+
+        int need_line       = 9999;
+        bool need_unique    = false;    // 是否需要去重
+        bool need_info      = false;    // 是否打印统计信息 
+
+
+        if(long_args.count("line"))
+        {
+            need_line = std::stoi(long_args["line"]);
+        }
+
+        if(short_args.count("u") > 0)
+        {
+            need_unique = true;
+        }
+
+        if(short_args.count("i") > 0)
+        {
+            need_info = true;
+        }
+
+        if(argc == 2)
+        {
+            // make sure if history file exists
+            if(! is_file(history_path))
+            {
+                std::cout << HIGHTLIGHT_COLOR << "cant find history file : " << history_path << STOP_COLOR << std::endl;
+                return -1;
+            }
+
+            // parse txt
+            std::ifstream txt_file;
+            txt_file.open(history_path);
+            assert(txt_file.is_open());
+
+            std::string line;
+            std::vector<std::string> txt_info;
+            while(getline(txt_file, line))
+            {
+                txt_info.push_back(line);
+            }
+
+            // print history
+            std::cout << "---------------------------------------------------------------------------" << std::endl;
+            std::cout << "                                history" << std::endl;
+            std::cout << "---------------------------------------------------------------------------" << std::endl;
+            
+            int line_count = txt_info.size();
+            int start_line = std::max(line_count - need_line, 0);
+            start_line = std::min(line_count, start_line);
+
+            if(need_info == false)
+            {
+                std::string command_str_old = "";
+                for(int i=start_line; i<line_count; i++)
+                {
+                    std::vector<std::string> line_info = pystring::split(txt_info[i], " :");
+                    std::string time_str = line_info[0];
+                    std::string command_str = txt_info[i].substr(time_str.size(), txt_info[i].size());
+                    
+                    if((need_unique == true) && (command_str_old == command_str))
+                    {
+                        continue;
+                    }
+
+                    std::cout << std::setw(6) << std::left << i << std::setw(21) << std::left << time_str << std::setw(40) << std::left << command_str << std::endl;
+                    command_str_old = command_str;
+                }
+            }
+            else
+            {
+                std::map< std::string, int > key_map;
+                for(int i=start_line; i<line_count; i++)
+                {
+                    std::vector<std::string> line_info = pystring::split(txt_info[i], " :");
+                    std::string time_str = line_info[0];
+                    std::string command_str = txt_info[i].substr(time_str.size(), txt_info[i].size());
+                    command_str = pystring::strip(command_str, " ");
+                    std::vector<std::string> command_info = pystring::split(command_str, " ");
+                    std::string command_key = "ucd";
+                    if(command_info.size() >= 3)
+                    {
+                        command_key = command_info[2];                    
+                    }
+
+                    if(key_map.count(command_key) > 0)
+                    {
+                        key_map[command_key] += 1;
+                    }
+                    else
+                    {
+                        key_map[command_key] = 1;
+                    }
+                }
+
+                // 打印统计结果
+                auto iter = key_map.begin();
+                while(iter != key_map.end())
+                {
+                    std::cout << std::setw(30) << std::left << iter->first << " : " << iter->second << std::endl;
+                    iter++;
+                }
+            }
+
+            std::cout << "---------------------------------------------------------------------------" << std::endl;
+
+            // std::cout << config_path << std::endl;
+            return 1;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1); 
         }
     }
     else if(command_1 == "fix_size_info")

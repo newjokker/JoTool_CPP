@@ -534,6 +534,63 @@ void UCDataset::add_voc_xml_info(std::string uc, std::string voc_xml_path)
     delete dete_res;
 }
 
+void UCDataset::add_yolo_txt_info(std::string uc, std::string txt_path, int width, int height)
+{
+    // 解析 txt 数据
+    std::ifstream txt_file;
+    txt_file.open(txt_path);
+    assert(txt_file.is_open());
+
+    // 过滤掉开头为 # 的行
+    std::string line;
+    while(getline(txt_file, line))
+    {
+        std::vector<std::string> obj_info = pystring::split(line, " ");
+
+        if(obj_info.size() != 5)
+        {
+            std::cout << ERROR_COLOR << "parse error : " << uc << ", " << line << STOP_COLOR << std::endl;
+            continue;
+        }
+
+        std::string tag     = obj_info[0];
+        float x_    = std::stof(obj_info[1]); 
+        float y_    = std::stof(obj_info[2]); 
+        float w_    = std::stof(obj_info[3]); 
+        float h_    = std::stof(obj_info[4]); 
+
+        float x_c       = x_ * width;  
+        float y_c       = y_ * height;  
+        float w_half    = w_ * width  * 0.5;  
+        float h_half    = h_ * height * 0.5; 
+
+        int x1 = (x_c - w_half) + 0.5;  // 加 0.5 float 四舍五入成 int
+        int y1 = (y_c - h_half) + 0.5;
+        int x2 = (x_c + w_half) + 0.5;
+        int y2 = (y_c + h_half) + 0.5;
+
+        RectangleObj* obj = new RectangleObj();
+        obj->label = tag;
+        obj->conf = -1;
+        obj->points = {{(double)x1, (double)y1}, {(double)x2, (double)y2}};
+        if(! UCDataset::has_obj(uc, obj))
+        {
+            UCDataset::object_info[uc].push_back(obj);
+        }
+        else
+        {
+            std::cout << "repeated obj : " << uc << ", " << obj->label << std::endl; 
+        }
+        std::vector<int> size_info;
+        size_info.push_back(width);
+        size_info.push_back(height);
+        UCDataset::size_info[uc] = size_info;
+        UCDataset::uc_list.push_back(uc);
+    }
+    txt_file.close();
+    return;
+}
+
 void UCDataset::add_labelme_json_info(std::string uc, std::string labelme_json_path)
 {
     std::ifstream jsfile(labelme_json_path);
@@ -862,8 +919,8 @@ void UCDataset::save_to_yolo_train_txt_with_assign_uc(std::string save_path, std
                 }
                 else
                 {
-                    float x = ((x1 + x2) / 2.0 - 1) * dw;
-                    float y = ((y1 + y2) / 2.0 - 1) * dh;
+                    float x = ((x1 + x2) / 2.0) * dw;
+                    float y = ((y1 + y2) / 2.0) * dh;
                     float w = (x2 - x1) * dw;
                     float h = (y2 - y1) * dh;
 
@@ -2974,6 +3031,88 @@ void UCDatasetUtil::get_ucd_from_file_dir(std::string file_dir, std::string ucd_
     delete ucd;
 }
 
+void UCDatasetUtil::get_ucd_from_yolo_txt_dir(std::string yolo_txt_dir, std::string save_ucd_path, std::string size_ucd_path)
+{
+        
+    UCDataset *size_ucd = new UCDataset(size_ucd_path);
+    if(size_ucd_path != "")
+    {
+        size_ucd->parse_ucd(false);
+    }
+
+    UCDataset *ucd = new UCDataset(save_ucd_path);
+    std::cout << "check size info : " << std::endl;
+    std::set<std::string> suffix {".txt", ".TXT"};
+    std::vector<std::string> all_txt_path_vector = get_all_file_path(yolo_txt_dir, suffix);
+    
+    int is_uc_count     = 0;
+    int not_uc_count    = 0;
+    tqdm bar;
+    int N = all_txt_path_vector.size();
+    // std::map <std::string, std::vector<int> > size_info_map;
+
+    for(int i=0; i<all_txt_path_vector.size(); i++)
+    {
+        std::string txt_path = all_txt_path_vector[i];
+        std::string uc = get_file_name(txt_path);
+        int width, height;
+
+        if(! is_uc(uc))
+        {
+            not_uc_count += 1;
+            continue;
+        }
+        is_uc_count += 1;
+
+        std::string img_path = UCDatasetUtil::get_cache_uc_img_path(uc);
+
+        // 查询是否存在对应的缓存图片
+        if(img_path == "")
+        {
+            if(size_ucd->size_info.count(uc) > 0)
+            {
+                if((size_ucd->size_info[uc][0] == -1) || (size_ucd->size_info[uc][1] == -1))
+                {
+                    std::cout << ERROR_COLOR << "can't get size info from cache_img and size_ucd : " << uc << STOP_COLOR << std::endl;
+                    std::cout << ERROR_COLOR << "use : ucd save_cache ucd_path 10 , to load img to cache or assign a size_info ucd " << uc << STOP_COLOR << std::endl;
+                    return;
+                }
+                else
+                {
+                    width = size_ucd->size_info[uc][0];
+                    height = size_ucd->size_info[uc][1];
+                }
+            }
+            else
+            {
+                std::cout << ERROR_COLOR << "can't get size info from cache_img and size_ucd : " << uc << STOP_COLOR << std::endl;
+                std::cout << ERROR_COLOR << "use : ucd save_cache ucd_path 10 , to load img to cache or assign a size_info ucd " << uc << STOP_COLOR << std::endl;
+                return;
+            }
+        }
+        else
+        {
+            // 从图像中获取长宽
+            FILE *file = fopen(img_path.c_str(), "rb");
+            auto imageInfo = getImageInfo<IIFileReader>(file);
+            fclose(file);
+
+            width =  imageInfo.getWidth();
+            height = imageInfo.getHeight();
+        }
+
+        // 解析增加 txt 的信息
+        ucd->add_yolo_txt_info(uc, txt_path, width, height);
+        bar.progress(i, N);
+    }
+    bar.finish();
+    std::cout << "is  uc : " << is_uc_count << std::endl;
+    std::cout << "not uc : " << not_uc_count << std::endl;
+
+    ucd->save_to_ucd(save_ucd_path);
+    return;
+}
+
 void UCDatasetUtil::get_ucd_from_dete_server(std::string  dete_server_dir, std::string ucd_path, std::string save_path)
 {
 
@@ -4690,6 +4829,12 @@ void UCDatasetUtil::fix_size_info(std::string ucd_path, std::string save_path, b
     ucd->save_to_ucd(save_path);
     delete ucd;
 
+}
+
+std::string UCDatasetUtil::get_cache_uc_img_path(std::string uc)
+{
+    std::set<std::string> suffix {".jpg", ".JPG", ".png", ".PNG"};
+    return get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, suffix);
 }
 
 
