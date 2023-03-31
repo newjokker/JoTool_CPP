@@ -134,10 +134,15 @@ using namespace std;
 
 // TODO: 所有人使用一个版本就是最新版本，每次只要我自己去更新那几个文件就行，但是我如何把权限给所有的人呢
 
-// TODO: diff_obj 对比 目标对象有对少是重合的，按照标签打印其中重合的个数和重合的比例
-
 // TODO: drop_tags 和 filter_by_tags 是不是文件名影响的 
 
+// TODO: 完善一个项目词汇表，将所有的命名规范化，统一调整所有的接口，新接口和老接口分开（filter，fix，drop，abosrb，minus，merge，from，get，set，[to(xml, labelme_json, yolo_txt)]）
+
+// TODO: diff_obj 对比 目标对象有对少是重合的，按照标签打印其中重合的个数和重合的比例，打印出每个标签有多少重合的，各自有多少不一样的，
+
+// TODO: 所有操作都有涉及到 uc 或者设计 obj 两种的操作，是默认使用 uc 操作，增加 -o 使用 obj 操做，全部是这个逻辑比较好，minus, merge, diff, absorb
+
+// TODO: fix_size_info 可以指定一个其他的 ucd 从这个 ucd 上拿到那些需要的 size_info 
 
 
 int main(int argc_old, char ** argv_old)
@@ -170,7 +175,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v3.0.2";
+    std::string app_version = "v3.0.4";
 
     // uci_info
     int volume_size         = 20;
@@ -1979,11 +1984,10 @@ int main(int argc_old, char ** argv_old)
     else if(command_1 == "conf_analysis")
     {
         // ucd 的置信度分布
-        if(argc == 4)
+        if(argc == 3)
         {
             std::string ucd_path = argv[2];
-            int seg_count = std::stoi(argv[3]);
-            ucd_util->conf_analysis(ucd_path, seg_count);
+            ucd_util->conf_analysis(ucd_path, 10);
         }
         else
         {
@@ -2276,11 +2280,17 @@ int main(int argc_old, char ** argv_old)
             }
         }
 
+        std::string size_ucd = "";
+        if(long_args.count("size_ucd") > 0)
+        {
+            size_ucd = long_args["size_ucd"];
+        }
+
         if(argc == 4)
         {
             std::string ucd_path    = argv[2];
             std::string save_path   = argv[3];
-            ucd_util->fix_size_info(ucd_path, save_path, no_cache);
+            ucd_util->fix_size_info(ucd_path, save_path, no_cache, size_ucd);
         }
         else
         {

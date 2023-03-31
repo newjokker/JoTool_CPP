@@ -835,10 +835,10 @@ void UcdParamOpt::load_param_info()
     // conf_analysis
     ParamInfo * param_conf_analysis = new ParamInfo("conf_analysis");
     param_conf_analysis->group = "analysis";
-    param_conf_analysis->grammar = "ucd conf_analysis ucd_path seg_count";
+    param_conf_analysis->grammar = "ucd conf_analysis ucd_path";
     param_conf_analysis->english_explain = "";
     param_conf_analysis->chinese_explain = "置信度分析，分析 ucd 中存放的置信度信息";
-    param_conf_analysis->demo.push_back("ucd conf_analysis test.json 10     (将置信度 0-1 划分为 10 个区间对 test.json 中的所有 obj 的置信度进行统计)");   
+    param_conf_analysis->demo.push_back("ucd conf_analysis test.json      (将置信度 0-1 划分为 10 个区间对 test.json 中的所有 obj 的置信度进行统计)");   
     UcdParamOpt::add_param(param_conf_analysis);
 
     // area_analysis
@@ -1170,6 +1170,7 @@ void UcdParamOpt::load_param_info()
     param_fix_size_info->group = "opt";
     param_fix_size_info->grammar = "ucd fix size_info ucd_path save_path";
     param_fix_size_info->args_info["--no_cache"] = "1|True|true 低缓存模式，使用完下载的图片之后会删除，本地已有缓存的不进行删除";
+    param_fix_size_info->args_info["--size_ucd"] = "用于辅助修复的 ucd 的路径，当辅助 ucd 中存在需要的 size_info 直接从辅助 ucd 中取而不是从缓存中获取";
     param_fix_size_info->chinese_explain = "对 size_info 信息进行修复";   
     param_fix_size_info->demo.push_back("ucd fix size_info test.json save.json               (对 test.json 中的 size_info 信息进行修复)");
     param_fix_size_info->demo.push_back("ucd fix size_info test.json save.json --no_cache 1   (使用低缓存模式对 test.json 中的 size_info 信息进行修复)");

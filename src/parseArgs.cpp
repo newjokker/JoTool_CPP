@@ -39,9 +39,9 @@ bool parse_args(int argc, char** argv, std::vector<std::string> &new_argv, std::
             }
             else
             {
-                std::cout << ERROR_COLOR << "need args after " << each_argv << STOP_COLOR << std::endl;
+                std::cout << ERROR_COLOR << "error : need args after " << each_argv << STOP_COLOR << std::endl;
                 throw "need args after " + each_argv;
-                return false;
+                // return false;
             }
             i++;
         }

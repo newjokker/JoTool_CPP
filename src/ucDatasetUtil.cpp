@@ -2769,6 +2769,7 @@ void UCDatasetUtil::search_ucd(std::string assign_uc)
 
     std::string check_url = "http://" + UCDatasetUtil::host + ":" + std::to_string(UCDatasetUtil::port);
     httplib::Client cli(check_url);
+    cli.set_connection_timeout(20);
     std::string url_path;
 
     if(assign_uc == "")
@@ -3962,76 +3963,123 @@ void UCDatasetUtil::uc_analysis(std::string ucd_path)
 
 void UCDatasetUtil::conf_analysis(std::string ucd_path, int seg_count)
 {
+    std::map<float, int>conf_map;
+    float conf_min = 1;
+    float conf_max = 0;
+
+    for(int i=0; i<11; i++)
+    {
+        conf_map[i] = 0;
+    }
+
     UCDataset* ucd = new UCDataset(ucd_path);
     ucd->parse_ucd(true);
-    std::vector<float> conf_vector;
 
     auto iter = ucd->object_info.begin();
     while(iter != ucd->object_info.end())
     {
         for(int i=0; i<iter->second.size(); i++)
         {
-            conf_vector.push_back(iter->second[i]->conf);
+            float conf = iter->second[i]->conf;
+            // 
+            if(conf_min > conf)
+            {
+                conf_min = conf;
+            }
+
+            if(conf_max < conf)
+            {
+                conf_max = conf;
+            }
+
+            for(int j=0; j<10; j++)
+            {
+                if(conf <= 0)
+                {
+                    conf_map[0] += 1;
+                }
+                else if((j < conf*10) && (conf*10 <= j+1))
+                {
+                    conf_map[j+1] += 1;
+                    continue;
+                }
+            }
         }
         iter++;
     }
 
-    // 排序
-    std::sort(conf_vector.begin(), conf_vector.end());
-
-    if(conf_vector.size() < 10)
+    std::cout << "-----------------------" << std::endl;
+    std::cout << "    conf analysis" << std::endl;
+    std::cout << "-----------------------" << std::endl;
+    std::cout << "MIN : " << conf_min << std::endl;
+    std::cout << "MAX : " << conf_max << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << "(l, r] 区间左开右闭" << std::endl;
+    std::cout << std::setw(10) << "NAN         : " << conf_map[0] << std::endl;
+    for(int i=0; i<10; i++)
     {
-        std::cout << ERROR_COLOR << "数据量太小，没必要分析，自己打开文件去看吧" << STOP_COLOR << std::endl;
-        return; 
+        std::cout << std::setw(4) << std::left << std::setprecision(2) << i * 0.1 << " ~ " << std::setw(4) << std::left << std::setprecision(2) << (i+1)*0.1 << " : " << conf_map[i+1] << std::endl;
     }
+    std::cout << "-----------------------" << std::endl;
 
-    // 按照百分位数进行分析
-    int conf_size = conf_vector.size();
-    std::map<float, int> conf_map;
+
+
+    // // 排序
+    // std::sort(conf_vector.begin(), conf_vector.end());
+
+    // if(conf_vector.size() < 10)
+    // {
+    //     std::cout << ERROR_COLOR << "数据量太小，没必要分析，自己打开文件去看吧" << STOP_COLOR << std::endl;
+    //     return; 
+    // }
+
+    // // 按照百分位数进行分析
+    // int conf_size = conf_vector.size();
+    // std::map<float, int> conf_map;
     
-    std::cout << "------------------------------" << std::endl;
-    std::cout << "conf_min  : " << "     " << conf_vector[0] << std::endl;
-    std::cout << "conf_max  : " << "     " << conf_vector[conf_vector.size() - 1] << std::endl;
-    std::cout << "------------------------------" << std::endl;
-    std::cout << " 百分位数" << std::endl;
+    // std::cout << "------------------------------" << std::endl;
+    // std::cout << "conf_min  : " << "     " << conf_vector[0] << std::endl;
+    // std::cout << "conf_max  : " << "     " << conf_vector[conf_vector.size() - 1] << std::endl;
+    // std::cout << "------------------------------" << std::endl;
+    // std::cout << " 百分位数" << std::endl;
 
-    for(int i=1; i<seg_count; i++)
-    {
-        std::string seg_index = std::to_string(i) + "/" + std::to_string(seg_count);
-        std::cout << std::setw(10) << std::left << seg_index << conf_vector[(conf_size/seg_count)*i] << std::endl; 
-    }
+    // for(int i=1; i<seg_count; i++)
+    // {
+    //     std::string seg_index = std::to_string(i) + "/" + std::to_string(seg_count);
+    //     std::cout << std::setw(10) << std::left << seg_index << conf_vector[(conf_size/seg_count)*i] << std::endl; 
+    // }
     
-    std::cout << "------------------------------" << std::endl;
-    std::cout << "比例分布: 比较容易搞错，步长为 最大值 / 步数" << std::endl;
+    // std::cout << "------------------------------" << std::endl;
+    // std::cout << "比例分布: 比较容易搞错，步长为 最大值 / 步数" << std::endl;
 
-    int count_none = 0;  // 没有的 conf(-1) 的值的个数
-    for(int i=0; i<conf_size; i++)
-    {
-        if(conf_vector[i] == -1)
-        {
-            count_none += 1;
-            continue;
-        }
+    // int count_none = 0;  // 没有的 conf(-1) 的值的个数
+    // for(int i=0; i<conf_size; i++)
+    // {
+    //     if(conf_vector[i] == -1)
+    //     {
+    //         count_none += 1;
+    //         continue;
+    //     }
 
-        int conf = (int)(conf_vector[i] * seg_count);
-        if(conf_map.count(conf) == 0)
-        {
-            conf_map[conf] = 1;
-        }
-        else
-        {
-            conf_map[conf] += 1;
-        }
-    }
+    //     int conf = (int)(conf_vector[i] * seg_count);
+    //     if(conf_map.count(conf) == 0)
+    //     {
+    //         conf_map[conf] = 1;
+    //     }
+    //     else
+    //     {
+    //         conf_map[conf] += 1;
+    //     }
+    // }
 
-    // 按照绝对值进行分析
-    std::cout << std::setw(10) << std::left << "-1" << count_none << std::endl;
-    for(int i=0; i<seg_count; i++)
-    {
-        float conf_value = i/(seg_count * 1.0);
-        std::cout << std::setw(10) << std::left << conf_value << conf_map[i] << std::endl;
-    }
-    std::cout << "------------------------------" << std::endl;
+    // // 按照绝对值进行分析
+    // std::cout << std::setw(10) << std::left << "-1" << count_none << std::endl;
+    // for(int i=0; i<seg_count; i++)
+    // {
+    //     float conf_value = i/(seg_count * 1.0);
+    //     std::cout << std::setw(10) << std::left << conf_value << conf_map[i] << std::endl;
+    // }
+    // std::cout << "------------------------------" << std::endl;
 
     delete ucd;
 }
@@ -4764,13 +4812,26 @@ void UCDatasetUtil::get_ucd_version_info(std::string app_dir, std::string app_ve
 
 }
 
-void UCDatasetUtil::fix_size_info(std::string ucd_path, std::string save_path, bool no_cache)
+void UCDatasetUtil::fix_size_info(std::string ucd_path, std::string save_path, bool no_cache, std::string size_ucd_path)
 {
 
     if(! is_ucd_path(ucd_path))
     {
         std::cout << ERROR_COLOR << "not ucd path : " << ucd_path << STOP_COLOR << std::endl;
         return;
+    }
+
+    if((size_ucd_path != "") && (! is_ucd_path(size_ucd_path)))
+    {
+        std::cout << ERROR_COLOR << "size_ucd_path not ucd path : " << size_ucd_path << STOP_COLOR << std::endl;
+        return;     
+    }
+    
+
+    UCDataset* size_ucd = new UCDataset(size_ucd_path);
+    if(size_ucd_path != "")
+    {
+        size_ucd->parse_ucd(false);
     }
 
     UCDataset* ucd = new UCDataset(ucd_path);
@@ -4803,6 +4864,19 @@ void UCDatasetUtil::fix_size_info(std::string ucd_path, std::string save_path, b
         // fix size_info 
         if(need_fix)
         {
+
+            // get size_info from size_ucd           
+            if(size_ucd->size_info.count(uc) > 0)
+            {
+                if((size_ucd->size_info[uc][0] > 0) && (size_ucd->size_info[uc][1] > 0))
+                {
+                    ucd->size_info[uc] = size_ucd->size_info[uc];
+                    fix_success_count += 1;
+                    continue;
+                }
+            }
+            
+            // get size_info from image
             std::string img_path_old = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);
             UCDatasetUtil::load_img_with_assign_uc(UCDatasetUtil::cache_img_dir, uc);
             std::string img_path = get_file_by_suffix_set(UCDatasetUtil::cache_img_dir, uc, img_suffix);

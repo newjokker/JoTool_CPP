@@ -393,7 +393,7 @@ class UCDatasetUtil
         void get_ucd_version_info(std::string ucd_dir, std::string app_version);
 
         // 修复 size_info 信息
-        void fix_size_info(std::string ucd_path, std::string save_path, bool no_cache);
+        void fix_size_info(std::string ucd_path, std::string save_path, bool no_cache, std::string size_ucd = "");
 
         // 找到缓存中 uc 图片
         std::string get_cache_uc_img_path(std::string uc);
