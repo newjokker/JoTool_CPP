@@ -142,7 +142,19 @@ using namespace std;
 
 // TODO: 所有操作都有涉及到 uc 或者设计 obj 两种的操作，是默认使用 uc 操作，增加 -o 使用 obj 操做，全部是这个逻辑比较好，minus, merge, diff, absorb
 
-// TODO: fix_size_info 可以指定一个其他的 ucd 从这个 ucd 上拿到那些需要的 size_info 
+// FIXME: ucd 多个用户使用的时候，a 下载的图片 b 没有读取的权限，需要将缓存文件夹设置为组内所有人都可以读写 chown user:group /path/to/folder
+
+// TODO: 支持多个机器编译的结果，ucd_v3.0.6_ubuntu_20.04, ucd_v3.0.6_ubuntu_16.04, so 两个版本也同时支持，这样相当于每次下载四个文件，ucd.conf 指定读取的版本
+
+// TODO: intersection 支持多个文件进行合并
+
+// TODO: 将 libtorch 搞成一个很大的可执行文件，这样很多事情就非常方便地进行处理了，甚至可以对 prebase 之类的直接生成一个 可执行文件，和 ucd 绑定起来，这样检测文件非常方便
+
+// TODO: 解决文件夹缓存权限的问题，
+
+// TODO: 可以不主动设置缓存文件夹，主动找一个路径，比如 /usr/local/ucd_cache ，这样用着就会很方便
+
+// TODO: 对那些没有标准化的数据也能分析，不一定要改为 uc 命名，可以设置是否改为 uc 命名
 
 
 int main(int argc_old, char ** argv_old)
@@ -175,13 +187,14 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v3.0.4";
+    std::string app_version = "v3.0.6";
 
     // uci_info
     int volume_size         = 20;
 
     // cache dir
     std::string cache_dir = "";
+
 
     // get user name
     struct passwd* pwd;

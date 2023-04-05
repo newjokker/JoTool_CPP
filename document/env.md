@@ -389,3 +389,104 @@ MESSAGE(STATUS, "------------------------------------------------------------")
 
   * 运行环境中安装好必须的环境
   * 编译好的代码拷贝到运行环境中的相同目录下
+
+
+
+## ucd 编译为一个大的文件
+
+### 编译 opencv
+
+* 新建 build 文件夹
+* cmake -D BUILD_SHARED_LIBS=OFF -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local ..
+* make -j$(nproc)
+* sudo make install
+
+
+> CMakeLists.txt 中为 
+  cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+  project(example-app)
+
+  >
+  # 不知道为什么要这一行，没有的话报错，to string 不是 std 的函数之类的
+  SET(CMAKE_CXX_FLAGS "-std=c++11 -O3")
+
+
+  # 指定头文件搜索路径
+  INCLUDE_DIRECTORIES(
+      ${PROJECT_SOURCE_DIR}
+      "/usr/include"
+      "/usr/include/mysql"
+  )
+
+
+  set(MYSQL_LIBS mysqlclient pthread z m rt atomic ssl crypto dl)
+
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+
+
+  SET(OpenCV_STATIC_LIBS
+    /usr/local/lib/libopencv_core.a
+    /usr/local/lib/libopencv_imgcodecs.a
+    /usr/local/lib/libopencv_imgproc.a
+    )
+
+
+
+  # 动态库文件目录
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
+  # 可执行文件目录
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
+
+
+  find_package(OpenCV REQUIRED )
+  find_package(OpenSSL REQUIRED)
+  find_package(nlohmann_json REQUIRED)
+
+
+
+  find_package(JPEG REQUIRED)
+  find_package(PNG REQUIRED)
+
+
+  include_directories(${OPENSSL_INCLUDE_DIRS})
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+
+  aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRCLIST)
+  aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/tools SRCLIST)
+
+
+
+  # add_library(saturntools_v3.0.6 STATIC ${SRCLIST})   
+  add_library(saturntools_v3.0.7 STATIC ${SRCLIST})   
+
+  add_executable(ucd main.cpp)
+  link_directories(${OpenCV_LIB_DIR})
+
+
+
+  # 增加关键字 第二位 +1
+  # 修改关键字 第三位 +1
+  target_link_libraries(
+      ucd 
+      
+    ${OpenCV_LIBS}
+      saturntools_v3.0.7
+    OpenSSL::Crypto OpenSSL::SSL
+    nlohmann_json::nlohmann_json
+    
+    ${OpenCV_STATIC_LIBS}
+    ${CMAKE_DL_LIBS}
+    ${JPEG_LIBRARIES}
+    PNG::PNG
+    
+    ${MYSQL_LIBS}
+
+  )
+
+
+  set_property(TARGET ucd PROPERTY CXX_STANDARD 14)
+
+
+
+

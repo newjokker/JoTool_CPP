@@ -10,97 +10,105 @@ SET(CMAKE_CXX_FLAGS "-std=c++11 -O3")
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}
     "/usr/include"
-	# "/home/ldq/Apps_jokker/so_dir"
     "/usr/include/mysql"
+	"/usr/lib/x86_64-linux-gnu"
 )
 
-# link_directories("/usr/lib/x86_64-linux-gnu")
-
-
-set(MYSQL_LIBS mysqlclient pthread z m rt atomic ssl crypto dl)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
+SET(OpenCV_STATIC_LIBS
+	/usr/local/lib/libopencv_core.a
+	/usr/local/lib/libopencv_imgcodecs.a
+	/usr/local/lib/libopencv_imgproc.a
+	/usr/lib/x86_64-linux-gnu/libpng.a
+	/usr/lib/x86_64-linux-gnu/libjpeg.a
+	)
 
-#find_package( CUDA REQUIRED )
+SET(other_STATIC_LIBS
+	/usr/lib/gcc/x86_64-linux-gnu/5/libstdc++.a
+	/usr/lib/x86_64-linux-gnu/libjasper.a
+	)
 
-#SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
-#SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
-# 设置静态库文件目录
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
-#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "/home/ldq/Apps_jokker/so_dir")
+
 # 动态库文件目录
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
-# 指定固定的动态库路径，约定俗成的路径
-#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "/home/ldq/Apps_jokker/so_dir")
 # 可执行文件目录
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "/home/ldq/Apps_jokker")
 
 
-#set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH} "~/libtorch/libtorch")
-set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH} "/home/libtorch" )
-set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH} "/usr/local/cuda-10.2" )
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
-# find_package(Torch REQUIRED)
-find_package( OpenCV REQUIRED )
+# mysql -------------------------------------------------------
+
+set(MYSQL_INCLUDE_DIR "/usr/include/mysql")
+
+set(MYSQL_LIB_DIR "/usr/lib/x86_64-linux-gnu")
+
+include_directories(${MYSQL_INCLUDE_DIR})
+
+
+find_package(OpenCV REQUIRED )
 find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
+
+find_package(JPEG REQUIRED)
+find_package(PNG REQUIRED)
+
+
+
 include_directories(${OPENSSL_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRCLIST)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/tools SRCLIST)
 
-add_library(saturntools_v3.0.4 SHARED ${SRCLIST})   
-# add_library(saturntools_v2.4.6 STATIC ${SRCLIST})   
+
+
+# openssl -------------------------------------------------------
+
+set(OPENSSL_INCLUDE_DIR "/usr/include/openssl")
+set(OPENSSL_LIB_DIR "/usr/lib/x86_64-linux-gnu")
+include_directories(${OPENSSL_INCLUDE_DIR})
+
+# -------------------------------------------------------
+
+
+# add_library(saturntools_v3.0.6 STATIC ${SRCLIST})   
+add_library(saturntools_v3.0.7 STATIC ${SRCLIST})   
 
 add_executable(ucd main.cpp)
+link_directories(${OpenCV_LIB_DIR})
 
-# 增加关键字 第二位 +1
-# 修改关键字 第一位 +1
+
 target_link_libraries(
     ucd 
-    # ${TORCH_LIBRARIES}
-    ${OpenCV_LIBS}
-    OpenSSL::Crypto OpenSSL::SSL
-    saturntools_v3.0.4
+	
+	${OpenCV_LIBS}
+    saturntools_v3.0.7
 	nlohmann_json::nlohmann_json
-    ${MYSQL_LIBS}
+	
+	${OpenCV_STATIC_LIBS}
+	${CMAKE_DL_LIBS}
+	${JPEG_LIBRARIES}
+	PNG::PNG
+		
+
+	${MYSQL_LIB_DIR}/libmysqlclient.a
+	
+	${OPENSSL_LIB_DIR}/libssl.a 
+	${OPENSSL_LIB_DIR}/libcrypto.a
+	
+	${other_STATIC_LIBS}
+	
+  
+    # Link against libgcc_s.a
+    -static-libgcc
+  
+	
 )
 
 
 set_property(TARGET ucd PROPERTY CXX_STANDARD 14)
-
-
-
-# MESSAGE(STATUS, "------------------------------------------------------------")
-
-# MESSAGE("${TORCH_LIBRARIES}")
-
-# MESSAGE("${OpenCV_LIBS}")
-
-# MESSAGE("${PROJECT_SOURCE_DIR}")
-
-# MESSAGE("${TORCH_INCLUDE_DIRS}")
-
-# MESSAGE("${OpenCV_INCLUDE_DIRS}")
-
-# MESSAGE(STATUS, "------------------------------------------------------------")
-
-
-# ---------------------- 安装规则 --------------------------------
-
-# refer : https://www.hahack.com/codes/cmake/
-# install (TARGETS MathFunctions DESTINATION bin)
-
-# install (FILES MathFunctions.h DESTINATION include)
-
-
-# ---------------------- 测试规则 --------------------------------
-
-
-
-

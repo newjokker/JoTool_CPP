@@ -4924,6 +4924,7 @@ void UCDatasetUtil::fix_size_info(std::string ucd_path, std::string save_path, b
     bar.finish();
     ucd->save_to_ucd(save_path);
     delete ucd;
+    delete size_ucd;
 
 }
 
