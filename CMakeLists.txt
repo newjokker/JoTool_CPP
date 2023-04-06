@@ -31,20 +31,14 @@ SET(other_STATIC_LIBS
 	)
 
 
-
 # 动态库文件目录
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
 # 可执行文件目录
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
 
 
-
-# mysql -------------------------------------------------------
-
 set(MYSQL_INCLUDE_DIR "/usr/include/mysql")
-
 set(MYSQL_LIB_DIR "/usr/lib/x86_64-linux-gnu")
-
 include_directories(${MYSQL_INCLUDE_DIR})
 
 
@@ -52,42 +46,32 @@ find_package(OpenCV REQUIRED )
 find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
-
 find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
 
-
-
 include_directories(${OPENSSL_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRCLIST)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/tools SRCLIST)
 
 
-
-# openssl -------------------------------------------------------
-
 set(OPENSSL_INCLUDE_DIR "/usr/include/openssl")
 set(OPENSSL_LIB_DIR "/usr/lib/x86_64-linux-gnu")
 include_directories(${OPENSSL_INCLUDE_DIR})
 
-# -------------------------------------------------------
-
 
 # add_library(saturntools_v3.0.6 STATIC ${SRCLIST})   
-add_library(saturntools_v3.0.7 STATIC ${SRCLIST})   
+add_library(saturn_ucd_tools STATIC ${SRCLIST})   
 
 add_executable(ucd main.cpp)
 link_directories(${OpenCV_LIB_DIR})
-
 
 target_link_libraries(
     ucd 
 	
 	${OpenCV_LIBS}
-    saturntools_v3.0.7
+    saturn_ucd_tools
 	nlohmann_json::nlohmann_json
 	
 	${OpenCV_STATIC_LIBS}

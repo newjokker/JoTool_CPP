@@ -144,8 +144,6 @@ using namespace std;
 
 // FIXME: ucd 多个用户使用的时候，a 下载的图片 b 没有读取的权限，需要将缓存文件夹设置为组内所有人都可以读写 chown user:group /path/to/folder
 
-// TODO: 支持多个机器编译的结果，ucd_v3.0.6_ubuntu_20.04, ucd_v3.0.6_ubuntu_16.04, so 两个版本也同时支持，这样相当于每次下载四个文件，ucd.conf 指定读取的版本
-
 // TODO: intersection 支持多个文件进行合并
 
 // TODO: 将 libtorch 搞成一个很大的可执行文件，这样很多事情就非常方便地进行处理了，甚至可以对 prebase 之类的直接生成一个 可执行文件，和 ucd 绑定起来，这样检测文件非常方便
@@ -155,6 +153,9 @@ using namespace std;
 // TODO: 可以不主动设置缓存文件夹，主动找一个路径，比如 /usr/local/ucd_cache ，这样用着就会很方便
 
 // TODO: 对那些没有标准化的数据也能分析，不一定要改为 uc 命名，可以设置是否改为 uc 命名
+
+// TODO: 设置为数据组模式，可以禁用一些功能
+
 
 
 int main(int argc_old, char ** argv_old)
@@ -187,14 +188,13 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v3.0.6";
+    std::string app_version = "v4.0.1";
 
     // uci_info
     int volume_size         = 20;
 
     // cache dir
-    std::string cache_dir = "";
-
+    std::string cache_dir   = "";
 
     // get user name
     struct passwd* pwd;
@@ -211,8 +211,8 @@ int main(int argc_old, char ** argv_old)
     }
     else
     {
-        config_path = "/home/" + pw_name + "/ucdconfig.ini";
-        history_path = "/home/" + pw_name + "/.ucdhistory.txt";
+        config_path     = "/home/" + pw_name + "/ucdconfig.ini";
+        history_path    = "/home/" + pw_name + "/.ucdhistory.txt";
     }
 
     // read config
@@ -241,7 +241,7 @@ int main(int argc_old, char ** argv_old)
         xini_write["server"]["host"]    = host;
         xini_write["server"]["port"]    = port;
         xini_write["sql"]["host"]       = sql_host;
-        xini_write["sql"]["port"]       = sql_host;
+        xini_write["sql"]["port"]       = sql_port;
         xini_write["sql"]["user"]       = sql_user;
         xini_write["sql"]["pwd"]        = sql_pwd;
         xini_write["sql"]["db"]         = sql_db;
@@ -2660,7 +2660,7 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "fake_uc")
     {
-        std::cout << WARNNING_COLOR << "fake_uc 功能慎用，不要将 fake uc 与正确 uc 混合使用" << STOP_COLOR << std::endl;
+        std::cout << WARNNING_COLOR << "fake_uc 功能慎用，不要将 fake_uc 与正确 uc 混合使用" << STOP_COLOR << std::endl;
 
         if(argc == 3)
         {
@@ -2973,27 +2973,7 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "test")
     {
-
-        std::string s = "quicks";
-        std::regex r("quick*|hook*");
-
-        if (std::regex_search(s, r)) {
-            std::cout << "Match found!" << std::endl;
-        } 
-        else 
-        {
-            std::cout << "Match not found." << std::endl;
-        }
-
-        if (std::regex_search("hooks", r)) {
-            std::cout << "Match found!" << std::endl;
-        } 
-        else 
-        {
-            std::cout << "Match not found." << std::endl;
-        }
-
-
+        std::cout << "test" << std::endl;
     }
     else if(command_1 == "grammar")
     {
@@ -3025,6 +3005,7 @@ int main(int argc_old, char ** argv_old)
         return -1;
     }
     
+
     delete ucd_util;
     delete ucd_param_opt;
 	return 1;

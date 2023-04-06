@@ -36,6 +36,41 @@ using namespace jotools;
 
 // 自己写的服务，上传下载大文件出错的问题，
 
+
+// 将36进制数转换为10进制数
+int from36(std::string s) 
+{
+    int base = 1, res = 0;
+    for (int i = s.size() - 1; i >= 0; i--) 
+    {
+        if (isdigit(s[i])) {
+            res += (s[i] - '0') * base;
+        } else {
+            res += (s[i] - 'a' + 10) * base;
+        }
+        base *= 36;
+    }
+    return res;
+}
+
+// 将10进制数转换为36进制数
+std::string to36(int n) 
+{
+    std::string res = "";
+    while (n > 0) {
+        int x = n % 36;
+        if (x < 10) {
+            res += std::to_string(x);
+        } else {
+            res += (char)('a' + x - 10);
+        }
+        n /= 36;
+    }
+    reverse(res.begin(), res.end());
+    return res;
+}
+
+
 static bool is_uc(std::string uc)
 {
 
@@ -4213,9 +4248,8 @@ void UCDatasetUtil::set_fack_uc(std::string fake_folder)
     std::set<std::string> suffix = {".jpg", ".png", ".JPG", ".PNG", ".json", ".xml"};
     std::vector<std::string> file_path_vector = get_all_file_path(fake_folder, suffix);
     std::map< std::string, std::string > fack_dict;
-    std::vector<std::string> uc_c = {"0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
 
-    int index = 0;
+    int index = 46656;
     for(int i=0; i<file_path_vector.size(); i++)
     {
         std::string fake_uc = "";
@@ -4227,35 +4261,15 @@ void UCDatasetUtil::set_fack_uc(std::string fake_folder)
         }
         
         index += 1;
-        std::string index_str = std::to_string(index);
 
-        std::cout << index_str << std::endl;
+        if(index >= 1679614)
+        {
+            std::cout << ERROR_COLOR << "Fake uc number must less than 1679614" << STOP_COLOR << std::endl;
+        }
 
-        if(index_str.size() == 1)
-        {
-            fake_uc = "Fuc000" + index_str;
-        }
-        else if(index_str.size() == 2)
-        {
-            fake_uc = "Fuc00" + index_str;
-        }
-        else if(index_str.size() == 3)
-        {
-            fake_uc = "Fuc0" + index_str;
-        }
-        else if(index_str.size() == 4)
-        {
-            fake_uc = "Fuc" + index_str;
-        }
-        else
-        {
-            std::cout << "Fake uc count must less then 10000 : " << index_str << std::endl;
-            return;
-        }
-        fack_dict[file_name] = fake_uc;
-        
-        std::cout << fake_uc << std::endl;
+        fake_uc = to36(index);
 
+        fack_dict[file_name] = "Fuc" + fake_uc;
     }
 
     for(int i=0; i<file_path_vector.size(); i++)
@@ -4266,7 +4280,7 @@ void UCDatasetUtil::set_fack_uc(std::string fake_folder)
 
         std::string new_file_path = fake_folder + "/" + fake_uc + suffix; 
 
-        std::cout << file_path_vector[i] << " -> " << new_file_path << std::endl;
+        // std::cout << file_path_vector[i] << " -> " << new_file_path << std::endl;
 
         rename(file_path_vector[i].c_str(), new_file_path.c_str());
     }
