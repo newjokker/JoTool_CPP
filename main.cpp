@@ -98,8 +98,6 @@ using namespace std;
 
 // TODO: 做成 python 类型，输入 python 之后直接进入 pythyon 的环境变量，一直到 按 ctrl + c 才退出
 
-// FIXME: 存在 bug 只要 ucd 安装了，有些软件就不能安装，会报确实 .so 的错误
-
 // TODO: map 最后的结果画图出来，可以画简单点的图，找 C++ 或者 opencv 的画图软件
 
 // TODO: map 计算结果有问题
@@ -156,7 +154,30 @@ using namespace std;
 
 // TODO: 设置为数据组模式，可以禁用一些功能
 
+// TODO: ucd 成为一门语言
 
+// TODO: 将 MD5 生成 uc 这一步也放到 ucd 来做，
+        // (0) ucd 连接不到 80 服务器就直接报错 (1) get_uc (2) ucd 生成的和saturnDatabase 生成的用一种方法进行分开 (3) 服务端接收上传的图片复制整理到对应的文件夹中去
+        // (4) .json 文件可有可无，没必要一定去生成这个文件
+        // (5) 考虑快速入库的方法，如何快速申请一连串的 uc，输入 md5_list 返回的是 uc_list
+        // (6) 输入 uc_list 返回 md5_list
+        // (7) 申请 uc 的过程可以更加优雅一些，要更加的有 鲁棒性，有一个在申请，另外一个直接就报错就行，要绝对保证 uc 的唯一性
+        // （8）支持文件名为 md5 和 uc，两个都是合法的文件名，uc 是作为 md5 的简化，每一个 md5 应该能动态生成唯一的 uc
+        // (9)入库在 111 上专门写一个服务，用于接收传输过去的图片，传输的格式为 (uc, md5, img_data)
+        // (10) 数据库需要保存的数据为 md5_uc, 日期_已分配uc数目
+        // (11) 专门入库的这个功能单独做成一个小工具，不一定要和 ucd 进行合并
+
+// TODO: ucd 可以检查当前主板的 ID ，绑定主板 ID，当前版本只能这个主板使用，在使用之前需要进行联网激活, sudo dmidecode -s system-uuid, 03C00218-044D-0543-5A06-950700080009
+            // UUID是由系统生成的，因此除非您更改了硬件或重新安装操作系统，否则UUID应该是唯一的且不变的
+
+// TODO: 分组信息，有些数据 add 进去是有组的信息的，可以在 merge 的时候指定数据的组信息，group，对 uc 进行分组还是对 obj 进行分组
+        // split_by_group
+        // obj_info 中可以增加组的信息，随着 obj 中的 uc 进行存储 
+        // obj 中增加 group 信息，可以在 merge 的时候进行指定
+        // filter_by_group
+        // 
+
+// TODO: 根据前 uc 的前三位日期对 json 进行分类 ucd split_by_date ucd:json ; filter_by_date ucd:json; 
 
 int main(int argc_old, char ** argv_old)
 {
@@ -188,7 +209,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.0.1";
+    std::string app_version = "v4.0.5";
 
     // uci_info
     int volume_size         = 20;
@@ -1130,14 +1151,38 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "rename_img")
     {
+        // 一次处理的图片的个数，目前用不到
+        int buffer_img_size = 100;
+        if(long_args.count("buffer_img_size") > 0)
+        {
+            buffer_img_size = std::stoi(long_args["check_uc"]);
+        }
+        // 是否强制根据 md5 得到 uc
+        bool check_uc = true;
+        if(long_args.count("check_uc") > 0)
+        {
+            std::string check_uc_str = long_args["check_uc"];
+            if(check_uc_str == "1" || check_uc_str == "True" || check_uc_str == "true")
+            {
+                check_uc = true;
+            }
+            else
+            {
+                check_uc = false;
+            }
+        }
+
         if(argc == 3)
         {
             std::string img_dir = argv[2];
             if(is_dir(img_dir))
             {
                 SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
-                sd_sql->rename_img_dir(img_dir);
+                sd_sql->rename_img_dir(img_dir, 100, check_uc);
                 delete sd_sql;
+
+
+                std::cout << "check uc : " << check_uc << std::endl;
             }
             else
             {
@@ -1154,12 +1199,26 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "rename_img_xml")
     {
+        bool check_uc = true;
+        if(long_args.count("check_uc") > 0)
+        {
+            std::string check_uc_str = long_args["check_uc"];
+            if(check_uc_str == "1" || check_uc_str == "True" || check_uc_str == "true")
+            {
+                check_uc = true;
+            }
+            else
+            {
+                check_uc = false;
+            }
+        }
+
         if(argc == 4)
         {
             std::string img_dir = argv[2];
             std::string xml_dir = argv[3];
             SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
-            sd_sql->rename_img_xml_dir(img_dir, xml_dir);
+            sd_sql->rename_img_xml_dir(img_dir, xml_dir, 100, check_uc);
             delete sd_sql;
         }
         else
@@ -1170,12 +1229,27 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "rename_img_json")
     {
+        
+        bool check_uc = true;
+        if(long_args.count("check_uc") > 0)
+        {
+            std::string check_uc_str = long_args["check_uc"];
+            if(check_uc_str == "1" || check_uc_str == "True" || check_uc_str == "true")
+            {
+                check_uc = true;
+            }
+            else
+            {
+                check_uc = false;
+            }
+        }
+
         if(argc == 4)
         {
             std::string img_dir = argv[2];
             std::string json_dir = argv[3];
             SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
-            sd_sql->rename_img_json_dir(img_dir, json_dir);
+            sd_sql->rename_img_json_dir(img_dir, json_dir, 100, check_uc);
             delete sd_sql;
         }
         else
@@ -1930,6 +2004,35 @@ int main(int argc_old, char ** argv_old)
             ucd_param_opt->print_command_info(command_1);
         }
     }
+    else if(command_1 == "filter_by_date")
+    {
+        // 根据时间进行筛选，只需要指定时间的，时间之间使用逗号分隔
+
+        if(argc == 5)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_path = argv[3];
+            std::string assign_date_str = argv[4];
+            std::vector<std::string> assign_date = pystring::split(assign_date_str, ",");
+
+            if(! is_read_file(ucd_path))
+            {
+                std::cout << ERROR_COLOR << "ucd path is not readable : " << ucd_path << STOP_COLOR << std::endl;
+                return -1; 
+            }
+
+            UCDataset *ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->filter_by_date(assign_date, true);
+            ucd->save_to_ucd(save_path);
+            delete ucd;
+            return 1;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
     else if(command_1 == "filter_volume_by_tags")
     {
         if(argc > 5)
@@ -2519,7 +2622,7 @@ int main(int argc_old, char ** argv_old)
             std::cout << "change ucd version by :" << std::endl;
 
             std::cout << HIGHTLIGHT_COLOR << "  sudo chmod 777 /home/ldq/Apps_jokker -R" << STOP_COLOR << std::endl;
-            std::cout << HIGHTLIGHT_COLOR << "  sudo ldconfig" << STOP_COLOR << std::endl;
+            // std::cout << HIGHTLIGHT_COLOR << "  sudo ldconfig" << STOP_COLOR << std::endl;
             std::cout << HIGHTLIGHT_COLOR << "  vim ~/.bash_aliases" << STOP_COLOR << std::endl;
             std::cout << HIGHTLIGHT_COLOR << "  source ~/.bash_aliases" << STOP_COLOR << std::endl;
             std::cout << "" << std::endl;
@@ -2541,6 +2644,41 @@ int main(int argc_old, char ** argv_old)
             UCDataset* ucd = new UCDataset(ucd_path);
             ucd->parse_ucd(true);
             ucd->split(ucd_part_a, ucd_part_b, ratio);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "split_by_date")
+    {
+        if(argc == 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_dir = argv[3];
+
+            if(! is_read_file(ucd_path))
+            {
+                std::cout << ERROR_COLOR << "ucd path is not readable : " << ucd_path << STOP_COLOR << std::endl;
+                return -1; 
+            }
+
+            // 获取保存的名字
+            std::string save_name = "";
+            if(long_args.count("save_name") > 0)
+            {
+                save_name = long_args["save_name"];
+            }
+            else
+            {
+                save_name = get_file_name(ucd_path);
+            }
+
+            UCDataset *ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->split_by_date(save_dir, save_name);
+            delete ucd;
+            return 1;
         }
         else
         {

@@ -156,6 +156,9 @@ class UCDataset
         // 对 ucd 做 nms
         void filter_by_nms(float nms_th, bool ignore_tag, bool clear_obj=true);
 
+        // 对日期进行筛选
+        void filter_by_date(std::vector<std::string> assign_date, bool clear_obj);
+
         // crop_dete_res
         void crop_dete_res_with_assign_uc(std::string uc, std::string img_path, std::string save_dir, bool is_split=true);
 
@@ -167,6 +170,9 @@ class UCDataset
 
         // 随机将 ucd 分割为一定比例的几个部分
         void split(std::string ucd_part_a, std::string ucd_part_b, float ratio);
+
+        // 将 ucd 按照日期分为几部分
+        void split_by_date(std::string save_dir, std::string save_name="");
 
         // 从指定 ucd 中提取需要的内容
         void absorb(std::string meat_ucd, std::string save_path, std::string need_attr);

@@ -1186,6 +1186,49 @@ void UCDataset::filter_by_uc_set(std::set<std::string> uc_set, bool clear_obj)
     UCDataset::uc_list = uc_list;
 }
 
+void UCDataset::filter_by_date(std::vector<std::string> assign_date, bool clear_obj)
+{
+    std::vector<std::string> uc_list;
+    for(int i=0; i<UCDataset::uc_list.size(); i++)
+    {
+        std::string uc = UCDataset::uc_list[i];
+        
+        bool filter_pass = false;
+        for(int j=0; j<assign_date.size(); j++)
+        {
+            if(pystring::startswith(uc, assign_date[j]))
+            {
+                filter_pass = true;
+            }
+        }
+
+        if(filter_pass == false)
+        {
+            if(UCDataset::size_info.count(uc) > 0)
+            {
+                UCDataset::size_info.erase(uc);
+            }
+            
+            if(UCDataset::object_info.count(uc) > 0)
+            {
+                if(clear_obj == true)
+                {
+                    for(int j=0; j<UCDataset::object_info[uc].size(); j++)
+                    {
+                        delete UCDataset::object_info[uc][j];
+                    }
+                }
+                UCDataset::object_info.erase(uc);
+            }
+        }
+        else
+        {
+            uc_list.push_back(uc);
+        }
+    }
+    UCDataset::uc_list = uc_list;
+}
+
 void UCDataset::crop_dete_res_with_assign_uc(std::string uc, std::string img_path, std::string save_dir, bool is_split)
 {
     if(UCDataset::object_info.count(uc) == 0)
@@ -1311,6 +1354,66 @@ void UCDataset::split(std::string ucd_part_a, std::string ucd_part_b, float rati
     }
     ucd_b->save_to_ucd(ucd_part_b);
     delete ucd_b;
+}
+
+void UCDataset::split_by_date(std::string save_dir, std::string save_name)
+{
+    if(! is_write_dir(save_dir))
+    {
+        std::cout << ERROR_COLOR << "save folder is not writeable : " << save_dir << STOP_COLOR << std::endl;
+        return;
+    }
+
+    // 将 obj 按照 日期分为几份
+
+    // 日期统计
+    std::map<std::string, std::vector<std::string> >  uc_date_map;
+    for(int i=0; i<UCDataset::uc_list.size(); i++)
+    {
+        std::string uc = UCDataset::uc_list[i];
+        std::string uc_head = uc.substr(0, 3);
+        if(uc_date_map.count(uc_head) == 0)
+        {
+            std::vector<std::string> uc_vector;
+            uc_vector.push_back(uc);
+            uc_date_map[uc_head] = uc_vector;
+        }
+        else
+        {
+            uc_date_map[uc_head].push_back(uc);
+        }
+    }
+
+    auto iter = uc_date_map.begin();
+    while(iter != uc_date_map.end())
+    {
+        std::cout << "save " << iter->first << " : " << uc_date_map[iter->first].size() << std::endl;
+        std::string save_path;
+        UCDataset * ucd = new UCDataset();
+        for(int i=0; i<uc_date_map[iter->first].size(); i++)
+        {
+            std::string uc = uc_date_map[iter->first][i];
+            ucd->uc_list.push_back(uc);
+            if(UCDataset::object_info.count(uc)>0)
+            {
+                ucd->object_info[uc] = UCDataset::object_info[uc];
+            }
+            if(UCDataset::size_info.count(uc)>0)
+            {
+                ucd->size_info[uc] = UCDataset::size_info[uc];
+            }
+        }
+        if(save_name == "")
+        {
+            save_path = save_dir + "/" + iter->first + ".json";
+        }
+        else
+        {
+            save_path = save_dir + "/" + save_name + "_" + iter->first + ".json";
+        }
+        ucd->save_to_ucd(save_path);
+        iter++;
+    }
 }
 
 void UCDataset::absorb(std::string meat_ucd, std::string save_path, std::string need_attr)
@@ -2784,11 +2887,12 @@ void UCDatasetUtil::load_ucd_app(std::string version, std::string save_dir)
 {
     // 必须指定版本，
     std::string save_ucd_path   = save_dir + "/" + "ucd_" + version;
-    std::string save_so_path    = save_dir + "/" + "so_dir"+ "/" + "libsaturntools_" + version + ".so";
-    UCDatasetUtil::load_file("/ucd_app/so_" + version, save_so_path);
     UCDatasetUtil::load_file("/ucd_app/" + version, save_ucd_path);
 
-    if((! is_file(save_ucd_path)) || (! is_file(save_so_path)))
+    // std::string save_so_path    = save_dir + "/" + "so_dir"+ "/" + "libsaturntools_" + version + ".so";
+    // UCDatasetUtil::load_file("/ucd_app/so_" + version, save_so_path);
+
+    if((! is_file(save_ucd_path)))
     {
         std::cout << ERROR_COLOR << "load app file filed !" << STOP_COLOR << std::endl;
     }
@@ -4245,7 +4349,7 @@ void UCDatasetUtil::set_fack_uc(std::string fake_folder)
         return;
     }
 
-    std::set<std::string> suffix = {".jpg", ".png", ".JPG", ".PNG", ".json", ".xml"};
+    std::set<std::string> suffix = {".jpg", ".png", ".JPG", ".PNG", ".json", ".xml", ".jpeg"};
     std::vector<std::string> file_path_vector = get_all_file_path(fake_folder, suffix);
     std::map< std::string, std::string > fack_dict;
 
@@ -4815,7 +4919,7 @@ void UCDatasetUtil::get_ucd_version_info(std::string app_dir, std::string app_ve
         // customer
         for(int i=0; i<data["ucd_version_info"].size(); i++)
         {
-            std::cout << "  remote : " << data["ucd_version_info"][i] << std::endl;
+            std::cout << "  remote : ucd_v" << data["ucd_version_info"][i] << std::endl;
         }
     }
     else

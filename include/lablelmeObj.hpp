@@ -18,6 +18,7 @@ class LabelmeObj
         // 置信度信息，这个数据还是很重要的，想想还是加上去了
         float conf;
         
+        // 组的 ID，
         int group_id;
         
         // 打印 obj 信息

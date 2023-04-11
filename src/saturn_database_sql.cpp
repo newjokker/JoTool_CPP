@@ -84,9 +84,8 @@ SaturnDatabaseSQL::SaturnDatabaseSQL(std::string host, int port, std::string use
     SaturnDatabaseSQL::db = db;
 }
 
-void SaturnDatabaseSQL::rename_img_dir(std::string img_dir, int buffer_img_size)
+void SaturnDatabaseSQL::rename_img_dir(std::string img_dir, int buffer_img_size, bool check_uc)
 {
-
 
     if(img_dir == "./")
     {
@@ -97,7 +96,7 @@ void SaturnDatabaseSQL::rename_img_dir(std::string img_dir, int buffer_img_size)
 
     // fixme 本身是 uc 名字的就不要操作了，直接拷贝或者复制就行，有 uc 格式的看在不在数据库就完事了
 
-    std::set<std::string> suffixs {".jpg", ".JPG", ".png", ".PNG"};
+    std::set<std::string> suffixs {".jpg", ".JPG", ".png", ".PNG", ".jpeg"};
     std::vector<std::string> img_path_vector = get_all_file_path_recursive(img_dir, suffixs);
     std::vector<std::string> md5_vector;
     std::string md5_str;
@@ -109,7 +108,8 @@ void SaturnDatabaseSQL::rename_img_dir(std::string img_dir, int buffer_img_size)
     for(int i=0; i<img_path_vector.size(); i++)
     {
         std::string img_name = get_file_name(img_path_vector[i]);
-        if(! is_uc(img_name))
+
+        if((! is_uc(img_name)) || (check_uc == false))
         {
             md5_str = get_file_md5(img_path_vector[i]);
             md5_vector.push_back(md5_str);
@@ -146,7 +146,7 @@ void SaturnDatabaseSQL::rename_img_dir(std::string img_dir, int buffer_img_size)
     }
 }
 
-void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_dir, int buffer_img_size)
+void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_dir, int buffer_img_size, bool check_uc)
 {
 
     if((! is_dir(img_dir)) || (! is_dir(xml_dir)))
@@ -154,7 +154,7 @@ void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_
         std::cout << ERROR_COLOR << "image dir or xml dir not exists : " << img_dir << STOP_COLOR << std::endl;
     }
 
-    std::set<std::string> suffixs {".jpg", ".JPG", ".png", ".PNG"};
+    std::set<std::string> suffixs {".jpg", ".JPG", ".png", ".PNG", ".jpeg"};
     std::vector<std::string> img_path_vector = get_all_file_path(img_dir, suffixs);
     std::vector<std::string> md5_vector;
     std::string md5_str;
@@ -171,7 +171,7 @@ void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_
         // todo 如果存在对应的 xml path
         img_name = get_file_name(img_path_vector[i]);
         xml_path = xml_dir + "/" + img_name + ".xml";
-        if(! is_uc(img_name))
+        if((! is_uc(img_name)) || (check_uc == false))
         {
             if(is_file(xml_path))
             {
@@ -215,7 +215,7 @@ void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_
     }
 }
 
-void SaturnDatabaseSQL::rename_img_json_dir(std::string img_dir, std::string json_dir, int buffer_img_size)
+void SaturnDatabaseSQL::rename_img_json_dir(std::string img_dir, std::string json_dir, int buffer_img_size, bool check_uc)
 {
 
     if((! is_dir(img_dir)) || (! is_dir(json_dir)))
@@ -223,7 +223,7 @@ void SaturnDatabaseSQL::rename_img_json_dir(std::string img_dir, std::string jso
         std::cout << ERROR_COLOR << "image dir or xml dir not exists : " << img_dir << STOP_COLOR << std::endl;
     }
 
-    std::set<std::string> suffixs {".jpg", ".JPG", ".png", ".PNG"};
+    std::set<std::string> suffixs {".jpg", ".JPG", ".png", ".PNG", ".jpeg"};
     std::vector<std::string> img_path_vector = get_all_file_path(img_dir, suffixs);
     std::vector<std::string> md5_vector;
     std::string md5_str;
@@ -240,7 +240,7 @@ void SaturnDatabaseSQL::rename_img_json_dir(std::string img_dir, std::string jso
         // todo 如果存在对应的 xml path
         img_name = get_file_name(img_path_vector[i]);
         xml_path = json_dir + "/" + img_name + ".json";
-        if(! is_uc(img_name))
+        if((! is_uc(img_name)) || (check_uc == false))
         {
             if(is_file(xml_path))
             {

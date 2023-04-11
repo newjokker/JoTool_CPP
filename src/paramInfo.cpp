@@ -551,6 +551,7 @@ void UcdParamOpt::load_param_info()
     ParamInfo * param_rename_img = new ParamInfo("rename_img");
     param_rename_img->group = "rename";
     param_rename_img->grammar = "ucd rename_img img_dir";
+    param_rename_img->args_info["--check_uc"] = "false|0|False, 不管文件名是不是uc，都强制根据文件 md5 找到对应的 uc";
     param_rename_img->english_explain = "rename img by uc";
     param_rename_img->chinese_explain = "使用 uc 重命名图片(.jpg, .JPG, .png, .PNG), 未入库的数据不进行重命名";
     param_rename_img->demo.push_back("ucd rename_img ./img                      (将 ./img 路径下的所有图片进行重名名)");   
@@ -560,6 +561,7 @@ void UcdParamOpt::load_param_info()
     ParamInfo * param_rename_img_xml = new ParamInfo("rename_img_xml");
     param_rename_img_xml->group = "rename";
     param_rename_img_xml->grammar = "ucd rename_img_xml img_dir xml_dir";
+    param_rename_img_xml->args_info["--check_uc"] = "false|0|False, 不管文件名是不是uc，都强制根据文件 md5 找到对应的 uc";
     param_rename_img_xml->english_explain = "rename img xml by uc";
     param_rename_img_xml->chinese_explain = "使用 uc 重命名数据集, xml 名字跟随者 img 的名字的改变而改变";
     param_rename_img_xml->demo.push_back("ucd rename_img_xml ./img ./xml        (将 ./img 文件夹中的图片和 ./xml 文件夹中的 xml 同时使用 uc 重命名)");   
@@ -569,6 +571,7 @@ void UcdParamOpt::load_param_info()
     ParamInfo * param_rename_img_json = new ParamInfo("rename_img_json");
     param_rename_img_json->group = "rename";
     param_rename_img_json->grammar = "ucd rename_img_json img_dir xml_dir";
+    param_rename_img_json->args_info["--check_uc"] = "false|0|False, 不管文件名是不是uc，都强制根据文件 md5 找到对应的 uc";
     param_rename_img_json->english_explain = "rename img json by uc";
     param_rename_img_json->chinese_explain = "使用 uc 重命名数据集, json 名字跟随者 img 的名字的改变而改变";   
     param_rename_img_json->demo.push_back("ucd rename_img_xml ./img ./json        (将 ./img 文件夹中的图片和 ./json 文件夹中的 json 同时使用 uc 重命名)");   
@@ -897,6 +900,17 @@ void UcdParamOpt::load_param_info()
     param_split->demo.push_back("ucd split aqm.json aqm_a.json aqm_b.json 0.2       (将 aqm.json 数据集按照 0.2 0.8 划分成两个数据集 aqm_a.json aqm_b.json)");
     param_split->demo.push_back("ucd split aqm.json aqm_a.json aqm_b.json 0.5       (将 aqm.json 数据集按照 0.5 0.5 划分成两个数据集 aqm_a.json aqm_b.json)");
     UcdParamOpt::add_param(param_split);
+
+    // split_by_date
+    ParamInfo * param_split_by_date = new ParamInfo("split_by_date");
+    param_split_by_date->group = "opt";
+    param_split_by_date->grammar = "ucd split_by_date ucd_path save_dir";
+    param_split_by_date->args_info["--save_name"] = "指定保存的名字，保存格式为 save_name_date.json, 当不指定时，保存名形如 origin_name_date.json";
+    param_split_by_date->english_explain = "";
+    param_split->chinese_explain = "将 ucd 按照uc 的前三位（日期）划分为多个 json 文件";   
+    param_split_by_date->demo.push_back("ucd split_by_date aqm.json ./res                   (将 aqm.json 根据时间划分为多个 json 保存在 ./res 文件夹)");
+    param_split_by_date->demo.push_back("ucd split_by_date aqm.json ./res --save_name test  (将 aqm.json 根据时间划分为多个 json 保存在 ./res 文件夹，指定保存的名字)");
+    UcdParamOpt::add_param(param_split_by_date);
    
     // update
     ParamInfo * param_update = new ParamInfo("update");
@@ -991,6 +1005,16 @@ void UcdParamOpt::load_param_info()
     param_filter_by_tags->demo.push_back("ucd filter_by_tags aqm.json res.json aqm*                             (将 aqm.json 只保留 aqm 开头的所有标签)");
     param_filter_by_tags->demo.push_back("ucd filter_by_tags aqm.json res.json aqm*ll                           (将 aqm.json 只保留 aqm 开头ll结尾的所有标签)");
     UcdParamOpt::add_param(param_filter_by_tags);
+
+    // filter_by_date
+    ParamInfo * param_filter_by_date = new ParamInfo("filter_by_date");
+    param_filter_by_date->group = "filter";
+    param_filter_by_date->grammar = "ucd param_filter_by_date ucd_path save_path date1,date2,date3";
+    param_filter_by_date->english_explain = "";
+    param_filter_by_date->chinese_explain = "数据集中只保留指定日期入库的数据";   
+    param_filter_by_date->demo.push_back("ucd param_filter_by_date aqm.json res.json C                   (将 aqm.json 只保留 2021 年入库的数据)");
+    param_filter_by_date->demo.push_back("ucd param_filter_by_date aqm.json res.json Dad                 (将 aqm.json 只保留 2022.01.04 入库的数据)");
+    UcdParamOpt::add_param(param_filter_by_date);
 
     // filter_volume_by_tags
     ParamInfo * param_filter_volume_by_tags = new ParamInfo("filter_volume_by_tags");

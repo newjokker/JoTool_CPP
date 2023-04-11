@@ -25,13 +25,13 @@ class SaturnDatabaseSQL
         // std::string get_file_md5(std::string file_path);
 
         // rename image
-        void rename_img_dir(std::string img_dir, int buffer_img_size=100);
+        void rename_img_dir(std::string img_dir, int buffer_img_size=100, bool check_uc=true);
 
         // rename image xml
-        void rename_img_xml_dir(std::string img_dir, std::string xml_dir, int buffer_img_size=100);
+        void rename_img_xml_dir(std::string img_dir, std::string xml_dir, int buffer_img_size=100, bool check_uc=true);
         
         // rename image json
-        void rename_img_json_dir(std::string img_dir, std::string json_dir, int buffer_img_size=100);
+        void rename_img_json_dir(std::string img_dir, std::string json_dir, int buffer_img_size=100, bool check_uc=true);
 
         // 根据 md5 获取 uc
         std::map<std::string, std::string> get_md5_uc_map_from_md5_vector(std::vector<std::string> md5_vector);
