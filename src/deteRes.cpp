@@ -290,7 +290,7 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
             // throw "parse xml error, lose filename, " + xml_path; 
             DeteRes::file_name = "";         
         }
-
+        
         // object info
         if(objects)
         {
@@ -301,7 +301,16 @@ bool DeteRes::parse_xml_info(const std::string xml_path)
                 auto name = objects->FirstChildElement("name");
                 if(name)
                 {
-                    obj_info->tag = name->GetText();
+                    auto tag = name->GetText();
+                    if(tag)
+                    {
+                        obj_info->tag = tag;
+                    }
+                    else
+                    {
+                        obj_info->tag = "";
+                        std::cout << ERROR_COLOR << "xml path has empty tag : " << xml_path << STOP_COLOR << std::endl;
+                    }
                 }
                 else
                 {

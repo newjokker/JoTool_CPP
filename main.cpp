@@ -177,7 +177,14 @@ using namespace std;
         // filter_by_group
         // 
 
-// TODO: 根据前 uc 的前三位日期对 json 进行分类 ucd split_by_date ucd:json ; filter_by_date ucd:json; 
+// TODO: 请求 uc 部分应该是 服务端提供的功能，指定一个 md5_list 服务端就应该返回一个 md5_dict(md5:uc), 这应该全部是服务端提供的功能
+            // uc_v2_server
+            // uc_v1 和 uc_v2 之间是不能混合使用的，新的 uc 第一个字母是小写，后面两个字母是大写和数字, 日期按照天数来计算，计算到 1970 年到现在一共过去了多少天，
+
+
+// TODO: 批处理, 指定某个操作，可以传入一个 json 的文件夹，
+
+
 
 int main(int argc_old, char ** argv_old)
 {
@@ -209,7 +216,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.0.5";
+    std::string app_version = "v4.1.2";
 
     // uci_info
     int volume_size         = 20;
@@ -3111,7 +3118,13 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "test")
     {
-        std::cout << "test" << std::endl;
+        while(true)
+        {
+            std::string command;
+            std::cout << "请输入命令：";
+            std::getline(std::cin, command);
+            std::cout << "您输入的命令是：" << command << std::endl;
+        }
     }
     else if(command_1 == "grammar")
     {
