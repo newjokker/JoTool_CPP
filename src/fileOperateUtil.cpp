@@ -218,8 +218,16 @@ bool is_match(std::string assign_str, std::string regex_str)
 
 bool is_match_regex(std::string s, std::string regex_str)
 {
+    // 防止出现 abc 匹配到 
     std::regex r(regex_str);
-    
+    if(pystring::count(regex_str, "*") == 0)
+    {
+        if(s != regex_str)
+        {
+            return false;
+        }
+    }
+
     if (std::regex_search(s, r)) 
     {
         return true;
