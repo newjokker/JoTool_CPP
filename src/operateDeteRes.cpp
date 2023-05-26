@@ -117,6 +117,65 @@ void cut_small_img(std::string img_dir, std::string xml_dir, std::string save_di
     }
 }
 
+void get_ucd_from_crop_img(std::string crop_dir, std::string save_path, bool origin_tag)
+{
+    std::map<std::string, std::vector<std::string>> xml_info_map;
+    std::vector<std::string> folder_path_list = get_all_folder_path(crop_dir);
+    DeteObj obj;
+
+    for(int i=0; i<folder_path_list.size(); i++)
+    {
+        std::string folder_name = get_folder_name(folder_path_list[i]);
+        std::vector<std::string> file_path_vector = get_all_file_path(folder_path_list[i]);
+        std::set<std::string> suffixs {".jpg", ".png", ".JPG", ".PNG"};
+        std::vector<std::string> img_path_vector = filter_by_suffix(file_path_vector, suffixs);
+
+        for(int j=0; j<img_path_vector.size(); j++)
+        {
+            std::string file_name = get_file_name(img_path_vector[j]);
+            std::vector<std::string> loc_str_list = pystring::split(file_name, "-+-");
+            std::string loc_str = loc_str_list[loc_str_list.size()-1];
+
+            if(! origin_tag)
+            {
+                // 替换 loc_str 中的 tag 信息
+                obj.load_from_name_str(loc_str);
+                obj.tag = folder_name;
+                loc_str = obj.get_name_str();
+            }
+
+            std::string uc = file_name.substr(0, pystring::rfind(file_name, "-+-"));
+            xml_info_map[uc].push_back(loc_str);
+        }
+    }
+
+    UCDataset *ucd = new UCDataset(save_path);
+
+    // get xml
+    auto iter = xml_info_map.begin();
+    while (iter != xml_info_map.end())
+    {
+        DeteRes* dete_res = new DeteRes();
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            DeteObj* dete_obj = new DeteObj();
+            dete_obj->load_from_name_str(iter->second[i]);
+            // 这边修改名字
+
+            dete_res->add_dete_obj(*dete_obj);
+            delete dete_obj;
+            // std::cout << iter->first << " : " << iter->second.size() << std::endl;
+        }
+        ucd->add_dete_res_info(iter->first, *dete_res);
+        delete dete_res;
+        iter++;
+    }
+
+    // save ucd
+    ucd->save_to_ucd(save_path);
+    delete ucd;
+}
+
 void get_xml_from_crop_img(std::string crop_dir, std::string save_xml_dir)
 {
     std::map<std::string, std::vector<std::string>> xml_info_map;

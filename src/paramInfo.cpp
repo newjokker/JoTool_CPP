@@ -693,6 +693,18 @@ void UcdParamOpt::load_param_info()
     param_to_yolo_txt->demo.push_back("ucd to_yolo_txt test_2.json ./yolo_train_txt Fnormal,fzc_broken      (指定需要转为 txt 的标签)");   
     UcdParamOpt::add_param(param_to_yolo_txt);
 
+    // to_yolo_train_data
+    ParamInfo * param_to_yolo_train_data = new ParamInfo("to_yolo_train_data");
+    param_to_yolo_train_data->group = "convert";
+    param_to_yolo_train_data->args_info["--ratio"]  = "划分 train 和 val 的比例，default = 0.8";
+    param_to_yolo_train_data->args_info["--tags"]   = "指定需要训练的标签";
+    param_to_yolo_train_data->grammar = "ucd to_yolo_train_data save_dir";
+    param_to_yolo_train_data->english_explain = "convert ucd to yolo train data";
+    param_to_yolo_train_data->chinese_explain = "将 ucd 转为 yolo 训练的格式，train/images|labels, val/images|labels";
+    param_to_yolo_train_data->demo.push_back("ucd to_yolo_train_data test.json train_dir --ratio 0.8                    (将 test.json 整理为 0.8 | 0.2 的 yolo 训练数据)");   
+    param_to_yolo_train_data->demo.push_back("ucd to_yolo_train_data test.json train_dir --tags  tag1,tag2,tag3         (将 test.json 中的 tag1,tag2,tag3 三个标签整理为yolo 训练数据)");   
+    UcdParamOpt::add_param(param_to_yolo_train_data);
+
     // history
     ParamInfo * param_history = new ParamInfo("history");
     param_history->group = "info";
@@ -788,6 +800,19 @@ void UcdParamOpt::load_param_info()
     param_move_not_uc->chinese_explain = "将文件件中所有不符合 uc 命名的移动到指定文件夹中";   
     param_move_not_uc->demo.push_back("ucd move_not_uc ./test ./res             (将 ./test 文件夹下不符合 uc 命名规范的指定后缀的文件移动到 ./res 文件夹下面)");
     UcdParamOpt::add_param(param_move_not_uc);
+
+
+    // from_crop
+    ParamInfo * param_from_crop = new ParamInfo("from_crop");
+    param_from_crop->group = "opt";
+    param_from_crop->args_info["-o"] = "不使用文件夹的名字作为小图的标签，直接使用小图文件名中包含的标签作为 obj 的 tag";
+    param_from_crop->grammar = "ucd from_crop crop_dir save_path";
+    param_from_crop->english_explain = "cut img to xml";
+    param_from_crop->chinese_explain = "截图生成xml";   
+    param_from_crop->demo.push_back("ucd from_crop ./crop res.json                 (将 ./crop 文件夹中的小图文件夹 生成 res.json 文件，使用文件夹的名字作为小图标签)");
+    param_from_crop->demo.push_back("ucd from_crop ./crop res.json   -o            (将 ./crop 文件夹中的小图文件夹 生成 res.json 文件，使用小图的名字作为小图标签)");
+    UcdParamOpt::add_param(param_from_crop);
+    
 
     // from_file
     ParamInfo * param_from_file = new ParamInfo("from_file");

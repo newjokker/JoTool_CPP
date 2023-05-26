@@ -216,7 +216,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.1.3";
+    std::string app_version = "v4.2.3";
 
     // uci_info
     int volume_size         = 20;
@@ -717,6 +717,26 @@ int main(int argc_old, char ** argv_old)
             return -1;
         }
     }
+    else if(command_1 == "from_crop")
+    {
+        bool origin_tag = false;
+        if(short_args.count("o") != 0)
+        {
+            origin_tag = true;
+        }
+
+        if(argc == 4)
+        {
+            std::string crop_dir    = argv[2];
+            std::string save_path   = argv[3];
+            jotools::get_ucd_from_crop_img(crop_dir, save_path, origin_tag);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+            return -1;
+        }
+    }
     else if(command_1 == "from_img")
     {
         if(argc == 4)
@@ -727,7 +747,7 @@ int main(int argc_old, char ** argv_old)
         }
         else
         {
-            ucd_param_opt->print_command_info("from_img");
+            ucd_param_opt->print_command_info(command_1);
             return -1;
         }
     }
@@ -1369,7 +1389,7 @@ int main(int argc_old, char ** argv_old)
         }
         else
         {
-            ucd_param_opt->print_command_info("crop_to_xml");
+            ucd_param_opt->print_command_info(command_1);
             return -1;
         }
     }
@@ -1696,6 +1716,48 @@ int main(int argc_old, char ** argv_old)
             ucd_param_opt->print_command_info(command_1);
         }
     }
+    else if(command_1 == "to_yolo_train_data")
+    {
+        float ratio = 0.8;
+        if(long_args.count("ratio") != 0)
+        {
+            ratio = std::stof(long_args["ratio"]);
+        }
+
+        std::string tag_str = "";
+        if(long_args.count("tags") != 0)
+        {
+            tag_str = long_args["tags"];
+        }
+
+        if(argc == 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_dir = argv[3];
+            if(ucd_util->is_ucd_path(ucd_path))
+            {
+                if(is_write_dir(save_dir))
+                {
+                    ucd_util->save_to_yolo_train_data(ucd_path, save_dir, tag_str, ratio);
+                }
+                else
+                {
+                    std::cout << ERROR_COLOR << "WARNING : save folder don't have write access : " << save_dir << STOP_COLOR << std::endl;
+                    return -1; 
+                }
+            }
+            else
+            {
+                std::cout << "ucd path not exists : " << ucd_path << std::endl;
+                throw "ucd path not exists";
+            }
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+            return -1;
+        }
+    }
     else if(command_1 == "attr")
     {
         // 修改 ucd 文件的属性信息，因为对于比较大的 ucd 打开自己去修改非常麻烦
@@ -1720,7 +1782,7 @@ int main(int argc_old, char ** argv_old)
         }
         else
         {
-            ucd_param_opt->print_command_info("attr");
+            ucd_param_opt->print_command_info(command_1);
             return -1;
         }
     }

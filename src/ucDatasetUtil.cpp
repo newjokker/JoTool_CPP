@@ -1302,6 +1302,7 @@ void UCDataset::split(std::string ucd_part_a, std::string ucd_part_b, float rati
     }
     
     std::vector<std::string> uc_list = UCDataset::uc_list;
+    // 打乱顺序
     std::random_shuffle(uc_list.begin(), uc_list.end());
     int count_for_a = ratio * uc_list.size();
     
@@ -5043,6 +5044,78 @@ void UCDatasetUtil::fix_size_info(std::string ucd_path, std::string save_path, b
     ucd->save_to_ucd(save_path);
     delete ucd;
     delete size_ucd;
+
+}
+
+void UCDatasetUtil::save_to_yolo_train_data(std::string ucd_path, std::string save_dir, std::string tag_str, float ratio)
+{
+    // 
+    UCDataset *ucd = new UCDataset(ucd_path);
+    ucd->parse_ucd(true);
+
+    // 分为两个 train.json val.json
+    // TODO 如果两个文件存在的话就直接用那两个文件
+
+    std::string ucd_path_train  = save_dir + "train.json";
+    std::string ucd_path_val    = save_dir + "val.json";
+
+    if(is_read_file(ucd_path_train) && is_read_file(ucd_path_val))
+    {
+        std::cout << HIGHTLIGHT_COLOR << "* train.josn val.json exists, use exists json" << STOP_COLOR << std::endl;
+    }
+    else
+    {
+        ucd->split(ucd_path_train, ucd_path_val, ratio);
+    }
+
+    // 创建新的文件夹
+    std::string train_label_dir = save_dir + "//" + "train" + "//" + "labels";
+    std::string train_image_dir = save_dir + "//" + "train" + "//" + "images";
+    std::string val_label_dir = save_dir + "//" + "val" + "//" + "labels";
+    std::string val_image_dir = save_dir + "//" + "val" + "//" + "images";
+    create_folder(save_dir + "//" + "train");
+    create_folder(train_image_dir);
+    create_folder(train_label_dir);
+    create_folder(save_dir + "//" + "val");
+    create_folder(val_label_dir);
+    create_folder(val_image_dir);
+
+    // 下载图片文件
+    UCDataset *train_ucd = new UCDataset(ucd_path_train);
+    train_ucd->parse_ucd();
+    UCDataset *val_ucd = new UCDataset(ucd_path_val);
+    val_ucd->parse_ucd();
+    UCDatasetUtil::load_img(train_image_dir, train_ucd->uc_list);
+    UCDatasetUtil::load_img(val_image_dir, val_ucd->uc_list);
+
+    // 保存 txt 文件
+    std::vector<std::string> tag_list;
+    if(tag_str != "")
+    {
+        tag_list = pystring::split(tag_str, ",");
+    }
+    else
+    {
+        std::set<std::string> tag_set = ucd->get_tags();
+        tag_list.assign(tag_set.begin(), tag_set.end());
+    }
+
+    UCDatasetUtil::parse_yolo_train_data(UCDatasetUtil::cache_img_dir, train_label_dir, ucd_path_train, tag_list);
+    UCDatasetUtil::parse_yolo_train_data(UCDatasetUtil::cache_img_dir, val_label_dir, ucd_path_val, tag_list);
+
+
+    // 打印信息 
+    std::cout << HIGHTLIGHT_COLOR << "tag list : ";
+
+    for(int i=0; i<tag_list.size(); i++)
+    {
+        std::cout << tag_list[i] << ",";
+    }
+    std::cout << STOP_COLOR << std::endl;
+
+    delete ucd;
+    delete train_ucd;
+    delete val_ucd;
 
 }
 

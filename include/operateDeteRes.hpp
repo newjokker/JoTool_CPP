@@ -21,6 +21,7 @@ namespace jotools
     void cut_small_img(std::string img_dir, std::string xml_dir, std::string save_dir, bool split_by_tag);
 
     // 从截图中反推出小图
+    void get_ucd_from_crop_img(std::string crop_dir,  std::string save_path, bool origin_tag = false);
     void get_xml_from_crop_img(std::string crop_dir,  std::string save_xml_dir);
     void get_xml_from_crop_img_use_origin_tag(std::string crop_dir,  std::string save_xml_dir);
 

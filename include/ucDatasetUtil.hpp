@@ -404,15 +404,14 @@ class UCDatasetUtil
         // 找到缓存中 uc 图片
         std::string get_cache_uc_img_path(std::string uc);
 
+        // 保存为 yolo 默认的训练格式
+        void save_to_yolo_train_data(std::string ucd_path, std::string save_dir, std::string tag_str, float ratio=0.8);
 
     private:
         
         // 下载云上的数据
         void load_file(std::string url, std::string save_path, int index=-1);
 };
-
-
-
 
 
 #endif
