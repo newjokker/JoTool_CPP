@@ -356,7 +356,7 @@ FilePath parse_file_path(std::string file_path_str)
 
 void create_folder(std::string folder_path)
 {
-    mkdir(folder_path.c_str(), S_IRWXU);
+    mkdir(folder_path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
     // mkdir(folder_path.c_str(), 0777);
 }
 

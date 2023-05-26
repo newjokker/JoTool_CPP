@@ -1080,7 +1080,7 @@ void UCDataset::filter_by_conf(float conf_th, bool clear_obj)
         {
             if((*iter_o)->conf < conf_th)
             {
-                iter_o = objs.erase(iter_o);
+                objs.erase(iter_o);
             }
             else
             {
@@ -1227,6 +1227,37 @@ void UCDataset::filter_by_date(std::vector<std::string> assign_date, bool clear_
         }
     }
     UCDataset::uc_list = uc_list;
+}
+
+void UCDataset::filter_by_area(float area_th, bool clear_obj)
+{
+    auto iter = UCDataset::object_info.begin();
+    while(iter != UCDataset::object_info.end())
+    {
+        std::vector<LabelmeObj*> objs;
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            LabelmeObj* obj = iter->second[i];
+
+            if(obj->get_area() < area_th)
+            {
+                if((clear_obj))
+                {
+                    delete obj;
+                }
+            }
+            else
+            {
+                objs.push_back(obj);
+            }
+        }
+        iter->second = objs;
+        if(objs.size() == 0)
+        {
+            UCDataset::size_info.erase(iter->first);
+        }
+        iter++;
+    }
 }
 
 void UCDataset::crop_dete_res_with_assign_uc(std::string uc, std::string img_path, std::string save_dir, bool is_split)
@@ -3758,9 +3789,10 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
     // 
     if(! is_dir(save_dir))
     {
-        std::cout << ERROR_COLOR << "save dir not exists : " << save_dir << STOP_COLOR << std::endl;
-        throw "save dir not exists";
-        return;
+        std::cout << WARNNING_COLOR << "save dir not exists : " << save_dir << STOP_COLOR << std::endl;
+        create_folder(save_dir);
+        // throw "save dir not exists";
+        // return;
     }
 
     if(! UCDatasetUtil::is_ucd_path(ucd_path))
@@ -4920,7 +4952,7 @@ void UCDatasetUtil::get_ucd_version_info(std::string app_dir, std::string app_ve
         // customer
         for(int i=0; i<data["ucd_version_info"].size(); i++)
         {
-            std::cout << "  remote : ucd_v" << data["ucd_version_info"][i] << std::endl;
+            std::cout << "  remote : ucd " << data["ucd_version_info"][i] << std::endl;
         }
     }
     else

@@ -216,7 +216,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.2.3";
+    std::string app_version = "v4.3.2";
 
     // uci_info
     int volume_size         = 20;
@@ -1361,16 +1361,47 @@ int main(int argc_old, char ** argv_old)
             }
         }
 
-        if (argc == 5)
+        bool is_split = true;
+        if(short_args.count("s") != 0)
+        {
+            is_split = false;
+        }
+
+        if (argc == 4)
         {
             std::string ucd_path = argv[2];
             std::string save_dir = argv[3];
-            std::string is_split_str = argv[4];
-            bool is_split = true;
-            if((is_split_str != "true") && (is_split_str != "True") && (is_split_str != "1"))
+            ucd_util->cut_small_img(ucd_path, save_dir, is_split, no_cache);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+            return -1;
+        }
+    }
+    else if(command_1 == "to_crop")
+    {
+        // 低缓存模式
+        bool no_cache = false;
+        if(long_args.count("no_cache") > 0)
+        {
+            std::string no_cache_str = long_args["no_cache"];
+            if(no_cache_str == "1" || no_cache_str == "True" || no_cache_str == "true")
             {
-                is_split = false;
+                no_cache = true;
             }
+        }
+
+        bool is_split = true;
+        if(short_args.count("s") != 0)
+        {
+            is_split = false;
+        }
+
+        if (argc == 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_dir = argv[3];
             ucd_util->cut_small_img(ucd_path, save_dir, is_split, no_cache);
         }
         else
@@ -1992,6 +2023,33 @@ int main(int argc_old, char ** argv_old)
             UCDataset* ucd = new UCDataset(ucd_path);
             ucd->parse_ucd(true);
             ucd->filter_by_conf(conf_th);
+            ucd->save_to_ucd(ucd_save_path);
+            delete ucd; 
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "filter_by_area")
+    {
+        if(argc == 5)
+        {
+            std::string ucd_path = argv[2];
+            std::string ucd_save_path = argv[3];
+            float area_th = std::stof(argv[4]);
+
+            //
+            if(! is_file(ucd_path))
+            {
+                std::cout << "ucd_path not exists : " << ucd_path;
+                throw "ucd_path not exists";
+            }
+
+            std::cout << ucd_path << std::endl;
+            UCDataset* ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->filter_by_area(area_th);
             ucd->save_to_ucd(ucd_save_path);
             delete ucd; 
         }

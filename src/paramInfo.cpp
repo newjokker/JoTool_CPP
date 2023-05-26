@@ -602,12 +602,26 @@ void UcdParamOpt::load_param_info()
     param_cut_small_img->group = "opt";
     param_cut_small_img->grammar = "ucd cut_small_img ucd_path save_dir is_split(true|1|True|false|0|False)";
     param_cut_small_img->args_info["--no_cache"] = "1|True|true 低缓存模式，使用完下载的图片之后会删除，本地已有缓存的不进行删除";
+    param_cut_small_img->args_info["-s"] = "小图放到以其名字命名的文件夹中，设置的话，全部放到一个文件夹中";
     param_cut_small_img->english_explain = "cut img by dete obj";
     param_cut_small_img->chinese_explain = "裁剪出小图";   
-    param_cut_small_img->demo.push_back("ucd cut_small_img test.json ./crop 1       (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，每个标签的的小图分文件夹存放)");
-    param_cut_small_img->demo.push_back("ucd cut_small_img test.json ./crop 0       (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，所有小图放在一起)");
+    param_cut_small_img->demo.push_back("ucd cut_small_img test.json ./crop         (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，每个标签的的小图分文件夹存放)");
+    param_cut_small_img->demo.push_back("ucd cut_small_img test.json ./crop -s      (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，所有小图放在一起)");
     UcdParamOpt::add_param(param_cut_small_img);
     
+    // to_crop
+    ParamInfo * param_to_crop = new ParamInfo("to_crop");
+    param_to_crop->group = "opt";
+    param_to_crop->grammar = "ucd to_crop ucd_path save_dir is_split(true|1|True|false|0|False)";
+    param_to_crop->args_info["--no_cache"] = "1|True|true 低缓存模式，使用完下载的图片之后会删除，本地已有缓存的不进行删除";
+    param_to_crop->args_info["-s"] = "小图放到以其名字命名的文件夹中，设置的话，全部放到一个文件夹中";
+    param_to_crop->english_explain = "cut img by dete obj";
+    param_to_crop->chinese_explain = "裁剪出小图";   
+    param_to_crop->demo.push_back("ucd to_crop test.json ./crop         (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，每个标签的的小图分文件夹存放)");
+    param_to_crop->demo.push_back("ucd to_crop test.json ./crop -s       (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，所有小图放在一起)");
+    UcdParamOpt::add_param(param_to_crop);
+    
+
     // crop_to_xml
     ParamInfo * param_crop_to_xml = new ParamInfo("crop_to_xml");
     param_crop_to_xml->group = "opt";
@@ -840,6 +854,15 @@ void UcdParamOpt::load_param_info()
     param_filter_by_conf->chinese_explain = "对 ucd 进行指定阈值过滤"; 
     param_filter_by_conf->demo.push_back("ucd filter_by_conf test.json res.json 0.5 (以 0.5 为阈值对 test.json 中的所有 obj 对象进行过滤)");  
     UcdParamOpt::add_param(param_filter_by_conf);
+    
+    // filter_by_area
+    ParamInfo * param_filter_by_area = new ParamInfo("filter_by_area");
+    param_filter_by_area->group = "filter";
+    param_filter_by_area->grammar = "ucd filter_by_area ucd_path save_ucd_path area_th";
+    param_filter_by_area->english_explain = "";
+    param_filter_by_area->chinese_explain = "对 ucd 进行指定面积阈值过滤"; 
+    param_filter_by_area->demo.push_back("ucd filter_by_area test.json res.json 500 (以 500 为阈值对 test.json 中的所有 obj 对象进行过滤)");  
+    UcdParamOpt::add_param(param_filter_by_area);
 
     // filter_by_nms
     ParamInfo * param_filter_by_nms = new ParamInfo("filter_by_nms");
