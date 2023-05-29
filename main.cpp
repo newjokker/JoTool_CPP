@@ -185,6 +185,8 @@ using namespace std;
 // TODO: 批处理, 指定某个操作，可以传入一个 json 的文件夹，
 
 
+// TODO: 共用同一批 config 文件
+
 
 int main(int argc_old, char ** argv_old)
 {
@@ -216,7 +218,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.3.2";
+    std::string app_version = "v4.4.1";
 
     // uci_info
     int volume_size         = 20;
@@ -1741,6 +1743,35 @@ int main(int argc_old, char ** argv_old)
                 label_list = pystring::split(label_list_str, ",");
                 ucd_util->parse_yolo_train_data(ucd_util->cache_img_dir, save_dir, ucd_path, label_list);
             }
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "to_img")
+    {
+        if(argc == 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_dir = argv[3];
+            UCDataset *ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd();
+            ucd_util->load_img(save_dir, ucd->uc_list);
+            delete ucd;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "to_xml")
+    {
+        if(argc == 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_dir = argv[3];
+            ucd_util->parse_voc_xml(ucd_util->cache_img_dir, save_dir, ucd_path);
         }
         else
         {

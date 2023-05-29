@@ -719,6 +719,24 @@ void UcdParamOpt::load_param_info()
     param_to_yolo_train_data->demo.push_back("ucd to_yolo_train_data test.json train_dir --tags  tag1,tag2,tag3         (将 test.json 中的 tag1,tag2,tag3 三个标签整理为yolo 训练数据)");   
     UcdParamOpt::add_param(param_to_yolo_train_data);
 
+    // to_img
+    ParamInfo * param_to_img = new ParamInfo("to_img");
+    param_to_img->group = "convert";
+    param_to_img->grammar = "ucd to_img ucd_path save_dir";
+    param_to_img->english_explain = "convert ucd to jpg (format)";
+    param_to_img->chinese_explain = "将 ucd 中对应的图片保存到指定文件夹";
+    param_to_img->demo.push_back("ucd to_img test.json ./img                        ( 将 test.json 中包含的图片保存到 ./img 文件夹下)");   
+    UcdParamOpt::add_param(param_to_img);
+
+    // to_xml
+    ParamInfo * param_to_xml = new ParamInfo("to_xml");
+    param_to_xml->group = "convert";
+    param_to_xml->grammar = "ucd to_xml ucd_path save_dir";
+    param_to_xml->english_explain = "convert ucd to xml (format)";
+    param_to_xml->chinese_explain = "将 ucd 中对应的图片保存到指定文件夹";
+    param_to_xml->demo.push_back("ucd to_xml test.json ./img                        ( 将 test.json 中包含的xml信息保存到 ./xml 文件夹下)");   
+    UcdParamOpt::add_param(param_to_xml);
+
     // history
     ParamInfo * param_history = new ParamInfo("history");
     param_history->group = "info";
