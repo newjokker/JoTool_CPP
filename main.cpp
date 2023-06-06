@@ -225,7 +225,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.5.1";
+    std::string app_version = "v4.5.2";
 
     // uci_info
     int volume_size         = 20;
@@ -3134,25 +3134,12 @@ int main(int argc_old, char ** argv_old)
     else if(command_1 == "book")
     {
 
-        // 查询获取 svn 上的内容
-
         // 可以进入类似 redis-cli 命令的界面
 
-        // set, get, del
+        // set, get, del, find
         // 将一些用于关键字记忆的一些信息直接存放到服务器上，这样的话就容易多了，关键字的获取参考浏览器的关键字标准
-        
-        // 所有的记录先直接存到内存中去，这样方便获取 
-        
-        // 直接读取 pingcode 上面的文档信息，直接关键字查询所有一直的信息文档，返回绝对路径
-
-
-        // 数据结构就使用有序 set 
 
         // TODO: 查看所有的 key，以一个什么样的方式进行排序，有时间信息，有内容信息，有权重信息，有所有人的信息，有推送的机器的信息，每一条信息最好有一个唯一的 ID
-
-        // TODO: 对于重复的 Key 对应的问题的显示
-
-        // TODO: 对于系统的数据的查询的问题，比如存储一整本笑话到里面，怎么处理
 
         // TODO: 目前存储的范围 指定文件 | 日常分享的数据 | SVN 模型位置信息 | 笑话关键词查询 | 
 
@@ -3162,15 +3149,54 @@ int main(int argc_old, char ** argv_old)
 
         // 进入一个主界面之后就是一个不能退出的循环，上面写了使用说明，每一个主要内容就是一种格式
 
+        if(argc == 3)
+        {
+            std::string book_index = argv[2];
 
-        std::cout << "------------------------------------" << std::endl;
-        std::cout << HIGHTLIGHT_COLOR << "redis server : " << redis_host << ":" << redis_port << STOP_COLOR << std::endl; 
-        std::cout << "------------------------------------" << std::endl;
+            if(book_index == "menu")
+            {
+                // 进入书籍
 
-        RedisBook *book = new RedisBook(redis_host, redis_port);
+                RedisBook *book = new RedisBook(redis_host, redis_port);
+                book->get_menu_info();
 
-        book->get_menu_info();
+                while(true)
+                {
+                    std::string input;
+                    std::cout << "enter book index or book name :";
+                    std::getline(std::cin, input);
 
+                    if(input == "txkj" || input == "2")
+                    {
+                        book->learn_tx_cluture();
+                        break;
+                    }
+                    else if(input == "q")
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        std::cout << "* 输入 book 不存在，重新输入，键入 q 结束 :";
+                    }
+                }
+                book->close();
+            }
+            else if(book_index == "find")
+            {
+                // 进行关键字查找
+            }
+            else
+            {
+                RedisBook *book = new RedisBook(redis_host, redis_port);
+                book->get_menu_info();
+                book->close();
+            }
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1); 
+        }
     }
     else if(command_1 == "augment")
     {
