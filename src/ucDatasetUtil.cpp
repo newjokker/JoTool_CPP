@@ -5088,8 +5088,8 @@ void UCDatasetUtil::save_to_yolo_train_data(std::string ucd_path, std::string sa
     // 分为两个 train.json val.json
     // TODO 如果两个文件存在的话就直接用那两个文件
 
-    std::string ucd_path_train  = save_dir + "train.json";
-    std::string ucd_path_val    = save_dir + "val.json";
+    std::string ucd_path_train  = save_dir + "/" + "train.json";
+    std::string ucd_path_val    = save_dir + "/" + "val.json";
 
     if(is_read_file(ucd_path_train) && is_read_file(ucd_path_val))
     {
@@ -5101,14 +5101,14 @@ void UCDatasetUtil::save_to_yolo_train_data(std::string ucd_path, std::string sa
     }
 
     // 创建新的文件夹
-    std::string train_label_dir = save_dir + "//" + "train" + "//" + "labels";
-    std::string train_image_dir = save_dir + "//" + "train" + "//" + "images";
-    std::string val_label_dir = save_dir + "//" + "val" + "//" + "labels";
-    std::string val_image_dir = save_dir + "//" + "val" + "//" + "images";
-    create_folder(save_dir + "//" + "train");
+    std::string train_label_dir = save_dir + "/" + "train" + "/" + "labels";
+    std::string train_image_dir = save_dir + "/" + "train" + "/" + "images";
+    std::string val_label_dir = save_dir + "/" + "val" + "/" + "labels";
+    std::string val_image_dir = save_dir + "/" + "val" + "/" + "images";
+    create_folder(save_dir + "/" + "train");
     create_folder(train_image_dir);
     create_folder(train_label_dir);
-    create_folder(save_dir + "//" + "val");
+    create_folder(save_dir + "/" + "val");
     create_folder(val_label_dir);
     create_folder(val_image_dir);
 

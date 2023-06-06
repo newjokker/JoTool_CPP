@@ -25,6 +25,9 @@
 #include <regex>
 #include "include/the_book_of_change.hpp"
 #include "include/parseArgs.hpp"
+#include <hiredis/hiredis.h> 
+#include "include/redisBook.hpp"
+
 
 using json = nlohmann::json;
 using namespace jotools;
@@ -213,12 +216,16 @@ int main(int argc_old, char ** argv_old)
     std::string sql_user    = "root";
     std::string sql_pwd     = "root123";
     std::string sql_db      = "Saturn_Database_V1";
+
+    // redis info
+    int redis_port          = 6379;
+    std::string redis_host  = "192.168.3.221";
     
     // app dir path
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.4.1";
+    std::string app_version = "v4.5.1";
 
     // uci_info
     int volume_size         = 20;
@@ -258,6 +265,8 @@ int main(int argc_old, char ** argv_old)
         sql_db      = (const std::string &)xini_file["sql"]["db"];
         cache_dir   = (const std::string &)xini_file["cache"]["dir"];
         volume_size = ((const int &)xini_file["uci"]["volume_size"]);
+        redis_port  = ((const int &)xini_file["redis"]["port"]);
+        redis_host  = ((const std::string &)xini_file["redis"]["host"]);
 
         // 分卷大小不能为 0 会有很多问题 
         if(volume_size <= 0)
@@ -276,6 +285,8 @@ int main(int argc_old, char ** argv_old)
         xini_write["sql"]["pwd"]        = sql_pwd;
         xini_write["sql"]["db"]         = sql_db;
         xini_write["uci"]["volume_size"]= volume_size;
+        xini_write["redis"]["port"]     = redis_port;
+        xini_write["redis"]["host"]     = redis_host;
         xini_write.dump(config_path);   
     }
 
@@ -362,7 +373,7 @@ int main(int argc_old, char ** argv_old)
         std::cout << WARNNING_COLOR << "cache_dir not exists, edit ucdconfig.ini cache/dir : " << STOP_COLOR << std::endl;
         std::cout << "ucdconfig path : " << config_path << std::endl;
         std::cout << "-----------------------------------------------------------" << std::endl;
-        std::cout << "set cache_dir with 'ucd set cache_dir {cache_dir}' " << std::endl;
+        std::cout << WARNNING_COLOR << "ucd set cache_dir {cache_dir}" << STOP_COLOR << " to set cache_dir " << std::endl;
         std::cout << "-----------------------------------------------------------" << std::endl;
         return -1;
     }
@@ -1069,15 +1080,18 @@ int main(int argc_old, char ** argv_old)
             std::cout << "config_path   : " << config_path << std::endl;
             std::cout << "history_path  : " << history_path << std::endl;
             std::cout << "[sql]" << std::endl;
-            std::cout << "sql_host      : " << sql_host << std::endl;
-            std::cout << "sql_port      : " << sql_port << std::endl;
-            std::cout << "sql_user      : " << sql_user << std::endl;
-            std::cout << "sql_pwd       : " << sql_pwd << std::endl;
-            std::cout << "sql_db        : " << sql_db << std::endl;
+            std::cout << "host          : " << sql_host << std::endl;
+            std::cout << "port          : " << sql_port << std::endl;
+            std::cout << "user          : " << sql_user << std::endl;
+            std::cout << "pwd           : " << sql_pwd << std::endl;
+            std::cout << "db            : " << sql_db << std::endl;
             std::cout << "[cache]" << std::endl;
             std::cout << "dir           : " << cache_dir << std::endl;
             std::cout << "[uci]"    << std::endl;
             std::cout << "volume_size   : " << volume_size << std::endl;
+            std::cout << "[redis]"    << std::endl;
+            std::cout << "host          : " << redis_host << std::endl;
+            std::cout << "port          : " << redis_port << std::endl;
             std::cout << "-----------------------------" << std::endl;
             return -1;
         }
@@ -1143,6 +1157,16 @@ int main(int argc_old, char ** argv_old)
             {
                 std::string sql_db_name_new = argv[3];
                 xini_write["sql"]["db"] = sql_db_name_new;
+            }
+            else if(option == "redis_port")
+            {
+                std::string redis_port_str = argv[3];
+                xini_write["redis"]["port"] = std::stoi(redis_port_str);
+            }
+            else if(option == "redis_host")
+            {
+                std::string redis_host_str = argv[3];
+                xini_write["redis"]["host"] = redis_host_str;
             }
             else if(option == "cache_dir")
             {
@@ -1894,7 +1918,7 @@ int main(int argc_old, char ** argv_old)
 
             std::vector<string> uc_vector;
             std::set<std::string> file_suffix {".jpg", ".JPG", ".png", ".PNG", ".json", ".xml"}; 
-            std::vector<std::string> file_vector = get_all_file_path(file_dir, file_suffix);
+            std::vector<std::string> file_vector = get_all_file_path_recursive(file_dir, file_suffix);
         
             for(int i=0; i<file_vector.size(); i++)
             {
@@ -1961,7 +1985,7 @@ int main(int argc_old, char ** argv_old)
             }
 
             std::vector<string> uc_vector;
-            std::vector<std::string> file_vector = get_all_file_path(file_dir);
+            std::vector<std::string> file_vector = get_all_file_path_recursive(file_dir);
 
             for(int i=0; i<file_vector.size(); i++)
             {
@@ -3109,8 +3133,44 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "book")
     {
-        // i_ching 
-        // 
+
+        // 查询获取 svn 上的内容
+
+        // 可以进入类似 redis-cli 命令的界面
+
+        // set, get, del
+        // 将一些用于关键字记忆的一些信息直接存放到服务器上，这样的话就容易多了，关键字的获取参考浏览器的关键字标准
+        
+        // 所有的记录先直接存到内存中去，这样方便获取 
+        
+        // 直接读取 pingcode 上面的文档信息，直接关键字查询所有一直的信息文档，返回绝对路径
+
+
+        // 数据结构就使用有序 set 
+
+        // TODO: 查看所有的 key，以一个什么样的方式进行排序，有时间信息，有内容信息，有权重信息，有所有人的信息，有推送的机器的信息，每一条信息最好有一个唯一的 ID
+
+        // TODO: 对于重复的 Key 对应的问题的显示
+
+        // TODO: 对于系统的数据的查询的问题，比如存储一整本笑话到里面，怎么处理
+
+        // TODO: 目前存储的范围 指定文件 | 日常分享的数据 | SVN 模型位置信息 | 笑话关键词查询 | 
+
+        // 里面的数据可以分为几个级别，book（field（content）），info，key_word，offical content
+
+        // hkeys menu, 查看 hash 中的 key 值
+
+        // 进入一个主界面之后就是一个不能退出的循环，上面写了使用说明，每一个主要内容就是一种格式
+
+
+        std::cout << "------------------------------------" << std::endl;
+        std::cout << HIGHTLIGHT_COLOR << "redis server : " << redis_host << ":" << redis_port << STOP_COLOR << std::endl; 
+        std::cout << "------------------------------------" << std::endl;
+
+        RedisBook *book = new RedisBook(redis_host, redis_port);
+
+        book->get_menu_info();
+
     }
     else if(command_1 == "augment")
     {
@@ -3307,7 +3367,6 @@ int main(int argc_old, char ** argv_old)
         return -1;
     }
     
-
     delete ucd_util;
     delete ucd_param_opt;
 	return 1;

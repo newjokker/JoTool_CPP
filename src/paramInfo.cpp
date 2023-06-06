@@ -506,7 +506,7 @@ void UcdParamOpt::load_param_info()
     param_set->group = "info";
     param_set->grammar = "ucd set key value";
     param_set->english_explain = "update config info";
-    param_set->chinese_explain = "设置配置信息 (host, port, sql_host, sql_port, sql_user, sql_pwd, sql_db, cache_dir) ";  
+    param_set->chinese_explain = "设置配置信息 (host, port, sql_host, sql_port, sql_user, sql_pwd, sql_db, cache_dir, redis_port, redis_host) ";  
     param_set->demo.push_back("ucd set cache_dir /home/disk2/ucd_cache      (设置 ucd 的缓存文件夹)"); 
     param_set->demo.push_back("ucd set host 192.168.3.111                   (设置 ucd 服务的 host 信息)"); 
     UcdParamOpt::add_param(param_set);

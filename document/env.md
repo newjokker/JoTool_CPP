@@ -172,6 +172,14 @@
 
   ```
 
+### hiredis 的安装
+
+* https://blog.csdn.net/qq_41134622/article/details/120626744
+
+* target_link_libraries 增加一行即可 /usr/code/include/hiredis/libhiredis.a
+
+* redis 无法从其他服务器访问，起来redis 对外访问权限即可，改一下配置文件
+
 ### libtorch 使用需要的配置
 
 * CMakeLists.txt 需要增加的部分

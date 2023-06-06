@@ -8,6 +8,7 @@ INCLUDE_DIRECTORIES(
     "/usr/include"
     "/usr/include/mysql"
 	"/usr/lib/x86_64-linux-gnu"
+	"/usr/local/include"
 )
 
 # 不知道为什么要这一行，没有的话报错，to string 不是 std 的函数之类的
@@ -16,6 +17,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
+
 
 SET(OpenCV_STATIC_LIBS
 	/usr/local/lib/libopencv_core.a
@@ -34,6 +36,7 @@ SET(MYSQL_INCLUDE_DIR 	"/usr/include/mysql")
 SET(MYSQL_LIB_DIR 		"/usr/lib/x86_64-linux-gnu")
 SET(OPENSSL_INCLUDE_DIR "/usr/include/openssl")
 SET(OPENSSL_LIB_DIR 	"/usr/lib/x86_64-linux-gnu")
+# set(CMAKE_PREFIX_PATH 	)
 
 
 FIND_PACKAGE(OpenCV REQUIRED )
@@ -41,7 +44,6 @@ FIND_PACKAGE(OpenSSL REQUIRED)
 FIND_PACKAGE(nlohmann_json REQUIRED)
 FIND_PACKAGE(JPEG REQUIRED)
 FIND_PACKAGE(PNG REQUIRED)
-
 
 INCLUDE_DIRECTORIES(${OPENSSL_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -68,6 +70,8 @@ target_link_libraries(
 	${CMAKE_DL_LIBS}
 	${JPEG_LIBRARIES}
 	PNG::PNG
+
+	/usr/code/include/hiredis/libhiredis.a
 
 	${MYSQL_LIB_DIR}/libmysqlclient.a
 	${OPENSSL_LIB_DIR}/libssl.a 
