@@ -4,7 +4,18 @@
 #include <vector>
 #include "include/redisBook.hpp"
 #include <hiredis/hiredis.h> 
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <fstream>
+#include <map>
+#include "include/pystring.h"
+#include <ncurses.h>
+#include <unistd.h>
+#include <termios.h>
+#include <string>
+#include <chrono>
+#include <iomanip>
+#include <sstream>
 
 #define ERROR_COLOR         "\x1b[1;31m"    // 红色
 #define HIGHTLIGHT_COLOR    "\033[1;35m"    // 品红
@@ -12,9 +23,27 @@
 #define STOP_COLOR          "\033[0m"       // 复原
 
 
-RedisBook::RedisBook(std::string host, int port)
+void enableRawMode() {
+    termios term;
+    tcgetattr(STDIN_FILENO, &term);
+    term.c_lflag &= ~(ICANON | ECHO); // disable buffer and echo
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+}
+
+void disableRawMode() {
+    termios term;
+    tcgetattr(STDIN_FILENO, &term);
+    term.c_lflag |= ICANON | ECHO; // enable buffer and echo
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+}
+
+
+RedisBook::RedisBook(std::string host, int port, std::string name)
 {
-    int connect_status = RedisBook::connect();
+    RedisBook::host     = host;
+    RedisBook::port     = port;
+    RedisBook::name     = name;
+    int connect_status  = RedisBook::connect();
     if(connect_status == -1)
     {
         std::cout << ERROR_COLOR << "connect to redis fail" << STOP_COLOR << std::endl;
@@ -68,20 +97,82 @@ int RedisBook::close()
     redisFree(RedisBook::client);
 }
 
-int RedisBook::learn_tx_cluture()
+int RedisBook::menu_loop(std::string book_name)
 {
 
-    // 主要内容
+    if(book_name == "" || book_name == "menu")
+    {
+        RedisBook::get_menu_info();
+    }
 
-    // 各部分内容的解释
-    
-    std::cout << "\033[2J\033[1;1H";                        // 清除页面并将光标移动到第一行第一列
+    if(book_name != "find")
+    {
+        while(true)
+        {
+            if(book_name == "menu" || book_name == "")
+            {
+                std::cout << "enter book index or book name :";
+                std::getline(std::cin, book_name);
+            }
+            
+            if(book_name == "joke" || book_name == "0")
+            {
+                RedisBook::tell_joke();
+                break;
+            }
+            else if(book_name == "customer" || book_name == "1")
+            {
+                break;
+            }
+            else if(book_name == "txkj" || book_name == "2")
+            {
+                RedisBook::learn_tx_cluture();
+                break;
+            }
+            else if(book_name == "svn" || book_name == "3")
+            {
+                break;
+            }
+            else if(book_name == "offical" || book_name == "4")
+            {
+                break;
+            }
+            else if(book_name == "pingcode" || book_name == "5")
+            {
+                break;
+            }
+            else if(book_name == "document" || book_name == "6")
+            {
+                break;
+            }
+            else if(book_name == "q")
+            {
+                break;
+            }
+            else
+            {
+                std::cout << "* 输入 book 不存在，重新输入，键入 q 结束" << std::endl;
+                book_name = "";
+            }
+        }
+    }
+    else
+    {
+        // 查找模式
+    }
+
+
+}
+
+int RedisBook::learn_tx_cluture()
+{
+    std::cout << "\033[2J\033[1;1H";                            // 清除页面并将光标移动到第一行第一列
 
     std::cout << "" << std::endl;
     std::cout << "" << std::endl;
     std::cout << "" << std::endl;
 
-    std::cout << HIGHTLIGHT_COLOR << "愿景，使命，价值观" << STOP_COLOR << std::endl;
+    std::cout << ERROR_COLOR << "愿景，使命，价值观" << STOP_COLOR << std::endl;
     std::cout << "" << std::endl;
     std::cout << "      愿景   ：成为国际一流的能源电力人工智能技术公司" << std::endl;
     std::cout << "" << std::endl;
@@ -93,7 +184,7 @@ int RedisBook::learn_tx_cluture()
     std::cout << "" << std::endl;
     std::cout << "" << std::endl;
 
-    std::cout << HIGHTLIGHT_COLOR << "价值观详解" << STOP_COLOR << std::endl;
+    std::cout << ERROR_COLOR << "价值观详解" << STOP_COLOR << std::endl;
     std::cout << "" << std::endl;
     std::cout << "      诚朴：真诚质朴" << std::endl;
     std::cout << "" << std::endl;
@@ -107,7 +198,7 @@ int RedisBook::learn_tx_cluture()
     std::cout << "" << std::endl;
     std::cout << "" << std::endl;
 
-    std::cout << HIGHTLIGHT_COLOR << "反对自由主义。何为自由主义：" << STOP_COLOR << std::endl;
+    std::cout << ERROR_COLOR << "反对自由主义。何为自由主义：" << STOP_COLOR << std::endl;
     std::cout << "" << std::endl;
     std::cout << "      小团体内不作原则上的争论。任其下去，求得和平亲热。" << std::endl;
     std::cout << "" << std::endl;
@@ -125,9 +216,272 @@ int RedisBook::learn_tx_cluture()
 
 }
 
+int RedisBook::tell_joke()
+{
+
+    std::vector<std::string> joke_ids = RedisBook::get_joke_id_vector();
+    int joke_size   = joke_ids.size(); 
+    int index       = 0;
 
 
+    char ch;
+    bool quit = false;
+
+    while (read(STDIN_FILENO, &ch, 1) == 1 && ch != 'q') 
+    {
+        
+        enableRawMode();
+
+        // 
+        std::cout << "\033[2J\033[1;1H";
+        std::cout << "index : " << index << std::endl;
+        Joke *each_joke = new Joke();
+        RedisBook::load_assign_joke(joke_ids[index], each_joke);
+        each_joke->print_info();
+
+        // 输出导航界面
+        for(int i=0; i<15; i++)
+        {
+            std::cout << "" << std::endl;
+        }
+        std::cout << "q : quit      d : next      a : last    t : add tag   c : add command" << std::endl;
+        
+        for(int i=0; i<5; i++)
+        {
+            std::cout << "" << std::endl;
+        }
+        // 
+
+        if(ch == 'q')
+        {
+            quit = true;
+        }
+        else if(ch == 'a')
+        {
+            index -= 1;
+        }
+        else if(ch == 'd')
+        {
+            index += 1;
+        }
+        else if(ch == 't')
+        {
+            disableRawMode();
+            std::cout << "add tag : ";
+            std::string tags;
+            std::getline(std::cin, tags);
+            each_joke->add_tag(tags);
+            RedisBook::update_assign_joke(each_joke->id, each_joke);
+        }
+        else if(ch == 'c')
+        {
+            disableRawMode();
+            std::cout << "add command : ";
+            std::string command;
+            std::getline(std::cin, command);
+
+            std::cout << command << std::endl;
+
+            each_joke->add_command(command, RedisBook::name);
+            RedisBook::update_assign_joke(each_joke->id, each_joke);
+        }
+        else if(ch == ':')
+        {
+            // 跳到指定的个数和 id 
+        }
+        else
+        {
+            std::cout << "key should in (q, d, a,)" <<  ch << std::endl; 
+        }
+
+        if(index < 0){index = 0;}
+        if(index > joke_size - 1){index = joke_size-1;}
+        if(quit == true){break;}
+
+    }
+
+    disableRawMode();
+
+}
+
+int RedisBook::load_assign_joke(std::string joker_id, Joke *each_joke)
+{
+    each_joke->id = joker_id;
+
+    // load content
+    std::string command_content = "HGET joke_content " + joker_id;
+    redisReply* reply_content = (redisReply*)redisCommand(RedisBook::client, command_content.c_str());    
+    if (reply_content == NULL) 
+    {
+        std::cout << ERROR_COLOR << "Failed to execute command : " << command_content << STOP_COLOR << std::endl;
+        return 0;
+    }
+    each_joke->content = reply_content->str;
+    freeReplyObject(reply_content);
+
+    // load tags
+    std::string command_tags = "HGET joke_tags " + joker_id;
+    redisReply* reply_tags = (redisReply*)redisCommand(RedisBook::client, command_tags.c_str());    
+    if (reply_tags == NULL) 
+    {
+        std::cout << ERROR_COLOR << "Failed to execute command "  << STOP_COLOR << command_tags << std::endl;
+        return 0;
+    }
+    if(reply_tags->str)
+    {
+        std::vector<std::string> tag_list = pystring::split(reply_tags->str, ",");
+        std::set<std::string> tag_set(tag_list.begin(), tag_list.end());
+        each_joke->tags =  tag_set;
+    }
+    freeReplyObject(reply_tags);
+
+    // load command
+    std::string command_command = "HGET joke_command " + joker_id;
+    redisReply* reply_command = (redisReply*)redisCommand(RedisBook::client, command_command.c_str());    
+    if (reply_tags == NULL) 
+    {
+        std::cout << ERROR_COLOR << "Failed to execute command"  << command_command << STOP_COLOR << std::endl;
+        return 0;
+    }
+
+    if(reply_command->str)
+    {
+        each_joke->command = pystring::split(reply_command->str, "-+-");    
+    }
+    freeReplyObject(reply_command);
+
+    return 1;
+}
+
+int RedisBook::update_assign_joke(std::string joke_id, Joke *each_joke)
+{
+
+    // content
+    std::string command_content = "HSET joke_content " + joke_id + " " + each_joke->content; 
+    redisReply* reply_content = (redisReply*)redisCommand(RedisBook::client, command_content.c_str());
+    if (reply_content == NULL) {
+        std::cout << "SET command failed: " << RedisBook::client->errstr << std::endl;
+        redisFree(RedisBook::client);
+        return 1;
+    }
+    freeReplyObject(reply_content);
+
+    // tags
+    std::vector<std::string> tags_vector(each_joke->tags.begin(), each_joke->tags.end());
+    std::string command_tags = "HSET joke_tags " + joke_id + " " + pystring::join(",", tags_vector); 
+    redisReply* reply_tags = (redisReply*)redisCommand(RedisBook::client, command_tags.c_str());
+    if (reply_tags == NULL) {
+        std::cout << "SET command failed: " << RedisBook::client->errstr << std::endl;
+        redisFree(RedisBook::client);
+        return 1;
+    }
+    freeReplyObject(reply_tags);
+
+    // command
+    // TODO: 中间不能出现空格，不然插入不成功
+    std::string command_all = pystring::join("-+-", each_joke->command);
+    std::string command_command = "HSET joke_command " + joke_id + " " +  pystring::replace(command_all, " ", "_"); 
+
+    std::cout << command_command.c_str() << std::endl;
+
+    // redisReply* reply_command = (redisReply*)redisCommand(RedisBook::client, command_command.c_str());
+    redisReply* reply_command = (redisReply*)redisCommand(RedisBook::client, command_command.c_str());
+    if (reply_command == NULL) {
+        std::cout << "SET command failed: " << RedisBook::client->errstr << std::endl;
+        redisFree(RedisBook::client);
+        throw command_command;
+        // return 1;
+    }
+    freeReplyObject(reply_command);
+
+    return 1;
+}
+
+std::vector<std::string> RedisBook::get_joke_id_vector()
+{
+    std::vector<std::string> book_ids;
+
+    // load content
+    redisReply* reply_content = (redisReply*)redisCommand(RedisBook::client, "HKEYS joke_content");    
+    if (reply_content == NULL) 
+    {
+        std::cout << "Failed to execute command" << std::endl;
+    }
+    if (reply_content->type == REDIS_REPLY_ARRAY) 
+    {   
+        for (int i = 0; i < reply_content->elements; i++) 
+        {
+            book_ids.push_back(reply_content->element[i]->str);
+        }
+    }
+    freeReplyObject(reply_content);
+    return book_ids;
+}
 
 
+void Joke::print_info()
+{
+    std::cout << std::endl;
 
+    std::cout << HIGHTLIGHT_COLOR << "ID : " << STOP_COLOR << Joke::id << std::endl;
+    std::cout << "" << std::endl;
+    
+    std::cout << HIGHTLIGHT_COLOR << "content : " << STOP_COLOR << std::endl;
+    std::cout << "    " << pystring::ljust(Joke::content, 1000) << std::endl;
+    std::cout << "" << std::endl;
 
+    // tags 
+    std::cout << HIGHTLIGHT_COLOR << "tags : " << STOP_COLOR << std::endl;
+    std::cout << "    ";
+    auto iter = Joke::tags.begin();
+    while(iter != Joke::tags.end())
+    {
+        std::cout << iter->data() << ","; 
+        iter++;
+    }
+    std::cout << std::endl;
+    std::cout << std::endl;
+
+    // command
+    std::cout << HIGHTLIGHT_COLOR << "command : " << STOP_COLOR << std::endl;
+    for(int i=0; i<Joke::command.size(); i++)
+    {
+        std::cout << "    " << Joke::command[i] << std::endl;
+    }
+    std::cout << std::endl;
+
+    // std::cout << "-------------------------------------" << std::endl;
+
+}
+
+int Joke::add_tag(std::string tag)
+{
+    Joke::tags.insert(tag);
+    return 1;
+}
+
+int Joke::add_command(std::string command, std::string writer)
+{
+
+    // Get current time as a time_point object
+    auto now = std::chrono::system_clock::now();
+
+    // Convert time_point to time_t
+    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+
+    // Convert time_t to tm
+    std::tm* timeInfo = std::localtime(&currentTime);
+
+    // Create a stringstream object
+    std::ostringstream timeStream;
+
+    // Write the current time into the stringstream in the specified format
+    timeStream << std::put_time(timeInfo, "%Y-%m-%d %H:%M:%S");
+
+    // Get the resulting string
+    std::string timeString = timeStream.str();
+
+    Joke::command.push_back(timeString + "[" + writer + "]-->" + command);
+
+    return 1;
+}

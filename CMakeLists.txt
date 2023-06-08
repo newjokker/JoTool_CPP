@@ -72,6 +72,7 @@ target_link_libraries(
 	PNG::PNG
 
 	/usr/code/include/hiredis/libhiredis.a
+	ncurses
 
 	${MYSQL_LIB_DIR}/libmysqlclient.a
 	${OPENSSL_LIB_DIR}/libssl.a 

@@ -20,7 +20,6 @@
 #include "include/printCpp.hpp"
 #include "include/lablelmeObj.hpp"
 #include <nlohmann/json.hpp>
-#include "include/lablelmeObj.hpp"
 #include "include/tqdm.h"
 #include <regex>
 #include "include/the_book_of_change.hpp"
@@ -220,12 +219,13 @@ int main(int argc_old, char ** argv_old)
     // redis info
     int redis_port          = 6379;
     std::string redis_host  = "192.168.3.221";
+    std::string redis_name  = "anonymity";
     
     // app dir path
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.5.2";
+    std::string app_version = "v4.5.5";
 
     // uci_info
     int volume_size         = 20;
@@ -267,6 +267,7 @@ int main(int argc_old, char ** argv_old)
         volume_size = ((const int &)xini_file["uci"]["volume_size"]);
         redis_port  = ((const int &)xini_file["redis"]["port"]);
         redis_host  = ((const std::string &)xini_file["redis"]["host"]);
+        redis_name  = ((const std::string &)xini_file["redis"]["name"]);
 
         // 分卷大小不能为 0 会有很多问题 
         if(volume_size <= 0)
@@ -287,6 +288,7 @@ int main(int argc_old, char ** argv_old)
         xini_write["uci"]["volume_size"]= volume_size;
         xini_write["redis"]["port"]     = redis_port;
         xini_write["redis"]["host"]     = redis_host;
+        xini_write["redis"]["name"]     = redis_name;
         xini_write.dump(config_path);   
     }
 
@@ -1092,6 +1094,7 @@ int main(int argc_old, char ** argv_old)
             std::cout << "[redis]"    << std::endl;
             std::cout << "host          : " << redis_host << std::endl;
             std::cout << "port          : " << redis_port << std::endl;
+            std::cout << "name          : " << redis_name << std::endl;
             std::cout << "-----------------------------" << std::endl;
             return -1;
         }
@@ -1167,6 +1170,11 @@ int main(int argc_old, char ** argv_old)
             {
                 std::string redis_host_str = argv[3];
                 xini_write["redis"]["host"] = redis_host_str;
+            }
+            else if(option == "redis_name")
+            {
+                std::string redis_name_str = argv[3];
+                xini_write["redis"]["name"] = redis_name_str;
             }
             else if(option == "cache_dir")
             {
@@ -3133,65 +3141,21 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "book")
     {
-
         // 可以进入类似 redis-cli 命令的界面
 
         // set, get, del, find
-        // 将一些用于关键字记忆的一些信息直接存放到服务器上，这样的话就容易多了，关键字的获取参考浏览器的关键字标准
 
-        // TODO: 查看所有的 key，以一个什么样的方式进行排序，有时间信息，有内容信息，有权重信息，有所有人的信息，有推送的机器的信息，每一条信息最好有一个唯一的 ID
-
-        // TODO: 目前存储的范围 指定文件 | 日常分享的数据 | SVN 模型位置信息 | 笑话关键词查询 | 
-
-        // 里面的数据可以分为几个级别，book（field（content）），info，key_word，offical content
-
-        // hkeys menu, 查看 hash 中的 key 值
-
-        // 进入一个主界面之后就是一个不能退出的循环，上面写了使用说明，每一个主要内容就是一种格式
-
-        if(argc == 3)
+        if(argc == 3 || argc == 2)
         {
-            std::string book_index = argv[2];
-
-            if(book_index == "menu")
+            std::string book_index = "";
+            
+            if(argc == 3)
             {
-                // 进入书籍
-
-                RedisBook *book = new RedisBook(redis_host, redis_port);
-                book->get_menu_info();
-
-                while(true)
-                {
-                    std::string input;
-                    std::cout << "enter book index or book name :";
-                    std::getline(std::cin, input);
-
-                    if(input == "txkj" || input == "2")
-                    {
-                        book->learn_tx_cluture();
-                        break;
-                    }
-                    else if(input == "q")
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        std::cout << "* 输入 book 不存在，重新输入，键入 q 结束 :";
-                    }
-                }
-                book->close();
+                book_index = argv[2];
             }
-            else if(book_index == "find")
-            {
-                // 进行关键字查找
-            }
-            else
-            {
-                RedisBook *book = new RedisBook(redis_host, redis_port);
-                book->get_menu_info();
-                book->close();
-            }
+            RedisBook *book = new RedisBook(redis_host, redis_port, redis_name);
+            book->menu_loop(book_index);
+            book->close();
         }
         else
         {
