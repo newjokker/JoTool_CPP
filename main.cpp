@@ -229,7 +229,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.6.1";
+    std::string app_version = "v4.6.3";
 
     // uci_info
     int volume_size         = 20;
@@ -3145,9 +3145,6 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "book")
     {
-        // 可以进入类似 redis-cli 命令的界面
-
-        // set, get, del, find
 
         if(argc == 3 || argc == 2)
         {
@@ -3168,9 +3165,23 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "todo")
     {
-        TodoList *todo_list = new TodoList(redis_host, redis_port);
+        // TODO: 查看一个较大日期范围 todo 信息
+
+        // 指定用户
+        std::string assign_name = "";
+        if(long_args.count("name") != 0)
+        {
+            assign_name = long_args["name"];
+        }
+        else
+        {
+            assign_name = redis_name;
+        }
+
+        TodoList *todo_list = new TodoList(redis_host, redis_port, assign_name);
         std::string assign_date;
 
+        // 指定时间
         if(long_args.count("date") != 0)
         {
             assign_date = long_args["date"];
@@ -3206,8 +3217,9 @@ int main(int argc_old, char ** argv_old)
             if(method == "add")
             {
                 todo_list->add_todo_info(assign_date, info);
+                todo_list->print_todo_info(assign_date);
             }
-            else if(method == "del")
+            else if(method == "del" || method == "done" || method == "undo")
             {
                 int index;
                 if(info == "all,")
@@ -3219,7 +3231,19 @@ int main(int argc_old, char ** argv_old)
                     index = std::stoi(info);
                 }
 
-                todo_list->delete_todo_info(assign_date, index);
+                if(method == "del")
+                {
+                    todo_list->delete_todo_info(assign_date, index);
+                }
+                else if(method == "done")
+                {
+                    todo_list->finish_todo(assign_date, index);
+                }
+                else
+                {
+                    todo_list->undo_todo(assign_date, index);
+                }
+                todo_list->print_todo_info(assign_date);
             }
             else if(method == "check")
             {

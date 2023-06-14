@@ -849,16 +849,22 @@ void UcdParamOpt::load_param_info()
     ParamInfo * param_todo = new ParamInfo("todo");
     param_todo->group = "fun";
     param_todo->args_info["--date"] = "指定要操作的日期，有两种格式 2023-06-14 或者 06-14，不指定的话就使用今天的日期";
+    param_todo->args_info["--name"] = "指定要查看用户的 name，如不指定直接使用 ucd meta 中 redis_name 作为用户名";
     param_todo->grammar = "ucd todo {method} {info}";
     param_todo->english_explain = "";
-    param_todo->chinese_explain = "计划表，todo 表，目前支持的方法为 [check, add, del]";   
+    param_todo->chinese_explain = "计划表，todo 表，目前支持的方法为 [check, add, del, done, undo]";   
     param_todo->demo.push_back("ucd todo                                           (查看今天的日程表)");
     param_todo->demo.push_back("ucd todo check                                     (查看今天的日程表)");
+    param_todo->demo.push_back("ucd todo check --name jokker                       (查看今天 jokker 的日程表)");
     param_todo->demo.push_back("ucd todo check --date  2023-06-14                  (查看2023-06-14的日程表)");
     param_todo->demo.push_back("ucd todo add test1                                 (今天的日程表增加信息 test1)");
     param_todo->demo.push_back("ucd todo add test1 --date  2023-06-14              (2023-06-14的日程表增加信息 test1)");
     param_todo->demo.push_back("ucd todo del 1 --date  2023-06-14                  (2023-06-14的日程表删除第一条信息)");
     param_todo->demo.push_back("ucd todo del all --date  2023-06-14                (2023-06-14的日程表删除所有的信息)");
+    param_todo->demo.push_back("ucd todo done 1 --date  2023-06-14                 (2023-06-14的日程表第一条记录已完成)");
+    param_todo->demo.push_back("ucd todo done all --date  2023-06-14               (2023-06-14的日程表全部记录已完成)");
+    param_todo->demo.push_back("ucd todo undo 1 --date  2023-06-14                 (2023-06-14的日程表第一条记录设置为未完成)");
+    param_todo->demo.push_back("ucd todo undo all --date  2023-06-14               (2023-06-14的日程表全部记录设置为未完成)");
     UcdParamOpt::add_param(param_todo);
     
     // from_file

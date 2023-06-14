@@ -497,10 +497,12 @@ int Joke::add_command(std::string command, std::string writer)
 
 
 
-TodoList::TodoList(std::string host, int port)
+TodoList::TodoList(std::string host, int port, std::string name)
 {
     TodoList::port = port;
     TodoList::host = host;
+    TodoList::name = name;
+    TodoList::book_name = "todo_list_" + name;
 }
 
 int TodoList::add_todo_info(std::string date, std::string todo_info)
@@ -516,7 +518,7 @@ int TodoList::add_todo_info(std::string date, std::string todo_info)
     std::vector<std::string> todo_info_history = TodoList::get_todo_info(date);
     todo_info_history.push_back(todo_info);
 
-    std::string command_command = "HSET todo_list " + date + " " +  pystring::join("-+-", todo_info_history); 
+    std::string command_command = "HSET " + TodoList::book_name + " " + date + " " +  pystring::join("-+-", todo_info_history); 
     // std::cout << command_command << std::endl; 
     redisReply* reply_command = (redisReply*)redisCommand(client, command_command.c_str());
     if (reply_command == NULL) 
@@ -533,7 +535,7 @@ int TodoList::add_todo_info(std::string date, std::string todo_info)
 std::vector<std::string> TodoList::get_todo_info(std::string date)
 {
     redisContext *client = redisConnect(TodoList::host.c_str(), TodoList::port);
-    std::string command_str = "HGET todo_list " + date; 
+    std::string command_str = "HGET " + TodoList::book_name + " " + date; 
     // std::cout << command_str << std::endl;
     redisReply* reply = (redisReply*)redisCommand(client, command_str.c_str());
     std::vector<std::string> empty_info;
@@ -570,13 +572,20 @@ int TodoList::print_todo_info(std::string assign_date)
     }
     else
     {
-        std::cout << assign_date << " : " << std::endl;
+        std::cout << assign_date << " (" + TodoList::name + ")" << " : " << std::endl;
         // std::cout << "" << std::endl;
 
         for(int i=0; i<todo_info.size(); i++)
         {
             std::cout << std::endl; 
-            std::cout << "    [" << i+1 << "] " << todo_info[i] << std::endl;
+            if(pystring::startswith(todo_info[i], "[done]"))
+            {
+                std::cout << HIGHTLIGHT_COLOR << "    [" << i+1 << "] " << todo_info[i].substr(6) << " [done]" << STOP_COLOR << std::endl;
+            }
+            else
+            {
+                std::cout << "    [" << i+1 << "] " << todo_info[i] << std::endl;
+            }
         }
     }
     std::cout << "-------------------------------------------------------" << std::endl;
@@ -658,15 +667,15 @@ int TodoList::update_todo_info(std::string assign_date, std::vector<std::string>
     std::string command_command;
     if(todo_vector.size() == 0)
     {
-        command_command = "HDEL todo_list " + assign_date; 
+        command_command = "HDEL " + TodoList::book_name + " " + assign_date; 
 
     }
     else
     {
-        command_command = "HSET todo_list " + assign_date + " " +  pystring::join("-+-", todo_vector); 
+        command_command = "HSET " + TodoList::book_name + " " + assign_date + " " +  pystring::join("-+-", todo_vector); 
     }
 
-    std::cout << command_command << std::endl;
+    // std::cout << command_command << std::endl;
 
     redisReply* reply_command = (redisReply*)redisCommand(client, command_command.c_str());
     if (reply_command == NULL) 
@@ -702,7 +711,67 @@ int TodoList::delete_todo_info(std::string assign_date, int assign_index)
     return 1;
 }
 
+int TodoList::finish_todo(std::string assign_date, int assign_index)
+{
+    std::vector<std::string> todo_info = get_todo_info(assign_date);
 
+    if(assign_index == -1)
+    {
+        for(int i=0; i<todo_info.size(); i++)
+        {
+            if(!pystring::startswith(todo_info[i], "[done]"))
+            {
+                todo_info[i] = "[done]" + todo_info[i];
+            }
+        }
+    }
+    else if(assign_index > 0 && assign_index < (todo_info.size() + 1))
+    {
+        if(!pystring::startswith(todo_info[assign_index-1], "[done]"))
+        {
+            todo_info[assign_index-1] = "[done]" + todo_info[assign_index-1];
+        } 
+    }
+    else
+    {
+        std::cout << ERROR_COLOR << "index 不合法, index 范围是 1 到 " << todo_info.size() << " 的自然数" << STOP_COLOR << std::endl;
+        return -1;
+    } 
+
+    TodoList::update_todo_info(assign_date, todo_info);
+    return 1;
+}
+
+int TodoList::undo_todo(std::string assign_date, int assign_index)
+{
+    std::vector<std::string> todo_info = get_todo_info(assign_date);
+
+    if(assign_index == -1)
+    {
+        for(int i=0; i<todo_info.size(); i++)
+        {
+            if(pystring::startswith(todo_info[i], "[done]"))
+            {
+                todo_info[i] = todo_info[i].substr(6);
+            }
+        }
+    }
+    else if(assign_index > 0 && assign_index < (todo_info.size() + 1))
+    {
+        if(pystring::startswith(todo_info[assign_index-1], "[done]"))
+        {
+            todo_info[assign_index-1] = todo_info[assign_index-1].substr(6);
+        }
+    }    
+    else
+    {
+        std::cout << ERROR_COLOR << "index 不合法, index 范围是 1 到 " << todo_info.size() << " 的自然数" << STOP_COLOR << std::endl;
+        return -1;
+    } 
+
+    TodoList::update_todo_info(assign_date, todo_info);
+    return 1;
+}
 
 
 

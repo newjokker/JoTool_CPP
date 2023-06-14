@@ -75,10 +75,12 @@ class TodoList
 {
     public:
 
+        std::string name;
+        std::string book_name;
         std::string host;
         int port;
 
-        TodoList(std::string host, int port);
+        TodoList(std::string host, int port, std::string name="");
 
         // 获取指定日期的 todo 信息
         std::vector<std::string> get_todo_info(std::string date);
@@ -100,6 +102,12 @@ class TodoList
 
         // 验证输入的日期是否合法
         bool is_valid_date(std::string assign_date);
+
+        // 完成某条信息
+        int finish_todo(std::string assign_date, int index);
+
+        // 恢复某条记录为 todo
+        int undo_todo(std::string assign_date, int index);
 
 };
 
