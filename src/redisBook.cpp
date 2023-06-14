@@ -198,6 +198,16 @@ int RedisBook::learn_tx_cluture()
     std::cout << "" << std::endl;
     std::cout << "" << std::endl;
 
+    std::cout << ERROR_COLOR << "两个提倡" << STOP_COLOR << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << "      不让老实人吃亏" << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << "      自然竞争，成就伟大" << std::endl;
+
+    std::cout << "" << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << "" << std::endl;
+
     std::cout << ERROR_COLOR << "反对自由主义。何为自由主义：" << STOP_COLOR << std::endl;
     std::cout << "" << std::endl;
     std::cout << "      小团体内不作原则上的争论。任其下去，求得和平亲热。" << std::endl;
@@ -382,7 +392,7 @@ int RedisBook::update_assign_joke(std::string joke_id, Joke *each_joke)
     std::string command_all = pystring::join("-+-", each_joke->command);
     std::string command_command = "HSET joke_command " + joke_id + " " +  pystring::replace(command_all, " ", "_"); 
 
-    std::cout << command_command.c_str() << std::endl;
+    // std::cout << command_command.c_str() << std::endl;
 
     // redisReply* reply_command = (redisReply*)redisCommand(RedisBook::client, command_command.c_str());
     redisReply* reply_command = (redisReply*)redisCommand(RedisBook::client, command_command.c_str());
@@ -417,7 +427,6 @@ std::vector<std::string> RedisBook::get_joke_id_vector()
     freeReplyObject(reply_content);
     return book_ids;
 }
-
 
 void Joke::print_info()
 {
@@ -485,3 +494,219 @@ int Joke::add_command(std::string command, std::string writer)
 
     return 1;
 }
+
+
+
+TodoList::TodoList(std::string host, int port)
+{
+    TodoList::port = port;
+    TodoList::host = host;
+}
+
+int TodoList::add_todo_info(std::string date, std::string todo_info)
+{
+    if(pystring::find(todo_info, "-+-") != -1)
+    {
+        std::cout << ERROR_COLOR << "* 记录信息中不得存在字符 -+- " << STOP_COLOR << std::endl;
+        return -1;
+    }
+
+    // 登录 redis
+    redisContext *client = redisConnect(TodoList::host.c_str(), TodoList::port);
+    std::vector<std::string> todo_info_history = TodoList::get_todo_info(date);
+    todo_info_history.push_back(todo_info);
+
+    std::string command_command = "HSET todo_list " + date + " " +  pystring::join("-+-", todo_info_history); 
+    // std::cout << command_command << std::endl; 
+    redisReply* reply_command = (redisReply*)redisCommand(client, command_command.c_str());
+    if (reply_command == NULL) 
+    {
+        std::cout << "SET command failed: " << client->errstr << std::endl;
+        redisFree(client);
+        throw command_command;
+    }
+    freeReplyObject(reply_command);
+    redisFree(client);
+    return 1;
+}
+
+std::vector<std::string> TodoList::get_todo_info(std::string date)
+{
+    redisContext *client = redisConnect(TodoList::host.c_str(), TodoList::port);
+    std::string command_str = "HGET todo_list " + date; 
+    // std::cout << command_str << std::endl;
+    redisReply* reply = (redisReply*)redisCommand(client, command_str.c_str());
+    std::vector<std::string> empty_info;
+
+
+    if (reply == NULL) 
+    {
+        std::cout << ERROR_COLOR << "Failed to execute command : " << command_str << STOP_COLOR << std::endl;
+        return empty_info;
+    }
+
+    if (reply->type == REDIS_REPLY_NIL)
+    {
+        return empty_info;
+    }
+    else
+    {
+        // std::cout << "reply : " << reply->str << std::endl;
+        std::vector<std::string> todo_info = pystring::split(reply->str, "-+-");    // 以 -+- 分隔
+        freeReplyObject(reply);
+        redisFree(client);
+        return todo_info;
+    }
+}
+
+int TodoList::print_todo_info(std::string assign_date)
+{
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::vector<std::string> todo_info = TodoList::get_todo_info(assign_date);
+
+    if(todo_info.size() == 0)
+    {
+        std::cout << ERROR_COLOR << "empty" << STOP_COLOR << std::endl;
+    }
+    else
+    {
+        std::cout << assign_date << " : " << std::endl;
+        // std::cout << "" << std::endl;
+
+        for(int i=0; i<todo_info.size(); i++)
+        {
+            std::cout << std::endl; 
+            std::cout << "    [" << i+1 << "] " << todo_info[i] << std::endl;
+        }
+    }
+    std::cout << "-------------------------------------------------------" << std::endl;
+    return 1;
+}
+
+std::string TodoList::get_date(std::string assign_date)
+{
+    // Get current time as a time_point object
+    auto now = std::chrono::system_clock::now();
+
+    // Convert time_point to time_t
+    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+
+    // Convert time_t to tm
+    std::tm* timeInfo = std::localtime(&currentTime);
+
+    // Create a stringstream object
+    std::ostringstream timeStream;
+
+    // Write the current time into the stringstream in the specified format
+    timeStream << std::put_time(timeInfo, "%Y-%m-%d");
+
+    // Get the resulting string
+    std::string timeString = timeStream.str();
+
+    if(assign_date == "")
+    {
+        return timeString;
+    }
+    else if(assign_date.size() == 5)
+    {
+        bool valid = TodoList::is_valid_date(assign_date);
+        if(valid)
+        {
+            timeString = timeString.substr(0, 4) + "-" + assign_date;
+            return timeString;
+        }
+        else
+        {
+            return "";
+        }
+    }
+    else
+    {
+        return assign_date;
+    }
+}
+
+bool TodoList::is_valid_date(std::string assign_date)
+{
+    if(assign_date.size() != 10 && assign_date.size() != 5)
+    {
+        return false;
+    }
+
+    if(assign_date.size() == 10)
+    {
+        if(assign_date[4] != '-' || assign_date[7] != '-')
+        {
+            return false;
+        }
+    }
+    else
+    {
+        if(assign_date[2] != '-')
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+int TodoList::update_todo_info(std::string assign_date, std::vector<std::string> todo_vector)
+{
+
+    // 登录 redis
+    redisContext *client = redisConnect(TodoList::host.c_str(), TodoList::port);
+    std::string command_command;
+    if(todo_vector.size() == 0)
+    {
+        command_command = "HDEL todo_list " + assign_date; 
+
+    }
+    else
+    {
+        command_command = "HSET todo_list " + assign_date + " " +  pystring::join("-+-", todo_vector); 
+    }
+
+    std::cout << command_command << std::endl;
+
+    redisReply* reply_command = (redisReply*)redisCommand(client, command_command.c_str());
+    if (reply_command == NULL) 
+    {
+        std::cout << "SET command failed: " << client->errstr << std::endl;
+        redisFree(client);
+        throw command_command;
+    }
+    freeReplyObject(reply_command);
+    redisFree(client);
+    return 1;
+}
+
+int TodoList::delete_todo_info(std::string assign_date, int assign_index)
+{
+    std::vector<std::string> todo_info = get_todo_info(assign_date);
+
+    if(assign_index == -1)
+    {
+        todo_info.clear();
+    }
+    else if(assign_index > 0 && assign_index < (todo_info.size() + 1))
+    {
+        todo_info.erase(todo_info.begin() + (assign_index - 1));
+    }
+    else
+    {
+        std::cout << ERROR_COLOR << "index 不合法, index 范围是 1 到 " << todo_info.size() << " 的自然数" << STOP_COLOR << std::endl;
+        return -1;
+    } 
+
+    TodoList::update_todo_info(assign_date, todo_info);
+    return 1;
+}
+
+
+
+
+
+
+
+
+

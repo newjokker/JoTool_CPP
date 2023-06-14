@@ -845,7 +845,22 @@ void UcdParamOpt::load_param_info()
     param_from_crop->demo.push_back("ucd from_crop ./crop res.json   -o            (将 ./crop 文件夹中的小图文件夹 生成 res.json 文件，使用小图的名字作为小图标签)");
     UcdParamOpt::add_param(param_from_crop);
     
-
+    // todo
+    ParamInfo * param_todo = new ParamInfo("todo");
+    param_todo->group = "fun";
+    param_todo->args_info["--date"] = "指定要操作的日期，有两种格式 2023-06-14 或者 06-14，不指定的话就使用今天的日期";
+    param_todo->grammar = "ucd todo {method} {info}";
+    param_todo->english_explain = "";
+    param_todo->chinese_explain = "计划表，todo 表，目前支持的方法为 [check, add, del]";   
+    param_todo->demo.push_back("ucd todo                                           (查看今天的日程表)");
+    param_todo->demo.push_back("ucd todo check                                     (查看今天的日程表)");
+    param_todo->demo.push_back("ucd todo check --date  2023-06-14                  (查看2023-06-14的日程表)");
+    param_todo->demo.push_back("ucd todo add test1                                 (今天的日程表增加信息 test1)");
+    param_todo->demo.push_back("ucd todo add test1 --date  2023-06-14              (2023-06-14的日程表增加信息 test1)");
+    param_todo->demo.push_back("ucd todo del 1 --date  2023-06-14                  (2023-06-14的日程表删除第一条信息)");
+    param_todo->demo.push_back("ucd todo del all --date  2023-06-14                (2023-06-14的日程表删除所有的信息)");
+    UcdParamOpt::add_param(param_todo);
+    
     // from_file
     ParamInfo * param_from_file = new ParamInfo("from_file");
     param_from_file->group = "convert";

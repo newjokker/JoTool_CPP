@@ -190,6 +190,10 @@ using namespace std;
 // TODO: 共用同一批 config 文件
 
 
+// ucd 实现 post v1 v2 接口，
+
+
+
 int main(int argc_old, char ** argv_old)
 {
     // param
@@ -225,7 +229,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.5.5";
+    std::string app_version = "v4.6.1";
 
     // uci_info
     int volume_size         = 20;
@@ -3161,6 +3165,72 @@ int main(int argc_old, char ** argv_old)
         {
             ucd_param_opt->print_command_info(command_1); 
         }
+    }
+    else if(command_1 == "todo")
+    {
+        TodoList *todo_list = new TodoList(redis_host, redis_port);
+        std::string assign_date;
+
+        if(long_args.count("date") != 0)
+        {
+            assign_date = long_args["date"];
+            assign_date = todo_list->get_date(assign_date);
+        }
+        else
+        {
+            assign_date = todo_list->get_date();
+        }
+
+        if(not todo_list->is_valid_date(assign_date))
+        {
+            std::cout << ERROR_COLOR << "* 日期格式不合法, 日期格式为 2023-06-14 或者 06-14" << STOP_COLOR << std::endl;
+            return 0;
+        }
+
+        std::string method  = "";
+        std::string info    = "";
+        if(argc == 2)
+        {
+            method = "check";
+            todo_list->print_todo_info(assign_date);
+        }
+        else
+        {
+            method  = argv[2];
+
+            for(int i=3; i<argc; i++)
+            {
+                info += argv[i] + ",";
+            }
+
+            if(method == "add")
+            {
+                todo_list->add_todo_info(assign_date, info);
+            }
+            else if(method == "del")
+            {
+                int index;
+                if(info == "all,")
+                {
+                    index = -1;
+                }
+                else
+                {
+                    index = std::stoi(info);
+                }
+
+                todo_list->delete_todo_info(assign_date, index);
+            }
+            else if(method == "check")
+            {
+                todo_list->print_todo_info(assign_date);
+            } 
+            else
+            {
+                ucd_param_opt->print_command_info(command_1);
+            }
+        }
+        delete todo_list;
     }
     else if(command_1 == "augment")
     {

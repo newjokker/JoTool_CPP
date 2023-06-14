@@ -39,23 +39,30 @@ def get_require_txt(app_path, require_txt_path):
 if __name__ == "__main__":
 
 
-    if len(sys.argv) != 3:
-        print("move_dll save_dir ucd_name")
-    else:
-        saveDir     = sys.argv[1]
-        saveName    = sys.argv[2]       # ucd_v2.5.1
-        saveDir     = os.path.join(saveDir, saveName)
-        # ---------------------------
-        appPath = r"../bin/ucd"
-        # ---------------------------
+    # if len(sys.argv) != 3:
+    #     print("move_dll save_dir ucd_name")
+    # else:
 
-        saveTxtPath = os.path.join(saveDir, "require.txt")
-        soDir = os.path.join(saveDir, "so_dir")
-        os.makedirs(saveDir,    exist_ok=True)
-        os.makedirs(soDir,      exist_ok=True)
 
-        get_require_txt(appPath, saveTxtPath)
-        move_require_so_to_assign_dir(saveTxtPath, soDir)
-        #
-        shutil.copy(appPath, os.path.join(saveDir, saveName))
-        shutil.copy("./install_ucd.sh", os.path.join(saveDir, "install_" + saveName + ".sh"))
+    # saveDir     = sys.argv[1]
+    # saveName    = sys.argv[2]       # ucd_v2.5.1
+    # saveDir     = os.path.join(saveDir, saveName)
+    # # ---------------------------
+    # appPath = r"../bin/ucd"
+    # # ---------------------------
+
+    appPath = r"/home/ldq/beijingfeihua/011_语音识别/语音唤醒/bin/awaken_offline_sample"
+    saveDir = r"/home/docker/docker_feihua/v0.0.1/x64"
+    saveName = "demo"
+
+
+    saveTxtPath = os.path.join(saveDir, "require.txt")
+    soDir = os.path.join(saveDir, "so_dir")
+    os.makedirs(saveDir,    exist_ok=True)
+    os.makedirs(soDir,      exist_ok=True)
+
+    get_require_txt(appPath, saveTxtPath)
+    move_require_so_to_assign_dir(saveTxtPath, soDir)
+    #
+    shutil.copy(appPath, os.path.join(saveDir, saveName))
+    shutil.copy("./install_ucd.sh", os.path.join(saveDir, "install_" + saveName + ".sh"))

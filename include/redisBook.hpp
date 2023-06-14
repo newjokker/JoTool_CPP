@@ -71,7 +71,37 @@ class RedisBook
 };
 
 
+class TodoList
+{
+    public:
 
+        std::string host;
+        int port;
+
+        TodoList(std::string host, int port);
+
+        // 获取指定日期的 todo 信息
+        std::vector<std::string> get_todo_info(std::string date);
+
+        // 打印 todo 信息
+        int print_todo_info(std::string assign_date);
+
+        // 删除 todo 信息
+        int delete_todo_info(std::string assign_date, int assign_index);
+
+        // 增加 todo 信息
+        int add_todo_info(std::string assign_date, std::string todo_info);
+
+        // 更新 todo 信息
+        int update_todo_info(std::string assign_date, std::vector<std::string> todo_vector);
+
+        // 获得当前的日期
+        std::string get_date(std::string assign_date="");
+
+        // 验证输入的日期是否合法
+        bool is_valid_date(std::string assign_date);
+
+};
 
 
 
