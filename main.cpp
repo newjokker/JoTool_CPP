@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <algorithm>
 #include <opencv2/opencv.hpp>
-#include <nlohmann/json.hpp>
 #include "include/strToImg.hpp"
 #include "include/deteRes.hpp"
 #include "include/operateDeteRes.hpp"
@@ -26,7 +25,9 @@
 #include "include/parseArgs.hpp"
 #include <hiredis/hiredis.h> 
 #include "include/redisBook.hpp"
-
+#include <thread>
+#include <httplib.h>
+#include "include/ucd_tools.hpp"
 
 using json = nlohmann::json;
 using namespace jotools;
@@ -190,7 +191,14 @@ using namespace std;
 // TODO: 共用同一批 config 文件
 
 
-// ucd 实现 post v1 v2 接口，
+void handle_post(const httplib::Request& req, httplib::Response& res) 
+{
+    // 打印接收到的 POST 内容和额外的参数
+    std::cout << "Received POST data: " << req.body << std::endl;
+
+    // 返回响应
+    res.set_content("OK", "text/plain");
+}
 
 
 
@@ -229,7 +237,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.6.3";
+    std::string app_version = "v4.7.1";
 
     // uci_info
     int volume_size         = 20;
@@ -2816,7 +2824,6 @@ int main(int argc_old, char ** argv_old)
             std::cout << "change ucd version by :" << std::endl;
 
             std::cout << HIGHTLIGHT_COLOR << "  sudo chmod 777 /home/ldq/Apps_jokker -R" << STOP_COLOR << std::endl;
-            // std::cout << HIGHTLIGHT_COLOR << "  sudo ldconfig" << STOP_COLOR << std::endl;
             std::cout << HIGHTLIGHT_COLOR << "  vim ~/.bash_aliases" << STOP_COLOR << std::endl;
             std::cout << HIGHTLIGHT_COLOR << "  source ~/.bash_aliases" << STOP_COLOR << std::endl;
             std::cout << "" << std::endl;
@@ -3200,9 +3207,13 @@ int main(int argc_old, char ** argv_old)
 
         std::string method  = "";
         std::string info    = "";
-        if(argc == 2)
+        if(argc == 2 && long_args.count("date") == 0)
         {
             method = "check";
+            todo_list->print_todo_info_assign_date_range(assign_date, 5);
+        }
+        else if(argc == 2)
+        {
             todo_list->print_todo_info(assign_date);
         }
         else
@@ -3255,6 +3266,121 @@ int main(int argc_old, char ** argv_old)
             }
         }
         delete todo_list;
+    }
+    else if(command_1 == "receiver")
+    {
+
+        // TODO: 做一个数据的服务器，接收相对位置，返回找到的文件并返回
+        // TODO: 成为接收器，接收消息，receiver_v1, receive_v2, 心跳信息之类的
+        // TODO: 作为税局中转站，将请求进行转发
+        // TODO: 获取 meta, cache 等信息，提供给其他机器调用
+        // TODO: 设置为协程启动，并进行阻塞
+
+
+        int port            = 11223;
+        std::string name    = "";
+
+        if(long_args.count("port") != 0)
+        {
+            port = std::stoi(long_args["port"]);
+        }
+
+        if(long_args.count("name") != 0)
+        {
+            name = long_args["name"];
+        }
+
+        httplib::Server server;
+
+        std::string additional_param = "123";
+
+        // auto bound_handle_post = std::bind(handle_post, std::placeholders::_1, std::placeholders::_2, additional_param);
+
+        // server.Post("/" + name, bound_handle_post);
+
+
+        server.Post("/" + name, handle_post);
+        server.listen("0.0.0.0", port);
+
+    }
+    else if(command_1 == "img_server")
+    {
+
+        // 当 80 服务器失效时，可以使用 ucd 和当前机器的缓存提供图片服务
+
+        int port = 5001;
+        std::string img_dir = "";
+
+        // img_dir
+        if(long_args.count("img_dir") != 0 )
+        {
+            img_dir = long_args["img_dir"];
+        }
+        else
+        {
+            img_dir = ucd_util->cache_img_dir;
+        }
+
+        // port
+        if(long_args.count("port") != 0 )
+        {
+            port = stoi(long_args["port"]);
+        }
+
+        std::string ip_str = get_ip_address();
+        std::cout << "---------------------------------------------------" << std::endl;
+        std::cout << "port      : " << port << std::endl;
+        std::cout << "url       : " << "http://" << ip_str << ":" << port << "/image/{uc}" << std::endl;
+        std::cout << "file_dir  : " << img_dir << std::endl;
+        std::cout << "---------------------------------------------------" << std::endl;
+
+        httplib::Server server;
+        server.Get("/file/(.*)", [&](const httplib::Request& req, httplib::Response& res) 
+        {
+            std::string image_name  = req.matches[1];                            // 获取路径参数中的图片名
+            std::string image_path  = img_dir + "/" + image_name;      // 获取图片文件路径
+            std::string clientIP    = req.remote_addr;
+
+            if(is_read_file(image_path))
+            {
+                std::cout  << "get image [" << clientIP << "] -> " << image_path << std::endl;
+            }
+            else
+            {
+                std::cout << ERROR_COLOR << "get image [" << clientIP << "] -> " << image_path << " [failed] " << STOP_COLOR << std::endl;
+            }
+
+            // 读取图片文件
+            std::ifstream file(image_path, std::ios::binary);
+
+            if (file) 
+            {
+                // 获取文件大小
+                file.seekg(0, std::ios::end);
+                size_t file_size = file.tellg();
+                file.seekg(0, std::ios::beg);
+
+                // 分配缓冲区并读取文件内容
+                std::vector<char> buffer(file_size);
+                file.read(buffer.data(), file_size);
+
+                // 将缓冲区内容转换为字符串
+                std::string content(buffer.data(), file_size);
+
+                // 设置响应内容类型为图片
+                res.set_header("Content-Type", "image/jpeg");
+                res.set_content(content, "image/jpeg");
+            } 
+            else 
+            {
+                // 文件不存在，返回404错误
+                res.status = 404;
+                res.set_content("Image not found", "text/plain");
+            }
+        });
+
+        // 启动服务器，监听端口为8080
+        server.listen("0.0.0.0", port);
     }
     else if(command_1 == "augment")
     {

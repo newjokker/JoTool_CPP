@@ -853,7 +853,7 @@ void UcdParamOpt::load_param_info()
     param_todo->grammar = "ucd todo {method} {info}";
     param_todo->english_explain = "";
     param_todo->chinese_explain = "计划表，todo 表，目前支持的方法为 [check, add, del, done, undo]";   
-    param_todo->demo.push_back("ucd todo                                           (查看今天的日程表)");
+    param_todo->demo.push_back("ucd todo                                           (查看四天前和今天的日程表)");
     param_todo->demo.push_back("ucd todo check                                     (查看今天的日程表)");
     param_todo->demo.push_back("ucd todo check --name jokker                       (查看今天 jokker 的日程表)");
     param_todo->demo.push_back("ucd todo check --date  2023-06-14                  (查看2023-06-14的日程表)");
@@ -866,7 +866,18 @@ void UcdParamOpt::load_param_info()
     param_todo->demo.push_back("ucd todo undo 1 --date  2023-06-14                 (2023-06-14的日程表第一条记录设置为未完成)");
     param_todo->demo.push_back("ucd todo undo all --date  2023-06-14               (2023-06-14的日程表全部记录设置为未完成)");
     UcdParamOpt::add_param(param_todo);
-    
+
+    // img_server
+    ParamInfo * param_img_server = new ParamInfo("img_server");
+    param_img_server->group = "server";
+    param_img_server->args_info["--port"] = "指定服务提供的端口, 默认端口为 5001";
+    param_img_server->args_info["--img_dir"] = "图片服务提供的图片文件夹，默认使用 ucd 的缓存文件夹";
+    param_img_server->grammar = "ucd img_server";
+    param_img_server->chinese_explain = "当 80 服务器服务断掉之后可以暂时使用这个图片服务在各个服务器之间进行数据的转移";   
+    param_img_server->demo.push_back("ucd img_server                                            (使用默认配置提供图片服务)");
+    param_img_server->demo.push_back("ucd img_server --port 11223 --img_dir /home/ldq/img_dir   (使用指定的端口号和图片文件夹提供图片服务)");
+    UcdParamOpt::add_param(param_img_server);
+
     // from_file
     ParamInfo * param_from_file = new ParamInfo("from_file");
     param_from_file->group = "convert";

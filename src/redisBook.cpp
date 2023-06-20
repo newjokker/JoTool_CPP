@@ -572,7 +572,7 @@ int TodoList::print_todo_info(std::string assign_date)
     }
     else
     {
-        std::cout << assign_date << " (" + TodoList::name + ")" << " : " << std::endl;
+        std::cout << WARNNING_COLOR << assign_date << " (" + TodoList::name + ")" << " : " << STOP_COLOR << std::endl;
         // std::cout << "" << std::endl;
 
         for(int i=0; i<todo_info.size(); i++)
@@ -592,10 +592,61 @@ int TodoList::print_todo_info(std::string assign_date)
     return 1;
 }
 
-std::string TodoList::get_date(std::string assign_date)
+int TodoList::print_todo_info_assign_date_range(std::string assign_date, int data_range)
 {
+    std::cout << "-------------------------------------------------------" << std::endl;
+    for(int day=data_range; day > -1; day--)
+    {
+        std::string new_date = TodoList::get_date("", 0-day);
+
+        std::vector<std::string> todo_info = TodoList::get_todo_info(new_date);
+
+        std::cout << "" << std::endl;
+        std::cout << WARNNING_COLOR << new_date << " (" + TodoList::name + ")" << " : " << STOP_COLOR << std::endl;
+
+        if(todo_info.size() == 0)
+        {
+            std::cout << ERROR_COLOR << "empty" << STOP_COLOR << std::endl;
+        }
+        else
+        {
+            // std::cout << "" << std::endl;
+
+            for(int i=0; i<todo_info.size(); i++)
+            {
+                std::cout << std::endl; 
+                if(pystring::startswith(todo_info[i], "[done]"))
+                {
+                    std::cout << HIGHTLIGHT_COLOR << "    [" << i+1 << "] " << todo_info[i].substr(6) << " [done]" << STOP_COLOR << std::endl;
+                }
+                else
+                {
+                    std::cout << "    [" << i+1 << "] " << todo_info[i] << std::endl;
+                }
+            }
+        }
+    }
+    std::cout << "-------------------------------------------------------" << std::endl;
+
+    return 1;
+}
+
+std::string TodoList::get_date(std::string assign_date, int offset_day)
+{
+
+    // FIXME: 设计的有问题，不过用的比较少，就先不修改了
+
     // Get current time as a time_point object
     auto now = std::chrono::system_clock::now();
+
+    if(offset_day > 0)
+    {
+        now = now + std::chrono::hours(24 * abs(offset_day));
+    }
+    else
+    {
+        now = now - std::chrono::hours(24 * abs(offset_day));
+    }
 
     // Convert time_point to time_t
     std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
@@ -612,6 +663,7 @@ std::string TodoList::get_date(std::string assign_date)
     // Get the resulting string
     std::string timeString = timeStream.str();
 
+    // 
     if(assign_date == "")
     {
         return timeString;
@@ -621,6 +673,7 @@ std::string TodoList::get_date(std::string assign_date)
         bool valid = TodoList::is_valid_date(assign_date);
         if(valid)
         {
+            // 只写日期默认是今年的信息
             timeString = timeString.substr(0, 4) + "-" + assign_date;
             return timeString;
         }

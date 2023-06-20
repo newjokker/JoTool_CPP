@@ -88,6 +88,9 @@ class TodoList
         // 打印 todo 信息
         int print_todo_info(std::string assign_date);
 
+        // 打印指定日期到前面一周的 todo 信息
+        int print_todo_info_assign_date_range(std::string assign_date, int data_range=7);
+
         // 删除 todo 信息
         int delete_todo_info(std::string assign_date, int assign_index);
 
@@ -98,7 +101,7 @@ class TodoList
         int update_todo_info(std::string assign_date, std::vector<std::string> todo_vector);
 
         // 获得当前的日期
-        std::string get_date(std::string assign_date="");
+        std::string get_date(std::string assign_date="", int offset_day=0);
 
         // 验证输入的日期是否合法
         bool is_valid_date(std::string assign_date);

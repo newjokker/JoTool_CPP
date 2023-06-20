@@ -2184,6 +2184,7 @@ void UCDataset::update_tags(std::map< std::string, std::string > tag_map)
 void UCDataset::drop_empty_uc()
 {
     std::vector< std::string > uc_list;
+    int drop_count = 0;
     for(int i=0; i<UCDataset::uc_list.size(); i++)
     {
         std::string uc = UCDataset::uc_list[i];
@@ -2196,10 +2197,13 @@ void UCDataset::drop_empty_uc()
             // clean extra size_info
             if(UCDataset::size_info.count(uc) > 0)
             {
+                drop_count += 1;
                 UCDataset::size_info.erase(uc);
             }
         }
     }
+    std::cout << WARNNING_COLOR << "drop uc count : " << drop_count << STOP_COLOR << std::endl;
+    std::cout << WARNNING_COLOR << "keep uc count : " << uc_list.size() << STOP_COLOR << std::endl;
     UCDataset::uc_list = uc_list;
 }
 
