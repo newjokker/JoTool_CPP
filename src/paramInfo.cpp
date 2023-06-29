@@ -615,13 +615,14 @@ void UcdParamOpt::load_param_info()
     param_to_crop->grammar = "ucd to_crop ucd_path save_dir is_split(true|1|True|false|0|False)";
     param_to_crop->args_info["--no_cache"] = "1|True|true 低缓存模式，使用完下载的图片之后会删除，本地已有缓存的不进行删除";
     param_to_crop->args_info["-s"] = "小图放到以其名字命名的文件夹中，设置的话，全部放到一个文件夹中";
+    param_to_crop->args_info["-c"] = "小图会根据其置信度改变标签名类似为 tag_(0.1-0.2] 用于分析不同置信度下得到的结果";
     param_to_crop->english_explain = "cut img by dete obj";
     param_to_crop->chinese_explain = "裁剪出小图";   
     param_to_crop->demo.push_back("ucd to_crop test.json ./crop         (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，每个标签的的小图分文件夹存放)");
-    param_to_crop->demo.push_back("ucd to_crop test.json ./crop -s       (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，所有小图放在一起)");
+    param_to_crop->demo.push_back("ucd to_crop test.json ./crop -s      (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，所有小图放在一起)");
+    param_to_crop->demo.push_back("ucd to_crop test.json ./crop -s -c   (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，所有小图放在一起, 并改变标签包含置信度信息)");
     UcdParamOpt::add_param(param_to_crop);
     
-
     // crop_to_xml
     ParamInfo * param_crop_to_xml = new ParamInfo("crop_to_xml");
     param_crop_to_xml->group = "opt";
@@ -870,13 +871,29 @@ void UcdParamOpt::load_param_info()
     // img_server
     ParamInfo * param_img_server = new ParamInfo("img_server");
     param_img_server->group = "server";
-    param_img_server->args_info["--port"] = "指定服务提供的端口, 默认端口为 5001";
+    param_img_server->args_info["--port"] = "指定服务提供的端口, 默认端`口为 5001";
     param_img_server->args_info["--img_dir"] = "图片服务提供的图片文件夹，默认使用 ucd 的缓存文件夹";
     param_img_server->grammar = "ucd img_server";
     param_img_server->chinese_explain = "当 80 服务器服务断掉之后可以暂时使用这个图片服务在各个服务器之间进行数据的转移";   
     param_img_server->demo.push_back("ucd img_server                                            (使用默认配置提供图片服务)");
     param_img_server->demo.push_back("ucd img_server --port 11223 --img_dir /home/ldq/img_dir   (使用指定的端口号和图片文件夹提供图片服务)");
     UcdParamOpt::add_param(param_img_server);
+
+    // post_v2
+    ParamInfo * param_post_v2 = new ParamInfo("post_v2");
+    param_post_v2->group = "server";
+    param_post_v2->args_info["--host"] = "图片服务器 host, 默认为 192.168.3.221";
+    param_post_v2->args_info["--port"] = "图片服务器的 port, 默认为 11101";
+    param_post_v2->args_info["--post_port"] = "指定推送的端口, 默认会找空闲的端口作为推送端口";
+    param_post_v2->args_info["--batch_id"] = "批次的 id, 不要重复，默认为 test_ucd_post_v2";
+    param_post_v2->args_info["--model_list"] = "需要检测的模型列表, 默认为 nc,kkx";
+    param_post_v2->grammar = "ucd post_v2 ucd_path {save_dir}";
+    param_post_v2->chinese_explain = "将检测推送给 v2 接口，并将返回结果打印并保存到文件夹中";   
+    param_post_v2->demo.push_back("ucd post_v2 test.json                                (将 test.json 中的图片推送给 http://192.168.3.221:111/dete 进行检测)");
+    param_post_v2->demo.push_back("ucd post_v2 test.json ./xml_dir                      (将 test.json 中的图片推送给 http://192.168.3.221:111/dete 进行检测，结果保存到 xml_dir 中)");
+    param_post_v2->demo.push_back("ucd post_v2 test.json ./xml_dir --model_list test    (将 test.json 中的图片推送给 http://192.168.3.221:111/dete 进行检测，结果保存到 xml_dir 中, 指定检测 test 模型)");
+    UcdParamOpt::add_param(param_post_v2);
+
 
     // from_file
     ParamInfo * param_from_file = new ParamInfo("from_file");
@@ -1005,10 +1022,19 @@ void UcdParamOpt::load_param_info()
     param_split_by_date->grammar = "ucd split_by_date ucd_path save_dir";
     param_split_by_date->args_info["--save_name"] = "指定保存的名字，保存格式为 save_name_date.json, 当不指定时，保存名形如 origin_name_date.json";
     param_split_by_date->english_explain = "";
-    param_split->chinese_explain = "将 ucd 按照uc 的前三位（日期）划分为多个 json 文件";   
+    param_split_by_date->chinese_explain = "将 ucd 按照uc 的前三位（日期）划分为多个 json 文件";   
     param_split_by_date->demo.push_back("ucd split_by_date aqm.json ./res                   (将 aqm.json 根据时间划分为多个 json 保存在 ./res 文件夹)");
     param_split_by_date->demo.push_back("ucd split_by_date aqm.json ./res --save_name test  (将 aqm.json 根据时间划分为多个 json 保存在 ./res 文件夹，指定保存的名字)");
     UcdParamOpt::add_param(param_split_by_date);
+   
+    // split_by_conf
+    ParamInfo * param_split_by_conf = new ParamInfo("split_by_conf");
+    param_split_by_conf->group = "opt";
+    param_split_by_conf->grammar = "ucd split_by_conf ucd_path save_path {-t} ";
+    param_split_by_conf->args_info["-t"] = "只会改变标签，并按照置信度生成多个 json";
+    param_split_by_conf->chinese_explain = "将 ucd 按照置信度进行划分，两种模式（1）不同的置信度分为不同的 json （2）将置信度信息加在 tag 后面，只生成一个文件";   
+    param_split_by_conf->demo.push_back("ucd split_by_conf test.json res.json -c             (将 test.json 的标签根据置信度分裂为多个，不理解的话运行一下就知道了)");
+    UcdParamOpt::add_param(param_split_by_conf);
    
     // update
     ParamInfo * param_update = new ParamInfo("update");

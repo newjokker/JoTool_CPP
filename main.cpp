@@ -123,15 +123,9 @@ using namespace std;
 
 // FIXME: save 进度条会出现不动的情况，当保存的地址是有图片的时候
 
-// TODO: cut_small_img 有些时候会报错，需要打印出报错的 uc 信息
-
 // TODO: 增加 cleanlab_server 方式的 cut_small_img ，或者 先 split 分为 N 份，裁剪小图的代码多写几个使用分好隔开就行
 
-// TODO: 重命名的时候，重复的图片直接删掉了，
-
 // TODO: 可以指定所有的标签都是一个颜色，用于结果检查，for_improve_recall， --assign_color [0,0,255] 
-
-// TODO: 每个函数运行完，需要有运行的基本信息，
 
 // TODO: 所有人使用一个版本就是最新版本，每次只要我自己去更新那几个文件就行，但是我如何把权限给所有的人呢
 
@@ -185,10 +179,21 @@ using namespace std;
             // uc_v1 和 uc_v2 之间是不能混合使用的，新的 uc 第一个字母是小写，后面两个字母是大写和数字, 日期按照天数来计算，计算到 1970 年到现在一共过去了多少天，
 
 
-// TODO: 批处理, 指定某个操作，可以传入一个 json 的文件夹，
-
-
 // TODO: 共用同一批 config 文件
+
+// TODO: 增加一批可以直接调用的 运行文件，这样可以作为额外的服务进行部署
+
+// TODO: saki 的小说里面的每一个人物的赏析
+
+// TODO: from_crop 中增加选项可以从本地文件中找 uc 的大小获取 size_info 信息
+
+// TODO: filter_by_tags 可以指定必须同时存在几个标签 --mode 默认是 or 可以 指定为 and 
+
+// TODO: relate_anlysis 关联性分析，出现 a 标签的同时出现 b 标签的概率
+
+// TODO: 包含关系分析，a 在 b 中的概率 和 a 不在 b 中的概率 
+
+// TODO: 完善 load 和 upload 
 
 
 void handle_post(const httplib::Request& req, httplib::Response& res) 
@@ -199,7 +204,6 @@ void handle_post(const httplib::Request& req, httplib::Response& res)
     // 返回响应
     res.set_content("OK", "text/plain");
 }
-
 
 
 int main(int argc_old, char ** argv_old)
@@ -237,7 +241,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.7.1";
+    std::string app_version = "v4.7.3";
 
     // uci_info
     int volume_size         = 20;
@@ -520,9 +524,10 @@ int main(int argc_old, char ** argv_old)
                 throw "json_path not exists";
             }
 
+            create_folder(save_dir);
            if(! is_dir(save_dir))
             {
-                std::cout << ERROR_COLOR << "save_dir not exists : " << save_dir << STOP_COLOR  << std::endl;
+                std::cout << ERROR_COLOR << "unable to create multiple levels of directories simultaneously, create folder failed : " << save_dir << STOP_COLOR  << std::endl;
                 throw "save_dir not exists";
              }
 
@@ -695,12 +700,17 @@ int main(int argc_old, char ** argv_old)
         if(argc == 3)
         {
             ucd_path = argv[2];
-            ucd_util->upload_ucd(ucd_path);
+            ucd_util->upload_ucd(ucd_path, "");
         }
         else if(argc == 4)
         {
             ucd_path = argv[2];
             assign_ucd_name = argv[3];
+
+            if(! pystring::endswith(assign_ucd_name, ".json"))
+            {
+                assign_ucd_name += ".json";
+            }
             ucd_util->upload_ucd(ucd_path, assign_ucd_name);
         }
         else
@@ -1444,11 +1454,17 @@ int main(int argc_old, char ** argv_old)
             is_split = false;
         }
 
+        bool split_by_conf = false;
+        if(short_args.count("c") > 0)
+        {
+            split_by_conf = true;
+        }
+
         if (argc == 4)
         {
             std::string ucd_path = argv[2];
             std::string save_dir = argv[3];
-            ucd_util->cut_small_img(ucd_path, save_dir, is_split, no_cache);
+            ucd_util->cut_small_img(ucd_path, save_dir, is_split, no_cache, split_by_conf);
         }
         else
         {
@@ -2851,7 +2867,7 @@ int main(int argc_old, char ** argv_old)
             ucd_param_opt->print_command_info(command_1);
         }
     }
-    else if(command_1 == "split_by_date")
+    else if(command_1 == "split_by_date" || command_1 == "split_by_uc")
     {
         if(argc == 4)
         {
@@ -2883,8 +2899,52 @@ int main(int argc_old, char ** argv_old)
         }
         else
         {
+            ucd_param_opt->print_command_info("split_by_date");
+        }
+    }
+    else if(command_1 == "split_by_conf")
+    {
+
+        std::string mode = "split_json";  // change tag 
+        std::string save_name = "";
+
+        if(short_args.count("t") > 0)
+        {
+            mode = "change_tag";
+        }
+        
+        if(long_args.count("save_name") > 0)
+        {
+            save_name = long_args["save_name"];
+        }
+
+        if(argc == 4 && mode == "split_json")
+        {
+            std::string ucd_path    = argv[2];
+            std::string save_dir    = argv[3];
+            UCDataset *ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->split_by_conf(save_dir, save_name);
+            delete ucd;
+        }
+        else if(argc == 4 && mode == "change_tag")
+        {
+            std::string ucd_path    = argv[2];
+            std::string save_path   = argv[3];
+            UCDataset *ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            ucd->split_by_conf_change_tags();
+            ucd->save_to_ucd(save_path);
+            delete ucd;
+        }
+        else
+        {
             ucd_param_opt->print_command_info(command_1);
         }
+    }
+    else if(command_1 == "split_by_tags")
+    {
+        // 按照 tag 分为不同的 json 文件，保存在本地
     }
     else if(command_1 == "absorb")
     {
@@ -3381,6 +3441,58 @@ int main(int argc_old, char ** argv_old)
 
         // 启动服务器，监听端口为8080
         server.listen("0.0.0.0", port);
+    }
+    else if(command_1 == "post_v2")
+    {
+        if(argc == 3 || argc ==4)
+        {
+            std::string ucd_path    = argv[2];
+
+            std::string save_xml_dir = "";
+            if(argc == 4)
+            {
+                save_xml_dir = argv[3];
+            }
+
+            int server_port         = 111;
+            int post_port           = -1;
+            std::string server_host = "192.168.3.221";
+            std::string batch_id    = "test_ucd_post_v2";
+            std::vector<std::string> model_list = {"nc", "kkx"};
+
+            if(long_args.count("host") != 0)
+            {
+                server_host = long_args["server_host"];
+            }
+
+            if(long_args.count("batch_id") != 0)
+            {
+                batch_id = long_args["batch_id"];
+            }
+
+            if(long_args.count("port") != 0)
+            {
+                server_port = std::stoi(long_args["port"]);
+            }
+
+            if(long_args.count("post_port") != 0)
+            {
+                post_port = std::stoi(long_args["post_port"]);
+            }
+
+            if(long_args.count("model_list") != 0)
+            {
+                std::string model_list_str = long_args["model_list"];
+                model_list = pystring::split(model_list_str, ",");
+            }
+
+            std::string url = "http://" + server_host + ":" + std::to_string(server_port);
+            post_v2(host, port, ucd_path, url, model_list, batch_id, save_xml_dir, post_port);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
     else if(command_1 == "augment")
     {

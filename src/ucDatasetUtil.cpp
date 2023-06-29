@@ -787,6 +787,13 @@ void UCDataset::add_ucd_info(UCDataset* other)
 
 void UCDataset::save_to_ucd(std::string save_path)
 {
+
+    if(! pystring::endswith(save_path, ".json"))
+    {
+        std::cout << ERROR_COLOR << "save_path need end with '.json' " << STOP_COLOR << std::endl;
+        return;
+    }
+
     nlohmann::json json_info = {
         {"dataset_name", UCDataset::dataset_name},
         {"model_name", UCDataset::model_name},
@@ -1446,6 +1453,59 @@ void UCDataset::split_by_date(std::string save_dir, std::string save_name)
         ucd->save_to_ucd(save_path);
         iter++;
     }
+}
+
+void UCDataset::split_by_conf(std::string save_dir, std::string save_name)
+{
+    std::cout << "作者觉得这个模式没什么软用，没有实现，要是这个功能对你很重要，去催作者实现" << std::endl;
+    return;
+}
+
+void UCDataset::split_by_conf_change_tags(float step)
+{
+    auto iter = UCDataset::object_info.begin();
+    tqdm bar;
+    int i = 0;
+    int N = UCDataset::object_info.size();
+
+    while(iter != UCDataset::object_info.end())
+    {
+        std::string uc = iter->first;
+
+        for(int j=0; j < iter->second.size(); j++)
+        {            
+            std::string new_label = "";
+            float conf = iter->second[j]->conf;
+            std::string tag = iter->second[j]->label;
+        
+            if(conf == -1 || conf == 0)
+            {
+                new_label = tag + "_[-1,0]";
+            }
+            else if(conf > 0 && conf < 1)
+            {
+                float lower = int(iter->second[j]->conf * 10) / 10.0;
+                float upper = lower + 0.1;
+                new_label = tag + "_[" + std::to_string(lower).substr(0, 3) + "-" + std::to_string(upper).substr(0, 3)  + ")";
+            }
+            else if(conf == 1)
+            {
+                new_label = tag + "_[1]";
+            }
+            else
+            {
+                std::cout << ERROR_COLOR << "conf range error : " << conf << STOP_COLOR << std::endl;
+                throw "conf range error";
+            }
+
+            iter->second[j]->label = new_label; 
+        }
+        iter++;
+        i++;
+        bar.progress(i, N);
+    }
+    bar.finish();
+    return;
 }
 
 void UCDataset::absorb(std::string meat_ucd, std::string save_path, std::string need_attr)
@@ -3004,27 +3064,21 @@ void UCDatasetUtil::upload_ucd(std::string ucd_path, std::string assign_ucd_name
     std::string ucd_name_suffix = get_file_name_suffix(ucd_path);
 
     httplib::Client cliSendFiles(UCDatasetUtil::root_url);
-    if(assign_ucd_name != "")
+    if(assign_ucd_name == "")
     {
-        httplib::MultipartFormDataItems items = {{"json_file", buffer_lf_img.str(), ucd_name_suffix, "application/octet-stream"},{"ucd_name", assign_ucd_name}};
-        auto resSendFiles = cliSendFiles.Post("/ucd/upload", items);
-        // 这边返回 status 不为 200 也报错？        
-        if(resSendFiles == nullptr)
-        {
-            std::cout << ERROR_COLOR << "upload failed !" << STOP_COLOR << std::endl;
-            throw "upload failed !";
-        }
+        assign_ucd_name = ucd_name;
     }
-    else
+
+    httplib::MultipartFormDataItems items = {{"json_file", buffer_lf_img.str(), ucd_name_suffix, "application/octet-stream"},{"ucd_name", assign_ucd_name}};
+    auto resSendFiles = cliSendFiles.Post("/ucd/upload", items);
+    // 这边返回 status 不为 200 也报错？        
+    if(resSendFiles == nullptr)
     {
-        httplib::MultipartFormDataItems items = {{"json_file", buffer_lf_img.str(), ucd_name_suffix, "application/octet-stream"},{"ucd_name", ucd_name}};
-        auto resSendFiles = cliSendFiles.Post("/ucd/upload", items);
-        if(resSendFiles == nullptr)
-        {
-            std::cout << ERROR_COLOR << "upload failed !" << STOP_COLOR << std::endl;
-            throw "upload failed !";
-        }
+        std::cout << ERROR_COLOR << "upload failed !" << STOP_COLOR << std::endl;
+        throw "upload failed !";
     }
+
+    std::cout << HIGHTLIGHT_COLOR << "upload path : " << assign_ucd_name << STOP_COLOR << std::endl;
 }
 
 void UCDatasetUtil::get_ucd_from_img_dir(std::string img_dir, std::string ucd_path)
@@ -3788,7 +3842,7 @@ void UCDatasetUtil::print_words(std::string name, int width, int height)
     }
 }
 
-void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bool is_split, bool no_cache)
+void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bool is_split, bool no_cache, bool split_by_conf)
 {
     // 
     if(! is_dir(save_dir))
@@ -3808,6 +3862,11 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
 
     UCDataset* ucd = new UCDataset(ucd_path);
     ucd->parse_ucd(true);
+
+    if(split_by_conf)
+    {
+        ucd->split_by_conf_change_tags();
+    }
 
     tqdm bar;
     int N = ucd->object_info.size();
@@ -4436,9 +4495,10 @@ void UCDatasetUtil::draw_res(std::string ucd_path, std::string save_dir, std::ve
         return;
     }
 
+    create_folder(save_dir);
     if(! is_dir(save_dir))
     {
-        std::cout << ERROR_COLOR << "save_dir not exist : " << save_dir << STOP_COLOR << std::endl;
+        std::cout << ERROR_COLOR << "unable to create multiple levels of directories simultaneously, create folder failed : " << save_dir << STOP_COLOR << std::endl;
         return;
     }
     else if(access(save_dir.c_str(), 2) != 0)

@@ -174,6 +174,10 @@ class UCDataset
         // 将 ucd 按照日期分为几部分
         void split_by_date(std::string save_dir, std::string save_name="");
 
+        // 将 ucd 按照置信度分为几部分
+        void split_by_conf(std::string save_dir, std::string save_name="");
+        void split_by_conf_change_tags(float step=0.1);
+
         // 从指定 ucd 中提取需要的内容
         void absorb(std::string meat_ucd, std::string save_path, std::string need_attr);
 
@@ -345,7 +349,7 @@ class UCDatasetUtil
         void print_words(std::string name, int width=50, int height=50);
         
         // 裁切小图
-        void cut_small_img(std::string ucd_path, std::string save_dir, bool is_split, bool no_cache=false);
+        void cut_small_img(std::string ucd_path, std::string save_dir, bool is_split, bool no_cache=false, bool split_by_conf=false);
 
         // uc_check
         void uc_check(std::vector<std::string> file_vector);

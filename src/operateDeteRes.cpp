@@ -119,10 +119,13 @@ void cut_small_img(std::string img_dir, std::string xml_dir, std::string save_di
 
 void get_ucd_from_crop_img(std::string crop_dir, std::string save_path, bool origin_tag)
 {
+
     std::map<std::string, std::vector<std::string>> xml_info_map;
     std::vector<std::string> folder_path_list = get_all_folder_path(crop_dir);
     DeteObj obj;
 
+    tqdm bar;
+    int N = folder_path_list.size();
     for(int i=0; i<folder_path_list.size(); i++)
     {
         std::string folder_name = get_folder_name(folder_path_list[i]);
@@ -147,11 +150,16 @@ void get_ucd_from_crop_img(std::string crop_dir, std::string save_path, bool ori
             std::string uc = file_name.substr(0, pystring::rfind(file_name, "-+-"));
             xml_info_map[uc].push_back(loc_str);
         }
+        bar.progress(i, N);
     }
+    bar.finish();
 
     UCDataset *ucd = new UCDataset(save_path);
 
     // get xml
+    tqdm bar2;
+    int N2 = xml_info_map.size();
+    int i2 = 0;
     auto iter = xml_info_map.begin();
     while (iter != xml_info_map.end())
     {
@@ -164,12 +172,14 @@ void get_ucd_from_crop_img(std::string crop_dir, std::string save_path, bool ori
 
             dete_res->add_dete_obj(*dete_obj);
             delete dete_obj;
-            // std::cout << iter->first << " : " << iter->second.size() << std::endl;
         }
         ucd->add_dete_res_info(iter->first, *dete_res);
         delete dete_res;
         iter++;
+        i2++;
+        bar2.progress(i2, N2);
     }
+    bar2.finish();
 
     // save ucd
     ucd->save_to_ucd(save_path);
