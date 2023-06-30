@@ -163,7 +163,7 @@ class UCDataset
         void crop_dete_res_with_assign_uc(std::string uc, std::string img_path, std::string save_dir, bool is_split=true);
 
         // 保存指定范围，和指定范围内的目标
-        void save_assign_range_with_assign_uc(std::string uc, std::string img_path, std::string save_img_dir, std::string save_label_dir, std::string assign_tag, std::vector<std::string> tag_list, float iou_th=0.5);
+        void save_assign_range_with_assign_uc(std::string uc, std::string img_path, std::string save_img_dir, std::string save_label_dir, std::string assign_tag, std::vector<std::string> tag_list, float iou_th=0.5, std::string mode="txt");
 
         // 获得子序列
         void get_sub_ucd(int sub_count, bool is_random, std::string save_path);
@@ -308,6 +308,9 @@ class UCDatasetUtil
         // 将 xml 信息 保存在 ucd 中
         void get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_path);
         
+        // 将 crop_xml 信息保存到 ucd 中
+        void get_ucd_from_crop_xml(std::string xml_dir, std::string ucd_path);
+
         // 从大量的 xml 中获取 ucd 数据集
         void get_ucd_from_huge_xml_dir(std::string xml_dir, std::string save_path, int volume_size=30);
 
@@ -416,6 +419,10 @@ class UCDatasetUtil
 
         // 保存为 yolo 默认的训练格式 指定截取的范围
         void save_to_yolo_train_data_with_assign_range(std::string ucd_path, std::string save_dir, std::string tag_str, std::string assign_tag, float ratio=0.8, float iou_th=0.85);
+
+        // 保存指定范围的图片和标签
+        void save_assign_range(std::string ucd_path, std::string save_dir, std::string assign_tag, float iou_th=0.85, std::string mode="xml");
+
 
     private:
         

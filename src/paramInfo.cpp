@@ -623,6 +623,24 @@ void UcdParamOpt::load_param_info()
     param_to_crop->demo.push_back("ucd to_crop test.json ./crop -s -c   (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，所有小图放在一起, 并改变标签包含置信度信息)");
     UcdParamOpt::add_param(param_to_crop);
     
+    // to_assign_crop_xml
+    ParamInfo * param_to_assign_crop_xml = new ParamInfo("to_assign_crop_xml");
+    param_to_assign_crop_xml->group = "opt";
+    param_to_assign_crop_xml->grammar = "ucd to_assign_crop_xml ucd_path save_dir assign_tag";
+    param_to_assign_crop_xml->args_info["--iou_th"] = "指定根据范围进行删选的时候使用的重复阈值";
+    param_to_assign_crop_xml->chinese_explain = "指定标签，根据标签的范围裁剪小图和对应的xml，xml 中包含在指定标签内部的标签";   
+    param_to_assign_crop_xml->demo.push_back("ucd to_assign_crop_xml test.json ./crop range --iou_th 0.85   (将 test.json 中 range 标签的范围裁剪出来，同时保存一份 xml 里面记录着包含在 range 标签内部的 obj 信息)");
+    UcdParamOpt::add_param(param_to_assign_crop_xml);
+    
+    // to_assign_crop_txt
+    ParamInfo * param_to_assign_crop_txt = new ParamInfo("to_assign_crop_txt");
+    param_to_assign_crop_txt->group = "opt";
+    param_to_assign_crop_txt->grammar = "ucd to_assign_crop_txt ucd_path save_dir assign_tag";
+    param_to_assign_crop_txt->args_info["--iou_th"] = "指定根据范围进行删选的时候使用的重复阈值";
+    param_to_assign_crop_txt->chinese_explain = "指定标签，根据标签的范围裁剪小图和对应的xml，xml 中包含在指定标签内部的标签";   
+    param_to_assign_crop_txt->demo.push_back("ucd to_assign_crop_txt test.json ./crop range --iou_th 0.85   (将 test.json 中 range 标签的范围裁剪出来，同时保存一份 xml 里面记录着包含在 range 标签内部的 obj 信息)");
+    UcdParamOpt::add_param(param_to_assign_crop_txt);
+
     // crop_to_xml
     ParamInfo * param_crop_to_xml = new ParamInfo("crop_to_xml");
     param_crop_to_xml->group = "opt";
@@ -848,6 +866,15 @@ void UcdParamOpt::load_param_info()
     param_from_crop->demo.push_back("ucd from_crop ./crop res.json                 (将 ./crop 文件夹中的小图文件夹 生成 res.json 文件，使用文件夹的名字作为小图标签)");
     param_from_crop->demo.push_back("ucd from_crop ./crop res.json   -o            (将 ./crop 文件夹中的小图文件夹 生成 res.json 文件，使用小图的名字作为小图标签)");
     UcdParamOpt::add_param(param_from_crop);
+    
+    // from_assign_crop_xml
+    ParamInfo * param_from_assign_crop_xml = new ParamInfo("from_assign_crop_xml");
+    param_from_assign_crop_xml->group = "opt";
+    param_from_assign_crop_xml->args_info["-o"] = "不使用文件夹的名字作为小图的标签，直接使用小图文件名中包含的标签作为 obj 的 tag";
+    param_from_assign_crop_xml->grammar = "ucd param_from_assign_crop_xml xml_dir save_path";
+    param_from_assign_crop_xml->chinese_explain = "将裁剪后的小图 xml 转为 json";   
+    param_from_assign_crop_xml->demo.push_back("ucd from_assign_crop_xml ./crop_xml res.json         (将 ./crop_xml 文件夹中的小图xml 生成 res.json 文件)");
+    UcdParamOpt::add_param(param_from_assign_crop_xml);
     
     // todo
     ParamInfo * param_todo = new ParamInfo("todo");

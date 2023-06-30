@@ -82,6 +82,9 @@ class DeteRes
         // 根据置信度对 dete_obj 进行排序
         void sort_by_conf(bool reverse=false);
         
+        // 内容进行偏移
+        void offset(int x, int y);
+
         // 结果进行 nms 处理
         void do_nms(float threshold, bool ignore_tag);
         

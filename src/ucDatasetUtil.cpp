@@ -1288,7 +1288,7 @@ void UCDataset::crop_dete_res_with_assign_uc(std::string uc, std::string img_pat
     delete dete_res;
 }
 
-void UCDataset::save_assign_range_with_assign_uc(std::string uc, std::string img_path, std::string save_img_dir, std::string save_label_dir, std::string assign_tag, std::vector<std::string> tag_list, float iou_th)
+void UCDataset::save_assign_range_with_assign_uc(std::string uc, std::string img_path, std::string save_img_dir, std::string save_label_dir, std::string assign_tag, std::vector<std::string> tag_list, float iou_th, std::string mode)
 {
     jotools::DeteRes* dete_res = new DeteRes();
     UCDataset::get_dete_res_with_assign_uc(dete_res, uc);
@@ -1305,7 +1305,7 @@ void UCDataset::save_assign_range_with_assign_uc(std::string uc, std::string img
     }
 
     dete_res->img_path = img_path;
-    dete_res->save_to_assign_range(assign_tag, save_img_dir, save_label_dir, tag_map, 0.85);
+    dete_res->save_to_assign_range(assign_tag, save_img_dir, save_label_dir, tag_map, 0.85, mode);
     delete dete_res;    
     return ;
 }
@@ -2248,6 +2248,7 @@ void UCDataset::drop_tags(std::set<std::string> tags, bool clear_obj)
 
 void UCDataset::update_tags(std::map< std::string, std::string > tag_map)
 {
+    std::map< std::string, int > change_count;
     auto iter = UCDataset::object_info.begin();
     while(iter != UCDataset::object_info.end())
     {
@@ -2256,11 +2257,28 @@ void UCDataset::update_tags(std::map< std::string, std::string > tag_map)
             LabelmeObj* obj = iter->second[i];
             if(tag_map.count(obj->label) > 0)
             {
+                if(change_count.count(obj->label) == 0)
+                {
+                    change_count[obj->label] = 1;
+                }
+                else
+                {
+                    change_count[obj->label] += 1;
+                }
                 obj->label = tag_map[obj->label];
             }
         }
         iter++;
     }
+
+    // 打印修改了多少数据
+    auto iter_2 = change_count.begin();
+    while(iter_2 != change_count.end())
+    {
+        std::cout << WARNNING_COLOR << std::left << std::setw(10) << iter_2->first << " -> " << std::left << std::setw(10) << tag_map[iter_2->first] << " : " << iter_2->second << STOP_COLOR << std::endl;
+        iter_2++;
+    }
+
 }
 
 void UCDataset::drop_empty_uc()
@@ -3163,6 +3181,55 @@ void UCDatasetUtil::get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_pa
         if(is_uc(uc))
         {
             ucd->add_voc_xml_info(uc, xml_path_vector[i]);
+            is_uc_count += 1;
+        }
+        else
+        {
+            not_uc_count += 1;
+        }
+        bar.progress(i, N);
+    }
+    bar.finish();
+    ucd->save_to_ucd(ucd_path);
+
+    // print
+    std::cout << WARNNING_COLOR << "is  uc count : " << is_uc_count  << STOP_COLOR << std::endl;
+    std::cout << WARNNING_COLOR << "not uc count : " << not_uc_count << STOP_COLOR << std::endl;
+
+    delete ucd;
+}
+
+void UCDatasetUtil::get_ucd_from_crop_xml(std::string xml_dir, std::string ucd_path)
+{
+    std::set<std::string> suffix {".xml"};
+    std::vector<std::string> xml_path_vector = get_all_file_path_recursive(xml_dir, suffix);
+    UCDataset* ucd = new UCDataset(ucd_path);
+    int is_uc_count  = 0; 
+    int not_uc_count = 0;
+
+    std::cout << xml_path_vector.size() << std::endl;
+
+    DeteObj obj;
+    tqdm bar;
+    int N = xml_path_vector.size();
+    for(int i=0; i<xml_path_vector.size(); i++)
+    {
+        std::cout << xml_path_vector[i] << std::endl;
+
+        std::string file_name = get_file_name(xml_path_vector[i]);
+        std::vector<std::string> loc_str_list = pystring::split(file_name, "-+-");
+        std::string loc_str = loc_str_list[loc_str_list.size()-1];
+        std::string uc = loc_str_list[0];
+
+        if(is_uc(uc))
+        {
+            obj.load_from_name_str(loc_str);
+            loc_str = obj.get_name_str();
+            DeteRes dete_res;
+            dete_res.parse_xml_info(xml_path_vector[i]);
+            dete_res.offset(obj.x1, obj.y1);
+            dete_res.add_dete_obj(obj);
+            ucd->add_dete_res_info(uc, dete_res);
             is_uc_count += 1;
         }
         else
@@ -5306,7 +5373,7 @@ void UCDatasetUtil::save_to_yolo_train_data_with_assign_range(std::string ucd_pa
     auto it = std::find(tag_list.begin(), tag_list.end(), assign_tag);
     if(it == tag_list.end())
     {
-        std::cout << ERROR_COLOR << "assign tag not in tag_list : " << STOP_COLOR << assign_tag << std::endl;
+        std::cout << ERROR_COLOR << "assign tag not in tag_list : " << assign_tag << STOP_COLOR << std::endl;
         return;
     }
 
@@ -5319,7 +5386,7 @@ void UCDatasetUtil::save_to_yolo_train_data_with_assign_range(std::string ucd_pa
         std::string img_path = UCDatasetUtil::cache_img_dir + "/" + uc + ".jpg";
         if(is_read_file(img_path))
         {
-            ucd->save_assign_range_with_assign_uc(uc, img_path, train_image_dir, train_label_dir, assign_tag, tag_list, iou_th);
+            ucd->save_assign_range_with_assign_uc(uc, img_path, train_image_dir, train_label_dir, assign_tag, tag_list, iou_th, "txt");
         }
         bar.progress(i, N);
     }
@@ -5351,6 +5418,57 @@ void UCDatasetUtil::save_to_yolo_train_data_with_assign_range(std::string ucd_pa
     delete ucd;
     delete train_ucd;
     delete val_ucd;
+
+}
+
+void UCDatasetUtil::save_assign_range(std::string ucd_path, std::string save_dir, std::string assign_tag, float iou_th, std::string mode)
+{
+        // 
+    UCDataset *ucd = new UCDataset(ucd_path);
+    ucd->parse_ucd(true);
+
+    create_folder(save_dir);
+    UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, ucd->uc_list);
+
+    std::vector<std::string> tag_list;
+    std::set<std::string> tag_set = ucd->get_tags();
+    tag_list.assign(tag_set.begin(), tag_set.end());
+
+    // 寻找是否有指定标签
+    auto it = std::find(tag_list.begin(), tag_list.end(), assign_tag);
+    if(it == tag_list.end())
+    {
+        std::cout << ERROR_COLOR << "assign tag not in tag_list : "  << assign_tag << STOP_COLOR << std::endl;
+        return;
+    }
+
+    // train_data
+    tqdm bar;
+    int N = ucd->uc_list.size();
+    for(int i=0; i<ucd->uc_list.size(); i++)
+    {
+        std::string uc = ucd->uc_list[i];
+        std::string img_path = UCDatasetUtil::cache_img_dir + "/" + uc + ".jpg";
+        if(is_read_file(img_path))
+        {
+            ucd->save_assign_range_with_assign_uc(uc, img_path, save_dir, save_dir, assign_tag, tag_list, iou_th, mode);
+        }
+        bar.progress(i, N);
+    }
+    bar.finish();
+
+    // // 打印信息 
+    // std::cout << HIGHTLIGHT_COLOR << "tag list : ";
+    // for(int i=0; i<tag_list.size(); i++)
+    // {
+    //     if(tag_list[i] != assign_tag)
+    //     {
+    //         std::cout << tag_list[i] << ",";
+    //     }
+    // }
+    // std::cout << STOP_COLOR << std::endl;
+
+    delete ucd;
 
 }
 

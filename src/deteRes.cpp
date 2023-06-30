@@ -910,8 +910,6 @@ void DeteRes::draw_dete_res(std::string save_path, std::map<std::string, Color> 
 void DeteRes::save_to_assign_range(std::string tag, std::string save_img_dir, std::string save_label_dir, std::map<std::string, int>tag_map, float iou_1_th, std::string mode)
 {
 
-    // FIXME: 执行后改了数据，这个要处理一下
-
     DeteRes * range_dete_res = new DeteRes();
     DeteRes * filter_dete_res = new DeteRes();
 
@@ -948,7 +946,10 @@ void DeteRes::save_to_assign_range(std::string tag, std::string save_img_dir, st
                 each_dete_res->add_dete_obj(obj);
             }
         }
-                
+        
+        // 这边会导致原始文件修改，如何才能不修改原始文件呢，需要增加一个 deep_copy 的功能
+        // FIXME: 执行后改了数据，这个要处理一下
+        
         DeteRes::filter_by_tags({tag});
         DeteRes::parse_img_info(DeteRes::img_path);
         DeteRes::crop_dete_obj(save_img_dir, false);
@@ -963,7 +964,7 @@ void DeteRes::save_to_assign_range(std::string tag, std::string save_img_dir, st
         }
         else if(mode == "xml")
         {
-            std::string save_txt_path   = save_label_dir + '/' + save_name + "-+-" + range_dete_res->alarms[i].get_name_str() + ".txt";
+            std::string save_txt_path   = save_label_dir + '/' + save_name + "-+-" + range_dete_res->alarms[i].get_name_str() + ".xml";
             each_dete_res->width        = range_dete_res->alarms[i].x2 - range_dete_res->alarms[i].x1;
             each_dete_res->height       = range_dete_res->alarms[i].y2 - range_dete_res->alarms[i].y1;
             each_dete_res->depth        = 3;
@@ -986,5 +987,12 @@ void DeteRes::save_to_assign_range(std::string tag, std::string save_img_dir, st
 
 }
 
+void DeteRes::offset(int x, int y)
+{
+    for(int i=0; i<DeteRes::alarms.size(); i++)
+    {
+        DeteRes::alarms[i].do_offset(x, y);
+    }
+}
 
 }

@@ -181,7 +181,7 @@ using namespace std;
 
 // TODO: 共用同一批 config 文件
 
-// TODO: 增加一批可以直接调用的 运行文件，这样可以作为额外的服务进行部署
+// TODO: 增加一批可以直接调用的 运行文件，这样可以作为额外的服务进行部署, 可以改为通用的 docker 环境，只需要配置 模型和配置文件即可
 
 // TODO: saki 的小说里面的每一个人物的赏析
 
@@ -191,15 +191,12 @@ using namespace std;
 
 // TODO: relate_anlysis 关联性分析，出现 a 标签的同时出现 b 标签的概率
 
-// TODO: 包含关系分析，a 在 b 中的概率 和 a 不在 b 中的概率 
-
 // TODO: 完善 load 和 upload , 指定需要上传的文件夹
 
-// TODO: 按照某一个目标的范围进行裁切，可以保存为 img,xml,txt 等格式，这样的话就不用切小图进行训练了（至少小图不用入库了）
+// TODO: to_yolo_train_data 打印用于训练的各个元素的个数 
 
-// TODO: to_yolo_train_data 同时保留裁剪后的 json 
+// TODO: from_assign_crop, to_assign_crop 两个都支持 txt, xml 两种格式的处理，默认处理 txt 格式， 可以选处理 xml 格式
 
-// TODO: 一键更新，不用改配置文件了，
 
 
 void handle_post(const httplib::Request& req, httplib::Response& res) 
@@ -229,7 +226,7 @@ int main(int argc_old, char ** argv_old)
     std::string host        = "192.168.3.111";
     int port                = 11101;
     std::string config_path = "";
-    std::string history_path;
+    std::string history_path= "";
     
     // sql info 
     int sql_port = 3306;
@@ -247,7 +244,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.7.8";
+    std::string app_version = "v4.8.1";
 
     // uci_info
     int volume_size         = 20;
@@ -704,6 +701,9 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "upload")
     {
+
+        // 指定需要上传的文件夹的级别，这样是不是只能上传一个层次的文件夹
+
         std::string ucd_path, assign_ucd_name;
         if(argc == 3)
         {
@@ -755,6 +755,20 @@ int main(int argc_old, char ** argv_old)
         else
         {
             ucd_param_opt->print_command_info("info");
+            return -1;
+        }
+    }
+    else if(command_1 == "from_assign_crop_xml")
+    {
+        if(argc == 4)
+        {
+            std::string xml_dir = argv[2];
+            std::string ucd_path = argv[3];
+            ucd_util->get_ucd_from_crop_xml(xml_dir, ucd_path);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
             return -1;
         }
     }
@@ -1445,43 +1459,6 @@ int main(int argc_old, char ** argv_old)
             return -1;
         }
     }
-    else if(command_1 == "to_crop")
-    {
-        // 低缓存模式
-        bool no_cache = false;
-        if(long_args.count("no_cache") > 0)
-        {
-            std::string no_cache_str = long_args["no_cache"];
-            if(no_cache_str == "1" || no_cache_str == "True" || no_cache_str == "true")
-            {
-                no_cache = true;
-            }
-        }
-
-        bool is_split = true;
-        if(short_args.count("s") != 0)
-        {
-            is_split = false;
-        }
-
-        bool split_by_conf = false;
-        if(short_args.count("c") > 0)
-        {
-            split_by_conf = true;
-        }
-
-        if (argc == 4)
-        {
-            std::string ucd_path = argv[2];
-            std::string save_dir = argv[3];
-            ucd_util->cut_small_img(ucd_path, save_dir, is_split, no_cache, split_by_conf);
-        }
-        else
-        {
-            ucd_param_opt->print_command_info(command_1);
-            return -1;
-        }
-    }
     else if(command_1 == "crop_to_xml")
     {
         if (argc== 4)
@@ -1829,6 +1806,83 @@ int main(int argc_old, char ** argv_old)
             ucd->parse_ucd();
             ucd_util->load_img(save_dir, ucd->uc_list);
             delete ucd;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "to_crop")
+    {
+        // 低缓存模式
+        bool no_cache = false;
+        if(long_args.count("no_cache") > 0)
+        {
+            std::string no_cache_str = long_args["no_cache"];
+            if(no_cache_str == "1" || no_cache_str == "True" || no_cache_str == "true")
+            {
+                no_cache = true;
+            }
+        }
+
+        bool is_split = true;
+        if(short_args.count("s") != 0)
+        {
+            is_split = false;
+        }
+
+        bool split_by_conf = false;
+        if(short_args.count("c") > 0)
+        {
+            split_by_conf = true;
+        }
+
+        if (argc == 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_dir = argv[3];
+            ucd_util->cut_small_img(ucd_path, save_dir, is_split, no_cache, split_by_conf);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+            return -1;
+        }
+    }
+    else if(command_1 == "to_assign_crop_xml")
+    {
+        float iou_th = 0.85;
+        if(long_args.count("iou_th") > 0)
+        {
+            iou_th = std::stof(long_args["iou_th"]);
+        }
+
+        if(argc == 5)
+        {
+            std::string ucd_path    = argv[2];
+            std::string save_dir    = argv[3];
+            std::string assign_tag  = argv[4];
+            ucd_util->save_assign_range(ucd_path, save_dir, assign_tag, iou_th, "xml");
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "to_assign_crop_txt")
+    {
+        float iou_th = 0.85;
+        if(long_args.count("iou_th") > 0)
+        {
+            iou_th = std::stof(long_args["iou_th"]);
+        }
+
+        if(argc == 5)
+        {
+            std::string ucd_path    = argv[2];
+            std::string save_dir    = argv[3];
+            std::string assign_tag  = argv[4];
+            ucd_util->save_assign_range(ucd_path, save_dir, assign_tag, iou_th, "txt");
         }
         else
         {
@@ -2836,6 +2890,7 @@ int main(int argc_old, char ** argv_old)
                 if(res != nullptr)
                 {
                     json data = json::parse(res->body);
+                    
                     // customer
                     for(int i=0; i<data["ucd_version_info"].size(); i++)
                     {
@@ -2863,15 +2918,9 @@ int main(int argc_old, char ** argv_old)
             
             // 下载数据
             ucd_util->load_ucd_app(version, app_dir);
-
             std::cout << "--------------------------------------" << std::endl;
             std::cout << "load ucd_" + version + " success" << std::endl;
             std::cout << "--------------------------------------" << std::endl;
-            std::cout << "change ucd version by :" << std::endl;
-
-            std::cout << HIGHTLIGHT_COLOR << "  sudo chmod 777 /home/ldq/Apps_jokker -R" << STOP_COLOR << std::endl;
-            std::cout << HIGHTLIGHT_COLOR << "  vim ~/.bash_aliases" << STOP_COLOR << std::endl;
-            std::cout << HIGHTLIGHT_COLOR << "  source ~/.bash_aliases" << STOP_COLOR << std::endl;
             std::cout << "" << std::endl;
         }
         else
@@ -3103,7 +3152,6 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "update_tags")
     {
-        // old_tag:new_tag
         if(argc > 4)
         {
             std::string ucd_path = argv[2];
@@ -3128,6 +3176,7 @@ int main(int argc_old, char ** argv_old)
             ucd->parse_ucd(true);
             ucd->update_tags(tag_map);
             ucd->save_to_ucd(save_path);
+            delete ucd;
         }
         else
         {
