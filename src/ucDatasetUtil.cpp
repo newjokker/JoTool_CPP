@@ -1288,6 +1288,28 @@ void UCDataset::crop_dete_res_with_assign_uc(std::string uc, std::string img_pat
     delete dete_res;
 }
 
+void UCDataset::save_assign_range_with_assign_uc(std::string uc, std::string img_path, std::string save_img_dir, std::string save_label_dir, std::string assign_tag, std::vector<std::string> tag_list, float iou_th)
+{
+    jotools::DeteRes* dete_res = new DeteRes();
+    UCDataset::get_dete_res_with_assign_uc(dete_res, uc);
+
+    std::map<std::string, int>tag_map; 
+    int index = 0;
+    for(int i=0; i<tag_list.size(); i++)
+    {
+        if(tag_list[i] != assign_tag)
+        {
+            tag_map[tag_list[i]] = index;
+            index += 1;
+        }
+    }
+
+    dete_res->img_path = img_path;
+    dete_res->save_to_assign_range(assign_tag, save_img_dir, save_label_dir, tag_map, 0.85);
+    delete dete_res;    
+    return ;
+}
+
 void UCDataset::get_sub_ucd(int sub_count, bool is_random, std::string save_path)
 {
     if(sub_count > UCDataset::uc_list.size())
@@ -2982,11 +3004,21 @@ void UCDatasetUtil::load_ucd(std::string ucd_name, std::string save_path)
 void UCDatasetUtil::load_ucd_app(std::string version, std::string save_dir)
 {
     // 必须指定版本，
-    std::string save_ucd_path   = save_dir + "/" + "ucd_" + version;
+    std::string save_ucd_path   = save_dir + "/" + "ucd";
+    
+    if(is_read_file(save_ucd_path))
+    {
+        remove(save_ucd_path.c_str());
+    }
+
     UCDatasetUtil::load_file("/ucd_app/" + version, save_ucd_path);
 
-    // std::string save_so_path    = save_dir + "/" + "so_dir"+ "/" + "libsaturntools_" + version + ".so";
-    // UCDatasetUtil::load_file("/ucd_app/so_" + version, save_so_path);
+    int result = chmod(save_ucd_path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
+    
+    if (result != 0) 
+    {
+        std::cout << "不能修改权限" << std::endl;
+    } 
 
     if((! is_file(save_ucd_path)))
     {
@@ -3901,6 +3933,7 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
     delete ucd;
 }
 
+
 void UCDatasetUtil::parse_labelme_json(std::string img_dir, std::string save_dir, std::string ucd_path)
 {
     if(! is_dir(img_dir))
@@ -4071,6 +4104,7 @@ void UCDatasetUtil::parse_yolo_train_data(std::string img_dir, std::string save_
         throw "img_dir not exists";
     }
 
+    create_folder(save_dir);
     if(! is_dir(save_dir))
     {
         std::cout << ERROR_COLOR << "save_dir not exists : " << save_dir << STOP_COLOR << std::endl;
@@ -4940,67 +4974,67 @@ void UCDatasetUtil::get_ucd_version_info(std::string app_dir, std::string app_ve
     std::cout << "-----------------------------------" << std::endl;
     std::cout << "            " << app_version << std::endl;
     std::cout << "-----------------------------------" << std::endl;
-    if(! is_read_dir(app_dir))
-    {
-        std::cout << "app dir is not readable : " << app_dir << std::endl;
-        return;
-    }
+    // if(! is_read_dir(app_dir))
+    // {
+    //     std::cout << "app dir is not readable : " << app_dir << std::endl;
+    //     return;
+    // }
 
-    std::vector<std::string> app_path_list = get_all_file_path(app_dir);
-    std::vector<int> app_version_list;
-    std::map< int, std::string > app_version_map;
+    // std::vector<std::string> app_path_list = get_all_file_path(app_dir);
+    // std::vector<int> app_version_list;
+    // std::map< int, std::string > app_version_map;
 
-    for(int i=0; i<app_path_list.size(); i++)
-    {
-        std::string app_name = get_file_name_suffix(app_path_list[i]);
-        if(! pystring::startswith(app_name, "ucd_v"))
-        {
-            continue;
-        }
+    // for(int i=0; i<app_path_list.size(); i++)
+    // {
+    //     std::string app_name = get_file_name_suffix(app_path_list[i]);
+    //     if(! pystring::startswith(app_name, "ucd_v"))
+    //     {
+    //         continue;
+    //     }
 
-        // get verrsion int
-        int version_int = 0;
-        std::string app_version_str = app_name.substr(5);
-        std::vector<std::string> app_name_list = pystring::split(app_version_str, ".");
-        if(app_name_list.size() != 3)
-        {
-            continue;
-        }
-        else
-        {
-            int version_1 =  std::stoi(app_name_list[0]) * 1000000;
-            int version_2 =  std::stoi(app_name_list[1]) * 1000;
-            int version_3 =  std::stoi(app_name_list[2]);
-            version_int = version_1 + version_2 + version_3;
+    //     // get verrsion int
+    //     int version_int = 0;
+    //     std::string app_version_str = app_name.substr(5);
+    //     std::vector<std::string> app_name_list = pystring::split(app_version_str, ".");
+    //     if(app_name_list.size() != 3)
+    //     {
+    //         continue;
+    //     }
+    //     else
+    //     {
+    //         int version_1 =  std::stoi(app_name_list[0]) * 1000000;
+    //         int version_2 =  std::stoi(app_name_list[1]) * 1000;
+    //         int version_3 =  std::stoi(app_name_list[2]);
+    //         version_int = version_1 + version_2 + version_3;
 
-            if(pystring::endswith(app_name, app_version))
-            {
-                app_version_map[version_int] = "* local  : " + app_path_list[i];
-            }
-            else
-            {
-                app_version_map[version_int] = "  local  : " + app_path_list[i];
-            }
-            app_version_list.push_back(version_int);
-        }
-    }
+    //         if(pystring::endswith(app_name, app_version))
+    //         {
+    //             app_version_map[version_int] = "* local  : " + app_path_list[i];
+    //         }
+    //         else
+    //         {
+    //             app_version_map[version_int] = "  local  : " + app_path_list[i];
+    //         }
+    //         app_version_list.push_back(version_int);
+    //     }
+    // }
 
-    // sort by version
-    std::sort(app_version_list.begin(), app_version_list.end());
+    // // sort by version
+    // std::sort(app_version_list.begin(), app_version_list.end());
 
-    // print version info
-    for(int i=0; i<app_version_list.size(); i++)
-    {
-        if(app_version_map[app_version_list[i]][0] == '*')
-        {
-            std::cout << HIGHTLIGHT_COLOR << app_version_map[app_version_list[i]] << STOP_COLOR << std::endl;
-        }
-        else
-        {
-            std::cout << app_version_map[app_version_list[i]] << std::endl;
-        }
-    }
-    std::cout << "-----------------------------------" << std::endl;
+    // // print version info
+    // for(int i=0; i<app_version_list.size(); i++)
+    // {
+    //     if(app_version_map[app_version_list[i]][0] == '*')
+    //     {
+    //         std::cout << HIGHTLIGHT_COLOR << app_version_map[app_version_list[i]] << STOP_COLOR << std::endl;
+    //     }
+    //     else
+    //     {
+    //         std::cout << app_version_map[app_version_list[i]] << std::endl;
+    //     }
+    // }
+    // std::cout << "-----------------------------------" << std::endl;
 
 
     // -------------
@@ -5206,6 +5240,111 @@ void UCDatasetUtil::save_to_yolo_train_data(std::string ucd_path, std::string sa
     for(int i=0; i<tag_list.size(); i++)
     {
         std::cout << tag_list[i] << ",";
+    }
+    std::cout << STOP_COLOR << std::endl;
+
+    delete ucd;
+    delete train_ucd;
+    delete val_ucd;
+
+}
+
+void UCDatasetUtil::save_to_yolo_train_data_with_assign_range(std::string ucd_path, std::string save_dir, std::string tag_str, std::string assign_tag, float ratio, float iou_th)
+{
+    // 
+    UCDataset *ucd = new UCDataset(ucd_path);
+    ucd->parse_ucd(true);
+
+    // 分为两个 train.json val.json
+    // TODO 如果两个文件存在的话就直接用那两个文件
+
+    std::string ucd_path_train  = save_dir + "/" + "train.json";
+    std::string ucd_path_val    = save_dir + "/" + "val.json";
+
+    if(is_read_file(ucd_path_train) && is_read_file(ucd_path_val))
+    {
+        std::cout << HIGHTLIGHT_COLOR << "* train.josn val.json exists, use exists json" << STOP_COLOR << std::endl;
+    }
+    else
+    {
+        ucd->split(ucd_path_train, ucd_path_val, ratio);
+    }
+
+    // 创建新的文件夹
+    std::string train_label_dir = save_dir + "/" + "train" + "/" + "labels";
+    std::string train_image_dir = save_dir + "/" + "train" + "/" + "images";
+    std::string val_label_dir = save_dir + "/" + "val" + "/" + "labels";
+    std::string val_image_dir = save_dir + "/" + "val" + "/" + "images";
+    create_folder(save_dir + "/" + "train");
+    create_folder(train_image_dir);
+    create_folder(train_label_dir);
+    create_folder(save_dir + "/" + "val");
+    create_folder(val_label_dir);
+    create_folder(val_image_dir);
+
+    // 下载图片文件
+    UCDataset *train_ucd = new UCDataset(ucd_path_train);
+    train_ucd->parse_ucd();
+    UCDataset *val_ucd = new UCDataset(ucd_path_val);
+    val_ucd->parse_ucd();
+    UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, train_ucd->uc_list);
+    UCDatasetUtil::load_img(UCDatasetUtil::cache_img_dir, val_ucd->uc_list);
+
+    // 保存 txt 文件
+    std::vector<std::string> tag_list;
+    if(tag_str != "")
+    {
+        tag_list = pystring::split(tag_str, ",");
+    }
+    else
+    {
+        std::set<std::string> tag_set = ucd->get_tags();
+        tag_list.assign(tag_set.begin(), tag_set.end());
+    }
+
+    // 寻找是否有指定标签
+    auto it = std::find(tag_list.begin(), tag_list.end(), assign_tag);
+    if(it == tag_list.end())
+    {
+        std::cout << ERROR_COLOR << "assign tag not in tag_list : " << STOP_COLOR << assign_tag << std::endl;
+        return;
+    }
+
+    // train_data
+    tqdm bar;
+    int N = train_ucd->uc_list.size() + val_ucd->uc_list.size();
+    for(int i=0; i<train_ucd->uc_list.size(); i++)
+    {
+        std::string uc = ucd->uc_list[i];
+        std::string img_path = UCDatasetUtil::cache_img_dir + "/" + uc + ".jpg";
+        if(is_read_file(img_path))
+        {
+            ucd->save_assign_range_with_assign_uc(uc, img_path, train_image_dir, train_label_dir, assign_tag, tag_list, iou_th);
+        }
+        bar.progress(i, N);
+    }
+
+    // val_data
+    for(int i=0; i<val_ucd->uc_list.size(); i++)
+    {
+        std::string uc = ucd->uc_list[i];
+        std::string img_path = UCDatasetUtil::cache_img_dir + "/" + uc + ".jpg";
+        if(is_read_file(img_path))
+        {
+            ucd->save_assign_range_with_assign_uc(uc, img_path, val_image_dir, val_label_dir, assign_tag, tag_list, iou_th);
+        }
+        bar.progress(i + train_ucd->uc_list.size(), N);
+    }
+    bar.finish();
+
+    // 打印信息 
+    std::cout << HIGHTLIGHT_COLOR << "tag list : ";
+    for(int i=0; i<tag_list.size(); i++)
+    {
+        if(tag_list[i] != assign_tag)
+        {
+            std::cout << tag_list[i] << ",";
+        }
     }
     std::cout << STOP_COLOR << std::endl;
 

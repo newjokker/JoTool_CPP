@@ -522,6 +522,64 @@ void DeteRes::save_to_xml(std::string save_path)
     delete doc;
 }
 
+void DeteRes::save_to_yolo_txt(std::string txt_path, std::map<std::string, int>tag_map)
+{
+
+    std::vector< std::vector<std::string> > txt_info;
+    float dh = 1.0 / DeteRes::height;
+    float dw = 1.0 / DeteRes::width;
+
+
+    for(int i=0; i<DeteRes::alarms.size(); i++)
+    {
+        DeteObj obj = DeteRes::alarms[i];
+        float x1 = obj.x1;
+        float y1 = obj.y1;
+        float x2 = obj.x2;
+        float y2 = obj.y2;
+        std::string tag = obj.tag;
+
+        float x = ((x1 + x2) / 2.0) * dw;
+        float y = ((y1 + y2) / 2.0) * dh;
+        float w = (x2 - x1) * dw;
+        float h = (y2 - y1) * dh;
+
+        std::vector<std::string> each_txt_info;
+        if((x <= 1) && (y <= 1) && (w <= 1) && (h <= 1))
+        {
+            int label_index = tag_map[tag];
+            each_txt_info.push_back(std::to_string(label_index));   
+            each_txt_info.push_back(std::to_string(x));   
+            each_txt_info.push_back(std::to_string(y));   
+            each_txt_info.push_back(std::to_string(w));   
+            each_txt_info.push_back(std::to_string(h));
+            txt_info.push_back(each_txt_info);
+        }
+        else
+        {
+            std::cout << "x, y, w, h, not in range [0, 1]" << std::endl;
+            continue;
+        }
+    }
+
+    // save to txt
+    std::ofstream ofs;
+    ofs.open(txt_path);
+    if (!ofs.is_open()) 
+    {
+        std::cout << "Failed to open file : " << txt_path << std::endl;
+    } 
+    else 
+    {
+        for(int i=0; i<txt_info.size(); i++)
+        {
+            ofs << txt_info[i][0] << " " << txt_info[i][1] << " " << txt_info[i][2] << " " << txt_info[i][3] << " " << txt_info[i][4] << "\n";
+        }
+        ofs.close();
+    }
+
+}
+
 std::map<std::string, int> DeteRes::count_tags()
 {
     std::map <std::string, int> count_res;
@@ -696,6 +754,43 @@ float iou_between_obj(DeteObj a, DeteObj b, bool ignore_tag=false)
     }
 }
 
+float iou_1_between_obj(DeteObj a, DeteObj b, bool ignore_tag=false)
+{
+    // a,b 的重合面积占 b 面积的比例
+    if((ignore_tag == false) && (a.tag != b.tag))
+    {
+        return false;
+    }
+
+    int x1 = a.x1;
+    int y1 = a.y1;
+    int h1 = a.y2 - a.y1;
+    int w1 = a.x2 - a.x1;
+    int x2 = b.x1;
+    int y2 = b.y1;
+    int h2 = b.y2 - b.y1;
+    int w2 = b.x2 - b.x1;
+
+    int endx = std::max(x1 + w1, x2 + w2);
+    int startx = std::min(x1, x2);
+    int width = w1 + w2 - (endx - startx);
+    int endy = std::max(y1 + h1, y2 + h2);
+    int starty = std::min(y1, y2);
+    int height = h1 + h2 - (endy - starty);
+    if (width > 0 && height > 0) 
+    {
+        int area = width * height;
+        int area1 = w1 * h1;
+        int area2 = w2 * h2;
+        float ratio = (float)area / area2;
+        return ratio;
+    } 
+    else 
+    {
+        return 0.0;
+    }
+}
+
 void DeteRes::do_nms(float threshold, bool ignore_tag)
 {
     // 从大到小排列，结果不进行反转
@@ -811,5 +906,85 @@ void DeteRes::draw_dete_res(std::string save_path, std::map<std::string, Color> 
 
     cv::imwrite(save_path, img);
 }
+
+void DeteRes::save_to_assign_range(std::string tag, std::string save_img_dir, std::string save_label_dir, std::map<std::string, int>tag_map, float iou_1_th, std::string mode)
+{
+
+    // FIXME: 执行后改了数据，这个要处理一下
+
+    DeteRes * range_dete_res = new DeteRes();
+    DeteRes * filter_dete_res = new DeteRes();
+
+    // 
+    for(int i=0; i<DeteRes::alarms.size(); i++)
+    {
+        DeteObj obj = DeteRes::alarms[i];
+        if(obj.tag == tag)
+        {
+            range_dete_res->add_dete_obj(obj);
+        }        
+        else
+        {
+            filter_dete_res->add_dete_obj(obj);
+        }
+    }
+
+    // 
+    std::string save_name = get_file_name(DeteRes::img_path);
+    for(int i=0; i < range_dete_res->alarms.size(); i++)
+    {
+        DeteRes * each_dete_res = new DeteRes();
+        for(int j=0; j < filter_dete_res->size(); j++)
+        {
+            float iou_1 = iou_1_between_obj(range_dete_res->alarms[i] , filter_dete_res->alarms[j], true);
+            if(iou_1 > iou_1_th)
+            {
+                DeteObj obj;
+                obj.x1 = MAX(filter_dete_res->alarms[j].x1 - range_dete_res->alarms[i].x1, 0);
+                obj.y1 = MAX(filter_dete_res->alarms[j].y1 - range_dete_res->alarms[i].y1, 0);
+                obj.x2 = filter_dete_res->alarms[j].x2 - range_dete_res->alarms[i].x1;
+                obj.y2 = filter_dete_res->alarms[j].y2 - range_dete_res->alarms[i].y1;
+                obj.tag = filter_dete_res->alarms[j].tag;
+                each_dete_res->add_dete_obj(obj);
+            }
+        }
+                
+        DeteRes::filter_by_tags({tag});
+        DeteRes::parse_img_info(DeteRes::img_path);
+        DeteRes::crop_dete_obj(save_img_dir, false);
+
+        // 保存为 txt 数据
+        if(mode == "txt")
+        {
+            std::string save_txt_path   = save_label_dir + '/' + save_name + "-+-" + range_dete_res->alarms[i].get_name_str() + ".txt";
+            each_dete_res->width        = range_dete_res->alarms[i].x2 - range_dete_res->alarms[i].x1;
+            each_dete_res->height       = range_dete_res->alarms[i].y2 - range_dete_res->alarms[i].y1;
+            each_dete_res->save_to_yolo_txt(save_txt_path, tag_map);
+        }
+        else if(mode == "xml")
+        {
+            std::string save_txt_path   = save_label_dir + '/' + save_name + "-+-" + range_dete_res->alarms[i].get_name_str() + ".txt";
+            each_dete_res->width        = range_dete_res->alarms[i].x2 - range_dete_res->alarms[i].x1;
+            each_dete_res->height       = range_dete_res->alarms[i].y2 - range_dete_res->alarms[i].y1;
+            each_dete_res->depth        = 3;
+            each_dete_res->img_path     = DeteRes::img_path;
+            each_dete_res->file_name    = DeteRes::file_name;
+            each_dete_res->save_to_xml(save_txt_path);
+        }
+        else
+        {
+            std::cout << ERROR_COLOR << "not support mode : " << mode << STOP_COLOR << std::endl;\
+            throw "error mode";
+        }
+
+        delete each_dete_res;
+    }
+
+    delete range_dete_res;
+    delete filter_dete_res;
+    return;
+
+}
+
 
 }

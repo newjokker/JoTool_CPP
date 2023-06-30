@@ -69,6 +69,7 @@ class DeteRes
         // func
         void parse_json(std::string json_path);
         void save_to_xml(std::string xml_path);
+        void save_to_yolo_txt(std::string txt_path, std::map<std::string, int>tag_map);
         void save_to_json(std::string json_path);
         void crop_dete_obj(std::string save_dir, bool split_by_tag=true, std::string save_name="");
         cv::Mat get_sub_img_by_dete_obj(DeteObj assign_dete_obj, bool RGB=true);
@@ -76,7 +77,8 @@ class DeteRes
         void add_dete_obj(DeteObj dete_obj);
         void add_dete_obj(int x1, int y1, int x2, int y2, float conf, std::string tag);
         void draw_dete_res(std::string save_path, std::map<std::string, Color> color_dirt);
-        
+        void save_to_assign_range(std::string tag, std::string save_img_dir, std::string save_label_dir, std::map<std::string, int>tag_map, float iou_1=0.85, std::string mode="txt");
+
         // 根据置信度对 dete_obj 进行排序
         void sort_by_conf(bool reverse=false);
         

@@ -162,6 +162,9 @@ class UCDataset
         // crop_dete_res
         void crop_dete_res_with_assign_uc(std::string uc, std::string img_path, std::string save_dir, bool is_split=true);
 
+        // 保存指定范围，和指定范围内的目标
+        void save_assign_range_with_assign_uc(std::string uc, std::string img_path, std::string save_img_dir, std::string save_label_dir, std::string assign_tag, std::vector<std::string> tag_list, float iou_th=0.5);
+
         // 获得子序列
         void get_sub_ucd(int sub_count, bool is_random, std::string save_path);
 
@@ -410,6 +413,9 @@ class UCDatasetUtil
 
         // 保存为 yolo 默认的训练格式
         void save_to_yolo_train_data(std::string ucd_path, std::string save_dir, std::string tag_str, float ratio=0.8);
+
+        // 保存为 yolo 默认的训练格式 指定截取的范围
+        void save_to_yolo_train_data_with_assign_range(std::string ucd_path, std::string save_dir, std::string tag_str, std::string assign_tag, float ratio=0.8, float iou_th=0.85);
 
     private:
         

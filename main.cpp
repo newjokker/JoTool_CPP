@@ -193,7 +193,13 @@ using namespace std;
 
 // TODO: 包含关系分析，a 在 b 中的概率 和 a 不在 b 中的概率 
 
-// TODO: 完善 load 和 upload 
+// TODO: 完善 load 和 upload , 指定需要上传的文件夹
+
+// TODO: 按照某一个目标的范围进行裁切，可以保存为 img,xml,txt 等格式，这样的话就不用切小图进行训练了（至少小图不用入库了）
+
+// TODO: to_yolo_train_data 同时保留裁剪后的 json 
+
+// TODO: 一键更新，不用改配置文件了，
 
 
 void handle_post(const httplib::Request& req, httplib::Response& res) 
@@ -241,7 +247,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.7.3";
+    std::string app_version = "v4.7.8";
 
     // uci_info
     int volume_size         = 20;
@@ -274,6 +280,7 @@ int main(int argc_old, char ** argv_old)
         xini_file_t xini_file(config_path);
         host        = (const std::string &)xini_file["server"]["host"];
         port        = (const int &)xini_file["server"]["port"];
+        app_dir     = (const std::string &)xini_file["server"]["app_dir"];
         sql_host    = (const std::string &)xini_file["sql"]["host"];
         sql_port    = (const int &)xini_file["sql"]["port"];
         sql_user    = (const std::string &)xini_file["sql"]["user"];
@@ -296,6 +303,7 @@ int main(int argc_old, char ** argv_old)
         xini_file_t xini_write(config_path);
         xini_write["server"]["host"]    = host;
         xini_write["server"]["port"]    = port;
+        xini_write["server"]["app_dir"] = app_dir;
         xini_write["sql"]["host"]       = sql_host;
         xini_write["sql"]["port"]       = sql_port;
         xini_write["sql"]["user"]       = sql_user;
@@ -706,11 +714,7 @@ int main(int argc_old, char ** argv_old)
         {
             ucd_path = argv[2];
             assign_ucd_name = argv[3];
-
-            if(! pystring::endswith(assign_ucd_name, ".json"))
-            {
-                assign_ucd_name += ".json";
-            }
+            assign_ucd_name = pystring::strip(assign_ucd_name, ".json");
             ucd_util->upload_ucd(ucd_path, assign_ucd_name);
         }
         else
@@ -1101,6 +1105,7 @@ int main(int argc_old, char ** argv_old)
             std::cout << "[server]" << std::endl;
             std::cout << "host          : " << host << std::endl;
             std::cout << "port          : " << port << std::endl;
+            std::cout << "app_dir       : " << app_dir << std::endl;
             std::cout << "config_path   : " << config_path << std::endl;
             std::cout << "history_path  : " << history_path << std::endl;
             std::cout << "[sql]" << std::endl;
@@ -1152,6 +1157,11 @@ int main(int argc_old, char ** argv_old)
             {
                 std::string host_new = argv[3];
                 xini_write["server"]["host"] = host_new;
+            }
+            else if(option == "app_dir")
+            {
+                std::string app_dir_new = argv[3];
+                xini_write["server"]["app_dir"] = app_dir_new;      
             }
             else if(option == "port")
             {
@@ -1846,6 +1856,18 @@ int main(int argc_old, char ** argv_old)
             ratio = std::stof(long_args["ratio"]);
         }
 
+        float iou_th = 0.85;
+        if(long_args.count("iou_th") != 0)
+        {
+            iou_th = std::stof(long_args["iou_th"]);
+        }
+ 
+        std::string assign_tag = "";
+        if(long_args.count("assign_tag") != 0)
+        {
+            assign_tag = long_args["assign_tag"];
+        }
+ 
         std::string tag_str = "";
         if(long_args.count("tags") != 0)
         {
@@ -1858,9 +1880,17 @@ int main(int argc_old, char ** argv_old)
             std::string save_dir = argv[3];
             if(ucd_util->is_ucd_path(ucd_path))
             {
+                create_folder(save_dir);
                 if(is_write_dir(save_dir))
                 {
-                    ucd_util->save_to_yolo_train_data(ucd_path, save_dir, tag_str, ratio);
+                    if(assign_tag == "")
+                    {
+                        ucd_util->save_to_yolo_train_data(ucd_path, save_dir, tag_str, ratio);
+                    }
+                    else
+                    {
+                        ucd_util->save_to_yolo_train_data_with_assign_range(ucd_path, save_dir, tag_str, assign_tag, ratio, iou_th);
+                    }
                 }
                 else
                 {

@@ -713,11 +713,14 @@ void UcdParamOpt::load_param_info()
     param_to_yolo_train_data->group = "convert";
     param_to_yolo_train_data->args_info["--ratio"]  = "划分 train 和 val 的比例，default = 0.8";
     param_to_yolo_train_data->args_info["--tags"]   = "指定需要训练的标签";
+    param_to_yolo_train_data->args_info["--iou_th"] = "裁剪范围时，确定被裁剪的目标是否保留使用的阈值";
+    param_to_yolo_train_data->args_info["--assign_tag"] = "指定一个标签，作为裁剪范围";
     param_to_yolo_train_data->grammar = "ucd to_yolo_train_data save_dir";
     param_to_yolo_train_data->english_explain = "convert ucd to yolo train data";
     param_to_yolo_train_data->chinese_explain = "将 ucd 转为 yolo 训练的格式，train/images|labels, val/images|labels";
     param_to_yolo_train_data->demo.push_back("ucd to_yolo_train_data test.json train_dir --ratio 0.8                    (将 test.json 整理为 0.8 | 0.2 的 yolo 训练数据)");   
     param_to_yolo_train_data->demo.push_back("ucd to_yolo_train_data test.json train_dir --tags  tag1,tag2,tag3         (将 test.json 中的 tag1,tag2,tag3 三个标签整理为yolo 训练数据)");   
+    param_to_yolo_train_data->demo.push_back("ucd to_yolo_train_data test.json train_dir --iou_th 0.85 --assign_tag kg  (将 test.json 使用阈值为 0.85 裁剪出 kg 的范围，制作 yolo 训练数据)");   
     UcdParamOpt::add_param(param_to_yolo_train_data);
 
     // to_img
