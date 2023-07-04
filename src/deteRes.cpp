@@ -557,7 +557,7 @@ void DeteRes::save_to_yolo_txt(std::string txt_path, std::map<std::string, int>t
         }
         else
         {
-            std::cout << "x, y, w, h, not in range [0, 1]" << std::endl;
+            std::cout << "x, y, w, h, not in range [0, 1] : " << x << ", "<< y << ", " << w << ", " << h << std::endl;
             continue;
         }
     }
@@ -578,6 +578,18 @@ void DeteRes::save_to_yolo_txt(std::string txt_path, std::map<std::string, int>t
         ofs.close();
     }
 
+}
+
+bool DeteRes::has_tag(std::string tag)
+{
+    for(int i=0; i<DeteRes::alarms.size(); i++)
+    {
+        if(DeteRes::alarms[i].tag == tag)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 std::map<std::string, int> DeteRes::count_tags()
@@ -940,8 +952,8 @@ void DeteRes::save_to_assign_range(std::string tag, std::string save_img_dir, st
                 DeteObj obj;
                 obj.x1 = MAX(filter_dete_res->alarms[j].x1 - range_dete_res->alarms[i].x1, 0);
                 obj.y1 = MAX(filter_dete_res->alarms[j].y1 - range_dete_res->alarms[i].y1, 0);
-                obj.x2 = filter_dete_res->alarms[j].x2 - range_dete_res->alarms[i].x1;
-                obj.y2 = filter_dete_res->alarms[j].y2 - range_dete_res->alarms[i].y1;
+                obj.x2 = MIN(filter_dete_res->alarms[j].x2 - range_dete_res->alarms[i].x1, range_dete_res->alarms[i].x2 - range_dete_res->alarms[i].x1);
+                obj.y2 = MIN(filter_dete_res->alarms[j].y2 - range_dete_res->alarms[i].y1, range_dete_res->alarms[i].y2 - range_dete_res->alarms[i].y1);
                 obj.tag = filter_dete_res->alarms[j].tag;
                 each_dete_res->add_dete_obj(obj);
             }

@@ -978,7 +978,7 @@ void UCDataset::save_to_yolo_train_txt_with_assign_uc(std::string save_path, std
                     }
                     else
                     {
-                        std::cout << "x, y, w, h, not in range [0, 1]" << std::endl;
+                        std::cout << "x, y, w, h, not in range [0, 1] : " << x << ", "<< y << ", " << w << ", " << h << std::endl;
                         continue;
                     }
                 }
@@ -1120,42 +1120,123 @@ void UCDataset::filter_by_nms(float nms_th, bool ignore_tag, bool clear_obj)
     UCDataset::object_info = ucd->object_info;
 }
 
-void UCDataset::filter_by_tags(std::set<std::string> tags, bool clear_obj)
+void UCDataset::filter_by_tags(std::set<std::string> tags, std::string mode, bool clear_obj)
 {
     auto iter = UCDataset::object_info.begin();
-    while(iter != UCDataset::object_info.end())
+    
+    // 存在任意一个标签 
+    if(mode == "or")
     {
-        std::vector<LabelmeObj*> objs;
-        for(int i=0; i<iter->second.size(); i++)
+        while(iter != UCDataset::object_info.end())
         {
-            LabelmeObj* obj = iter->second[i];
-            auto iter_tag = tags.begin();
-            bool be_choose = false; 
-            while(iter_tag != tags.end())
+            std::vector<LabelmeObj*> objs;
+            for(int i=0; i<iter->second.size(); i++)
             {
-                if(is_match_regex(obj->label, iter_tag->data()))
+                LabelmeObj* obj = iter->second[i];
+                auto iter_tag = tags.begin();
+                bool be_choose = false; 
+                while(iter_tag != tags.end())
+                {
+                    if(is_match_regex(obj->label, iter_tag->data()))
+                    {
+                        objs.push_back(obj);
+                        iter_tag++;
+                        be_choose = true;
+                        break;
+                    }
+                    iter_tag++;
+                }
+
+                // 当没有被选中的元素需要被删除时候，删除
+                if((clear_obj) && (be_choose == false))
+                {
+                    delete obj;
+                }
+
+            }
+            iter->second = objs;
+            if(objs.size() == 0)
+            {
+                UCDataset::size_info.erase(iter->first);
+            }
+            iter++;
+        }
+    }
+    // 存在所有的标签
+    else if(mode == "and")
+    {
+
+        // // 在 and 模式之下是不支持通配符匹配的
+        // auto iter_tag = tags.begin();
+        // while(iter_tag != tags.end())
+        // {
+        //     std::cout << pystring::find(iter_tag->data(), "*") << std::endl;
+        //     if(pystring::find(iter_tag->data(), "*") != -1)
+        //     {
+        //         std::cout << ERROR_COLOR << "* filter_by_tags 使用 and 模式时不能使用通配符 * " << STOP_COLOR << std::endl;
+        //         return;
+        //     }
+        //     iter_tag++;
+        // }
+
+        while(iter != UCDataset::object_info.end())
+        {
+            std::vector<LabelmeObj*> objs;
+            std::set<std::string> be_choose_tags;
+
+            for(int i=0; i<iter->second.size(); i++)
+            {
+                bool be_choose = false;
+                LabelmeObj* obj = iter->second[i];
+                if(be_choose_tags.count(iter->second[i]->label) > 0)
                 {
                     objs.push_back(obj);
-                    iter_tag++;
-                    be_choose = true;
                     continue;
                 }
-                iter_tag++;
+
+                auto iter_tag = tags.begin();
+                while(iter_tag != tags.end())
+                {
+                    if(is_match_regex(obj->label, iter_tag->data()))
+                    {
+                        be_choose = true;
+                        be_choose_tags.insert(obj->label);
+                        objs.push_back(obj);
+                        break;
+                    }
+                    iter_tag++;
+                }
+
+                if((! be_choose) && clear_obj)
+                {
+                    delete obj;
+                }
             }
 
-            // 当没有被选中的元素需要被删除时候，删除
-            if((clear_obj) && (be_choose == false))
+            if(be_choose_tags.size() == tags.size())
             {
-                delete obj;
+                iter->second = objs;
             }
-
+            else
+            {
+                if(clear_obj)
+                {
+                    for(int i2=0; i2<objs.size(); i2++)
+                    {
+                        delete objs[i2];
+                    }
+                }
+                std::vector<LabelmeObj*> empty_obj;
+                iter->second = empty_obj;
+            }
+        
+            if(iter->second.size() == 0)
+            {
+                UCDataset::size_info.erase(iter->first);
+            }
+            iter++;
         }
-        iter->second = objs;
-        if(objs.size() == 0)
-        {
-            UCDataset::size_info.erase(iter->first);
-        }
-        iter++;
+        UCDataset::drop_empty_uc();
     }
 }
 
@@ -1305,7 +1386,7 @@ void UCDataset::save_assign_range_with_assign_uc(std::string uc, std::string img
     }
 
     dete_res->img_path = img_path;
-    dete_res->save_to_assign_range(assign_tag, save_img_dir, save_label_dir, tag_map, 0.85, mode);
+    dete_res->save_to_assign_range(assign_tag, save_img_dir, save_label_dir, tag_map, iou_th, mode);
     delete dete_res;    
     return ;
 }
@@ -3207,15 +3288,11 @@ void UCDatasetUtil::get_ucd_from_crop_xml(std::string xml_dir, std::string ucd_p
     int is_uc_count  = 0; 
     int not_uc_count = 0;
 
-    std::cout << xml_path_vector.size() << std::endl;
-
     DeteObj obj;
     tqdm bar;
     int N = xml_path_vector.size();
     for(int i=0; i<xml_path_vector.size(); i++)
     {
-        std::cout << xml_path_vector[i] << std::endl;
-
         std::string file_name = get_file_name(xml_path_vector[i]);
         std::vector<std::string> loc_str_list = pystring::split(file_name, "-+-");
         std::string loc_str = loc_str_list[loc_str_list.size()-1];
@@ -5318,6 +5395,13 @@ void UCDatasetUtil::save_to_yolo_train_data(std::string ucd_path, std::string sa
 
 void UCDatasetUtil::save_to_yolo_train_data_with_assign_range(std::string ucd_path, std::string save_dir, std::string tag_str, std::string assign_tag, float ratio, float iou_th)
 {
+
+    if(assign_tag == "")
+    {
+        std::cout << ERROR_COLOR << "assign_tag is empty " << STOP_COLOR << std::endl;
+        return;
+    }
+
     // 
     UCDataset *ucd = new UCDataset(ucd_path);
     ucd->parse_ucd(true);

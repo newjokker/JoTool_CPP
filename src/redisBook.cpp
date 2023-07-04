@@ -143,6 +143,14 @@ int RedisBook::menu_loop(std::string book_name)
             }
             else if(book_name == "document" || book_name == "6")
             {
+                // 文件服务器直接维护在 111 服务器，提供查询和下载和上传的功能
+                // 上传的时候注意不能重名
+
+                break;
+            }
+            else if(book_name == "docker" || book_name == "7")
+            {
+                RedisBook::print_docker_info();
                 break;
             }
             else if(book_name == "q")
@@ -407,6 +415,50 @@ int RedisBook::update_assign_joke(std::string joke_id, Joke *each_joke)
     return 1;
 }
 
+int RedisBook::print_docker_info()
+{
+    
+    std::map<std::string, std::string> print_map;
+
+    print_map["- posrt_v2"]   = "docker run --gpus device=0 -p 111:111 -v /home/ldq/output_test:/usr/output_dir  -v /home/ldq/logs_dir:/usr/logs -d test:v0.0.1";
+    print_map["- feihua"]     = "docker run --gpus device=0 -p 5001:5001 -v /etc/localtime:/etc/localtime:ro -v /home/logs:/v0.0.1/logs -d test:v0.0.1";
+    print_map["- wuhan_pd"]   = "docker run --gpus device=0 -v /home/input_dir:/usr/input_picture -v /home/output_dir:/usr/output_dir -v /home/ldq/json_dir:/usr/input_picture_attach -v /home/ldq/logs:/v0.0.1/logs -d wuhan_ft:v0.0.1";
+    
+    
+    print_map["* commit -c"]    = "docker commit -c 'CMD /v0.01/start_server_jibei.sh' contain_id test:v0.0.1";
+    print_map["* build  -t"]    = "docker build -t test:v0.0.1 -f docker_file_path .";
+    print_map["* save   -o"]    = "docker save -o image_id test:v0.0.1";
+    print_map["* exec   -it"]   = "docker exec -it image_id bash";
+    print_map["* load   -i"]    = "docker load -i image_id";
+    
+    print_map["[*] cp "]    = "docker cp <container_id>:<container_path> <host_path>";
+
+
+    // docker file 的写法
+    // 指定 时区
+    // 指定 commit 时候启动脚本
+    // 指定 commit 可以不用指定启动脚本
+    // docker commit -c "CMD /v0.01/start_server_jibei.sh"
+
+    // 常用的 docker 命令
+    // docker 启动命令各个参数的解析 
+
+    std::cout << "--------------------------------------------------------------------------------" << std::endl;
+    std::cout << "" << std::endl;
+
+    auto iter = print_map.begin();
+    while(iter != print_map.end())
+    {
+        std::cout << HIGHTLIGHT_COLOR << std::setw(10) << std::left << iter->first << " : " << STOP_COLOR;
+        std::cout << iter->second << std::endl;
+        std::cout << "" << std::endl;
+        iter++;
+    }
+    std::cout << "--------------------------------------------------------------------------------" << std::endl;
+
+    return 1;
+}
+
 std::vector<std::string> RedisBook::get_joke_id_vector()
 {
     std::vector<std::string> book_ids;
@@ -494,6 +546,7 @@ int Joke::add_command(std::string command, std::string writer)
 
     return 1;
 }
+
 
 
 

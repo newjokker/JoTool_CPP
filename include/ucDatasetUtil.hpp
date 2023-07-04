@@ -145,7 +145,7 @@ class UCDataset
         void filter_by_conf(float conf_th, bool clear_obj=true);
 
         // 根据标签进行过滤
-        void filter_by_tags(std::set<std::string> tags, bool clear_obj=true);
+        void filter_by_tags(std::set<std::string> tags, std::string mode="or", bool clear_obj=true);
 
         // 根据 uc 进行过滤
         void filter_by_uc_set(std::set<std::string> uc_set, bool clear_obj=true);

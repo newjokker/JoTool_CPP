@@ -97,7 +97,7 @@ class DeteRes
         void filter_by_topn();
         void do_augment();
         void del_dete_obj(DeteObj dete_obj);
-        bool has_tag();
+        bool has_tag(std::string tag);
         bool has_dete_obj(DeteObj dete_obj);
         std::map<std::string, int> count_tags();
         int size();

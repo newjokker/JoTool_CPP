@@ -870,7 +870,6 @@ void UcdParamOpt::load_param_info()
     // from_assign_crop_xml
     ParamInfo * param_from_assign_crop_xml = new ParamInfo("from_assign_crop_xml");
     param_from_assign_crop_xml->group = "opt";
-    param_from_assign_crop_xml->args_info["-o"] = "不使用文件夹的名字作为小图的标签，直接使用小图文件名中包含的标签作为 obj 的 tag";
     param_from_assign_crop_xml->grammar = "ucd param_from_assign_crop_xml xml_dir save_path";
     param_from_assign_crop_xml->chinese_explain = "将裁剪后的小图 xml 转为 json";   
     param_from_assign_crop_xml->demo.push_back("ucd from_assign_crop_xml ./crop_xml res.json         (将 ./crop_xml 文件夹中的小图xml 生成 res.json 文件)");
@@ -1152,12 +1151,14 @@ void UcdParamOpt::load_param_info()
     // filter_by_tags
     ParamInfo * param_filter_by_tags = new ParamInfo("filter_by_tags");
     param_filter_by_tags->group = "filter";
+    param_filter_by_tags->args_info["-a"] = "设置 -a 即为 and 模式，当且仅当拥有所有指定标签是才保存 obj（and 模式不支持通配符 * ），否者为 or 模式，只有满足其中的一个条件就保留 obj";
     param_filter_by_tags->grammar = "ucd filter_by_tags ucd_path save_path tag1 tag2 ...";
     param_filter_by_tags->english_explain = "";
     param_filter_by_tags->chinese_explain = "数据集中只保留指定标签（当前版本已经能使用正则表达式进行匹配了）";   
     param_filter_by_tags->demo.push_back("ucd filter_by_tags aqm.json res.json aqm cbd person                   (将 aqm.json 只保留 aqm cbd person 三个标签)");
     param_filter_by_tags->demo.push_back("ucd filter_by_tags aqm.json res.json aqm*                             (将 aqm.json 只保留 aqm 开头的所有标签)");
     param_filter_by_tags->demo.push_back("ucd filter_by_tags aqm.json res.json aqm*ll                           (将 aqm.json 只保留 aqm 开头ll结尾的所有标签)");
+    param_filter_by_tags->demo.push_back("ucd filter_by_tags aqm.json res.json aqm cbd -a                       (将 aqm.json 只保留 同时存在 aqm cbd 的 uc)");
     UcdParamOpt::add_param(param_filter_by_tags);
 
     // filter_by_date

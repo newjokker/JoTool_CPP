@@ -195,7 +195,15 @@ using namespace std;
 
 // TODO: to_yolo_train_data 打印用于训练的各个元素的个数 
 
-// TODO: from_assign_crop, to_assign_crop 两个都支持 txt, xml 两种格式的处理，默认处理 txt 格式， 可以选处理 xml 格式
+// TODO: 在使用 ucd 处理信息的时候将使用的环境发送给服务器，这样的话，就能知道谁在下载数据库里面的数据，下载了多少，下的都是什么数据
+
+// TODO: 支持 chartgpt api 已经部署在 221 服务器 post 11223，速度貌似不快（1）生成一段，显示一段（2）将显示的内容格式化打印出来
+
+// TODO: 配网缺陷表之类的数据可以直接在 ucd book 中查找到
+
+// TODO: filter_by_tags 支持 and 模式 或者 or 模式
+
+// TODO: 根据某一个标签对所有的 obj 进行删选，可以提前把指定的 去删选的标签标定为同样的名字，
 
 
 
@@ -244,7 +252,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.8.1";
+    std::string app_version = "v4.8.7";
 
     // uci_info
     int volume_size         = 20;
@@ -591,7 +599,7 @@ int main(int argc_old, char ** argv_old)
             }
 
             // 
-            std::cout << HIGHTLIGHT_COLOR << "如果出错, 查看对缓存文件夹是否有权限，使用 ucd meta | grep cache_dir 查看缓存文件夹，使用 sudo chmod 777 {cache_dir} -R 修改权限" << STOP_COLOR << std::endl;
+            std::cout << HIGHTLIGHT_COLOR << "如果出错, 查看对缓存文件夹是否有权限，使用 ucd meta | grep dir 查看缓存文件夹，使用 sudo chmod 777 {cache_dir} -R 修改权限" << STOP_COLOR << std::endl;
 
             // download img
             if(need_img){ucd_util->load_img(save_dir, uc_vector);}
@@ -2272,6 +2280,15 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "filter_by_tags")
     {
+
+        // 增加模式， or 和 and 模式
+        // 
+        std::string mode = "or";
+        if(short_args.count("a") > 0)
+        {
+            mode = "and";
+        }
+
         if(argc > 4)
         {
             // std::cout << HIGHTLIGHT_COLOR << "使用通配符匹配的时候，某些机器会存在无法匹配的问题（特别是a 开头的 tag），使用完函数，最好手工核对一下" << STOP_COLOR << std::endl;
@@ -2287,7 +2304,7 @@ int main(int argc_old, char ** argv_old)
             {
                 UCDataset* ucd = new UCDataset(ucd_path);
                 ucd->parse_ucd(true);
-                ucd->filter_by_tags(tags);
+                ucd->filter_by_tags(tags, mode);
                 ucd->save_to_ucd(save_path);
                 delete ucd;
             }
@@ -3126,15 +3143,20 @@ int main(int argc_old, char ** argv_old)
         // 设置常用的关键字, count, select, save, drop, filter 等，ucd 先解析命令字符串然后直接运行，类似于 python 那种的形式
         // ucd run "count nc where uc[:2] == 'CA' and obj.area > 10"
     }
-    else if(command_1 == "dete_check")
+    else if(command_1 == "dete")
     { 
-        // 仿照 check 函数，使用服务提供检测服务
-        // 所以只能是一个服务提供这个信息，使用这个在这个服务中填写对应的信息
+        // 设置的标准启动模型，发送模型，配置文件和逻辑进去
+
+        // model 使用一个叫做 model_uc 的东西，model 都维护在一个目录中，在 80 服务器上，（需要注意的是，对于大的文件需要解决传输断裂的问题，是不是要将大文件拆分为小文件进行处理）
+
+        // config 和 logic 直接使用二进制文件编码，服务端下载了直接能用就行
+
         // 
+
     }
-    else if(command_1 == "dete_info")
+    else if(command_1 == "chart_gpt")
     {
-        // 查看指定的检测服务的具体信息，由 docker 提供，docker 完善 info 接口
+        // 和 chart gpt 进行交互，主要看（1）一点点打印如何实现（2）格式化的输出
     }
     else if(command_1 == "fake_uc")
     {
@@ -3291,7 +3313,6 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "book")
     {
-
         if(argc == 3 || argc == 2)
         {
             std::string book_index = "";

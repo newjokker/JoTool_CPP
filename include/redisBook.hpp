@@ -68,6 +68,9 @@ class RedisBook
         // 获取所有笑话的 id
         std::vector<std::string> get_joke_id_vector();
 
+        // 打印 docker 相关的信息
+        int print_docker_info();
+
 };
 
 
