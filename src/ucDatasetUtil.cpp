@@ -2800,13 +2800,14 @@ int UCDataset::do_augment(float ax1, float ax2, float ay1, float ay2,  bool is_r
         {
             std::cout << ERROR_COLOR << "uc size_info is empty : " << uc << STOP_COLOR << std::endl;
             // throw "uc size_info is empty";
+            throw "uc size_info is empty";
             return -1;
         }
 
         if(UCDataset::size_info[uc][0] == -1 || UCDataset::size_info[uc][1] == -1)
         {
             std::cout << ERROR_COLOR << "uc size_info is -1 : " << uc << STOP_COLOR << std::endl;
-            // throw "uc size_info is empty";
+            throw "uc size_info is -1";
             return -1;
         }
     }

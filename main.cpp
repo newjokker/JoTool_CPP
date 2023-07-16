@@ -187,8 +187,6 @@ using namespace std;
 
 // TODO: from_crop 中增加选项可以从本地文件中找 uc 的大小获取 size_info 信息
 
-// TODO: filter_by_tags 可以指定必须同时存在几个标签 --mode 默认是 or 可以 指定为 and 
-
 // TODO: relate_anlysis 关联性分析，出现 a 标签的同时出现 b 标签的概率
 
 // TODO: 完善 load 和 upload , 指定需要上传的文件夹
@@ -201,10 +199,17 @@ using namespace std;
 
 // TODO: 配网缺陷表之类的数据可以直接在 ucd book 中查找到
 
-// TODO: filter_by_tags 支持 and 模式 或者 or 模式
-
 // TODO: 根据某一个标签对所有的 obj 进行删选，可以提前把指定的 去删选的标签标定为同样的名字，
 
+// TODO: 给 ucd 增加自定义的插件，只要符合规则进行编写就行，就类似实现简单的自定义的语言
+
+// TODO: crop 的时候可以将图画出来，这样就能在大图中看画出的小图
+
+// FIXME: to_crop 自动生成文件夹
+
+// TODO: 方便将 compare.json 调整为需要的可以方便调整测试集的形式，比如文件夹名字和里面的标签名字不一致
+
+// TODO: 
 
 
 void handle_post(const httplib::Request& req, httplib::Response& res) 
