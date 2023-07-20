@@ -209,7 +209,9 @@ using namespace std;
 
 // TODO: 方便将 compare.json 调整为需要的可以方便调整测试集的形式，比如文件夹名字和里面的标签名字不一致
 
-// TODO: 
+// TODO: cache_from, 可以将指定文件夹中的符合 ucd 命名的图片吸收到缓存中去
+
+// TODO: update --source 可以指定提供服务的地址，可以放在 github 上
 
 
 void handle_post(const httplib::Request& req, httplib::Response& res) 
@@ -257,7 +259,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.8.7";
+    std::string app_version = "v4.8.8";
 
     // uci_info
     int volume_size         = 20;

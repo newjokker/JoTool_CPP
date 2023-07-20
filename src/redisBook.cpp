@@ -434,6 +434,13 @@ int RedisBook::print_docker_info()
     print_map["[*] cp "]    = "docker cp <container_id>:<container_path> <host_path>";
 
 
+    print_map["[CMD] "]     = "docker rm -f $(docker ps -aq)";
+
+
+    // TODO: 删除所有的 容器 docker rm -f $(docker ps -aq --filter "ancestor=fwppt_model:v1.4.7")
+
+    // TODO: 删除所有的 容器 docker rm -f $(docker ps -aq --filter "ancestor=fwppt_model:v1.4.7")
+
     // docker file 的写法
     // 指定 时区
     // 指定 commit 时候启动脚本
