@@ -2960,10 +2960,10 @@ int main(int argc_old, char ** argv_old)
         std::cout << "直接运行下述命令在新机器上安装 ucd，注意修改 ucd 版本和缓存路径"                       << std::endl;
         std::cout << "--------------------------------------------------------------------------------" << std::endl;
         std::cout << "mkdir -p  /home/ldq/Apps_jokker  /usr/ucd_cache"                                  << std::endl;
-        std::cout << "curl  -o  /home/ldq/Apps_jokker/ucd http://192.168.3.111:11101/ucd_app/v4.8.5"    << std::endl;
+        std::cout << "curl  -o  /home/ldq/Apps_jokker/ucd http://192.168.3.111:11101/ucd_app/v4.8.9"    << std::endl;
         std::cout << "chmod 777 /home/ldq/Apps_jokker/ucd /usr/ucd_cache -R"                            << std::endl;
-        std::cout << "sed -i '$a alias ucd=/home/ldq/Apps_jokker/ucd' /root/.bash_aliases"              << std::endl;
-        std::cout << "source /root/.bash_aliases"                                                       << std::endl;
+        std::cout << "echo 'alias ucd=/home/ldq/Apps_jokker/ucd' >> /root/.bash_aliases"              << std::endl;
+        std::cout << ". /root/.bash_aliases"                                                       << std::endl;
         std::cout << "/home/ldq/Apps_jokker/ucd set cache_dir /usr/ucd_cache"                           << std::endl;
         std::cout << "--------------------------------------------------------------------------------" << std::endl;
     }

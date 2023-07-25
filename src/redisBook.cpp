@@ -21,6 +21,7 @@
 #define HIGHTLIGHT_COLOR    "\033[1;35m"    // 品红
 #define WARNNING_COLOR      "\033[1;33m"    // 橙色
 #define STOP_COLOR          "\033[0m"       // 复原
+#define CORRECT_COLOR       "\x1b[1;32m"    // 绿色
 
 
 void enableRawMode() {
@@ -420,35 +421,60 @@ int RedisBook::print_docker_info()
     
     std::map<std::string, std::string> print_map;
 
-    print_map["- posrt_v2"]   = "docker run --gpus device=0 -p 111:111 -v /home/ldq/output_test:/usr/output_dir  -v /home/ldq/logs_dir:/usr/logs -d test:v0.0.1";
-    print_map["- feihua"]     = "docker run --gpus device=0 -p 5001:5001 -v /etc/localtime:/etc/localtime:ro -v /home/logs:/v0.0.1/logs -d test:v0.0.1";
-    print_map["- wuhan_pd"]   = "docker run --gpus device=0 -v /home/input_dir:/usr/input_picture -v /home/output_dir:/usr/output_dir -v /home/ldq/json_dir:/usr/input_picture_attach -v /home/ldq/logs:/v0.0.1/logs -d wuhan_ft:v0.0.1";
-    
-    
-    print_map["* commit -c"]    = "docker commit -c 'CMD /v0.01/start_server_jibei.sh' contain_id test:v0.0.1";
-    print_map["* build  -t"]    = "docker build -t test:v0.0.1 -f docker_file_path .";
-    print_map["* save   -o"]    = "docker save -o image_id test:v0.0.1";
-    print_map["* exec   -it"]   = "docker exec -it image_id bash";
-    print_map["* load   -i"]    = "docker load -i image_id";
-    
-    print_map["[*] cp "]    = "docker cp <container_id>:<container_path> <host_path>";
+    print_map["[Server posrt_v2     ]"]   = "docker run --gpus device=0 -p 111:111 -v /home/ldq/output_test:/usr/output_dir  -v /home/ldq/logs_dir:/usr/logs -d test:v0.0.1";
+    print_map["[Server feihua       ]"]   = "docker run --gpus device=0 -p 5001:5001 -v /etc/localtime:/etc/localtime:ro -v /home/logs:/v0.0.1/logs -d test:v0.0.1";
+    print_map["[Server wuhan_pd     ]"]   = "docker run --gpus device=0 -v /home/input_dir:/usr/input_picture -v /home/output_dir:/usr/output_dir -v /home/ldq/json_dir:/usr/input_picture_attach -v /home/ldq/logs:/v0.0.1/logs -d wuhan_ft:v0.0.1";
+    print_map["[Server dianlixinxi  ]"]   = "docker run --gpus device=0 \
+    -e FJGHPT='http://192.168.132.44:30000-+-http://192.168.132.44:30000/robocop-web/file/generateUrl-+-rgznpt-+-DnY2NTT9W2-+-rbocup-+-v1' \
+    -e HUOMIAN_DEVICE_CODE=http://192.168.81.170:31333/iot/webservice/restInterface/safearea/getHuoMianSafeZone? \
+    -e OUTPUT_MQ='192.168.3.99-+-5673-+-/-+-ai.sdfwpo.3-+-guest-+-guest-+-ai.sdfwpo.3' \
+    -e INFERENCE_MQ='192.168.3.99-+-5673-+-/-+-ai.sdfwpo.1-+-guest-+-guest-+-queue-ai.sdfwpo.1' \
+    -e PROCESS_MQ='192.168.3.99-+-5673-+-/-+-ai.sdfwpo.2-+-guest-+-guest-+-ai.sdfwpo.2' \
+    -e MODE=TEST -it fwppt_business_fix:v0.0.7 /bin/bash";
 
+    print_map["[Docker commit -c ]"]    = "docker commit -c 'CMD /v0.01/start_server_jibei.sh' contain_id test:v0.0.1 (指定启动时候运行指定文件)";
+    print_map["[Docker build  -t ]"]    = "docker build -t test:v0.0.1 -f docker_file_path . (构建镜像)";
+    print_map["[Docker save   -o ]"]    = "docker save -o image_id test:v0.0.1 (保存镜像)";
+    print_map["[Docker exec   -it]"]    = "docker exec -it image_id bash (进入指定容器)";
+    print_map["[Docker load   -i ]"]    = "docker load -i image_id (加载指定镜像)";
+    print_map["[Docker cp        ]"]    = "docker cp <container_id>:<container_path> <host_path> (容器内外文件相互拷贝)";
+    print_map["[Docker --network ]"]    = "docker run --network==host (内外共享网络)";
 
-    print_map["[CMD] "]     = "docker rm -f $(docker ps -aq)";
+    print_map["[CMD kill_all_contain                ] "]     = "docker rm -f $(docker ps -aq) (删除所有容器)";
+    print_map["[CMD Keep_the_time_zone_consistent   ] "]     = "-v /etc/localtime:/etc/localtime:ro (内外时区一致)";
+    
+    print_map["[Dockerfile apt update failed]"]     = "\n \
+------------------------------------------------------------------------- \n \
+# 当 apt update 执行失败 \n \
+RUN gpg --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC \n \
+RUN gpg --export --armor A4B469963BF863CC | apt-key add - \n \
+-------------------------------------------------------------------------";
+    
+    print_map["[Dockerfile inastall UCD]"]     = "\n \ 
+------------------------------------------------------------------------- \n \
+# 使用 dockerfile 直接安装 UCD \n \
+RUN mkdir -p  /home/ldq/Apps_jokker  /usr/ucd_cache \n \ 
+RUN curl  -o  /home/ldq/Apps_jokker/ucd http://192.168.3.111:11101/ucd_app/v4.8.9 \n \ 
+RUN chmod 777 /home/ldq/Apps_jokker/* /usr/ucd_cache -R \n \ 
+RUN echo 'alias ucd=/home/ldq/Apps_jokker/ucd' >> /root/.bash_aliases \n \ 
+# 使用 source 关键字有时候运行不成功 \n \
+RUN . /root/.bash_aliases \n \ 
+# 执行的命令需要在 ucd 源码中返回 0, 否者执行会失败 \n \ 
+RUN /home/ldq/Apps_jokker/ucd set cache_dir /usr/ucd_cache/ \n \ 
+-------------------------------------------------------------------------";
+
+    print_map["[Dockerfile inastall APP]"]     = "\n \ 
+------------------------------------------------------------------------- \n \
+# 使用 dockerfile 安装常用的软件(-y 默认同意安装) \n \
+RUN apt-get update && apt-get install vim -y \ 
+&& apt-get install libglib2.0-0 -y \ 
+&& apt install libgl1-mesa-glx -y \ 
+&& apt-get install gcc -y \ 
+&& apt-get install curl -y \n \
+-------------------------------------------------------------------------";
 
 
     // TODO: 删除所有的 容器 docker rm -f $(docker ps -aq --filter "ancestor=fwppt_model:v1.4.7")
-
-    // TODO: 删除所有的 容器 docker rm -f $(docker ps -aq --filter "ancestor=fwppt_model:v1.4.7")
-
-    // docker file 的写法
-    // 指定 时区
-    // 指定 commit 时候启动脚本
-    // 指定 commit 可以不用指定启动脚本
-    // docker commit -c "CMD /v0.01/start_server_jibei.sh"
-
-    // 常用的 docker 命令
-    // docker 启动命令各个参数的解析 
 
     std::cout << "--------------------------------------------------------------------------------" << std::endl;
     std::cout << "" << std::endl;
@@ -456,7 +482,27 @@ int RedisBook::print_docker_info()
     auto iter = print_map.begin();
     while(iter != print_map.end())
     {
-        std::cout << HIGHTLIGHT_COLOR << std::setw(10) << std::left << iter->first << " : " << STOP_COLOR;
+        if(pystring::startswith(iter->first, "[CMD"))
+        {
+            std::cout << WARNNING_COLOR << std::setw(10) << std::left << iter->first << " : " << STOP_COLOR;
+        }
+        else if(pystring::startswith(iter->first, "[Dockerfile"))
+        {
+            std::cout << HIGHTLIGHT_COLOR << std::setw(10) << std::left << iter->first << " : " << STOP_COLOR;
+        }
+        else if(pystring::startswith(iter->first, "[Docker"))
+        {
+            std::cout << CORRECT_COLOR << std::setw(10) << std::left << iter->first << " : " << STOP_COLOR;
+        }
+        else if (pystring::startswith(iter->first, "[Server"))
+        {
+            std::cout << ERROR_COLOR << std::setw(10) << std::left << iter->first << " : " << STOP_COLOR;
+        }
+        else
+        {
+            std::cout << std::setw(10) << std::left << iter->first << " : ";  
+        }
+
         std::cout << iter->second << std::endl;
         std::cout << "" << std::endl;
         iter++;
