@@ -9,7 +9,7 @@
 #include <fstream>
 #include <map>
 #include "include/pystring.h"
-#include <ncurses.h>
+// #include <ncurses.h>
 #include <unistd.h>
 #include <termios.h>
 #include <string>
@@ -553,9 +553,6 @@ int Joke::add_command(std::string command, std::string writer)
 
     return 1;
 }
-
-
-
 
 TodoList::TodoList(std::string host, int port, std::string name)
 {

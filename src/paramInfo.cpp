@@ -1075,6 +1075,16 @@ void UcdParamOpt::load_param_info()
     param_update->demo.push_back("ucd update v1.4.7                                 (将 ucd 版本更新带 ucd_v1.4.7)");
     UcdParamOpt::add_param(param_update);
 
+    // install
+    ParamInfo * param_install = new ParamInfo("install");
+    param_install->group = "sync";
+    param_install->grammar = "ucd install";
+    param_install->english_explain = "";
+    param_install->chinese_explain = "打印在其他机器上安装 ucd 的命令";   
+    param_install->demo.push_back("ucd install                                        (将 ucd 更新到最新版本)");
+    UcdParamOpt::add_param(param_install);
+
+
     // absorb
     ParamInfo * param_absorb = new ParamInfo("absorb");
     param_absorb->group = "opt";
@@ -1132,7 +1142,7 @@ void UcdParamOpt::load_param_info()
 
     // fake_uc
     ParamInfo * param_fake_uc = new ParamInfo("fake_uc");
-    param_fake_uc->group = "sync";
+    param_fake_uc->group = "rename";
     param_fake_uc->grammar = "ucd fake_uc img_folder";
     param_fake_uc->english_explain = "";
     param_fake_uc->chinese_explain = "在离线的情况下将执执行文件夹下面的 文件赋予 假的 uc (Fuc001 开始), 只针对 .jpg .JPG .png .PNG .xml .json 文件";   

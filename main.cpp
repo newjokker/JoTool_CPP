@@ -211,7 +211,9 @@ using namespace std;
 
 // TODO: cache_from, 可以将指定文件夹中的符合 ucd 命名的图片吸收到缓存中去
 
-// TODO: update --source 可以指定提供服务的地址，可以放在 github 上
+// TODO: update --source 可以指定提供服务的地址，可以放在 github 上，提供下载
+
+// TODO: 
 
 
 void handle_post(const httplib::Request& req, httplib::Response& res) 
@@ -259,7 +261,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.8.8";
+    std::string app_version = "v4.8.9";
 
     // uci_info
     int volume_size         = 20;
@@ -1256,6 +1258,7 @@ int main(int argc_old, char ** argv_old)
                     }
                 }
                 xini_write["cache"]["dir"] = cache_dir_new;
+                return 0;
             }
             else
             {
@@ -2952,6 +2955,18 @@ int main(int argc_old, char ** argv_old)
             ucd_param_opt->print_command_info(command_1);
         }
     }
+    else if(command_1 == "install")
+    {
+        std::cout << "直接运行下述命令在新机器上安装 ucd，注意修改 ucd 版本和缓存路径"                       << std::endl;
+        std::cout << "--------------------------------------------------------------------------------" << std::endl;
+        std::cout << "mkdir -p  /home/ldq/Apps_jokker  /usr/ucd_cache"                                  << std::endl;
+        std::cout << "curl  -o  /home/ldq/Apps_jokker/ucd http://192.168.3.111:11101/ucd_app/v4.8.5"    << std::endl;
+        std::cout << "chmod 777 /home/ldq/Apps_jokker/ucd /usr/ucd_cache -R"                            << std::endl;
+        std::cout << "sed -i '$a alias ucd=/home/ldq/Apps_jokker/ucd' /root/.bash_aliases"              << std::endl;
+        std::cout << "source /root/.bash_aliases"                                                       << std::endl;
+        std::cout << "/home/ldq/Apps_jokker/ucd set cache_dir /usr/ucd_cache"                           << std::endl;
+        std::cout << "--------------------------------------------------------------------------------" << std::endl;
+    }
     else if(command_1 == "split")
     {
         // 随机将数据集按照一定的比例分为两个部分
@@ -3798,5 +3813,5 @@ int main(int argc_old, char ** argv_old)
     
     delete ucd_util;
     delete ucd_param_opt;
-	return 1;
+	return 0;
 }
