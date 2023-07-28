@@ -48,7 +48,10 @@ class RedisBook
         int close();
 
         // 获取菜单信息
-        int get_menu_info();
+        std::map<std::string, std::string> get_menu_info(bool print_info=true);
+
+        // 插入主菜单，显示插入的 python 代码，不直接插入
+        int insert_menu_info();
 
         // 主菜单循环
         int menu_loop(std::string book_name);
@@ -70,6 +73,12 @@ class RedisBook
 
         // 打印 docker 相关的信息
         int print_docker_info();
+
+        // 打印 pdb 使用的相关信息
+        int print_pdb_info();
+
+        // 打印官方通告
+        int print_official_info();
 
 };
 

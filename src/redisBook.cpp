@@ -55,28 +55,46 @@ RedisBook::RedisBook(std::string host, int port, std::string name)
     }
 }
 
-int RedisBook::get_menu_info()
+std::map<std::string, std::string> RedisBook::get_menu_info(bool print_info)
 {
-
+    std::map<std::string, std::string> menu_info;
     // redisReply* reply = (redisReply*)redisCommand(RedisBook::client, "HKEYS menu");
     redisReply* reply = (redisReply*)redisCommand(RedisBook::client, "HGETALL menu");
     
-    if (reply == NULL) {
+    if (reply == NULL) 
+    {
         std::cout << "Failed to execute command" << std::endl;
-        return 1;
+        return menu_info;
     }
 
     if (reply->type == REDIS_REPLY_ARRAY) 
     {   
-        std::cout << "" << std::endl;
+        if(print_info)
+        {
+            std::cout << "----------------------------------" << std::endl;
+        }
+
         for (int i = 0; i < reply->elements; i+=2) 
         {
-            std::cout << HIGHTLIGHT_COLOR << i/2 << ", " << std::setw(10) << std::setfill(' ') << std::left << reply->element[i]->str << STOP_COLOR << " : " ;
-            std::cout << reply->element[i+1]->str << std::endl;
-            std::cout << "" << std::endl;
+            if(print_info)
+            {
+                std::cout << HIGHTLIGHT_COLOR << std::setw(4) << std::setfill(' ') << std::left << std::to_string((i/2)) << std::setw(10) << std::setfill(' ') << std::left << reply->element[i]->str << STOP_COLOR << " : " ;
+                std::cout << reply->element[i+1]->str << std::endl;
+                std::cout << "" << std::endl;
+            }
+            menu_info[std::to_string(i/2)] = reply->element[i]->str;
         }
     }
     freeReplyObject(reply);
+    return menu_info;
+}
+
+int RedisBook::insert_menu_info()
+{
+    std::cout << "import redis" << std::endl;
+    std::cout << "r = redis.Redis(host='192.168.3.221', port=6379, db=0)" << std::endl;
+    std::cout << "r.hset('menu', 'info', '常用的一些信息')" << std::endl;
+    return 0;
 }
 
 int RedisBook::connect()
@@ -100,10 +118,14 @@ int RedisBook::close()
 
 int RedisBook::menu_loop(std::string book_name)
 {
-
-    if(book_name == "" || book_name == "menu")
+    std::map<std::string, std::string> menu_info;
+    if(book_name == "")
     {
-        RedisBook::get_menu_info();
+        menu_info = RedisBook::get_menu_info(true);
+    }
+    else
+    {
+        menu_info = RedisBook::get_menu_info(false);
     }
 
     if(book_name != "find")
@@ -116,42 +138,81 @@ int RedisBook::menu_loop(std::string book_name)
                 std::getline(std::cin, book_name);
             }
             
-            if(book_name == "joke" || book_name == "0")
+            // 序号转为 book_name 
+            if(menu_info.count(book_name) > 0)
+            {
+                book_name = menu_info[book_name];
+            }
+            
+            if(book_name == "joke")
             {
                 RedisBook::tell_joke();
                 break;
             }
-            else if(book_name == "customer" || book_name == "1")
+            else if(book_name == "customer")
             {
                 break;
             }
-            else if(book_name == "txkj" || book_name == "2")
+            else if(book_name == "txkj")
             {
                 RedisBook::learn_tx_cluture();
                 break;
             }
-            else if(book_name == "svn" || book_name == "3")
+            else if(book_name == "svn")
             {
                 break;
             }
-            else if(book_name == "offical" || book_name == "4")
+            else if(book_name == "official")
+            {
+                // 只接受 txt 和 .md 这两个格式的文件
+                // 可以直接查看文件的内容，在文件内容中进行查找
+                // 可以直接下载其中的内容 
+
+                // 各个服务器的账号密码
+                // 公司的无线密码等
+                // 111 服务器的账号密码
+
+                print_official_info();
+
+                break;
+            }
+            else if(book_name == "pingcode")
             {
                 break;
             }
-            else if(book_name == "pingcode" || book_name == "5")
-            {
-                break;
-            }
-            else if(book_name == "document" || book_name == "6")
+            else if(book_name == "document")
             {
                 // 文件服务器直接维护在 111 服务器，提供查询和下载和上传的功能
                 // 上传的时候注意不能重名
 
+                // 这个单独开辟一个关键字还是放在这里，还没想好
+                // 
                 break;
             }
-            else if(book_name == "docker" || book_name == "7")
+            else if(book_name == "docker")
             {
                 RedisBook::print_docker_info();
+                break;
+            }
+            else if(book_name == "pdb")
+            {
+                RedisBook::print_pdb_info();
+                break;
+            }
+            else if(book_name == "cmd")
+            {
+                // curl
+                // tar
+                // zip
+                // ls -h 按照时间，按照文件大小进行排序
+                // 
+                
+                // curl_explain
+                // curl_grammar 
+                // curl_example
+                
+                // 帮助文档的使用 curl --help 
+
                 break;
             }
             else if(book_name == "q")
@@ -473,7 +534,6 @@ RUN apt-get update && apt-get install vim -y \
 && apt-get install curl -y \n \
 -------------------------------------------------------------------------";
 
-
     // TODO: 删除所有的 容器 docker rm -f $(docker ps -aq --filter "ancestor=fwppt_model:v1.4.7")
 
     std::cout << "--------------------------------------------------------------------------------" << std::endl;
@@ -511,6 +571,65 @@ RUN apt-get update && apt-get install vim -y \
 
     return 1;
 }
+
+int RedisBook::print_pdb_info()
+{
+    std::cout << "---------------------------------------------------------------" << std::endl;
+    std::cout << HIGHTLIGHT_COLOR << "import pdb" << STOP_COLOR << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << HIGHTLIGHT_COLOR << "pdb.set_trace()   " << STOP_COLOR << "          # 代码中增加这一行，插入断点"  << std::endl;
+    std::cout << "-----------------------------" << std::endl;
+    std::cout << HIGHTLIGHT_COLOR << "p <variable>      " << STOP_COLOR << "          # 打印变量信息, p 后面是有空格的" << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << HIGHTLIGHT_COLOR << "n                 " << STOP_COLOR << "          # 执行下一行" << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << HIGHTLIGHT_COLOR << "s                 " << STOP_COLOR << "          # 执行下一行，进入函数内部" << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << HIGHTLIGHT_COLOR << "c                 " << STOP_COLOR << "          # 继续执行直到遇到下一个断点" << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << HIGHTLIGHT_COLOR << "l                 " << STOP_COLOR << "          # 查看当前位置附近的代码" << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << HIGHTLIGHT_COLOR << "help              " << STOP_COLOR << "          # 查看帮助" << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << HIGHTLIGHT_COLOR << "q                 " << STOP_COLOR << "          # q + 回车键，退出调试模式" << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << HIGHTLIGHT_COLOR << "exit              " << STOP_COLOR << "          # 退出调试模式" << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << HIGHTLIGHT_COLOR << "!                 " << STOP_COLOR << "          # 执行代码，!my_var = new_value" << std::endl;
+    std::cout << "---------------------------------------------------------------" << std::endl;
+    return 0;
+}
+
+int RedisBook::print_official_info()
+{
+
+    redisReply* reply = (redisReply*)redisCommand(RedisBook::client, "HGETALL official");
+    
+    if (reply == NULL) {
+        std::cout << "Failed to execute command" << std::endl;
+        return 1;
+    }
+
+    if (reply->type == REDIS_REPLY_ARRAY) 
+    {   
+        std::cout << "----------------------------------" << std::endl;
+        std::cout << "" << std::endl;
+        for (int i = 0; i < reply->elements; i+=2) 
+        {
+            std::cout << HIGHTLIGHT_COLOR << std::setw(4) << std::setfill(' ') << std::left << std::to_string((i/2)) << std::setw(10) << std::setfill(' ') << std::left << reply->element[i]->str << STOP_COLOR << " : " << std::endl;
+            std::vector<std::string> official_info = pystring::split(reply->element[i+1]->str, "-+-");
+            for(int j=0; j<official_info.size(); j++)
+            {
+                std::cout << "        * " << official_info[j] << std::endl;
+            }
+            std::cout << "" << std::endl;
+        }
+        std::cout << "----------------------------------" << std::endl;
+    }
+    freeReplyObject(reply);
+
+}
+
 
 std::vector<std::string> RedisBook::get_joke_id_vector()
 {
@@ -599,6 +718,7 @@ int Joke::add_command(std::string command, std::string writer)
 
     return 1;
 }
+
 
 TodoList::TodoList(std::string host, int port, std::string name)
 {

@@ -215,6 +215,13 @@ using namespace std;
 
 // TODO: 
 
+// TODO: book 中新增的内容 （1）pdb 代码调试 （2）linux 的常用命令 diff，（3）git 的常用语句 （5）ucd 常用的方法集锦 （6）自动添加主题信息，或者至少说明用什么python代码能添加
+
+// 
+
+
+
+
 
 void handle_post(const httplib::Request& req, httplib::Response& res) 
 {
@@ -261,7 +268,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.8.9";
+    std::string app_version = "v4.8.11";
 
     // uci_info
     int volume_size         = 20;
