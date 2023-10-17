@@ -80,6 +80,9 @@ class RedisBook
         // 打印官方通告
         int print_official_info();
 
+        // 打印常见的 CMD 命令
+        int print_cmd_info();
+
 };
 
 

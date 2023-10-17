@@ -193,7 +193,7 @@ using namespace std;
 
 // TODO: to_yolo_train_data 打印用于训练的各个元素的个数 
 
-// TODO: 在使用 ucd 处理信息的时候将使用的环境发送给服务器，这样的话，就能知道谁在下载数据库里面的数据，下载了多少，下的都是什么数据
+// TODO: 在使用 ucd 处理信息的时候将使用的环境发送给服务器，这样的话，就能知道谁在下载数据库里面的数据，下载了多少，下的都是什么数据，可以根据 history 日志来获取
 
 // TODO: 支持 chartgpt api 已经部署在 221 服务器 post 11223，速度貌似不快（1）生成一段，显示一段（2）将显示的内容格式化打印出来
 
@@ -203,24 +203,22 @@ using namespace std;
 
 // TODO: 给 ucd 增加自定义的插件，只要符合规则进行编写就行，就类似实现简单的自定义的语言
 
-// TODO: crop 的时候可以将图画出来，这样就能在大图中看画出的小图
-
-// FIXME: to_crop 自动生成文件夹
+// TODO: crop 的时候可以将图画出来，这样就能在大图中看画出的小图，同理 draw 时候可以指定范围，但这两种和方法都是有限制的，需要想一个中间一点的方法
 
 // TODO: 方便将 compare.json 调整为需要的可以方便调整测试集的形式，比如文件夹名字和里面的标签名字不一致
 
 // TODO: cache_from, 可以将指定文件夹中的符合 ucd 命名的图片吸收到缓存中去
 
-// TODO: update --source 可以指定提供服务的地址，可以放在 github 上，提供下载
-
-// TODO: 
-
-// TODO: book 中新增的内容 （1）pdb 代码调试 （2）linux 的常用命令 diff，（3）git 的常用语句 （5）ucd 常用的方法集锦 （6）自动添加主题信息，或者至少说明用什么python代码能添加
-
-// 
+// TODO: update --source 可以指定提供服务的地址，可以放在 github 上，提供下载，
 
 
+// TODO: filter_by_date --gt 大于某一天 --lt 小于某一天 (时间和 uc 之间的转换已经在 ucDataset 中实现了)0
 
+// TODO: 开辟 other，存放一些不是为了 json 实现的小功能
+
+// TODO: 对比两个文件夹，删除了哪些文件，新增了哪些文件
+
+// TODO: 实现插件功能，插件可以单独开发编译，
 
 
 void handle_post(const httplib::Request& req, httplib::Response& res) 
@@ -268,12 +266,15 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.8.11";
+    std::string app_version = "v4.9.3";
 
     // uci_info
     int volume_size         = 20;
 
-    // cache dir
+    // castration function 阉割功能
+    std::string castration_function;
+
+    // cache dirmake
     std::string cache_dir   = "";
 
     // get user name
@@ -312,7 +313,7 @@ int main(int argc_old, char ** argv_old)
         redis_port  = ((const int &)xini_file["redis"]["port"]);
         redis_host  = ((const std::string &)xini_file["redis"]["host"]);
         redis_name  = ((const std::string &)xini_file["redis"]["name"]);
-
+        castration_function  = ((const std::string &)xini_file["server"]["castration_function"]);
         // 分卷大小不能为 0 会有很多问题 
         if(volume_size <= 0)
         {
@@ -334,6 +335,7 @@ int main(int argc_old, char ** argv_old)
         xini_write["redis"]["port"]     = redis_port;
         xini_write["redis"]["host"]     = redis_host;
         xini_write["redis"]["name"]     = redis_name;
+        xini_write["server"]["castration_function"]     = castration_function;
         xini_write.dump(config_path);   
     }
 
@@ -1146,6 +1148,7 @@ int main(int argc_old, char ** argv_old)
             std::cout << "app_dir       : " << app_dir << std::endl;
             std::cout << "config_path   : " << config_path << std::endl;
             std::cout << "history_path  : " << history_path << std::endl;
+            std::cout << "castration_function  : " << castration_function << std::endl;
             std::cout << "[sql]" << std::endl;
             std::cout << "host          : " << sql_host << std::endl;
             std::cout << "port          : " << sql_port << std::endl;
@@ -1267,6 +1270,11 @@ int main(int argc_old, char ** argv_old)
                 xini_write["cache"]["dir"] = cache_dir_new;
                 return 0;
             }
+            else if(option == "castration_function")
+            {
+                std::string c_function = argv[3];
+                xini_write["server"]["castration_function"] = c_function;
+            }
             else
             {
                 ucd_param_opt->print_command_info("set");
@@ -1291,17 +1299,13 @@ int main(int argc_old, char ** argv_old)
         }
         // 是否强制根据 md5 得到 uc
         bool check_uc = true;
-        if(long_args.count("check_uc") > 0)
+        if(short_args.count("c") > 0)
         {
-            std::string check_uc_str = long_args["check_uc"];
-            if(check_uc_str == "1" || check_uc_str == "True" || check_uc_str == "true")
-            {
-                check_uc = true;
-            }
-            else
-            {
-                check_uc = false;
-            }
+            check_uc = true;
+        }
+        else
+        {
+            check_uc = false;
         }
 
         if(argc == 3)
@@ -1312,9 +1316,6 @@ int main(int argc_old, char ** argv_old)
                 SaturnDatabaseSQL *sd_sql = new SaturnDatabaseSQL(sql_host, sql_port, sql_user, sql_pwd, sql_db);
                 sd_sql->rename_img_dir(img_dir, 100, check_uc);
                 delete sd_sql;
-
-
-                std::cout << "check uc : " << check_uc << std::endl;
             }
             else
             {
@@ -1332,19 +1333,14 @@ int main(int argc_old, char ** argv_old)
     else if(command_1 == "rename_img_xml")
     {
         bool check_uc = true;
-        if(long_args.count("check_uc") > 0)
+        if(short_args.count("c") > 0)
         {
-            std::string check_uc_str = long_args["check_uc"];
-            if(check_uc_str == "1" || check_uc_str == "True" || check_uc_str == "true")
-            {
-                check_uc = true;
-            }
-            else
-            {
-                check_uc = false;
-            }
+            check_uc = true;
         }
-
+        else
+        {
+            check_uc = false;
+        }
         if(argc == 4)
         {
             std::string img_dir = argv[2];
@@ -1363,17 +1359,13 @@ int main(int argc_old, char ** argv_old)
     {
         
         bool check_uc = true;
-        if(long_args.count("check_uc") > 0)
+        if(short_args.count("c") > 0)
         {
-            std::string check_uc_str = long_args["check_uc"];
-            if(check_uc_str == "1" || check_uc_str == "True" || check_uc_str == "true")
-            {
-                check_uc = true;
-            }
-            else
-            {
-                check_uc = false;
-            }
+            check_uc = true;
+        }
+        else
+        {
+            check_uc = false;
         }
 
         if(argc == 4)
@@ -1389,6 +1381,26 @@ int main(int argc_old, char ** argv_old)
             ucd_param_opt->print_command_info("rename_img_json");
             return -1;
         }
+    }
+    else if(command_1 == "count_uc_by_tags")
+    {
+         if(argc == 3)
+         {
+            std::string ucd_path = argv[2];
+            if(ucd_util->is_ucd_path(ucd_path))
+            {
+                ucd_util->count_uc_by_tags(ucd_path);
+            }
+            else
+            {
+                std::cout << ERROR_COLOR << argv[2] << " is not json file " << STOP_COLOR << std::endl;
+            }
+         }
+         else
+         {
+            ucd_param_opt->print_command_info("count_uc_by_tags");
+            return -1; 
+         }
     }
     else if(command_1 == "count_tags")
     {
@@ -1695,6 +1707,10 @@ int main(int argc_old, char ** argv_old)
             ucd_param_opt->print_command_info(command_1);
             return -1;
         }
+    }
+    else if(command_1 == "cache_from")
+    {
+        // 还是不要实现这个功能了吧，还是直接从服务器上下载比较靠谱
     }
     else if(command_1 == "acc")
     {
@@ -2041,7 +2057,14 @@ int main(int argc_old, char ** argv_old)
         }
         else if(argc ==2)
         {
-            ucd_param_opt->print_all_fun_chinese();
+            if(castration_function == "")
+            {
+                ucd_param_opt->print_all_fun_chinese();
+            }
+            else
+            {
+                ucd_param_opt->print_castration_fun_chinese(castration_function);
+            }
         }
         else
         {
@@ -2344,6 +2367,25 @@ int main(int argc_old, char ** argv_old)
     {
         // 根据时间进行筛选，只需要指定时间的，时间之间使用逗号分隔
 
+        std::string gt = "";
+        std::string lt = "";
+        std::string eq = "";
+
+        if(long_args.count("gt") > 0)
+        {
+            gt = long_args["gt"];
+        }
+
+        if(long_args.count("lt") > 0)
+        {
+            lt = long_args["lt"];
+        }
+
+        if(argc == 5)
+        {
+            eq = argv[4];
+        }
+
         if(argc == 5)
         {
             std::string ucd_path = argv[2];
@@ -2359,7 +2401,8 @@ int main(int argc_old, char ** argv_old)
 
             UCDataset *ucd = new UCDataset(ucd_path);
             ucd->parse_ucd(true);
-            ucd->filter_by_date(assign_date, true);
+            // TODO 增加 method 选项
+            ucd->filter_by_date(assign_date, true, "eq");
             ucd->save_to_ucd(save_path);
             delete ucd;
             return 1;
@@ -3070,6 +3113,54 @@ int main(int argc_old, char ** argv_old)
     else if(command_1 == "split_by_tags")
     {
         // 按照 tag 分为不同的 json 文件，保存在本地
+
+        if(argc == 4)
+        {
+            std::string ucd_path = argv[2];
+            std::string save_dir = argv[3];
+
+            if(! is_read_file(ucd_path))
+            {
+                std::cout << ERROR_COLOR << "ucd path is not readable : " << ucd_path << STOP_COLOR << std::endl;
+                return -1; 
+            }
+
+            // 获取保存的名字
+            std::string save_name = "";
+            if(long_args.count("save_name") > 0)
+            {
+                save_name = long_args["save_name"];
+            }
+            else
+            {
+                save_name = get_file_name(ucd_path);
+            }
+
+            UCDataset *ucd = new UCDataset(ucd_path);
+            ucd->parse_ucd(true);
+            std::map<std::string, std::map<std::string, int> > count_map = ucd->count_tags();
+
+            auto iter = count_map["rectangle"].begin();
+            while(iter != count_map["rectangle"].end())
+            {
+                UCDataset *each_ucd = new UCDataset(ucd_path);
+                each_ucd->parse_ucd(true);
+                std::cout << "split -> " << iter->first << std::endl;
+                std::string each_save_path = save_dir + "/" + save_name + "_" + iter->first + ".json";
+                std::set<std::string> tags = {iter->first};
+                each_ucd->filter_by_tags(tags);
+                each_ucd->drop_empty_uc();
+                each_ucd->save_to_ucd(each_save_path);
+                delete each_ucd;
+                iter++;
+            }
+            delete ucd;
+            return 1;
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
     }
     else if(command_1 == "absorb")
     {
@@ -3790,7 +3881,14 @@ int main(int argc_old, char ** argv_old)
     }
     else if(command_1 == "grammar")
     {
-        ucd_param_opt->print_all_fun();
+        if(castration_function == "")
+        {
+            ucd_param_opt->print_all_fun();
+        }
+        else
+        {
+            ucd_param_opt->print_castration_fun(castration_function);
+        }
         return -1;
     }
     else if(command_1 == "game")

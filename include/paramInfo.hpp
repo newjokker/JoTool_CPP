@@ -78,8 +78,9 @@ class UcdParamOpt
 
         // 根据方法所属的类打印所有的方法
         void print_all_fun();
+        void print_castration_fun(std::string c_function="");
         void print_all_fun_chinese();
-        
+        void print_castration_fun_chinese(std::string c_function="");
         // 还没开发完备
         void not_ready(std::string method_name="");
 };

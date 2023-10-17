@@ -201,18 +201,7 @@ int RedisBook::menu_loop(std::string book_name)
             }
             else if(book_name == "cmd")
             {
-                // curl
-                // tar
-                // zip
-                // ls -h 按照时间，按照文件大小进行排序
-                // 
-                
-                // curl_explain
-                // curl_grammar 
-                // curl_example
-                
-                // 帮助文档的使用 curl --help 
-
+                RedisBook::print_cmd_info();
                 break;
             }
             else if(book_name == "q")
@@ -485,12 +474,12 @@ int RedisBook::print_docker_info()
     print_map["[Server posrt_v2     ]"]   = "docker run --gpus device=0 -p 111:111 -v /home/ldq/output_test:/usr/output_dir  -v /home/ldq/logs_dir:/usr/logs -d test:v0.0.1";
     print_map["[Server feihua       ]"]   = "docker run --gpus device=0 -p 5001:5001 -v /etc/localtime:/etc/localtime:ro -v /home/logs:/v0.0.1/logs -d test:v0.0.1";
     print_map["[Server wuhan_pd     ]"]   = "docker run --gpus device=0 -v /home/input_dir:/usr/input_picture -v /home/output_dir:/usr/output_dir -v /home/ldq/json_dir:/usr/input_picture_attach -v /home/ldq/logs:/v0.0.1/logs -d wuhan_ft:v0.0.1";
-    print_map["[Server dianlixinxi  ]"]   = "docker run --gpus device=0 \
-    -e FJGHPT='http://192.168.132.44:30000-+-http://192.168.132.44:30000/robocop-web/file/generateUrl-+-rgznpt-+-DnY2NTT9W2-+-rbocup-+-v1' \
-    -e HUOMIAN_DEVICE_CODE=http://192.168.81.170:31333/iot/webservice/restInterface/safearea/getHuoMianSafeZone? \
-    -e OUTPUT_MQ='192.168.3.99-+-5673-+-/-+-ai.sdfwpo.3-+-guest-+-guest-+-ai.sdfwpo.3' \
-    -e INFERENCE_MQ='192.168.3.99-+-5673-+-/-+-ai.sdfwpo.1-+-guest-+-guest-+-queue-ai.sdfwpo.1' \
-    -e PROCESS_MQ='192.168.3.99-+-5673-+-/-+-ai.sdfwpo.2-+-guest-+-guest-+-ai.sdfwpo.2' \
+    print_map["[Server dianlixinxi  ]"]   = "docker run --gpus device=0\
+    -e FJGHPT='http://192.168.132.44:30000-+-http://192.168.132.44:30000/robocop-web/file/generateUrl-+-rgznpt-+-DnY2NTT9W2-+-rbocup-+-v1'\
+    -e HUOMIAN_DEVICE_CODE=http://192.168.81.170:31333/iot/webservice/restInterface/safearea/getHuoMianSafeZone?\
+    -e OUTPUT_MQ='192.168.3.99-+-5673-+-/-+-ai.sdfwpo.3-+-guest-+-guest-+-ai.sdfwpo.3'\
+    -e INFERENCE_MQ='192.168.3.99-+-5673-+-/-+-ai.sdfwpo.1-+-guest-+-guest-+-queue-ai.sdfwpo.1'\
+    -e PROCESS_MQ='192.168.3.99-+-5673-+-/-+-ai.sdfwpo.2-+-guest-+-guest-+-ai.sdfwpo.2'\
     -e MODE=TEST -it fwppt_business_fix:v0.0.7 /bin/bash";
 
     print_map["[Docker commit -c ]"]    = "docker commit -c 'CMD /v0.01/start_server_jibei.sh' contain_id test:v0.0.1 (指定启动时候运行指定文件)";
@@ -504,36 +493,77 @@ int RedisBook::print_docker_info()
     print_map["[CMD kill_all_contain                ] "]     = "docker rm -f $(docker ps -aq) (删除所有容器)";
     print_map["[CMD Keep_the_time_zone_consistent   ] "]     = "-v /etc/localtime:/etc/localtime:ro (内外时区一致)";
     
-    print_map["[Dockerfile apt update failed]"]     = "\n \
-------------------------------------------------------------------------- \n \
-# 当 apt update 执行失败 \n \
-RUN gpg --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC \n \
-RUN gpg --export --armor A4B469963BF863CC | apt-key add - \n \
+    print_map["[Dockerfile apt update failed]"]     = "\n\
+------------------------------------------------------------------------- \n\
+# 当 apt update 执行失败 \n\
+RUN gpg --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC \n\
+RUN gpg --export --armor A4B469963BF863CC | apt-key add - \n\
 -------------------------------------------------------------------------";
     
-    print_map["[Dockerfile inastall UCD]"]     = "\n \ 
-------------------------------------------------------------------------- \n \
-# 使用 dockerfile 直接安装 UCD \n \
-RUN mkdir -p  /home/ldq/Apps_jokker  /usr/ucd_cache \n \ 
-RUN curl  -o  /home/ldq/Apps_jokker/ucd http://192.168.3.111:11101/ucd_app/v4.8.9 \n \ 
-RUN chmod 777 /home/ldq/Apps_jokker/* /usr/ucd_cache -R \n \ 
-RUN echo 'alias ucd=/home/ldq/Apps_jokker/ucd' >> /root/.bash_aliases \n \ 
-# 使用 source 关键字有时候运行不成功 \n \
-RUN . /root/.bash_aliases \n \ 
-# 执行的命令需要在 ucd 源码中返回 0, 否者执行会失败 \n \ 
-RUN /home/ldq/Apps_jokker/ucd set cache_dir /usr/ucd_cache/ \n \ 
+    print_map["[Dockerfile inastall UCD]"]     = "\n\ 
+------------------------------------------------------------------------- \n\
+# 使用 dockerfile 直接安装 UCD\n\
+RUN mkdir -p  /home/ldq/Apps_jokker  /usr/ucd_cache\n\ 
+RUN curl  -o  /home/ldq/Apps_jokker/ucd http://192.168.3.111:11101/ucd_app/v4.8.9\n\ 
+RUN chmod 777 /home/ldq/Apps_jokker/* /usr/ucd_cache -R\n\ 
+RUN echo 'alias ucd=/home/ldq/Apps_jokker/ucd' >> /root/.bash_aliases\n\ 
+# 使用 source 关键字有时候运行不成功\n\
+RUN . /root/.bash_aliases\n\ 
+# 执行的命令需要在 ucd 源码中返回 0, 否者执行会失败\n\ 
+RUN /home/ldq/Apps_jokker/ucd set cache_dir /usr/ucd_cache/\n\ 
 -------------------------------------------------------------------------";
 
-    print_map["[Dockerfile inastall APP]"]     = "\n \ 
-------------------------------------------------------------------------- \n \
-# 使用 dockerfile 安装常用的软件(-y 默认同意安装) \n \
-RUN apt-get update && apt-get install vim -y \ 
-&& apt-get install libglib2.0-0 -y \ 
-&& apt install libgl1-mesa-glx -y \ 
-&& apt-get install gcc -y \ 
-&& apt-get install curl -y \n \
+    print_map["[Dockerfile inastall APP]"]     = "\n\ 
+-------------------------------------------------------------------------\n\
+# 使用 dockerfile 安装常用的软件(-y 默认同意安装)\n\
+RUN apt-get update && apt-get install vim -y\ 
+&& apt-get install libglib2.0-0 -y\ 
+&& apt install libgl1-mesa-glx -y\ 
+&& apt-get install gcc -y\ 
+&& apt-get install curl -y \n\
 -------------------------------------------------------------------------";
 
+    print_map["[Dockerfile cuda11.1,sm_86]"]     = "\n\
+-------------------------------------------------------------------------\n\
+FROM pytorch/pytorch:1.8.1-cuda11.1-cudnn8-runtime \n\
+RUN apt-get update && apt-get install vim -y && apt-get install libglib2.0-0 -y && apt install libgl1-mesa-glx -y && apt-get install gcc -y \n\
+# install python package \n\
+RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple \
+    flask\
+    shapely\
+    pycryptodome\
+    Cython\
+    matplotlib\
+    pandas\
+    seaborn\
+    sklearn\
+    yacs\
+    prettytable\
+    gevent\
+    opencv-python\
+    JoUtil\
+    scikit-image \n\
+# insert line, check the inference \n\
+RUN sed -i '268i \            self.score_thresh = 0.1 if not hasattr(self, 'score_thresh') else self.score_thresh' /opt/conda/lib/python3.8/site-packages/JoTools/../torchvision/models/detection/rpn.py \n\
+-------------------------------------------------------------------------";
+
+
+    print_map["[Dockerfile dlxx_jupyter]"]     = "\n\
+-------------------------------------------------------------------------\n\
+# 电力信息安装 jupyter \n\
+RUN apt update -y\ \n\
+	&& apt install -y python3-pip\ \n\
+	&& pip install jupyter -i https://pypi.tuna.tsinghua.edu.cn/simple\ \n\
+	&& jupyter notebook --generate-config\\n\
+	&& echo 'c.NotebookApp.ip=\"0.0.0.0\"' 			>> /root/.jupyter/jupyter_notebook_config.py\ \n\
+	&& echo 'c.NotebookApp.open_browser = False'   	>> /root/.jupyter/jupyter_notebook_config.py\ \n\
+	&& echo 'c.NotebookApp.port = 8888' 			>> /root/.jupyter/jupyter_notebook_config.py\ \n\
+	&& echo 'c.NotebookApp.token = \"\"' 				>> /root/.jupyter/jupyter_notebook_config.py\ \n\
+	&& echo 'c.NotebookApp.allow_root = True'      	>> /root/.jupyter/jupyter_notebook_config.py\n\
+LABEL desc=\"电力信息yolo训练\"\n\
+ENV PATH=//opt/conda/bin/:$PATH\n\
+-------------------------------------------------------------------------";
+    
     // TODO: 删除所有的 容器 docker rm -f $(docker ps -aq --filter "ancestor=fwppt_model:v1.4.7")
 
     std::cout << "--------------------------------------------------------------------------------" << std::endl;
@@ -627,7 +657,51 @@ int RedisBook::print_official_info()
         std::cout << "----------------------------------" << std::endl;
     }
     freeReplyObject(reply);
+}
 
+int RedisBook::print_cmd_info()
+{
+
+    std::map< std::string, std::string > cmd_info;
+    cmd_info["全文查找"] = "find <文件夹路径>  -type f -name <文件匹配关键字> -print0 | xargs -0 grep <全文查找关键字>";
+    cmd_info["下载文件"] = "curl -o <保存文件名> <下载链接>";
+    cmd_info["压缩解压"] = "tar -xvf <压缩文件路径> ; tar -cvf <压缩文件路径> <文件夹路径>";
+    cmd_info["查看文件"] = "ls -lh";
+    cmd_info["看哈希值"] = "md5sum <文件路径>";
+    cmd_info["空间分析"] = "df -h ; du -sh <文件夹路径> ; ncdu(交互式空间分析工具)";
+    cmd_info["空间分析"] = "df -h ; du -sh <文件夹路径> ; ncdu(交互式空间分析工具)";
+
+
+    std::cout << "--------------------------------------------------------------------------" << std::endl;
+    auto iter = cmd_info.begin();
+    while(iter != cmd_info.end())
+    {
+        std::cout << HIGHTLIGHT_COLOR << iter->first << STOP_COLOR << " : " << iter->second << std::endl;
+        if(iter != cmd_info.end()--)
+        {
+            std::cout << "" << std::endl;
+        }
+        iter++;
+    }
+    std::cout << "\b";
+    std::cout << "----------------------------" << std::endl;
+    std::cout << "获取帮助 : <命令> --help" << std::endl;
+    std::cout << "--------------------------------------------------------------------------" << std::endl;
+
+
+    // std::cout << "--------------------------------------------------------------------------" << std::endl;
+    // std::cout << "全文查找 : find <文件夹路径>  -type f -name <文件匹配关键字> -print0 | xargs -0 grep <全文查找关键字> \n" << std::endl;
+    // std::cout << "下载文件 : curl -o <保存文件名> <下载链接>\n" << std::endl;
+    // std::cout << "压缩解压 : tar -xvf <压缩文件路径> ; tar -cvf <压缩文件路径> <文件夹路径> \n" << std::endl;
+    // std::cout << "查看文件 : ls -lh\n" << std::endl;
+    // std::cout << "看哈希值 : md5sum <文件路径>\n" << std::endl;
+    // std::cout << "空间分析 : df -h ; du -sh <文件夹路径> ; ncdu(交互式空间分析工具) \n" << std::endl;
+    // std::cout << "----------------------------" << std::endl;
+    // std::cout << "获取帮助 : <命令> --help" << std::endl;
+    // std::cout << "--------------------------------------------------------------------------" << std::endl;
+
+
+    return 0;
 }
 
 

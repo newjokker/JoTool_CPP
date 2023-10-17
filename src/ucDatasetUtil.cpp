@@ -170,6 +170,114 @@ UCDataset::UCDataset(std::string json_path)
 //     UCDataset::uc_list.clear();
 // }
 
+std::string UCDataset::uc_to_date(std::string uc)
+{
+    // uc to data
+    std::map<std::string, int> comparison_table = 
+                            {{"0", 0}, {"1", 1}, {"2", 2}, {"3", 3}, {"4", 4}, {"5", 5}, {"6", 6}, {"7", 7}, {"8", 8}, {"9", 9}, 
+                            {"a", 10}, {"b", 11}, {"c", 12}, {"d", 13}, {"e", 14}, {"f", 15}, {"g", 16}, {"h", 17}, {"i", 18},
+                            {"j", 19}, {"k", 20}, {"m", 21}, {"n", 22}, {"p", 23}, {"q", 24}, {"r", 25}, {"s", 26}, {"t", 27},
+                            {"u", 28}, {"v", 29}, {"w", 30}, {"x", 31}, {"y", 32}, {"z", 33}};
+
+    std::map<std::string, int> year_dict = {{"A", 2019}, {"B", 2020}, {"C", 2021}, {"D", 2022}, {"E", 2023}, {"F", 2024}, {"G", 2025}, {"H", 2026}, {"I", 2027}, {"J", 2027}, {"Z", 9999}};
+
+    int year    = year_dict[uc.substr(0, 1)];
+    int month   = comparison_table[uc.substr(1, 1)] - 9 ;
+    int day     = comparison_table[uc.substr(2, 1)] - 9 ;
+    
+    if(month > 12)
+    {
+        month -= 12;
+        day += 15;
+    }
+
+    // month_str
+    std::string date_month;
+    if(std::to_string(month).size() == 1)
+    {
+        date_month = "0" + std::to_string(month);
+    }
+    else
+    {
+        date_month = std::to_string(month);
+    }
+
+    // day_str
+    std::string date_day;
+    if(std::to_string(day).size() == 1)
+    {
+        date_day = "0" + std::to_string(day);
+    }
+    else
+    {
+        date_day = std::to_string(day);
+    }
+
+    std::string date = std::to_string(year) + "-" + date_month + "-" + date_day;
+    return date;
+}
+
+std::string UCDataset::date_to_uc_head(std::string date)
+{
+
+    std::map<int, std::string> comparison_table = 
+    {
+        {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}, {9, "9"}, 
+        {10, "a"}, {11, "b"}, {12, "c"}, {13, "d"}, {14, "e"}, {15, "f"}, {16, "g"}, {17, "h"}, {18, "i"}, 
+        {19, "j"}, {20, "k"}, {21, "m"}, {22, "n"}, {23, "p"}, {24, "q"}, {25, "r"}, {26, "s"}, {27, "t"}, 
+        {28, "u"}, {29, "v"}, {30, "w"}, {31, "x"}, {32, "y"}, {33, "z"}
+    };
+
+    std::map<int, std::string> year_dict = 
+    {
+        {2019, "A"}, {2020, "B"}, {2021, "C"}, {2022, "D"}, {2023, "E"}, {2024, "F"}, {2025, "G"}, {9999, "Z"}
+    };
+
+    if(date.size() != 8)
+    {
+        std::cout << ERROR_COLOR << "date format error, need 20230405" << STOP_COLOR << std::endl;
+    }
+
+    int year, month, day;
+    
+    year = std::stoi(date.substr(0, 4));
+
+    if(date[4] == '0')
+    {
+        month = std::stoi(date.substr(5, 1));
+    }
+    else
+    {
+        month = std::stoi(date.substr(4, 2));
+    }
+
+    if(date[6] == '0')
+    {
+        day = std::stoi(date.substr(7, 1));
+    }
+    else
+    {
+        day = std::stoi(date.substr(6, 2));
+    }
+
+    std::string letter_1, letter_2, letter_3;  
+    letter_1 = year_dict[year];
+
+    if(day <= 15)
+    {
+        letter_2 = comparison_table[month + 9];
+        letter_3 = comparison_table[day + 9];
+    }
+
+    else
+    {
+        letter_2 = comparison_table[month + 9 + 12];
+        letter_3 = comparison_table[day - 15 + 9];
+    }
+    return letter_1 + letter_2 + letter_3;
+
+}
+
 void UCDataset::parse_ucd(bool parse_shape_info)
 {
     if(! is_file(UCDataset::json_path))
@@ -1274,7 +1382,7 @@ void UCDataset::filter_by_uc_set(std::set<std::string> uc_set, bool clear_obj)
     UCDataset::uc_list = uc_list;
 }
 
-void UCDataset::filter_by_date(std::vector<std::string> assign_date, bool clear_obj)
+void UCDataset::filter_by_date(std::vector<std::string> assign_date, bool clear_obj, std::string method)
 {
     std::vector<std::string> uc_list;
     for(int i=0; i<UCDataset::uc_list.size(); i++)
@@ -1563,6 +1671,7 @@ void UCDataset::split_by_conf(std::string save_dir, std::string save_name)
     std::cout << "作者觉得这个模式没什么软用，没有实现，要是这个功能对你很重要，去催作者实现" << std::endl;
     return;
 }
+
 
 void UCDataset::split_by_conf_change_tags(float step)
 {
@@ -2375,10 +2484,10 @@ void UCDataset::drop_empty_uc()
         }
         else
         {
+            drop_count += 1;
             // clean extra size_info
             if(UCDataset::size_info.count(uc) > 0)
             {
-                drop_count += 1;
                 UCDataset::size_info.erase(uc);
             }
         }
@@ -3744,6 +3853,51 @@ bool UCDatasetUtil::is_uci_path(std::string uci_path)
     }
 }
 
+void UCDatasetUtil::count_uc_by_tags(std::string ucd_path)
+{
+    if(! UCDatasetUtil::is_ucd_path(ucd_path))
+    {
+        std::cout << ERROR_COLOR << "ucd path not exists : " << ucd_path << STOP_COLOR << std::endl;
+        return;
+    }
+
+    UCDataset* ucd = new UCDataset(ucd_path);
+    ucd->parse_ucd(true);
+    std::map<std::string, std::set<std::string> > uc_count_map;
+
+    // statistics uc
+    auto iter = ucd->object_info.begin();
+    while(iter != ucd->object_info.end())
+    {
+        for(int i=0; i<iter->second.size(); i++)
+        {
+            std::string label = iter->second[i]->label;
+            if(uc_count_map.count(label) == 0)
+            {
+                uc_count_map[label] = {iter->first};
+            }
+            else
+            {
+                uc_count_map[label].insert(iter->first);
+            }
+        }
+        iter++;
+    }
+    // 
+    std::cout << "---------------------------------------------" << std::endl;
+    std::cout << std::setw(15) << std::left << "tag" << std::setw(20) << std::left << "uc count" << std::endl;
+    std::cout << "---------------------------------------------" << std::endl;
+    auto iter_2 = uc_count_map.begin();
+    while(iter_2 != uc_count_map.end())
+    {
+        std::cout << std::setw(15) << std::left << iter_2->first << std::setw(20) << std::left << iter_2->second.size() << std::endl;
+        iter_2 ++;
+    }
+    std::cout << "---------------------------------------------" << std::endl;
+
+    delete ucd;
+}
+
 void UCDatasetUtil::count_ucd_tags(std::string ucd_path)
 {
     if(! UCDatasetUtil::is_ucd_path(ucd_path))
@@ -3761,6 +3915,9 @@ void UCDatasetUtil::count_ucd_tags(std::string ucd_path)
     // print statistics res
     auto iter_count = count_map.begin();
     std::cout << "---------------------------------------------" << std::endl;
+    std::cout << std::setw(15) << std::left << "shape" << std::setw(20) << std::left << "tag"  << " : " << "count" << std::endl;
+    std::cout << "---------------------------------------------" << std::endl;
+
     while(iter_count != count_map.end())
     {
         auto iter = iter_count->second.begin();
@@ -4024,10 +4181,8 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
     // 
     if(! is_dir(save_dir))
     {
-        std::cout << WARNNING_COLOR << "save dir not exists : " << save_dir << STOP_COLOR << std::endl;
+        // std::cout << WARNNING_COLOR << "save dir not exists : " << save_dir << STOP_COLOR << std::endl;
         create_folder(save_dir);
-        // throw "save dir not exists";
-        // return;
     }
 
     if(! UCDatasetUtil::is_ucd_path(ucd_path))
@@ -4077,7 +4232,6 @@ void UCDatasetUtil::cut_small_img(std::string ucd_path, std::string save_dir, bo
     bar.finish();
     delete ucd;
 }
-
 
 void UCDatasetUtil::parse_labelme_json(std::string img_dir, std::string save_dir, std::string ucd_path)
 {
@@ -4139,10 +4293,16 @@ void UCDatasetUtil::parse_labelme_json(std::string img_dir, std::string save_dir
 
 void UCDatasetUtil::parse_voc_xml(std::string img_dir, std::string save_dir, std::string ucd_path)
 {
+
     if(! is_dir(img_dir))
     {
         std::cout << ERROR_COLOR << "img_dir not exists : " << img_dir << STOP_COLOR << std::endl;
         throw "img_dir not exists";
+    }
+
+    if(! is_dir(save_dir))
+    {
+        create_folder(save_dir);
     }
 
     if(! is_dir(save_dir))
@@ -4324,55 +4484,28 @@ void UCDatasetUtil::uc_analysis(std::string ucd_path)
         }
     }
 
-
-    // uc to data
-    std::map<std::string, int> comparison_table = 
-                            {{"0", 0}, {"1", 1}, {"2", 2}, {"3", 3}, {"4", 4}, {"5", 5}, {"6", 6}, {"7", 7}, {"8", 8}, {"9", 9}, 
-                            {"a", 10}, {"b", 11}, {"c", 12}, {"d", 13}, {"e", 14}, {"f", 15}, {"g", 16}, {"h", 17}, {"i", 18},
-                            {"j", 19}, {"k", 20}, {"m", 21}, {"n", 22}, {"p", 23}, {"q", 24}, {"r", 25}, {"s", 26}, {"t", 27},
-                            {"u", 28}, {"v", 29}, {"w", 30}, {"x", 31}, {"y", 32}, {"z", 33}};
-
-    std::map<std::string, int> year_dict = {{"A", 2019}, {"B", 2020}, {"C", 2021}, {"D", 2022}, {"E", 2023}, {"F", 2024}, {"G", 2025}, {"Z", 9999}};
-
+    std::map< std::string, std::string > uc_info;
     auto iter = uc_date_map.begin();
     while(iter != uc_date_map.end())
     {
         std::string uc = iter->first;
-        int year = year_dict[uc.substr(0, 1)];
-        int month = comparison_table[uc.substr(1, 1)] - 9 ;
-        int day = comparison_table[uc.substr(2, 1)] - 9 ;
-        if(month > 12)
-        {
-            month -= 12;
-            day += 15;
-        }
-
-        // month_str
-        std::string date_month;
-        if(std::to_string(month).size() == 1)
-        {
-            date_month = "0" + std::to_string(month);
-        }
-        else
-        {
-            date_month = std::to_string(month);
-        }
-
-        // day_str
-        std::string date_day;
-        if(std::to_string(day).size() == 1)
-        {
-            date_day = "0" + std::to_string(day);
-        }
-        else
-        {
-            date_day = std::to_string(day);
-        }
-
-        std::string date = std::to_string(year) + "-" + date_month + "-" + date_day;
-        std::cout << uc << "   " << std::setw(10) << std::left << date << "   " << iter->second << std::endl;
+        std::string date = ucd->uc_to_date(uc);
+        uc_info[date] = uc + "        " + date + "        " + std::to_string(iter->second); 
+        // std::cout << uc << "   " << std::setw(10) << std::left << date << "   " << iter->second << std::endl;
         iter++;
     }
+
+    auto iter_1 = uc_info.begin();
+    std::cout << "-------------------------------------" << std::endl;
+    std::cout << "              UC analysis" << std::endl;
+    std::cout << "-------------------------------------" << std::endl;
+    while(iter_1 != uc_info.end())
+    {
+        std::cout << iter_1->second << std::endl;
+        iter_1++;
+    }
+    std::cout << "-------------------------------------" << std::endl;
+
 }
 
 void UCDatasetUtil::conf_analysis(std::string ucd_path, int seg_count)
@@ -4663,6 +4796,11 @@ void UCDatasetUtil::set_fack_uc(std::string fake_folder)
 
         rename(file_path_vector[i].c_str(), new_file_path.c_str());
     }
+
+    // 输出生成的 fake uc 的个数
+    std::cout << HIGHTLIGHT_COLOR << "fake uc count : " << file_path_vector.size() << STOP_COLOR << std::endl;
+
+
 }
 
 void UCDatasetUtil::draw_res(std::string ucd_path, std::string save_dir, std::vector<std::string> uc_list, bool cover_old_img)

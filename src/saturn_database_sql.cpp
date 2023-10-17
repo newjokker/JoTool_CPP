@@ -30,6 +30,18 @@ static bool is_uc(std::string uc)
     return true;
 }
 
+static bool is_uc_ignore_fake(std::string uc)
+{
+    if(uc.size() != 7){ return false; }
+    if(((int)uc[0] < (int)'C') || ((int)uc[0] > int('K'))) { return false; }
+    if(((int)uc[1] < (int)'a') || ((int)uc[1] > int('z'))) { return false; }
+    if(((int)uc[2] < (int)'a') || ((int)uc[2] > int('z'))) { return false; }
+    // 将 fake uc 视作非规范化的数据
+    if(uc[0] == 'F' && uc[1] == 'u' && uc[2] == 'c') { return false; }
+    
+    return true;
+}
+
 std::map<std::string, bool> SaturnDatabaseSQL::check_uc_by_mysql(std::vector<std::string> uc_vector)
 {
     MYSQL *conn;
@@ -109,7 +121,7 @@ void SaturnDatabaseSQL::rename_img_dir(std::string img_dir, int buffer_img_size,
     {
         std::string img_name = get_file_name(img_path_vector[i]);
 
-        if((! is_uc(img_name)) || (check_uc == false))
+        if((! is_uc_ignore_fake(img_name)) || (check_uc == true))
         {
             md5_str = get_file_md5(img_path_vector[i]);
             md5_vector.push_back(md5_str);
@@ -128,6 +140,7 @@ void SaturnDatabaseSQL::rename_img_dir(std::string img_dir, int buffer_img_size,
     std::string img_folder;
     std::string img_suffix;
     std::string new_img_path;
+    int rename_count = 0;
     auto iter = img_path_md5_map.begin();
     while(iter != img_path_md5_map.end())
     {
@@ -141,9 +154,13 @@ void SaturnDatabaseSQL::rename_img_dir(std::string img_dir, int buffer_img_size,
             new_img_path = img_folder + "/" + uc + img_suffix;
             // rename 
             rename(img_path.c_str(), new_img_path.c_str());
+            rename_count ++;
         }
         iter ++;
     }
+
+    std::cout << HIGHTLIGHT_COLOR << "rename count : " << rename_count << STOP_COLOR << std::endl;
+
 }
 
 void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_dir, int buffer_img_size, bool check_uc)
@@ -171,7 +188,7 @@ void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_
         // todo 如果存在对应的 xml path
         img_name = get_file_name(img_path_vector[i]);
         xml_path = xml_dir + "/" + img_name + ".xml";
-        if((! is_uc(img_name)) || (check_uc == false))
+        if((! is_uc_ignore_fake(img_name)) || (check_uc == true))
         {
             if(is_file(xml_path))
             {
@@ -193,6 +210,7 @@ void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_
     std::map<std::string, std::string> md5_uc_map = SaturnDatabaseSQL::get_md5_uc_map_from_md5_vector(md5_vector);
 
     // rename
+    int rename_count = 0; 
     auto iter = img_path_md5_map.begin();
     while(iter != img_path_md5_map.end())
     {
@@ -209,10 +227,13 @@ void SaturnDatabaseSQL::rename_img_xml_dir(std::string img_dir, std::string xml_
 
             rename(img_path.c_str(), new_img_path.c_str());
             rename(xml_path.c_str(), new_xml_path.c_str());
+            rename_count++;
         }
-        // std::cout << img_path << " : " << new_img_path << std::endl;
         iter ++;
     }
+    
+    std::cout << HIGHTLIGHT_COLOR << "rename count : " << rename_count << STOP_COLOR << std::endl;
+
 }
 
 void SaturnDatabaseSQL::rename_img_json_dir(std::string img_dir, std::string json_dir, int buffer_img_size, bool check_uc)
@@ -240,7 +261,7 @@ void SaturnDatabaseSQL::rename_img_json_dir(std::string img_dir, std::string jso
         // todo 如果存在对应的 xml path
         img_name = get_file_name(img_path_vector[i]);
         xml_path = json_dir + "/" + img_name + ".json";
-        if((! is_uc(img_name)) || (check_uc == false))
+        if((! is_uc_ignore_fake(img_name)) || (check_uc == true))
         {
             if(is_file(xml_path))
             {
@@ -262,6 +283,7 @@ void SaturnDatabaseSQL::rename_img_json_dir(std::string img_dir, std::string jso
     std::map<std::string, std::string> md5_uc_map = SaturnDatabaseSQL::get_md5_uc_map_from_md5_vector(md5_vector);
 
     // rename
+    int rename_count = 0; 
     auto iter = img_path_md5_map.begin();
     while(iter != img_path_md5_map.end())
     {
@@ -278,11 +300,14 @@ void SaturnDatabaseSQL::rename_img_json_dir(std::string img_dir, std::string jso
 
             rename(img_path.c_str(), new_img_path.c_str());
             rename(xml_path.c_str(), new_xml_path.c_str());
+            rename_count++;
         }
 
         // std::cout << img_path << " : " << new_img_path << std::endl;
         iter ++;
     }
+    std::cout << HIGHTLIGHT_COLOR << "rename count : " << rename_count << STOP_COLOR << std::endl;
+
 }
 
 std::map<std::string, std::string> SaturnDatabaseSQL::get_md5_uc_map_from_md5_vector(std::vector<std::string> md5_vector)
@@ -325,7 +350,7 @@ std::map<std::string, std::string> SaturnDatabaseSQL::get_md5_uc_map_from_md5_ve
         else
         {
             no_uc_index += 1;
-            std::cout << no_uc_index << ", " << "can't find uc by md5 : " << md5_vector[i] << std::endl;
+            // std::cout << no_uc_index << ", " << "can't find uc by md5 : " << md5_vector[i] << std::endl;
         }
         mysql_free_result(res); 
     }

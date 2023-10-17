@@ -275,4 +275,3 @@ int post_v2(std::string img_server_host, int img_server_port, std::string ucd_pa
     delete ucd;
     return 1;
 }
-

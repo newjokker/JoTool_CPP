@@ -275,6 +275,48 @@ void UcdParamOpt::print_all_fun()
     std::cout << "------------------------" << std::endl;
 }
 
+void UcdParamOpt::print_castration_fun(std::string castration_fun)
+{
+    std::cout << "----------------------------------------------------------------" << std::endl;
+    std::cout << "                        阉割版语法文档" << std::endl;
+    std::cout << "----------------------------------------------------------------" << std::endl;
+    std::vector<std::string> c_func_list = pystring::split(castration_fun, ",");
+    std::cout << "" << std::endl;
+    
+    for(int i=0; i<c_func_list.size(); i++)
+    {
+        std::string func = pystring::strip(c_func_list[i], " ");
+        if(UcdParamOpt::has_command(func))
+        {
+            ParamInfo param_info = UcdParamOpt::get_param(func);
+            std::cout << HIGHTLIGHT_COLOR << std::setw(15) << std::left << func << STOP_COLOR << std::left << " " << param_info.grammar << std::endl;
+            std::cout << "" << std::endl;
+        }
+    }
+    std::cout << "----------------------------------------------------------------" << std::endl;
+}
+
+void UcdParamOpt::print_castration_fun_chinese(std::string castration_fun)
+{
+    std::cout << "----------------------------------------------------------------" << std::endl;
+    std::cout << "                        阉割版语法文档" << std::endl;
+    std::cout << "----------------------------------------------------------------" << std::endl;
+    std::vector<std::string> c_func_list = pystring::split(castration_fun, ",");
+    std::cout << "" << std::endl;
+    
+    for(int i=0; i<c_func_list.size(); i++)
+    {
+        std::string func = pystring::strip(c_func_list[i], " ");
+        if(UcdParamOpt::has_command(func))
+        {
+            ParamInfo param_info = UcdParamOpt::get_param(func);
+            std::cout << HIGHTLIGHT_COLOR << std::setw(15) << std::left << func << STOP_COLOR << std::left << " " << param_info.chinese_explain << std::endl;
+            std::cout << "" << std::endl;
+        }
+    }
+    std::cout << "----------------------------------------------------------------" << std::endl;
+}
+
 void UcdParamOpt::print_all_fun_chinese()
 {
     // 计算模块属于的组，按照分组打印所有的帮助信息
@@ -393,8 +435,8 @@ void UcdParamOpt::load_param_info()
     param_load->grammar = "ucd load ucd_name save_path|save_dir";
     param_load->english_explain = "load ucd from server";
     param_load->chinese_explain = "下载在线数据集";   
-    param_load->demo.push_back("ucd load docker\\del\\recommend_base                        (将云端上地址为 docker\\del\\recommend_base 的ucd 保存到本地路径, 文件名中带有云上位置的文件夹等级信息)");
-    param_load->demo.push_back("ucd load docker\\del\\recommend_base recommend_base.json    (将云端上地址为 docker\\del\\recommend_base 的ucd 保存到本地的 recommend_base.json 路径)");
+    param_load->demo.push_back("ucd load docker\\\\del\\\\recommend_base                        (将云端上地址为 docker\\\\del\\\\recommend_base 的ucd 保存到本地路径, 文件名中带有云上位置的文件夹等级信息)");
+    param_load->demo.push_back("ucd load docker\\\\del\\\\recommend_base recommend_base.json    (将云端上地址为 docker\\\\del\\\\recommend_base 的ucd 保存到本地的 recommend_base.json 路径)");
     UcdParamOpt::add_param(param_load);
     
     // upload
@@ -506,7 +548,7 @@ void UcdParamOpt::load_param_info()
     param_set->group = "info";
     param_set->grammar = "ucd set key value";
     param_set->english_explain = "update config info";
-    param_set->chinese_explain = "设置配置信息 (host, port, sql_host, sql_port, sql_user, sql_pwd, sql_db, cache_dir, redis_port, redis_host) ";  
+    param_set->chinese_explain = "设置配置信息 (host, port, sql_host, sql_port, sql_user, sql_pwd, sql_db, cache_dir, redis_port, redis_host, castration_function) ";  
     param_set->demo.push_back("ucd set cache_dir /home/disk2/ucd_cache      (设置 ucd 的缓存文件夹)"); 
     param_set->demo.push_back("ucd set host 192.168.3.111                   (设置 ucd 服务的 host 信息)"); 
     UcdParamOpt::add_param(param_set);
@@ -551,7 +593,7 @@ void UcdParamOpt::load_param_info()
     ParamInfo * param_rename_img = new ParamInfo("rename_img");
     param_rename_img->group = "rename";
     param_rename_img->grammar = "ucd rename_img img_dir";
-    param_rename_img->args_info["--check_uc"] = "false|0|False, 不管文件名是不是uc，都强制根据文件 md5 找到对应的 uc";
+    param_rename_img->args_info["-c"] = "-c check_uc 强制根据文件 md5 找到对应的 uc, 否则当文件名为 uc 样式（不包括fake uc 即 Fuc 开始的 uc）则直接忽略重命名";
     param_rename_img->english_explain = "rename img by uc";
     param_rename_img->chinese_explain = "使用 uc 重命名图片(.jpg, .JPG, .png, .PNG), 未入库的数据不进行重命名";
     param_rename_img->demo.push_back("ucd rename_img ./img                      (将 ./img 路径下的所有图片进行重名名)");   
@@ -561,7 +603,7 @@ void UcdParamOpt::load_param_info()
     ParamInfo * param_rename_img_xml = new ParamInfo("rename_img_xml");
     param_rename_img_xml->group = "rename";
     param_rename_img_xml->grammar = "ucd rename_img_xml img_dir xml_dir";
-    param_rename_img_xml->args_info["--check_uc"] = "false|0|False, 不管文件名是不是uc，都强制根据文件 md5 找到对应的 uc";
+    param_rename_img_xml->args_info["-c"] = "-c check_uc 强制根据文件 md5 找到对应的 uc, 否则当文件名为 uc 样式（不包括fake uc 即 Fuc 开始的 uc）则直接忽略重命名";
     param_rename_img_xml->english_explain = "rename img xml by uc";
     param_rename_img_xml->chinese_explain = "使用 uc 重命名数据集, xml 名字跟随者 img 的名字的改变而改变";
     param_rename_img_xml->demo.push_back("ucd rename_img_xml ./img ./xml        (将 ./img 文件夹中的图片和 ./xml 文件夹中的 xml 同时使用 uc 重命名)");   
@@ -571,7 +613,7 @@ void UcdParamOpt::load_param_info()
     ParamInfo * param_rename_img_json = new ParamInfo("rename_img_json");
     param_rename_img_json->group = "rename";
     param_rename_img_json->grammar = "ucd rename_img_json img_dir xml_dir";
-    param_rename_img_json->args_info["--check_uc"] = "false|0|False, 不管文件名是不是uc，都强制根据文件 md5 找到对应的 uc";
+    param_rename_img_json->args_info["-c"] = "-c check_uc 强制根据文件 md5 找到对应的 uc, 否则当文件名为 uc 样式（不包括fake uc 即 Fuc 开始的 uc）则直接忽略重命名";
     param_rename_img_json->english_explain = "rename img json by uc";
     param_rename_img_json->chinese_explain = "使用 uc 重命名数据集, json 名字跟随者 img 的名字的改变而改变";   
     param_rename_img_json->demo.push_back("ucd rename_img_xml ./img ./json        (将 ./img 文件夹中的图片和 ./json 文件夹中的 json 同时使用 uc 重命名)");   
@@ -586,6 +628,15 @@ void UcdParamOpt::load_param_info()
     param_count_tags->demo.push_back("ucd count_tags test.json                      (统计 test.json 中的各个标签的个数)");   
     param_count_tags->demo.push_back("ucd count_tags test.uci                       (统计 test.uci 中的各个标签的个数)");   
     UcdParamOpt::add_param(param_count_tags);
+    
+    // count_uc_by_tags
+    ParamInfo * param_count_uc_by_tags = new ParamInfo("count_uc_by_tags");
+    param_count_uc_by_tags->group = "info";
+    param_count_uc_by_tags->grammar = "ucd count_uc_by_tags ucd_path | uci_path";
+    param_count_uc_by_tags->english_explain = "count tags";
+    param_count_uc_by_tags->chinese_explain = "统计每一个标签存在于多少个图片中";
+    param_count_uc_by_tags->demo.push_back("ucd count_uc_by_tags test.json             (统计 test.json 中的各个标签对应的图片数)");   
+    UcdParamOpt::add_param(param_count_uc_by_tags);
     
     // count_files
     ParamInfo * param_count_files = new ParamInfo("count_files");
@@ -621,6 +672,7 @@ void UcdParamOpt::load_param_info()
     param_to_crop->demo.push_back("ucd to_crop test.json ./crop         (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，每个标签的的小图分文件夹存放)");
     param_to_crop->demo.push_back("ucd to_crop test.json ./crop -s      (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，所有小图放在一起)");
     param_to_crop->demo.push_back("ucd to_crop test.json ./crop -s -c   (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，所有小图放在一起, 并改变标签包含置信度信息)");
+    param_to_crop->demo.push_back("ucd to_crop test.json ./crop -c      (将 test.json 中对应的各个小图都截取出来，放到 ./crop 文件夹中，按照 tag_conf_range 划分为多个文件夹");
     UcdParamOpt::add_param(param_to_crop);
     
     // to_assign_crop_xml
@@ -1056,6 +1108,19 @@ void UcdParamOpt::load_param_info()
     param_split_by_date->demo.push_back("ucd split_by_date aqm.json ./res --save_name test  (将 aqm.json 根据时间划分为多个 json 保存在 ./res 文件夹，指定保存的名字)");
     UcdParamOpt::add_param(param_split_by_date);
    
+
+    // split_by_tags
+    ParamInfo * param_split_by_tags = new ParamInfo("split_by_tags");
+    param_split_by_tags->group = "opt";
+    param_split_by_tags->grammar = "ucd split_by_tags ucd_path save_dir";
+    param_split_by_tags->args_info["--save_name"] = "指定保存的名字，保存格式为 save_name_date.json, 当不指定时，保存名形如 origin_name_tag.json";
+    param_split_by_tags->english_explain = "";
+    param_split_by_tags->chinese_explain = "将 ucd 按照uc 的前三位（日期）划分为多个 json 文件";   
+    param_split_by_tags->demo.push_back("ucd split_by_tags aqm.json ./res                   (将 aqm.json 根据标签划分为多个 json 保存在 ./res 文件夹)");
+    param_split_by_tags->demo.push_back("ucd split_by_tags aqm.json ./res --save_name test  (将 aqm.json 根据标签划分为多个 json 保存在 ./res 文件夹，指定保存的名字)");
+    UcdParamOpt::add_param(param_split_by_tags);
+   
+
     // split_by_conf
     ParamInfo * param_split_by_conf = new ParamInfo("split_by_conf");
     param_split_by_conf->group = "opt";
@@ -1174,11 +1239,11 @@ void UcdParamOpt::load_param_info()
     // filter_by_date
     ParamInfo * param_filter_by_date = new ParamInfo("filter_by_date");
     param_filter_by_date->group = "filter";
-    param_filter_by_date->grammar = "ucd param_filter_by_date ucd_path save_path date1,date2,date3";
+    param_filter_by_date->grammar = "ucd filter_by_date ucd_path save_path date1,date2,date3";
     param_filter_by_date->english_explain = "";
     param_filter_by_date->chinese_explain = "数据集中只保留指定日期入库的数据";   
-    param_filter_by_date->demo.push_back("ucd param_filter_by_date aqm.json res.json C                   (将 aqm.json 只保留 2021 年入库的数据)");
-    param_filter_by_date->demo.push_back("ucd param_filter_by_date aqm.json res.json Dad                 (将 aqm.json 只保留 2022.01.04 入库的数据)");
+    param_filter_by_date->demo.push_back("ucd filter_by_date aqm.json res.json C                   (将 aqm.json 只保留 2021 年入库的数据)");
+    param_filter_by_date->demo.push_back("ucd filter_by_date aqm.json res.json Dad                 (将 aqm.json 只保留 2022.01.04 入库的数据)");
     UcdParamOpt::add_param(param_filter_by_date);
 
     // filter_volume_by_tags

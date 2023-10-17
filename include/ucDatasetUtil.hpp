@@ -60,6 +60,12 @@ class UCDataset
         
         // ~UCDataset();
         
+        // 将 uc 转为 date 之间互相转换
+        std::string uc_to_date(std::string uc);
+
+        // 将 date 转为 uc
+        std::string date_to_uc_head(std::string date);
+
         // 解析 ucd 数据
         void parse_ucd(bool parse_xml_info=false);
         
@@ -157,7 +163,7 @@ class UCDataset
         void filter_by_nms(float nms_th, bool ignore_tag, bool clear_obj=true);
 
         // 对日期进行筛选
-        void filter_by_date(std::vector<std::string> assign_date, bool clear_obj);
+        void filter_by_date(std::vector<std::string> assign_date, bool clear_obj=true, std::string method="eq");
 
         // crop_dete_res
         void crop_dete_res_with_assign_uc(std::string uc, std::string img_path, std::string save_dir, bool is_split=true);
@@ -176,6 +182,9 @@ class UCDataset
 
         // 将 ucd 按照日期分为几部分
         void split_by_date(std::string save_dir, std::string save_name="");
+
+        // 将 ucd 按照标签分为几个部分
+        void split_by_tags(std::string save_dir, std::string save_name="");
 
         // 将 ucd 按照置信度分为几部分
         void split_by_conf(std::string save_dir, std::string save_name="");
@@ -295,6 +304,9 @@ class UCDatasetUtil
         
         // 是不是 uci path
         bool is_uci_path(std::string uci_path);
+
+        // 统计每个标签出现在多少个图片中
+        void count_uc_by_tags(std::string ucd_path);
 
         // 删除库中的 ucd
         void delete_ucd(std::string ucd_name);
