@@ -374,6 +374,14 @@ void UcdParamOpt::load_param_info()
     param_save->demo.push_back("ucd save test.json ./img 01 -s          (从 服务器下载 test.json 中包含的 uc 对应的 xml)");  
     UcdParamOpt::add_param(param_save);
     
+    // save_remote_ucd
+    ParamInfo * param_save_remote_ucd = new ParamInfo("save_remote_ucd");
+    param_save_remote_ucd->group = "sync";
+    param_save_remote_ucd->grammar = "ucd save_remote_ucd save_dir";
+    param_save_remote_ucd->chinese_explain = "从服务器将所有入库的 ucd 文件都下载到本地，用于同步数据防止丢失使用的";  
+    param_save_remote_ucd->demo.push_back("ucd save_remote_ucd ./ucd_dir          (从 服务器下载所有 customer 和 official 文件，保存到 ucd_dir 文件夹)");  
+    UcdParamOpt::add_param(param_save_remote_ucd);
+    
     // save_cache
     ParamInfo * param_save_cache = new ParamInfo("save_cache");
     param_save_cache->group = "sync";
@@ -963,8 +971,8 @@ void UcdParamOpt::load_param_info()
     // post_v2
     ParamInfo * param_post_v2 = new ParamInfo("post_v2");
     param_post_v2->group = "server";
-    param_post_v2->args_info["--host"] = "图片服务器 host, 默认为 192.168.3.221";
-    param_post_v2->args_info["--port"] = "图片服务器的 port, 默认为 11101";
+    param_post_v2->args_info["--host"] = "检测服务器 host, 默认为 192.168.3.221";
+    param_post_v2->args_info["--port"] = "检测服务器的 port, 默认为 11101";
     param_post_v2->args_info["--post_port"] = "指定推送的端口, 默认会找空闲的端口作为推送端口";
     param_post_v2->args_info["--batch_id"] = "批次的 id, 不要重复，默认为 test_ucd_post_v2";
     param_post_v2->args_info["--model_list"] = "需要检测的模型列表, 默认为 nc,kkx";
@@ -973,6 +981,7 @@ void UcdParamOpt::load_param_info()
     param_post_v2->demo.push_back("ucd post_v2 test.json                                (将 test.json 中的图片推送给 http://192.168.3.221:111/dete 进行检测)");
     param_post_v2->demo.push_back("ucd post_v2 test.json ./xml_dir                      (将 test.json 中的图片推送给 http://192.168.3.221:111/dete 进行检测，结果保存到 xml_dir 中)");
     param_post_v2->demo.push_back("ucd post_v2 test.json ./xml_dir --model_list test    (将 test.json 中的图片推送给 http://192.168.3.221:111/dete 进行检测，结果保存到 xml_dir 中, 指定检测 test 模型)");
+    param_post_v2->demo.push_back("ucd post_v2 test.json ./xml_dir --model_list test --host 192.168.3.33 --port 111 --batch_id test_001   (将 test.json 中的图片推送给 http://192.168.3.221:111/dete 进行检测，结果保存到 xml_dir 中, 指定检测 test 模型)");
     UcdParamOpt::add_param(param_post_v2);
 
 

@@ -3235,12 +3235,14 @@ void UCDatasetUtil::load_ucd_app(std::string version, std::string save_dir)
     }
 }
 
-void UCDatasetUtil::search_ucd(std::string assign_uc)
+std::map< std::string, std::vector<std::string> > UCDatasetUtil::search_ucd(std::string assign_uc, bool print_info)
 {
+
+    std::map< std::string, std::vector<std::string> > all_ucd_path;
     if((!is_uc(assign_uc)) && (assign_uc != ""))
     {
         std::cout << ERROR_COLOR << "error uc : " << assign_uc << STOP_COLOR << std::endl;
-        return;
+        return all_ucd_path;
     }
 
     std::string check_url = "http://" + UCDatasetUtil::host + ":" + std::to_string(UCDatasetUtil::port);
@@ -3258,23 +3260,37 @@ void UCDatasetUtil::search_ucd(std::string assign_uc)
     }
     
     auto res = cli.Get(url_path);
+    all_ucd_path["official"] = std::vector<std::string>();
+    all_ucd_path["customer"] = std::vector<std::string>();
 
     if(res != nullptr)
     {
         json data = json::parse(res->body);
         // customer
-        std::cout << "--------------------------------------------------------" << std::endl;
-        std::cout << "         check all dataset in server:80, " << HIGHTLIGHT_COLOR << assign_uc << STOP_COLOR << std::endl;
-        std::cout << "--------------------------------------------------------" << std::endl;
+        if(print_info)
+        {
+            std::cout << "--------------------------------------------------------" << std::endl;
+            std::cout << "         check all dataset in server:80, " << HIGHTLIGHT_COLOR << assign_uc << STOP_COLOR << std::endl;
+            std::cout << "--------------------------------------------------------" << std::endl;
+        }
+
         for(int i=0; i<data["official"].size(); i++)
         {
-            std::cout << "official : " << data["official"][i] << std::endl;
+            if(print_info)
+            {
+                std::cout << "official : " << data["official"][i] << std::endl;
+            }
+            all_ucd_path["official"].push_back(data["official"][i]);
         }
 
         // official
         for(int i=0; i<data["customer"].size(); i++)
         {
-            std::cout << "customer : " << data["customer"][i] << std::endl;
+            if(print_info)
+            {
+                std::cout << "customer : " << data["customer"][i] << std::endl;
+            }
+            all_ucd_path["customer"].push_back(data["customer"][i]);
         }
         std::cout << "--------------------------------------------------------" << std::endl;
     }
@@ -3282,6 +3298,97 @@ void UCDatasetUtil::search_ucd(std::string assign_uc)
     {
         std::cout << ERROR_COLOR << "connect error : " << check_url << STOP_COLOR << std::endl;
     }
+    return all_ucd_path;
+}
+
+bool UCDatasetUtil::save_remote_ucd(std::string save_dir)
+{
+
+    // 获取 ucd 文件列表
+    std::map< std::string, std::vector<std::string> > all_ucd_path = UCDatasetUtil::search_ucd("", false);
+
+    std::string official_dir = save_dir + "/" + "official";
+    std::string customer_dir = save_dir + "/" + "customer";
+
+    if(! is_dir(save_dir))
+    {
+        create_folder(save_dir);
+    }
+
+    if(is_write_dir(save_dir))
+    {
+        if(! is_dir(official_dir))
+        {
+            create_folder(official_dir);
+        }
+
+        if(! is_dir(customer_dir))
+        {
+            create_folder(customer_dir);
+        }
+    }
+    else
+    {
+        std::cout << ERROR_COLOR << "folder not exists or don't have read access : " << save_dir << STOP_COLOR << std::endl;
+        return false;
+    }
+
+    std::cout << HIGHTLIGHT_COLOR << "start load official ucd" << STOP_COLOR << std::endl;
+    tqdm bar_o;
+    int N_o = all_ucd_path["official"].size();
+    for(int i=0; i<all_ucd_path["official"].size(); i++)
+    {
+        std::string save_path;
+        std::vector<std::string> name_split =  pystring::split(all_ucd_path["official"][i], "\\");
+        if(name_split.size()>1)
+        {
+            std::vector<std::string> name_split_except_name(name_split.begin(), name_split.begin() + name_split.size() -1);
+            std::string save_dir = official_dir + "/" + pystring::join("\/", name_split_except_name);
+            create_folder(save_dir);
+            save_path = save_dir + "/" + name_split[name_split.size()-1] + ".json";
+        }
+        else
+        {
+            save_path = official_dir + "/" + all_ucd_path["official"][i] + ".json";
+        }
+
+        if(! is_file(save_path))
+        {
+            UCDatasetUtil::load_ucd(all_ucd_path["official"][i] , save_path);
+        }
+
+        bar_o.progress(i, N_o);
+    }
+
+    std::cout << "" << std::endl;
+    std::cout << HIGHTLIGHT_COLOR << "start load customer ucd" << STOP_COLOR << std::endl;
+    tqdm bar_c;
+    int N_c = all_ucd_path["customer"].size();
+    for(int i=0; i<all_ucd_path["customer"].size(); i++)
+    {
+        std::string save_path;
+        std::vector<std::string> name_split =  pystring::split(all_ucd_path["customer"][i], "\\");
+        if(name_split.size()>1)
+        {
+            std::vector<std::string> name_split_except_name(name_split.begin(), name_split.begin() + name_split.size() -1);
+            std::string save_dir = customer_dir + "/" + pystring::join("\/", name_split_except_name);
+            create_folder(save_dir);
+            save_path = save_dir + "/" + name_split[name_split.size()-1] + ".json";
+        }
+        else
+        {
+            save_path = customer_dir + "/" + all_ucd_path["customer"][i] + ".json";
+        }
+
+        if(! is_file(save_path))
+        {
+            UCDatasetUtil::load_ucd(all_ucd_path["customer"][i] , save_path);
+        }
+        bar_c.progress(i, N_c);
+    }
+    std::cout << std::endl;
+    return true;
+
 }
 
 void UCDatasetUtil::delete_ucd(std::string std_name)

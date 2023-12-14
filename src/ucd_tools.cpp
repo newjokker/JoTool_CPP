@@ -228,19 +228,21 @@ int post_v2(std::string img_server_host, int img_server_port, std::string ucd_pa
 
     // 打印 post 信息
     std::cout << "--------------------------------------------------------------" << std::endl;
-    std::cout << WARNNING_COLOR << "img_path_num      : " << STOP_COLOR << ucd->uc_list.size() << std::endl;
+    std::cout << WARNNING_COLOR << "img_path_num                : " << STOP_COLOR << ucd->uc_list.size() << std::endl;
     std::cout << std::endl;
-    std::cout << WARNNING_COLOR << "model_list        : " << STOP_COLOR << model_list_str << std::endl;
+    std::cout << WARNNING_COLOR << "url                         : " << STOP_COLOR << url + "/dete" << std::endl;
     std::cout << std::endl;
-    std::cout << WARNNING_COLOR << "post_url          : " << STOP_COLOR << post_url << std::endl;
+    std::cout << WARNNING_COLOR << "model_list                  : " << STOP_COLOR << model_list_str << std::endl;
     std::cout << std::endl;
-    std::cout << WARNNING_COLOR << "heart_beat_url    : " << STOP_COLOR << heart_beat_url << std::endl;
+    std::cout << WARNNING_COLOR << "(receive)post_url           : " << STOP_COLOR << post_url << std::endl;
     std::cout << std::endl;
-    std::cout << WARNNING_COLOR << "batch_id          : " << STOP_COLOR << batch_id << std::endl;
+    std::cout << WARNNING_COLOR << "(receive)heart_beat_url     : " << STOP_COLOR << heart_beat_url << std::endl;
     std::cout << std::endl;
+    std::cout << WARNNING_COLOR << "batch_id                    : " << STOP_COLOR << batch_id << std::endl;
+    std::cout << std::endl; 
     if(save_dir == "")
     {
-        std::cout << WARNNING_COLOR << "save_xml_dir      : " << STOP_COLOR << "None" << std::endl;
+        std::cout << WARNNING_COLOR << "save_xml_dir            : " << STOP_COLOR << "None" << std::endl;
     }
     else
     {

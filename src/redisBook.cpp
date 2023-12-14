@@ -491,6 +491,7 @@ int RedisBook::print_docker_info()
     print_map["[Docker --network ]"]    = "docker run --network==host (内外共享网络)";
 
     print_map["[CMD kill_all_contain                ] "]     = "docker rm -f $(docker ps -aq) (删除所有容器)";
+    print_map["[CMD kill_selected_contain           ] "]     = "docker rm -f $(docker ps -a | grep _model | awk {'print $1'}) (删除符合筛选条件的容器)";
     print_map["[CMD Keep_the_time_zone_consistent   ] "]     = "-v /etc/localtime:/etc/localtime:ro (内外时区一致)";
     
     print_map["[Dockerfile apt update failed]"]     = "\n\

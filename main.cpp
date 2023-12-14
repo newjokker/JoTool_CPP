@@ -266,7 +266,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.9.3";
+    std::string app_version = "v4.9.5";
 
     // uci_info
     int volume_size         = 20;
@@ -646,6 +646,20 @@ int main(int argc_old, char ** argv_old)
         else
         {
             ucd_param_opt->print_command_info("save");
+            return -1;
+        }
+    }
+    else if(command_1 == "save_remote_ucd")
+    {
+        // 将远程的 ucd 文件全部同步到本地
+        if (argc == 3)
+        {
+            std::string save_dir = argv[2];
+            ucd_util->save_remote_ucd(save_dir);
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
             return -1;
         }
     }
@@ -3682,7 +3696,7 @@ int main(int argc_old, char ** argv_old)
 
             if(long_args.count("host") != 0)
             {
-                server_host = long_args["server_host"];
+                server_host = long_args["host"];
             }
 
             if(long_args.count("batch_id") != 0)
