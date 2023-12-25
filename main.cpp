@@ -256,6 +256,10 @@ int main(int argc_old, char ** argv_old)
     std::string sql_user    = "root";
     std::string sql_pwd     = "root123";
     std::string sql_db      = "Saturn_Database_V1";
+    
+    // milvus info 
+    int milvus_port = 19530;
+    std::string milvus_host = "192.168.3.33";
 
     // redis info
     int redis_port          = 6379;
@@ -266,7 +270,7 @@ int main(int argc_old, char ** argv_old)
     std::string app_dir     = "/home/ldq/Apps_jokker";
 
     // version
-    std::string app_version = "v4.9.5";
+    std::string app_version = "v4.9.7";
 
     // uci_info
     int volume_size         = 20;
@@ -314,6 +318,8 @@ int main(int argc_old, char ** argv_old)
         redis_host  = ((const std::string &)xini_file["redis"]["host"]);
         redis_name  = ((const std::string &)xini_file["redis"]["name"]);
         castration_function  = ((const std::string &)xini_file["server"]["castration_function"]);
+        milvus_host = (const std::string &)xini_file["milvus"]["host"];
+        milvus_port = (const int &)xini_file["milvus"]["port"];
         // 分卷大小不能为 0 会有很多问题 
         if(volume_size <= 0)
         {
@@ -336,6 +342,8 @@ int main(int argc_old, char ** argv_old)
         xini_write["redis"]["host"]     = redis_host;
         xini_write["redis"]["name"]     = redis_name;
         xini_write["server"]["castration_function"]     = castration_function;
+        xini_write["milvus"]["host"]    = milvus_host;
+        xini_write["milvus"]["port"]    = milvus_port;
         xini_write.dump(config_path);   
     }
 
@@ -1177,6 +1185,9 @@ int main(int argc_old, char ** argv_old)
             std::cout << "host          : " << redis_host << std::endl;
             std::cout << "port          : " << redis_port << std::endl;
             std::cout << "name          : " << redis_name << std::endl;
+            std::cout << "[milvus]"    << std::endl;
+            std::cout << "host          : " << milvus_host << std::endl;
+            std::cout << "port          : " << milvus_port << std::endl;
             std::cout << "-----------------------------" << std::endl;
             return -1;
         }
@@ -1192,6 +1203,10 @@ int main(int argc_old, char ** argv_old)
             else if(attr_name == "sql_pwd") {std::cout << sql_pwd << std::endl ;}
             else if(attr_name == "sql_db") {std::cout << sql_db << std::endl ;}
             else if(attr_name == "cache_dir") {std::cout << cache_dir << std::endl ;}
+            else if(attr_name == "milvus_host") {std::cout << milvus_host << std::endl ;}
+            else if(attr_name == "milvus_port") {std::cout << milvus_port << std::endl ;}
+            else if(attr_name == "redis_host") {std::cout << redis_host << std::endl ;}
+            else if(attr_name == "redis_port") {std::cout << redis_port << std::endl ;}
             else{std::cout << "no attr name : " << attr_name << std::endl; }
             return -1;
         }
@@ -1283,6 +1298,16 @@ int main(int argc_old, char ** argv_old)
                 }
                 xini_write["cache"]["dir"] = cache_dir_new;
                 return 0;
+            }
+            else if(option == "milvus_host")
+            {
+                std::string redis_host_str = argv[3];
+                xini_write["milvus"]["host"] = redis_host_str;
+            }
+            else if(option == "milvus_port")
+            {
+                std::string redis_port_str = argv[3];
+                xini_write["milvus"]["port"] = std::stoi(redis_port_str);
             }
             else if(option == "castration_function")
             {
@@ -1845,6 +1870,19 @@ int main(int argc_old, char ** argv_old)
                 label_list = pystring::split(label_list_str, ",");
                 ucd_util->parse_yolo_train_data(ucd_util->cache_img_dir, save_dir, ucd_path, label_list);
             }
+        }
+        else
+        {
+            ucd_param_opt->print_command_info(command_1);
+        }
+    }
+    else if(command_1 == "search_similar")
+    {
+        // 找到相似的 uc 并返回
+        if(argc == 3)
+        {
+            std::string img_path = argv[2];
+            ucd_util->search_similar_uc(img_path, milvus_host, milvus_port);
         }
         else
         {

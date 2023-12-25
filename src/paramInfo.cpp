@@ -543,7 +543,7 @@ void UcdParamOpt::load_param_info()
     
     // meta
     ParamInfo * param_meta = new ParamInfo("meta");
-    param_meta->group = "info";
+    param_meta->group = "meta_info";
     param_meta->grammar = "ucd meta {attr_name}";
     param_meta->english_explain = "show config info";
     param_meta->chinese_explain = "查看配置信息, 可以指定配置的名字(host, port, config_path, sql_host, sql_port, sql_user, sql_pwd, sql_db, cache_dir)";   
@@ -553,7 +553,7 @@ void UcdParamOpt::load_param_info()
     
     // set
     ParamInfo * param_set = new ParamInfo("set");
-    param_set->group = "info";
+    param_set->group = "meta_info";
     param_set->grammar = "ucd set key value";
     param_set->english_explain = "update config info";
     param_set->chinese_explain = "设置配置信息 (host, port, sql_host, sql_port, sql_user, sql_pwd, sql_db, cache_dir, redis_port, redis_host, castration_function) ";  
@@ -711,6 +711,14 @@ void UcdParamOpt::load_param_info()
     param_crop_to_xml->demo.push_back("* atention, crop 文件夹下面要有小图文件夹，每个文件夹的名字是里面小图的真实标签");
     UcdParamOpt::add_param(param_crop_to_xml);
     
+    // search_similar
+    ParamInfo * param_search_similar = new ParamInfo("search_similar");
+    param_search_similar->group = "server";
+    param_search_similar->grammar = "ucd search_similar img_path";
+    param_search_similar->chinese_explain = "在矢量数据库中搜索已入库的 uc";   
+    param_search_similar->demo.push_back("ucd search_similar img_path                 (在矢量数据库中搜索已入库的相似的 uc)");
+    UcdParamOpt::add_param(param_search_similar);
+    
     // crop_to_xml_with_origin_tag
     ParamInfo * param_crop_to_xml_with_origin_tag = new ParamInfo("crop_to_xml_with_origin_tag");
     param_crop_to_xml_with_origin_tag->group = "opt";
@@ -859,7 +867,7 @@ void UcdParamOpt::load_param_info()
 
     // attr
     ParamInfo * param_attr = new ParamInfo("attr");
-    param_attr->group = "sync";
+    param_attr->group = "opt";
     param_attr->grammar = "ucd attr ucd_path attr_name attr_value";
     param_attr->english_explain = "change attr in ucd";
     param_attr->chinese_explain = "修改ucd中使用 ucd info 能看到的属性";   
@@ -1141,7 +1149,7 @@ void UcdParamOpt::load_param_info()
    
     // update
     ParamInfo * param_update = new ParamInfo("update");
-    param_update->group = "sync";
+    param_update->group = "meta_info";
     param_update->grammar = "ucd update {version}";
     param_update->english_explain = "";
     param_update->chinese_explain = "对 ucd 进行更新，只下载并配置库文件，还需要手动去改 ~/.bash_aliases 文件";   

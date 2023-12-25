@@ -21,6 +21,8 @@
 #include "include/imageinfo.hpp"
 #include "include/tqdm.h"
 #include <cstdlib>
+#include <openssl/bio.h>
+#include <openssl/evp.h>
 
 using json = nlohmann::json;
 using namespace jotools;
@@ -3497,6 +3499,86 @@ void UCDatasetUtil::get_ucd_from_xml_dir(std::string xml_dir, std::string ucd_pa
     delete ucd;
 }
 
+std::string ReadFileToBase64(const std::string& file_path) 
+{
+    // Read file content
+    std::ifstream file(file_path, std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << file_path << std::endl;
+        return "";
+    }
+
+    std::ostringstream content_stream;
+    content_stream << file.rdbuf();
+    std::string file_content = content_stream.str();
+
+    // Encode content to Base64
+    BIO* b64 = BIO_new(BIO_f_base64());
+    BIO* bmem = BIO_new(BIO_s_mem());
+    b64 = BIO_push(b64, bmem);
+    BIO_write(b64, file_content.c_str(), file_content.length());
+    BIO_flush(b64);
+
+    char* base64_buffer;
+    long base64_length = BIO_get_mem_data(bmem, &base64_buffer);
+
+    std::string base64_content(base64_buffer, base64_length);
+    BIO_free_all(b64);
+    return base64_content;
+}
+
+std::vector<std::string> UCDatasetUtil::search_similar_uc(std::string img_path, std::string milvus_host, int port)
+{
+
+    std::vector<std::string> res;
+    httplib::Headers headers = {{"Content-Type", "application/json"}};
+
+    nlohmann::json json_data;
+    if(is_read_file(img_path))
+    {
+        std::string bs64 = ReadFileToBase64(img_path);
+        json_data = {{"img_bs64", bs64}, {"limit", 10} };
+    }
+    else
+    {
+        json_data = {{"img_url", img_path}, {"limit", 10} };
+    }
+
+    std::string url = "http://" + milvus_host + ":" + std::to_string(port);
+    httplib::Client client(url.c_str());
+    auto result = client.Post("/get_similar_uc", headers, json_data.dump(), "application/json");
+
+    //  
+    if (result.error() == httplib::Error::Success) 
+    {
+        nlohmann::json json_data = nlohmann::json::parse(result.value().body);
+
+        if(json_data["status"] != "correct")
+        {
+            std::cout << ERROR_COLOR << json_data["status"] << STOP_COLOR << std::endl;
+            return res;
+        }
+        else
+        {
+            std::cout << "search result : " << std::endl;
+            for (const auto& uc : json_data["uc_info"]) 
+            {
+                std::string uc_info = uc["id"].get<std::string>() + "," + std::to_string(uc["distance"].get<double>());
+                std::string uc_url ;
+                uc_url = "http://192.168.3.111:11101/file/" + uc["id"].get<std::string>() + ".jpg";
+                std::cout << HIGHTLIGHT_COLOR << "     " << uc["id"] << " : " << std::to_string(uc["distance"].get<double>()) << "    " << uc_url << STOP_COLOR << std::endl;
+                res.push_back(uc_info);
+            }
+        }
+        return res;
+    }
+    else 
+    {
+        std::cerr << "Failed to send POST request: " << result.error() << std::endl;
+        return res;
+    }
+}
+
 void UCDatasetUtil::get_ucd_from_crop_xml(std::string xml_dir, std::string ucd_path)
 {
     std::set<std::string> suffix {".xml"};
@@ -3655,7 +3737,6 @@ void UCDatasetUtil::get_ucd_from_json_dir(std::string json_dir, std::string ucd_
 void UCDatasetUtil::get_ucd_from_file_dir(std::string file_dir, std::string ucd_path)
 {
     std::vector<std::string> json_path_vector = get_all_file_path_recursive(file_dir);
-
     UCDataset* ucd = new UCDataset(ucd_path);
     std::string uc, json_path;
 

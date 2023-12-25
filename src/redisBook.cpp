@@ -489,6 +489,7 @@ int RedisBook::print_docker_info()
     print_map["[Docker load   -i ]"]    = "docker load -i image_id (加载指定镜像)";
     print_map["[Docker cp        ]"]    = "docker cp <container_id>:<container_path> <host_path> (容器内外文件相互拷贝)";
     print_map["[Docker --network ]"]    = "docker run --network==host (内外共享网络)";
+    print_map["[Docker inspect   ]"]    = "docker inspect --format '{{.Config.Cmd}}' contain_id, 查看镜像执行时启动执行的启动文件";
 
     print_map["[CMD kill_all_contain                ] "]     = "docker rm -f $(docker ps -aq) (删除所有容器)";
     print_map["[CMD kill_selected_contain           ] "]     = "docker rm -f $(docker ps -a | grep _model | awk {'print $1'}) (删除符合筛选条件的容器)";

@@ -438,6 +438,9 @@ class UCDatasetUtil
         // 保存指定范围的图片和标签
         void save_assign_range(std::string ucd_path, std::string save_dir, std::string assign_tag, float iou_th=0.85, std::string mode="xml");
 
+        // 在数据库中找到相似的图片
+        std::vector<std::string> search_similar_uc(std::string img_path, std::string milvus_host="192.168.3.33", int port=19530);
+
 
     private:
         
